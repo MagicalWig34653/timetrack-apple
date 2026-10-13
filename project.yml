@@ -1,0 +1,31 @@
+name: Timetrack
+options:
+  bundleIdPrefix: app.timetrack
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    GENERATE_INFOPLIST_FILE: YES
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.0.1"
+    CURRENT_PROJECT_VERSION: 1
+targets:
+  TimetrackMac:
+    type: application
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources: [Sources/Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.timetrack.mac
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+  TimetrackIOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources: [Sources/Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.timetrack.ios
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES

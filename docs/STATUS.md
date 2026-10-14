@@ -6,3 +6,7 @@ xcodegen generate sowie xcodebuild -project Timetrack.xcodeproj -scheme Timetrac
 -configuration Debug -derivedDataPath /tmp/timetrack-derived-data CODE_SIGNING_ALLOWED=NO build erfolgreich.
 Kein iOS-Build, Geräte-/Signing-Test oder watchOS-Target. Keine laufenden Jobs.
 Priorität bleibt PWA; native Funktionalität später zuerst macOS. Globaler Einstieg: ../AGENTS.md.
+
+Nachtrag 14.10.2026: Sprachregel in AGENTS.md verbindlich ergänzt (Details im Backend).
+Nur Dokumentation geändert; Diff geprüft, keine Builds erneut ausgeführt.
+Lokalisierungsressourcen für die bisherigen direkt eingebetteten deutschen UI-Texte noch offen.

@@ -9,3 +9,7 @@ Claude koordiniert, etwa 50 % Umsetzung durch Codex über das Claude-Codex-Plugi
 Dateibesitz pro Agent klar trennen. Fragen ausschließlich im normalen Chat.
 Ergebnisse/Prüfungen lokal und globale Auswirkungen im Backend dokumentieren.
 Keine Secrets oder persönlichen Daten committen. Sessions müssen wegwerfbar bleiben.
+
+Code, Kommentare, Tests und technische Bezeichner auf Englisch; nutzerseitige Texte auf Deutsch.
+Verbindliche Details stehen im Backend unter docs/ENTWICKLUNGSABLAUF.md,
+Abschnitt „Sprache von Code und Oberfläche“. An alle beauftragten Agents weitergeben.

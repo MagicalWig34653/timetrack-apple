@@ -705,6 +705,94 @@
         }
       }
     },
+    "settings.watch": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Watch"
+          }
+        }
+      }
+    },
+    "settings.watch.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Überträgt die aktuelle Anmeldung verschlüsselt an die Uhr. Die Uhr speichert sie in ihrem eigenen Schlüsselbund."
+          }
+        }
+      }
+    },
+    "settings.watch.send": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitzung an Uhr senden"
+          }
+        }
+      }
+    },
+    "settings.watch.status.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Senden fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "settings.watch.status.not_paired": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uhr nicht gekoppelt"
+          }
+        }
+      }
+    },
+    "settings.watch.status.not_signed_in": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht angemeldet – nichts gesendet"
+          }
+        }
+      }
+    },
+    "settings.watch.status.sent": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesendet"
+          }
+        }
+      }
+    },
+    "settings.watch.status.unreachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uhr nicht erreichbar – die Übertragung wird nachgeholt"
+          }
+        }
+      }
+    },
     "sidebar.settings": {
       "extractionState": "manual",
       "localizations": {

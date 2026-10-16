@@ -7,6 +7,13 @@ struct RootView: View {
     let receiver: WatchHandoffReceiver
 
     var body: some View {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["TT_DEV_GALLERY"] != nil { return AnyView(ComplicationGallery()) }
+        #endif
+        return AnyView(content)
+    }
+
+    @ViewBuilder private var content: some View {
         switch model.phase {
         case .restoring:
             ProgressView()
@@ -18,6 +25,7 @@ struct RootView: View {
             }
         case .signedOut, .recoveryRestricted:
             SignedOutView(receiver: receiver)
+                .task { WidgetBridge.clear() }
         }
     }
 }

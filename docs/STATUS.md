@@ -22,3 +22,7 @@ persönliches Team unterstützt Associated Domains nicht (Passkeys brauchen beza
 
 Nachtrag 16.10.2026 (Paket A4, Branch a4-watch, nicht gemergt): watchOS-App `TimetrackWatch` (eingebettet in TimetrackIOS) mit Heute, Start/Stopp, Abschnitten, Einstellungen und
 Sitzungsübergabe vom iPhone per WatchConnectivity (Kern: `Sync/`). Zahlen und Grenzen: docs/handoffs/A4.md.
+
+Nachtrag 16.10.2026 (Paket A5, Branch a5-watch-extras, nicht gemergt): Typauswahl auf der Uhr, WidgetKit-Komplikation (App Group group.de.linolaske.timetrack, nur nicht geheimer Snapshot),
+iPhone-Knopf "Sitzung an Uhr senden", Dynamic-Type-Korrektur auf Heute. 69 Kerntests bestanden; Watch-, iOS- (mit Widget) und macOS-Build erfolgreich (CODE_SIGNING_ALLOWED=NO).
+Signierung mit App Group und echte Komplikation auf dem Zifferblatt nicht geprüft. Details: docs/handoffs/A5.md.

@@ -34,6 +34,15 @@ public final class WCSessionChannel: NSObject, WatchSessionChannel, WCSessionDel
         return WCSession.default.receivedApplicationContext.compactMapValues { $0 as? String }
     }
 
+    public var link: WatchLinkState {
+        guard WCSession.isSupported() else { return .notPaired }
+        let session = WCSession.default
+        #if os(iOS)
+        guard session.activationState == .activated, session.isPaired, session.isWatchAppInstalled else { return .notPaired }
+        #endif
+        return session.isReachable ? .reachable : .unreachable
+    }
+
     public func requestResend() {
         guard WCSession.isSupported(), WCSession.default.activationState == .activated, WCSession.default.isReachable else { return }
         WCSession.default.sendMessage(["request": "session"], replyHandler: nil, errorHandler: nil)

@@ -111,16 +111,37 @@ public enum TT {
 
 // MARK: - Accent theme (override hook)
 
-/// Accent selection. The default is `#2563EB`; a personal override (hex) can be injected at the app root with `.ttTheme(accentHex:)`.
+/// Accent selection. The default is `#2563EB`; a personal choice (hex) is injected at the app root with `.ttTheme(accentHex:)`.
+/// From the hex, `AccentDerivation` computes appearance-aware colours so accent text and buttons keep >= 4.5:1:
+/// - `accent`: fill (buttons, rings, selection, glows)
+/// - `onAccent`: text/icon colour on that fill (white or black)
+/// - `ink`: the accent as text/icon colour on app surfaces (darker in light mode, lighter in dark mode)
 public struct TTTheme: Sendable, Equatable {
     public var accentHex: String?
 
     public init(accentHex: String? = nil) { self.accentHex = accentHex }
 
     /// Valid override or the default. Invalid input is discarded (like the PWA).
+    public var baseHex: UInt32 {
+        if let accentHex, let value = AccentDerivation.parse(accentHex) { return value }
+        return TT.defaultAccentHex
+    }
+
+    public var tokens: AccentDerivation.Tokens { AccentDerivation.tokens(for: baseHex) }
+
     public var accent: Color {
-        if let accentHex, let color = Color(hex: accentHex) { return color }
-        return Color(hex: TT.defaultAccentHex)
+        let t = tokens
+        return Color(light: t.fillLight, dark: t.fillDark)
+    }
+
+    public var onAccent: Color {
+        let t = tokens
+        return Color(light: t.onFillLight, dark: t.onFillDark)
+    }
+
+    public var ink: Color {
+        let t = tokens
+        return Color(light: t.inkLight, dark: t.inkDark)
     }
 }
 
@@ -129,10 +150,10 @@ extension EnvironmentValues {
 }
 
 extension View {
-    /// Applies the accent to the whole subtree (`tint`) and exposes it to design components.
+    /// Applies the accent to the whole subtree (`tint`, text-safe ink) and exposes it to design components.
     public func ttTheme(accentHex: String? = nil) -> some View {
         let theme = TTTheme(accentHex: accentHex)
-        return self.environment(\.ttTheme, theme).tint(theme.accent)
+        return self.environment(\.ttTheme, theme).tint(theme.ink)
     }
 }
 

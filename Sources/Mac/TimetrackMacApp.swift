@@ -21,7 +21,7 @@ struct TimetrackMacApp: App {
                 .environment(model)
                 .environment(ui)
                 .frame(minWidth: 760, minHeight: 480)
-                .ttTheme()
+                .ttAppearance()
                 .task {
                     await model.restore()
                     #if DEBUG
@@ -40,7 +40,7 @@ struct TimetrackMacApp: App {
         Settings {
             SettingsView()
                 .environment(model)
-                .ttTheme()
+                .ttAppearance()
         }
     }
 }

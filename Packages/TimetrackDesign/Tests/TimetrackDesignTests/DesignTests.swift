@@ -12,8 +12,8 @@ import Testing
     }
 
     @Test func themeFallsBackToDefaultOnInvalidHex() {
-        #expect(TTTheme(accentHex: "garbage").accent == TTTheme().accent)
-        #expect(TTTheme(accentHex: "#FF0000").accent != TTTheme().accent)
+        #expect(TTTheme(accentHex: "garbage").baseHex == TTTheme().baseHex)
+        #expect(TTTheme(accentHex: "#FF0000").baseHex == 0xFF0000)
     }
 
     #if os(macOS)

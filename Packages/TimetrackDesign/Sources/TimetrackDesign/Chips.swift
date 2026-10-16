@@ -37,7 +37,7 @@ public struct StatusChip: View {
     }
 
     public var body: some View {
-        let color = tone.color(accent: theme.accent)
+        let color = tone.color(accent: theme.ink)
         HStack(spacing: 4) {
             if let symbol { Image(systemName: symbol).imageScale(.small).accessibilityHidden(true) }
             label

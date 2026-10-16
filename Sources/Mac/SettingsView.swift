@@ -3,8 +3,39 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
+/// Settings window: general (account, server, modules) and appearance (accent colour, light/dark, icon note).
 struct SettingsView: View {
+    var body: some View {
+        TabView {
+            GeneralSettingsView()
+                .tabItem { Label("settings.general", systemImage: "gearshape") }
+            AppearanceSettingsView()
+                .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
+        }
+        .frame(width: 520, height: 700)
+    }
+}
+
+private struct AppearanceSettingsView: View {
+    var body: some View {
+        ScrollView {
+            AppearanceSettingsPage {
+                FormSection("appearance.icon") {
+                    // The Dock icon of a Mac app cannot be switched at runtime; it follows the default icon.
+                    Label("appearance.icon.mac", systemImage: "info.circle")
+                        .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        .padding(TT.Space.l).frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .padding(TT.Space.xl)
+        }
+        .ttScreenBackground()
+    }
+}
+
+private struct GeneralSettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.ttTheme) private var theme
 
     var body: some View {
         ScrollView {
@@ -14,9 +45,9 @@ struct SettingsView: View {
                         HStack(spacing: TT.Space.l) {
                             Text(verbatim: String(account.displayName.prefix(1)).uppercased())
                                 .font(.system(.title2, design: .rounded, weight: .semibold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(theme.onAccent)
                                 .frame(width: 52, height: 52)
-                                .background(LinearGradient(colors: [Color(hex: 0x3B82F6), Color(hex: 0x1D4ED8)], startPoint: .top, endPoint: .bottom), in: .circle)
+                                .background(theme.accent.gradient, in: .circle)
                                 .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(verbatim: account.displayName).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
@@ -55,7 +86,6 @@ struct SettingsView: View {
             .padding(TT.Space.xl)
         }
         .ttScreenBackground()
-        .frame(width: 520, height: 640)
     }
 
     private static var versionText: String {

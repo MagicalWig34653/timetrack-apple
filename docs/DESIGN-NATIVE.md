@@ -12,7 +12,7 @@ Umsetzung: Swift-Paket `Packages/TimetrackDesign` (abhängig nur von `TimetrackC
 | Text | `textPrimary`, `textSecondary`, `textTertiary` (Kontrast zu `background`/`surface` >= 4,5:1 in beiden Modi) |
 | Status | `success`, `warning`, `danger` (unabhängig vom Akzent) |
 | Arten | `kindWork` (sky), `kindTravel` (amber), `kindSchool` (violett) wie PWA-Tageszeitleiste; Abwesenheiten wie PWA `ABSENCE_CLASSES`: `kindVacation` (sky), `kindSick` (rose), `kindExcused` (teal), `kindOther` (violett), `kindHoliday` (amber) |
-| Akzent | Standard `#2563EB`; Überschreibung per `.ttTheme(accentHex:)` am App-Wurzelknoten (ungültige Hex-Werte werden verworfen); Komponenten lesen `@Environment(\.ttTheme)`; Asset `AccentColor` je App (2563EB / 60A5FA) |
+| Akzent | Standard `#2563EB`; lokale Wahl (siehe Abschnitt Akzent-System) per `.ttAppearance()` am App-Wurzelknoten (setzt `.ttTheme(accentHex:)` und `preferredColorScheme`); Komponenten lesen `@Environment(\.ttTheme)`: `accent` (Fläche), `onAccent` (Schrift auf Fläche), `ink` (Akzent als Text); Asset `AccentColor` je App (2563EB / 60A5FA) |
 | Abstände/Radien | `TT.Space` (xs 4 ... xxl 32), `TT.Radius` (control 14, card 22, hero 28), Lesebreite `TT.contentWidth` 760 |
 | Schrift | `TTFont`: Seitentitel/Abschnitt/Karte/Beschriftung/Meta/Eyebrow; Zahlen `stat`, `numeral` als gerundete Systemschrift mit tabellarischen Ziffern; alles skaliert mit Dynamic Type |
 
@@ -34,6 +34,15 @@ Dauern immer `h:mm` (`DurationFormat`); Timer `h:mm:ss`. watchOS kennt nur den d
 5. Accessibility-Größen: Raster/Zeilen wechseln auf eine Spalte (`isAccessibilitySize`), Kennzahlen skalieren herunter statt abzuschneiden, Kombinierte Elemente für VoiceOver.
 6. iPad/Mac: Inhalt in Spalten statt Streckung (Heute zweispaltig, Zeit mit Wochenübersicht, Lesebreite begrenzt); iPhone: ein Strom aus Karten.
 7. Texte Deutsch in den `Localizable.xcstrings` der Apps, Code Englisch. Neue Schlüssel mit `scripts/add-strings.py`.
+
+## Akzent-System (A6d)
+
+Seite "Darstellung" (`AppearanceSettingsPage` im Design-Paket; iOS: Einstellungen > Darstellung, macOS: Einstellungsfenster, Tab "Darstellung"). Akzentfarbe und App-Symbol werden getrennt gewählt; das eine ändert nie das andere.
+- Auswahl: Blau, Türkis, Violett, Grün, Orange, Rosa (Farbtöne wie `IconAccent.strongHex`), Graphit `#52525B`, Eigene (`ColorPicker`). Lokal je Gerät in UserDefaults (`appearance.accent`, `appearance.customHex`, `appearance.scheme`), kein Konto-Sync.
+- Erscheinungsbild System/Hell/Dunkel (`preferredColorScheme`). "Transparenz reduzieren" folgt nur der Systemeinstellung (Anzeige des Zustands, kein App-Schalter).
+- Ableitung (`AccentDerivation`, wie PWA `accent.ts`): `accent` = gewählter Farbton (im Dunkelmodus aufgehellt, falls < 3:1 zum Grund, z. B. Graphit); `onAccent` = Weiß oder Schwarz mit >= 4,5:1 (Orange, Gelb tragen schwarze Schrift); `ink` = Akzent als Text/Symbol/Tint, in 5-%-Schritten Richtung Schwarz (hell) bzw. Weiß (dunkel), bis >= 4,5:1 auf allen App-Flächen und den getönten Chip-Hintergründen erreicht ist. Systemsteuerung (`tint`) nutzt `ink`. Tests: Kontrast über alle Voreinstellungen und Extremfarben.
+- Konsequenz: Orange/Rosa/Türkis erscheinen als Text im Hellmodus dunkler (bräunlich/gedämpft) als die Fläche; das ist gewollt (Lesbarkeit).
+- Konto-Avatar, Marke (`BrandMark`), Ringe, Glow, Chips, Auswahl folgen dem Akzent. Statusfarben und Artenfarben bleiben unabhängig.
 
 ## App-Icon und Start
 

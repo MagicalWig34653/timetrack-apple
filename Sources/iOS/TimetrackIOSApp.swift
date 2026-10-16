@@ -24,7 +24,7 @@ struct TimetrackIOSApp: App {
                 .environment(model)
                 .environment(ui)
                 .environment(\.watchSender, watchSender)
-                .ttTheme()
+                .ttAppearance()
                 .task { await watchSender.start() }
                 .onChange(of: model.phase) {
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).

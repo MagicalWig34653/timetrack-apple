@@ -1,5 +1,7 @@
 import SwiftUI
+import TimetrackCore
 
+/// iOS/iPadOS placeholder: A1 only proves that the shared core links on iOS. The real UI follows in a later package.
 @main
 struct TimetrackApp: App {
     var body: some Scene {
@@ -8,7 +10,7 @@ struct TimetrackApp: App {
                 ContentUnavailableView {
                     Label("Timetrack", systemImage: "clock")
                 } description: {
-                    Text("Das Projekt ist eingerichtet. Zeiterfassung und Anmeldung folgen nach der PWA.")
+                    Text("placeholder.description \(DurationFormat.hoursMinutes(27720))")
                 }
                 .navigationTitle("Timetrack")
             }

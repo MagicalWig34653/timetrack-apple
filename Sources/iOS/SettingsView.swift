@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 extension EnvironmentValues {
@@ -10,62 +11,92 @@ extension EnvironmentValues {
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.watchSender) private var watchSender
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var confirmingServerChange = false
     @State private var watchStatus: WatchHandoffResult?
 
     var body: some View {
-        Form {
-            Section("settings.server") {
-                LabeledContent("settings.server_url") {
-                    Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled)
-                }
-                if let account = model.account {
-                    LabeledContent("settings.account") { Text("\(account.displayName) (\(account.handle))") }
-                }
-                if let workModel = model.workModel {
-                    LabeledContent("settings.timezone") { Text(workModel.timeZone.identifier) }
-                }
-            }
-            Section {
-                ForEach(ModuleKey.all, id: \.self) { key in
-                    LabeledContent(moduleTitle(key)) {
-                        Text(model.isEnabled(key) ? "settings.module.on" : "settings.module.off")
-                            .foregroundStyle(model.isEnabled(key) ? .green : .secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: TT.Space.xl) {
+                accountCard
+                FormSection("settings.server") {
+                    FormRow("settings.server_url", stacked: true) { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled) }
+                    if let workModel = model.workModel {
+                        FormRow("settings.timezone") { Text(workModel.timeZone.identifier) }
                     }
                 }
-            } header: {
-                Text("settings.modules")
-            } footer: {
-                Text("settings.modules.hint")
-            }
-            if let watchSender {
-                Section {
-                    Button("settings.watch.send") { Task { watchStatus = await watchSender.sendNow() } }
+                FormSection("settings.modules", footer: "settings.modules.hint") {
+                    ForEach(ModuleKey.all, id: \.self) { key in
+                        FormRow(moduleTitle(key)) {
+                            StatusChip(model.isEnabled(key) ? "settings.module.on" : "settings.module.off", tone: model.isEnabled(key) ? .success : .neutral)
+                        }
+                    }
+                }
+                if let watchSender {
+                    FormSection("settings.watch", footer: "settings.watch.hint") {
+                        Button { Task { watchStatus = await watchSender.sendNow() } } label: {
+                            HStack {
+                                Label("settings.watch.send", systemImage: "applewatch")
+                                Spacer()
+                                Image(systemName: "arrow.up.circle").foregroundStyle(TT.textTertiary)
+                            }
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
                         .accessibilityIdentifier("settings.watch.send")
-                    if let watchStatus {
-                        Label(Self.statusKey(watchStatus), systemImage: Self.statusSymbol(watchStatus))
-                            .foregroundStyle(watchStatus == .sent ? .green : .secondary)
+                        if let watchStatus {
+                            HStack {
+                                StatusChip(Self.statusKey(watchStatus), tone: watchStatus == .sent ? .success : .neutral, symbol: Self.statusSymbol(watchStatus))
+                                Spacer()
+                            }
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
                             .accessibilityIdentifier("settings.watch.status")
+                        }
                     }
-                } header: {
-                    Text("settings.watch")
-                } footer: {
-                    Text("settings.watch.hint")
+                }
+                VStack(spacing: TT.Space.m) {
+                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
+                        .buttonStyle(.ttSecondary)
+                        .accessibilityIdentifier("settings.sign_out")
+                    Button("settings.change_server", role: .destructive) { confirmingServerChange = true }
+                        .font(TTFont.label)
+                        .foregroundStyle(TT.danger)
+                }
+                FormSection("settings.about") {
+                    FormRow("settings.version") { Text(verbatim: Self.versionText).monospacedDigit() }
+                    FormRow("settings.license") { Text(verbatim: "AGPL-3.0-only") }
                 }
             }
-            Section {
-                Button("account.sign_out") { Task { await model.signOut() } }
-                    .accessibilityIdentifier("settings.sign_out")
-                Button("settings.change_server", role: .destructive) { confirmingServerChange = true }
-            }
-            Section("settings.about") {
-                LabeledContent("settings.version") { Text(verbatim: Self.versionText) }
-                LabeledContent("settings.license") { Text(verbatim: "AGPL-3.0-only") }
-            }
+            .padding(.horizontal, TT.Space.l)
+            .padding(.vertical, TT.Space.s)
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity)
         }
+        .ttScreenBackground()
         .navigationTitle("sidebar.settings")
         .confirmationDialog("settings.change_server.confirm", isPresented: $confirmingServerChange, titleVisibility: .visible) {
             Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
+        }
+    }
+
+    @ViewBuilder private var accountCard: some View {
+        if let account = model.account {
+            Card {
+                HStack(spacing: TT.Space.l) {
+                    Text(verbatim: String(account.displayName.prefix(1)).uppercased())
+                        .font(.system(.title2, design: .rounded, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 56, height: 56)
+                        .background(LinearGradient(colors: [Color(hex: 0x3B82F6), Color(hex: 0x1D4ED8)], startPoint: .top, endPoint: .bottom), in: .circle)
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: account.displayName).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+                        Text(verbatim: "@\(account.handle)").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    }
+                    Spacer()
+                }
+                .accessibilityElement(children: .combine)
+            }
         }
     }
 

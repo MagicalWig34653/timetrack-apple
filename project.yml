@@ -5,6 +5,8 @@ options:
 packages:
   TimetrackCore:
     path: Packages/TimetrackCore
+  TimetrackDesign:
+    path: Packages/TimetrackDesign
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -25,11 +27,15 @@ targets:
         product: TimetrackCore
       - package: TimetrackCore
         product: TimetrackStores
+      - package: TimetrackDesign
+        product: TimetrackDesign
     settings:
       base:
         # Universal purchase: iOS and macOS share one bundle ID. A future watchOS app uses de.linolaske.timetrack.watchkitapp.
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
         PRODUCT_NAME: Timetrack
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_APP_SANDBOX: YES
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
         ENABLE_HARDENED_RUNTIME: YES
@@ -51,6 +57,8 @@ targets:
         product: TimetrackCore
       - package: TimetrackCore
         product: TimetrackStores
+      - package: TimetrackDesign
+        product: TimetrackDesign
       - target: TimetrackWatch
         embed: true
     settings:
@@ -59,6 +67,9 @@ targets:
         PRODUCT_NAME: Timetrack
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
@@ -98,12 +109,16 @@ targets:
         product: TimetrackCore
       - package: TimetrackCore
         product: TimetrackStores
+      - package: TimetrackDesign
+        product: TimetrackDesign
       - target: TimetrackWidget
         embed: true
     settings:
       base:
         # App Group for the complication's non-secret snapshot. Needs a team that can provision App Groups (see docs/handoffs/A5.md).
         CODE_SIGN_ENTITLEMENTS: Sources/Watch/TimetrackWatch.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.watchkitapp
         PRODUCT_NAME: Timetrack
         SDKROOT: watchos

@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct SignInView: View {
@@ -31,88 +32,105 @@ struct SignInView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                Image(systemName: "clock.badge.checkmark")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.tint)
-                    .accessibilityHidden(true)
-                Text("signin.title").font(.largeTitle.bold()).multilineTextAlignment(.center)
+            VStack(spacing: TT.Space.xl) {
+                VStack(spacing: TT.Space.m) {
+                    BrandMark(size: 84)
+                    Text("signin.brand").font(.system(.largeTitle, design: .rounded, weight: .bold)).foregroundStyle(TT.textPrimary)
+                    Text("signin.tagline").font(TTFont.body).foregroundStyle(TT.textSecondary).multilineTextAlignment(.center)
+                }
+                .padding(.top, TT.Space.xxl)
+                .accessibilityElement(children: .combine)
 
-                VStack(alignment: .leading, spacing: 14) {
-                    TextField("signin.server", text: $server, prompt: Text("signin.server.prompt"))
-                        .textContentType(.URL)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .textFieldStyle(.roundedBorder)
-                        .accessibilityLabel(Text("signin.server"))
-                        .accessibilityIdentifier("signin.server")
+                Card(padding: TT.Space.xl) {
+                    VStack(alignment: .leading, spacing: TT.Space.l) {
+                        VStack(alignment: .leading, spacing: TT.Space.s) {
+                            Text("signin.server").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                            TextField("signin.server", text: $server, prompt: Text("signin.server.prompt"))
+                                .textContentType(.URL)
+                                .keyboardType(.URL)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .ttField()
+                                .accessibilityLabel(Text("signin.server"))
+                                .accessibilityIdentifier("signin.server")
+                        }
 
-                    Picker("signin.mode", selection: $mode) {
-                        ForEach(Mode.allCases) { Text($0.titleKey).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .accessibilityLabel(Text("signin.mode"))
-
-                    switch mode {
-                    case .passkey:
-                        Text("signin.passkey.hint").font(.callout).foregroundStyle(.secondary)
-                        Button("signin.passkey.button") { Task { await model.signInWithPasskey(serverInput: server) } }
-                            .buttonStyle(.glassProminent)
+                        switch mode {
+                        case .passkey:
+                            Button { Task { await model.signInWithPasskey(serverInput: server) } } label: {
+                                Label("signin.passkey.button", systemImage: "person.badge.key.fill")
+                            }
+                            .buttonStyle(.ttPrimary)
                             .controlSize(.large)
                             .disabled(server.isEmpty)
                             .accessibilityIdentifier("signin.passkey")
-                    case .recovery:
-                        TextField("signin.handle", text: $handle)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .textFieldStyle(.roundedBorder)
-                            .accessibilityIdentifier("signin.handle")
-                        Picker("signin.method", selection: $method) {
-                            Text("signin.method.code").tag(RecoveryMethod.recoveryCode)
-                            Text("signin.method.password").tag(RecoveryMethod.fallbackPassword)
-                        }
-                        SecureField(method == .recoveryCode ? "signin.proof.code" : "signin.proof.password", text: $proof)
-                            .textFieldStyle(.roundedBorder)
-                            .accessibilityIdentifier("signin.proof")
-                        Text("signin.recovery.hint").font(.callout).foregroundStyle(.secondary)
-                        Button("signin.recovery.button") {
-                            Task { await model.signInWithRecovery(serverInput: server, method: method, handle: handle, proof: proof) }
-                        }
-                        .buttonStyle(.glassProminent)
-                        .controlSize(.large)
-                        .disabled(handle.isEmpty || proof.isEmpty || server.isEmpty)
-                    #if DEBUG
-                    case .developer:
-                        SecureField("signin.cookie", text: $cookie)
-                            .textFieldStyle(.roundedBorder)
-                            .accessibilityIdentifier("signin.cookie")
-                        Text("signin.developer.hint").font(.callout).foregroundStyle(.secondary)
-                        Button("signin.developer.button") { Task { await model.signInWithSessionCookie(serverInput: server, cookie: cookie) } }
-                            .buttonStyle(.glassProminent)
+                            Text("signin.passkey.hint").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        case .recovery:
+                            VStack(alignment: .leading, spacing: TT.Space.s) {
+                                Text("signin.handle").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                                TextField("signin.handle", text: $handle)
+                                    .textInputAutocapitalization(.never)
+                                    .autocorrectionDisabled()
+                                    .ttField()
+                                    .accessibilityIdentifier("signin.handle")
+                            }
+                            Picker("signin.method", selection: $method) {
+                                Text("signin.method.code").tag(RecoveryMethod.recoveryCode)
+                                Text("signin.method.password").tag(RecoveryMethod.fallbackPassword)
+                            }
+                            .pickerStyle(.segmented)
+                            SecureField(method == .recoveryCode ? "signin.proof.code" : "signin.proof.password", text: $proof)
+                                .ttField()
+                                .accessibilityIdentifier("signin.proof")
+                            Button("signin.recovery.button") {
+                                Task { await model.signInWithRecovery(serverInput: server, method: method, handle: handle, proof: proof) }
+                            }
+                            .buttonStyle(.ttPrimary)
                             .controlSize(.large)
-                            .disabled(cookie.isEmpty || server.isEmpty)
-                            .accessibilityIdentifier("signin.developer")
-                    #endif
-                    }
+                            .disabled(handle.isEmpty || proof.isEmpty || server.isEmpty)
+                            Text("signin.recovery.hint").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        #if DEBUG
+                        case .developer:
+                            SecureField("signin.cookie", text: $cookie)
+                                .ttField()
+                                .accessibilityIdentifier("signin.cookie")
+                            Button("signin.developer.button") { Task { await model.signInWithSessionCookie(serverInput: server, cookie: cookie) } }
+                                .buttonStyle(.ttPrimary)
+                                .controlSize(.large)
+                                .disabled(cookie.isEmpty || server.isEmpty)
+                                .accessibilityIdentifier("signin.developer")
+                            Text("signin.developer.hint").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        #endif
+                        }
 
-                    if model.phase == .offline {
-                        Label("signin.offline", systemImage: "wifi.slash").foregroundStyle(.orange)
-                        Button("signin.retry") { Task { await model.restore() } }
+                        if model.phase == .offline {
+                            HintBanner("signin.offline", symbol: "wifi.slash")
+                            Button("signin.retry") { Task { await model.restore() } }.buttonStyle(.ttSecondary)
+                        }
+                        if let error = model.lastError {
+                            ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { model.lastError = nil }
+                                .accessibilityIdentifier("signin.error")
+                        }
                     }
-                    if let error = model.lastError {
-                        error.messageText.foregroundStyle(.red).accessibilityIdentifier("signin.error")
+                    .disabled(model.isBusy)
+                }
+
+                // Secondary ways to sign in stay quiet below the main action.
+                HStack(spacing: TT.Space.l) {
+                    ForEach(Mode.allCases.filter { $0 != mode }) { other in
+                        Button(other.titleKey) { withAnimation(.smooth) { mode = other } }
+                            .font(TTFont.label)
+                            .accessibilityIdentifier("signin.mode.\(other.rawValue)")
                     }
                 }
-                .disabled(model.isBusy)
-                .padding(20)
-                .glassEffect(in: .rect(cornerRadius: 24))
+                .padding(.bottom, TT.Space.xl)
             }
-            .padding(24)
+            .padding(.horizontal, TT.Space.xl)
             .frame(maxWidth: 520)
             .frame(maxWidth: .infinity)
         }
         .scrollDismissesKeyboard(.interactively)
+        .ttScreenBackground()
         .onAppear { if server.isEmpty { server = model.serverURL?.absoluteString ?? "" } }
     }
 }

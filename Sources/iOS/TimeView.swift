@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct TimeView: View {
@@ -10,7 +11,7 @@ struct TimeView: View {
             if let store = model.timeList {
                 TimeContent(store: store)
             } else {
-                ProgressView()
+                ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
             }
         }
         .navigationTitle("sidebar.time")
@@ -27,23 +28,70 @@ private struct TimeContent: View {
     let store: TimeListStore
     @State private var editor: EditorRequest?
     @State private var voiding: Segment?
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
+        Group {
+            if sizeClass == .regular {
+                HStack(alignment: .top, spacing: TT.Space.xl) {
+                    dayList.frame(maxWidth: TT.contentWidth)
+                    ScrollView {
+                        VStack(spacing: TT.Space.l) {
+                            WeekHeader(store: store)
+                            WeekOverview(store: store)
+                        }
+                        .padding(.top, TT.Space.s)
+                    }
+                    .frame(maxWidth: 380)
+                    .scrollIndicators(.hidden)
+                }
+                .padding(.horizontal, TT.Space.l)
+                .frame(maxWidth: .infinity)
+            } else {
+                dayList
+            }
+        }
+        .ttScreenBackground()
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) } label: { Label("command.new_entry", systemImage: "plus") }
+                    .accessibilityIdentifier("time.new")
+            }
+        }
+        .sheet(item: $editor) { request in
+            SegmentEditor(store: store, segment: request.segment, day: request.day)
+                .presentationDetents([.fraction(0.75), .large])
+        }
+        .sheet(item: $voiding) { segment in
+            VoidSheet(store: store, segment: segment)
+        }
+    }
+
+    private var dayList: some View {
         List {
+            if sizeClass != .regular {
+                WeekHeader(store: store)
+                    .listRowBackground(Color.clear).listRowInsets(.init(top: 0, leading: 0, bottom: 4, trailing: 0)).listRowSeparator(.hidden)
+            }
             if let error = store.error {
-                ErrorBanner(error: error) { Task { await store.load() } }
-                    .listRowSeparator(.hidden)
+                ErrorBannerView(error: error) { Task { await store.load() } }
+                    .listRowBackground(Color.clear).listRowSeparator(.hidden)
+            }
+            if store.days.isEmpty && store.isLoading {
+                SkeletonList(rows: 3).listRowBackground(Color.clear).listRowInsets(.init()).listRowSeparator(.hidden)
             }
             ForEach(store.days) { day in
                 Section {
                     let segments = (day.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
                     if segments.isEmpty {
-                        Text(day.mark.map(markKey) ?? "time.no_entries").foregroundStyle(.secondary)
+                        EmptyDayRow(day: day)
+                            .listRowInsets(.init()).listRowBackground(TT.surface)
                     }
                     ForEach(segments) { segment in
                         SegmentRow(segment: segment, zone: store.calendar.timeZone)
-                            .contentShape(.rect)
                             .onTapGesture { editor = EditorRequest(segment: segment, day: day.date) }
+                            .listRowInsets(.init()).listRowBackground(TT.surface)
                             .swipeActions(edge: .trailing) {
                                 Button("time.void", role: .destructive) { voiding = segment }
                                 Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }.tint(.accentColor)
@@ -52,72 +100,134 @@ private struct TimeContent: View {
                             .accessibilityAction(named: Text("time.void")) { voiding = segment }
                     }
                 } header: {
-                    DayHeader(day: day, calendar: store.calendar) { editor = EditorRequest(segment: nil, day: day.date) }
+                    DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
+                        editor = EditorRequest(segment: nil, day: day.date)
+                    }
                 }
             }
         }
-        .overlay { if store.days.isEmpty && store.isLoading { ProgressView() } }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .listSectionSpacing(TT.Space.s)
         .task { await store.load() }
         .refreshable { await store.load() }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) } label: { Label("command.new_entry", systemImage: "plus") }
-                    .accessibilityIdentifier("time.new")
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Button { Task { await store.shiftWeeks(-1) } } label: { Label("time.previous_week", systemImage: "chevron.left") }
-                Spacer()
-                VStack(spacing: 0) {
-                    Text("time.week_range \(dayTitle(store.weekStart, calendar: store.calendar)) \(dayTitle(store.weekEnd, calendar: store.calendar))").font(.footnote)
-                    Text("time.week_total \(DurationFormat.hoursMinutes(store.weekEvaluatedSeconds)) \(DurationFormat.hoursMinutes(store.weekTargetSeconds))")
-                        .font(.caption2).foregroundStyle(.secondary).monospacedDigit()
+    }
+}
+
+/// Week navigation + total with progress against the week's target.
+private struct WeekHeader: View {
+    let store: TimeListStore
+
+    var body: some View {
+        let done = store.weekEvaluatedSeconds
+        let target = store.weekTargetSeconds
+        Card {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                HStack(spacing: TT.Space.s) {
+                    Button { Task { await store.shiftWeeks(-1) } } label: { Image(systemName: "chevron.left").frame(width: 36, height: 36) }
+                        .accessibilityLabel(Text("time.previous_week"))
+                    Spacer(minLength: 0)
+                    VStack(spacing: 2) {
+                        Text(verbatim: weekRangeText(start: store.weekStart, end: store.weekEnd, calendar: store.calendar))
+                            .font(TTFont.cardTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center)
+                        Button("time.this_week") { Task { await store.goToCurrentWeek() } }.font(TTFont.meta)
+                    }
+                    Spacer(minLength: 0)
+                    Button { Task { await store.shiftWeeks(1) } } label: { Image(systemName: "chevron.right").frame(width: 36, height: 36) }
+                        .accessibilityLabel(Text("time.next_week"))
+                }
+                .buttonStyle(.borderless)
+                ProgressBar(progress: target > 0 ? Double(done) / Double(target) : 0)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary)
+                    Text("time.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    Spacer()
+                    if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
                 }
                 .accessibilityElement(children: .combine)
-                Spacer()
-                Button("time.this_week") { Task { await store.goToCurrentWeek() } }
-                Button { Task { await store.shiftWeeks(1) } } label: { Label("time.next_week", systemImage: "chevron.right") }
             }
-            .labelStyle(.iconOnly)
-            .padding(.horizontal, 16).padding(.vertical, 8)
-            .glassEffect(in: .capsule)
-            .padding(.horizontal, 16)
         }
-        .sheet(item: $editor) { request in
-            SegmentEditor(store: store, segment: request.segment, day: request.day)
+    }
+}
+
+/// Per-day bars of the loaded week (iPad side column).
+private struct WeekOverview: View {
+    let store: TimeListStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            SectionHeader("time.overview")
+            Card {
+                VStack(spacing: TT.Space.m) {
+                    ForEach(store.days) { day in
+                        let done = day.evaluatedWorkSeconds + day.creditSeconds
+                        HStack(spacing: TT.Space.m) {
+                            Text(verbatim: dayTitle(day.date, calendar: store.calendar)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                                .frame(width: 84, alignment: .leading)
+                            ProgressBar(progress: day.targetSeconds > 0 ? Double(done) / Double(day.targetSeconds) : (done > 0 ? 1 : 0), height: 8)
+                            Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.numeralSmall).foregroundStyle(TT.textPrimary)
+                                .frame(width: 44, alignment: .trailing)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+            }
         }
-        .sheet(item: $voiding) { segment in
-            VoidSheet(store: store, segment: segment)
+    }
+}
+
+private struct EmptyDayRow: View {
+    let day: DayEvaluation
+
+    var body: some View {
+        HStack(spacing: TT.Space.m) {
+            if let mark = day.mark, mark != .unmarked, mark != .unknown {
+                KindGlyph(symbol: markSymbol(mark), tint: markTint(mark))
+                Text(markKey(mark)).font(TTFont.body).foregroundStyle(TT.textPrimary)
+            } else {
+                Text("time.no_entries").font(TTFont.body).foregroundStyle(TT.textTertiary)
+            }
+            Spacer()
         }
+        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+        .accessibilityElement(children: .combine)
     }
 }
 
 private struct DayHeader: View {
     let day: DayEvaluation
     let calendar: DayCalendar
+    let isToday: Bool
     let add: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(dayTitle(day.date, calendar: calendar)).font(.headline)
-                if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(.secondary) }
+        let done = day.evaluatedWorkSeconds + day.creditSeconds
+        HStack(alignment: .center, spacing: TT.Space.s) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+                    if isToday { StatusChip("time.today", tone: .accent) }
+                }
+                if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 0) {
-                Text("time.day_total \(DurationFormat.hoursMinutes(day.evaluatedWorkSeconds + day.creditSeconds)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
-                    .font(.caption).foregroundStyle(.secondary)
-                Text(DurationFormat.signed(day.deltaSeconds)).font(.caption.weight(.semibold))
-                    .foregroundStyle(day.deltaSeconds < 0 ? Color.orange : Color.green)
+            Spacer(minLength: TT.Space.xs)
+            if day.targetSeconds > 0 || done > 0 {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
+                        .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
+                    if day.deltaSeconds != 0 {
+                        Text(verbatim: DurationFormat.signed(day.deltaSeconds)).font(TTFont.numeralSmall.weight(.semibold))
+                            .foregroundStyle(day.deltaSeconds < 0 ? TT.warning : TT.success)
+                    }
+                }
             }
-            .monospacedDigit()
-            Button(action: add) { Image(systemName: "plus.circle").imageScale(.large) }
+            Button(action: add) { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical) }
                 .buttonStyle(.borderless)
                 .accessibilityLabel(Text("time.add_to_day \(dayTitle(day.date, calendar: calendar))"))
         }
         .textCase(nil)
+        .padding(.vertical, 2)
     }
 }
 
@@ -142,23 +252,35 @@ private struct SegmentEditor: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Picker("editor.kind", selection: $kind) {
-                    ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
-                }
-                DatePicker("editor.start", selection: $start, displayedComponents: [.date, .hourAndMinute])
-                Toggle("editor.has_end", isOn: $hasEnd).disabled(segment?.endedAt != nil)
-                if hasEnd { DatePicker("editor.end", selection: $end, displayedComponents: [.date, .hourAndMinute]) }
-                TextField("editor.note", text: $note, axis: .vertical).lineLimit(1...3)
-                if isEditing {
-                    Section {
-                        TextField("editor.reason", text: $reason).accessibilityIdentifier("editor.reason")
-                    } footer: {
-                        Text("editor.reason.hint")
+            ScrollView {
+                VStack(alignment: .leading, spacing: TT.Space.l) {
+                    FormSection("editor.kind") {
+                        KindSelector(selection: $kind).padding(TT.Space.m)
                     }
+                    FormSection("editor.time") {
+                        DatePicker("editor.start", selection: $start, displayedComponents: [.date, .hourAndMinute])
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                        Toggle("editor.has_end", isOn: $hasEnd).disabled(segment?.endedAt != nil)
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                        if hasEnd {
+                            DatePicker("editor.end", selection: $end, displayedComponents: [.date, .hourAndMinute])
+                                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                        }
+                    }
+                    FormSection("editor.note") {
+                        TextField("editor.note", text: $note, axis: .vertical).lineLimit(1...4)
+                            .padding(TT.Space.l)
+                    }
+                    if isEditing {
+                        FormSection("editor.reason", footer: "editor.reason.hint") {
+                            TextField("editor.reason", text: $reason).accessibilityIdentifier("editor.reason").padding(TT.Space.l)
+                        }
+                    }
+                    if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { store.error = nil } }
                 }
-                if let error = store.error { error.messageText.foregroundStyle(.red) }
+                .padding(TT.Space.l)
             }
+            .ttScreenBackground()
             .navigationTitle(isEditing ? "time.edit.title" : "command.new_entry")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -216,10 +338,16 @@ private struct VoidSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                TextField("editor.reason", text: $reason).accessibilityIdentifier("void.reason")
-                if let error = store.error { error.messageText.foregroundStyle(.red) }
+            ScrollView {
+                VStack(alignment: .leading, spacing: TT.Space.l) {
+                    FormSection("editor.reason", footer: "void.hint") {
+                        TextField("editor.reason", text: $reason).accessibilityIdentifier("void.reason").padding(TT.Space.l)
+                    }
+                    if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { store.error = nil } }
+                }
+                .padding(TT.Space.l)
             }
+            .ttScreenBackground()
             .navigationTitle("void.title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

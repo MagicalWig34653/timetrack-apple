@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 import UIKit
 
@@ -23,6 +24,7 @@ struct TimetrackIOSApp: App {
                 .environment(model)
                 .environment(ui)
                 .environment(\.watchSender, watchSender)
+                .ttTheme()
                 .task { await watchSender.start() }
                 .onChange(of: model.phase) {
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).

@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 @main
@@ -24,6 +25,7 @@ struct TimetrackWatchApp: App {
         WindowGroup {
             RootView(receiver: receiver)
                 .environment(model)
+                .ttTheme()
                 .task {
                     await model.restore()
                     await receiver.start()

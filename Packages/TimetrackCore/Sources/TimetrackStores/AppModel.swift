@@ -77,6 +77,18 @@ public final class AppModel {
         await run { auth in try await auth.addPasskey(context: context, name: name) }
     }
 
+    /// Session handed over from another device (watch). Stores it and validates it against the server.
+    public func adoptHandedOverSession(server: URL, cookie: String) async {
+        await auth.importSession(server: server, cookieValue: cookie)
+        await restore()
+    }
+
+    /// The other device signed out; forget the local session without contacting the server.
+    public func discardSessionLocally() async {
+        await auth.discardSession()
+        reset(to: .signedOut)
+    }
+
     public func signOut() async {
         await auth.signOut()
         reset(to: .signedOut)

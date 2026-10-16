@@ -51,6 +51,8 @@ targets:
         product: TimetrackCore
       - package: TimetrackCore
         product: TimetrackStores
+      - target: TimetrackWatch
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
@@ -82,6 +84,33 @@ targets:
           - UIApplicationShortcutItemType: de.linolaske.timetrack.quick.stop
             UIApplicationShortcutItemTitle: Timer stoppen
             UIApplicationShortcutItemIconSymbolName: stop.fill
+  TimetrackWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "27.0"
+    sources: [Sources/Watch]
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+      - package: TimetrackCore
+        product: TimetrackStores
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.watchkitapp
+        PRODUCT_NAME: Timetrack
+        SDKROOT: watchos
+        TARGETED_DEVICE_FAMILY: "4"
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: de.linolaske.timetrack
+    info:
+      path: Sources/Watch/Info.plist
+      properties:
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: de.linolaske.timetrack
+        # The watch talks to the server directly (ADR-0015); the iPhone only hands over the session.
+        WKRunsIndependentlyOfCompanionApp: true
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
   TimetrackIOSUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -94,6 +123,10 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.uitests
         GENERATE_INFOPLIST_FILE: YES
 schemes:
+  TimetrackWatch:
+    build:
+      targets: { TimetrackWatch: all }
+    run: { config: Debug }
   TimetrackMac:
     build:
       targets: { TimetrackMac: all }

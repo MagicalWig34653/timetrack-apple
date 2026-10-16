@@ -6,7 +6,7 @@ import TimetrackCore
 @MainActor
 @Observable
 public final class AppModel {
-    public enum Phase: Equatable {
+    public enum Phase: Equatable, Sendable {
         case restoring
         case signedOut
         /// Credentials are stored but the server could not be reached.

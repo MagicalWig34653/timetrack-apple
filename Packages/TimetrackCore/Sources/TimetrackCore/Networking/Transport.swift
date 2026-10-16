@@ -20,10 +20,10 @@ public final class URLSessionTransport: HTTPTransport, SessionCookieJar, @unchec
     private let cookies: HTTPCookieStorage
 
     public init(timeout: TimeInterval = 30) {
-        cookies = HTTPCookieStorage()
-        cookies.cookieAcceptPolicy = .always
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpCookieStorage = cookies
+        // The ephemeral configuration owns a private in-memory store; a hand-made HTTPCookieStorage() is not honoured by URLSession.
+        cookies = configuration.httpCookieStorage ?? HTTPCookieStorage()
+        cookies.cookieAcceptPolicy = .always
         configuration.httpCookieAcceptPolicy = .always
         configuration.httpShouldSetCookies = true
         configuration.timeoutIntervalForRequest = timeout
@@ -44,7 +44,7 @@ public final class URLSessionTransport: HTTPTransport, SessionCookieJar, @unchec
     public func setSessionCookie(_ value: String, for baseURL: URL) {
         clearSessionCookie(for: baseURL)
         var properties: [HTTPCookiePropertyKey: Any] = [
-            .name: sessionCookieName, .value: value, .path: "/", .domain: baseURL.host() ?? "",
+            .name: sessionCookieName, .value: value, .path: "/", .originURL: baseURL,
         ]
         if baseURL.scheme == "https" { properties[.secure] = "TRUE" }
         if let cookie = HTTPCookie(properties: properties) { cookies.setCookie(cookie) }

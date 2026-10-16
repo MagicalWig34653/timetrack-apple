@@ -19,3 +19,6 @@ Passkey-Anmeldung noch nicht testbar (Domain, Associated Domains, AASA im Backen
 Nachtrag 16.10.2026 (Paket A3, Branch a3-ios, nicht gemergt): iOS/iPadOS-App (Heute, Zeit, Urlaub lesend, Einstellungen, Quick Actions, App Intents), PlanningStore/TimerCommand im Kern.
 50 Unit-Tests bestanden; iOS-Simulator- und macOS-Build erfolgreich; XCUITest-Smoke auf iPhone- und iPad-Simulator gegen Wegwerf-Backend bestanden. Signierter Build scheitert:
 persönliches Team unterstützt Associated Domains nicht (Passkeys brauchen bezahltes Developer Program). Details: docs/handoffs/A3.md.
+
+Nachtrag 16.10.2026 (Paket A4, Branch a4-watch, nicht gemergt): watchOS-App `TimetrackWatch` (eingebettet in TimetrackIOS) mit Heute, Start/Stopp, Abschnitten, Einstellungen und
+Sitzungsübergabe vom iPhone per WatchConnectivity (Kern: `Sync/`). Zahlen und Grenzen: docs/handoffs/A4.md.

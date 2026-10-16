@@ -8,6 +8,8 @@ struct TimetrackIOSApp: App {
     @UIApplicationDelegateAdaptor(QuickActionDelegate.self) private var delegate
     @State private var model: AppModel
     @State private var ui = UIState.shared
+    /// Hands the session to the Apple Watch app (WatchConnectivity); the watch stores it in its own Keychain.
+    private let watchSender = WatchHandoffSender(channel: WCSessionChannel(), secrets: KeychainSecretStore())
 
     init() {
         let passkeys = PlatformPasskeyAuthenticator { Self.keyWindow() }
@@ -20,6 +22,15 @@ struct TimetrackIOSApp: App {
             RootView()
                 .environment(model)
                 .environment(ui)
+                .task { await watchSender.start() }
+                .onChange(of: model.phase) {
+                    // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).
+                    switch model.phase {
+                    case .signedIn: Task { await watchSender.update(isSignedIn: true) }
+                    case .signedOut, .recoveryRestricted: Task { await watchSender.update(isSignedIn: false) }
+                    case .restoring, .offline: break
+                    }
+                }
                 .task {
                     await model.restore()
                     #if DEBUG

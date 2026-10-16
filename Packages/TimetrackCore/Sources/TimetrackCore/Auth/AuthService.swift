@@ -22,6 +22,8 @@ public actor AuthService {
     private let cookieJar: SessionCookieJar
     private let passkeys: PasskeyAuthenticator
     private var client: APIClient?
+    /// A handed-over cookie kept in memory until the first validated `restore()`, so a Keychain write failure (unsigned simulator builds) does not lose it.
+    private var handedOverCookie: String?
     private(set) public var serverURL: URL?
 
     public init(secrets: SecretStore, transport: some HTTPTransport & SessionCookieJar, passkeys: PasskeyAuthenticator = UnavailablePasskeyAuthenticator()) {
@@ -65,7 +67,7 @@ public actor AuthService {
 
     public func restore() async -> RestoreResult {
         guard let url = serverURL else { return .signedOut }
-        guard let cookie = secrets.read(SecretKey.sessionCookie) else { return .signedOut }
+        guard let cookie = secrets.read(SecretKey.sessionCookie) ?? handedOverCookie else { return .signedOut }
         let client = useServer(url)
         cookieJar.setSessionCookie(cookie, for: url)
         do {
@@ -90,6 +92,7 @@ public actor AuthService {
 
     /// Forgets the session but keeps the server URL for the next sign-in.
     public func clearSession(for url: URL) async {
+        handedOverCookie = nil
         cookieJar.clearSessionCookie(for: url)
         secrets.delete(SecretKey.sessionCookie)
         await client?.setCSRFToken(nil)
@@ -101,6 +104,21 @@ public actor AuthService {
         secrets.delete(SecretKey.serverURL)
         serverURL = nil
         client = nil
+    }
+
+    /// Adopts a session handed over by another device (iPhone -> watch). Stores the credentials; `restore()` then validates them.
+    public func importSession(server: URL, cookieValue: String) {
+        if serverURL != server { client = nil }
+        serverURL = server
+        secrets.write(server.absoluteString, for: SecretKey.serverURL)
+        secrets.write(cookieValue, for: SecretKey.sessionCookie)
+        handedOverCookie = cookieValue
+    }
+
+    /// Drops the local session without calling the server (the other device already ended it or it expired).
+    public func discardSession() async {
+        handedOverCookie = nil
+        if let url = serverURL { await clearSession(for: url) } else { secrets.delete(SecretKey.sessionCookie) }
     }
 
     // MARK: - Sign-in flows

@@ -1,17 +1,17 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct TimeView: View {
     @Environment(AppModel.self) private var model
-    @Environment(UIState.self) private var ui
 
     var body: some View {
         Group {
             if let store = model.timeList {
                 TimeContent(store: store)
             } else {
-                ProgressView()
+                ScrollView { SkeletonList(rows: 3).padding(TT.Space.xl) }.ttScreenBackground()
             }
         }
         .navigationTitle("sidebar.time")
@@ -26,42 +26,44 @@ private struct EditorRequest: Identifiable {
 
 private struct TimeContent: View {
     let store: TimeListStore
-    @Environment(AppModel.self) private var model
     @Environment(UIState.self) private var ui
     @State private var editor: EditorRequest?
     @State private var voiding: Segment?
 
     var body: some View {
-        List {
-            if let error = store.error {
-                HStack {
-                    error.messageText
-                    Spacer()
-                    Button("common.retry") { Task { await store.load() } }
-                }
-                .foregroundStyle(.red)
-            }
-            ForEach(store.days) { day in
-                Section {
-                    let segments = (day.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
-                    if segments.isEmpty {
-                        Text(day.mark.map(markKey) ?? "time.no_entries").foregroundStyle(.secondary)
-                    }
-                    ForEach(segments) { segment in
-                        SegmentRow(segment: segment, zone: store.calendar.timeZone)
-                            .contentShape(.rect)
-                            .onTapGesture(count: 2) { editor = EditorRequest(segment: segment, day: day.date) }
-                            .contextMenu {
-                                Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }
-                                Button("time.void", role: .destructive) { voiding = segment }
+        ScrollView {
+            VStack(alignment: .leading, spacing: TT.Space.l) {
+                WeekHeader(store: store)
+                if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
+                if store.days.isEmpty && store.isLoading { SkeletonList(rows: 3) }
+                ForEach(store.days) { day in
+                    VStack(alignment: .leading, spacing: TT.Space.s) {
+                        DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
+                            editor = EditorRequest(segment: nil, day: day.date)
+                        }
+                        let segments = (day.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
+                        if segments.isEmpty {
+                            Card(padding: 0) { EmptyDayRow(day: day) }
+                        } else {
+                            ListCard {
+                                ForEach(segments) { segment in
+                                    SegmentRow(segment: segment, zone: store.calendar.timeZone)
+                                        .onTapGesture(count: 2) { editor = EditorRequest(segment: segment, day: day.date) }
+                                        .contextMenu {
+                                            Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }
+                                            Button("time.void", role: .destructive) { voiding = segment }
+                                        }
+                                }
                             }
+                        }
                     }
-                } header: {
-                    DayHeader(day: day, calendar: store.calendar) { editor = EditorRequest(segment: nil, day: day.date) }
                 }
             }
+            .padding(TT.Space.xl)
+            .frame(maxWidth: TT.contentWidth, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
-        .overlay { if store.days.isEmpty && store.isLoading { ProgressView() } }
+        .ttScreenBackground()
         .task { await store.load() }
         .onChange(of: ui.newEntryRequest) { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) }
         .toolbar {
@@ -75,16 +77,6 @@ private struct TimeContent: View {
                     .help(Text("command.new_entry"))
             }
         }
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Text("time.week_range \(dayTitle(store.weekStart, calendar: store.calendar)) \(dayTitle(store.weekEnd, calendar: store.calendar))")
-                Spacer()
-                Text("time.week_total \(DurationFormat.hoursMinutes(store.weekEvaluatedSeconds)) \(DurationFormat.hoursMinutes(store.weekTargetSeconds))").monospacedDigit()
-            }
-            .font(.callout)
-            .padding(.horizontal, 16).padding(.vertical, 10)
-            .background(.bar)
-        }
         .sheet(item: $editor) { request in
             SegmentEditor(store: store, segment: request.segment, day: request.day)
         }
@@ -92,37 +84,75 @@ private struct TimeContent: View {
             VoidSheet(store: store, segment: segment)
         }
     }
+}
 
-    private func markKey(_ mark: DayMarkKind) -> LocalizedStringKey {
-        switch mark {
-        case .holiday: "mark.holiday"
-        case .vacation: "mark.vacation"
-        case .sick: "mark.sick"
-        case .excused: "mark.excused"
-        case .schoolCredit: "mark.school_credit"
-        case .unmarked, .unknown: "time.no_entries"
+private struct WeekHeader: View {
+    let store: TimeListStore
+
+    var body: some View {
+        let done = store.weekEvaluatedSeconds
+        let target = store.weekTargetSeconds
+        Card {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                Text(verbatim: weekRangeText(start: store.weekStart, end: store.weekEnd, calendar: store.calendar))
+                    .font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+                ProgressBar(progress: target > 0 ? Double(done) / Double(target) : 0)
+                HStack(alignment: .firstTextBaseline) {
+                    Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary)
+                    Text("time.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    Spacer()
+                    if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
+                }
+                .accessibilityElement(children: .combine)
+            }
         }
+    }
+}
+
+private struct EmptyDayRow: View {
+    let day: DayEvaluation
+
+    var body: some View {
+        HStack(spacing: TT.Space.m) {
+            if let mark = day.mark, mark != .unmarked, mark != .unknown {
+                KindGlyph(symbol: markSymbol(mark), tint: markTint(mark))
+                Text(markKey(mark)).foregroundStyle(TT.textPrimary)
+            } else {
+                Text("time.no_entries").foregroundStyle(TT.textTertiary)
+            }
+            Spacer()
+        }
+        .padding(TT.Space.l)
+        .accessibilityElement(children: .combine)
     }
 }
 
 private struct DayHeader: View {
     let day: DayEvaluation
     let calendar: DayCalendar
+    let isToday: Bool
     let add: () -> Void
 
     var body: some View {
-        HStack {
-            Text(dayTitle(day.date, calendar: calendar)).font(.headline)
-            if day.provisional { Text("common.provisional").font(.caption).foregroundStyle(.secondary) }
+        let done = day.evaluatedWorkSeconds + day.creditSeconds
+        HStack(spacing: TT.Space.s) {
+            Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+            if isToday { StatusChip("time.today", tone: .accent) }
+            if day.provisional { StatusChip("common.provisional", tone: .neutral) }
             Spacer()
-            Text("time.day_total \(DurationFormat.hoursMinutes(day.evaluatedWorkSeconds + day.creditSeconds)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
-                .monospacedDigit().font(.callout).foregroundStyle(.secondary)
-            Text(DurationFormat.signed(day.deltaSeconds)).monospacedDigit().font(.callout)
-                .foregroundStyle(day.deltaSeconds < 0 ? Color.orange : Color.green)
-            Button(action: add) { Image(systemName: "plus.circle") }
+            if day.targetSeconds > 0 || done > 0 {
+                Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
+                    .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
+                if day.deltaSeconds != 0 {
+                    Text(verbatim: DurationFormat.signed(day.deltaSeconds)).font(TTFont.numeralSmall.weight(.semibold))
+                        .foregroundStyle(day.deltaSeconds < 0 ? TT.warning : TT.success)
+                }
+            }
+            Button(action: add) { Image(systemName: "plus.circle.fill").symbolRenderingMode(.hierarchical) }
                 .buttonStyle(.borderless)
                 .accessibilityLabel(Text("time.add_to_day \(dayTitle(day.date, calendar: calendar))"))
         }
+        .padding(.horizontal, TT.Space.xs)
     }
 }
 
@@ -146,32 +176,42 @@ private struct SegmentEditor: View {
     }
 
     var body: some View {
-        Form {
-            Picker("editor.kind", selection: $kind) {
-                ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: TT.Space.l) {
+                    Text(isEditing ? "time.edit.title" : "command.new_entry").font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary)
+                    FormSection("editor.kind") { KindSelector(selection: $kind).padding(TT.Space.m) }
+                    FormSection("editor.time") {
+                        DatePicker("editor.start", selection: $start, displayedComponents: [.date, .hourAndMinute]).padding(TT.Space.m)
+                        Toggle("editor.has_end", isOn: $hasEnd).disabled(segment?.endedAt != nil).padding(TT.Space.m)
+                        if hasEnd { DatePicker("editor.end", selection: $end, displayedComponents: [.date, .hourAndMinute]).padding(TT.Space.m) }
+                    }
+                    FormSection("editor.note") {
+                        TextField("editor.note", text: $note, axis: .vertical).textFieldStyle(.plain).lineLimit(1...4).padding(TT.Space.m)
+                    }
+                    if isEditing {
+                        FormSection("editor.reason", footer: "editor.reason.hint") {
+                            TextField("editor.reason", text: $reason).textFieldStyle(.plain).accessibilityIdentifier("editor.reason").padding(TT.Space.m)
+                        }
+                    }
+                    if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { store.error = nil } }
+                }
+                .padding(TT.Space.xl)
             }
-            DatePicker("editor.start", selection: $start, displayedComponents: [.date, .hourAndMinute])
-            Toggle("editor.has_end", isOn: $hasEnd).disabled(segment?.endedAt != nil)
-            if hasEnd { DatePicker("editor.end", selection: $end, displayedComponents: [.date, .hourAndMinute]) }
-            TextField("editor.note", text: $note, axis: .vertical).lineLimit(1...3)
-            if isEditing {
-                TextField("editor.reason", text: $reason).accessibilityIdentifier("editor.reason")
-                Text("editor.reason.hint").font(.caption).foregroundStyle(.secondary)
-            }
-            if let error = store.error { error.messageText.foregroundStyle(.red) }
             HStack {
                 Spacer()
                 Button("common.cancel", role: .cancel) { dismiss() }.keyboardShortcut(.cancelAction)
                 Button("common.save") { Task { await save() } }
-                    .buttonStyle(.glassProminent)
+                    .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                     .disabled(!valid || saving)
             }
+            .padding(TT.Space.l)
+            .background(.bar)
         }
-        .formStyle(.grouped)
+        .ttScreenBackground()
         .environment(\.timeZone, store.calendar.timeZone)
-        .frame(width: 440)
-        .padding()
+        .frame(width: 480, height: 600)
         .onAppear(perform: load)
     }
 
@@ -217,10 +257,12 @@ private struct VoidSheet: View {
     @State private var reason = ""
 
     var body: some View {
-        Form {
-            Text("void.title").font(.headline)
-            TextField("editor.reason", text: $reason).accessibilityIdentifier("void.reason")
-            if let error = store.error { error.messageText.foregroundStyle(.red) }
+        VStack(alignment: .leading, spacing: TT.Space.l) {
+            Text("void.title").font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary)
+            FormSection("editor.reason", footer: "void.hint") {
+                TextField("editor.reason", text: $reason).textFieldStyle(.plain).accessibilityIdentifier("void.reason").padding(TT.Space.m)
+            }
+            if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { store.error = nil } }
             HStack {
                 Spacer()
                 Button("common.cancel", role: .cancel) { dismiss() }.keyboardShortcut(.cancelAction)
@@ -231,9 +273,9 @@ private struct VoidSheet: View {
                 .disabled(reason.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }
-        .formStyle(.grouped)
-        .frame(width: 400)
-        .padding()
+        .padding(TT.Space.xl)
+        .frame(width: 420)
+        .ttScreenBackground()
         .onAppear { store.error = nil }
     }
 }

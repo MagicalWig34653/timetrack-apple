@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct TodayView: View {
@@ -10,7 +11,7 @@ struct TodayView: View {
             if let store = model.today {
                 TodayContent(store: store)
             } else {
-                ProgressView()
+                ScrollView { SkeletonList(rows: 3).padding(TT.Space.xl) }.ttScreenBackground()
             }
         }
         .navigationTitle("sidebar.today")
@@ -23,36 +24,43 @@ private struct TodayContent: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                if let error = store.error {
-                    HStack {
-                        error.messageText
-                        Spacer()
-                        Button("common.retry") { Task { await store.load() } }
-                    }
-                    .padding(12)
-                    .background(.red.opacity(0.12), in: .rect(cornerRadius: 12))
-                    .accessibilityIdentifier("today.error")
-                }
-                TimerCard(store: store)
-                SummaryGrid(store: store)
-                if let hints = store.day?.breakHints, !hints.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(hints, id: \.code) { hint in
-                            Label(breakHintKey(hint.code), systemImage: "cup.and.saucer")
+            VStack(alignment: .leading, spacing: TT.Space.l) {
+                Eyebrow(verbatim: dateLine).padding(.horizontal, TT.Space.xs)
+                if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: TT.Space.xl) {
+                        VStack(spacing: TT.Space.l) {
+                            TimerCard(store: store)
+                            DayStats(store: store)
                         }
+                        .frame(width: 400)
+                        VStack(alignment: .leading, spacing: TT.Space.l) {
+                            hints
+                            TodaySegments(store: store, zone: model.dayCalendar.timeZone)
+                        }
+                        .frame(minWidth: 320)
                     }
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 780)
+                    VStack(alignment: .leading, spacing: TT.Space.l) {
+                        TimerCard(store: store)
+                        DayStats(store: store)
+                        hints
+                        TodaySegments(store: store, zone: model.dayCalendar.timeZone)
+                    }
                 }
-                SegmentsSection(segments: store.segments)
             }
-            .padding(24)
-            .frame(maxWidth: 720, alignment: .leading)
+            .padding(TT.Space.xl)
+            .frame(maxWidth: 1000, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
+        .ttScreenBackground()
         .task { await store.load() }
         .refreshable { await store.load() }
+        .sensoryFeedback(trigger: store.running?.id) { old, new in
+            guard old != new else { return nil }
+            return new != nil ? .start : .stop
+        }
+        .animation(.smooth(duration: 0.35), value: store.running?.id)
         .toolbar {
             ToolbarItem {
                 Button { Task { await store.load() } } label: { Label("command.reload", systemImage: "arrow.clockwise") }
@@ -60,117 +68,95 @@ private struct TodayContent: View {
             }
         }
     }
+
+    @ViewBuilder private var hints: some View {
+        if let hints = store.day?.breakHints, !hints.isEmpty {
+            VStack(spacing: TT.Space.s) {
+                ForEach(hints, id: \.code) { HintBanner(breakHintKey($0.code), symbol: "cup.and.saucer.fill") }
+            }
+        }
+    }
+
+    private var dateLine: String {
+        Date.now.formatted(Date.FormatStyle(timeZone: model.dayCalendar.timeZone).weekday(.wide).day().month(.wide))
+    }
 }
 
 private struct TimerCard: View {
     let store: TodayStore
-    @State private var kind: SegmentKind = .work
+    @AppStorage("mac.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+
+    private var kind: Binding<SegmentKind> {
+        Binding(get: { SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work },
+                set: { lastKindRaw = $0.rawValue })
+    }
 
     var body: some View {
-        VStack(spacing: 14) {
-            if let running = store.running {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    Text(RunningTimerDisplay(startedAt: running.startedAt).clock(at: context.date))
-                        .font(.system(size: 54, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .accessibilityLabel(Text("today.timer.accessibility \(RunningTimerDisplay(startedAt: running.startedAt).clock(at: context.date))"))
-                }
-                Label(running.kind.titleKey, systemImage: running.kind.symbol).foregroundStyle(.secondary)
-                Button { Task { await store.stop() } } label: {
-                    Label("today.stop", systemImage: "stop.fill").frame(minWidth: 160)
-                }
-                .buttonStyle(.glassProminent)
-                .controlSize(.large)
-                .tint(.red)
-                .accessibilityIdentifier("today.stop")
+        TimerHero(startedAt: store.running?.startedAt, kind: store.running?.kind ?? kind.wrappedValue,
+                  idleTitle: "today.not_running", idleSubtitle: "today.idle_hint", runningCaption: "today.running") {
+            if store.running != nil {
+                Button { Task { await store.stop() } } label: { Label("today.stop", systemImage: "stop.fill") }
+                    .buttonStyle(.ttDanger).controlSize(.large)
+                    .accessibilityIdentifier("today.stop")
             } else {
-                Text("today.not_running").font(.title2).foregroundStyle(.secondary)
-                HStack {
-                    Picker("today.kind", selection: $kind) {
-                        ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
-                    }
-                    .frame(maxWidth: 170)
-                    Button { Task { await store.start(kind: kind) } } label: {
-                        Label("today.start", systemImage: "play.fill").frame(minWidth: 140)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
+                KindSelector(selection: kind)
+                Button { Task { await store.start(kind: kind.wrappedValue) } } label: { Label("today.start", systemImage: "play.fill") }
+                    .buttonStyle(.ttPrimary).controlSize(.large)
                     .accessibilityIdentifier("today.start")
-                }
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(24)
-        .glassEffect(in: .rect(cornerRadius: 24))
     }
 }
 
-private struct SummaryGrid: View {
+private struct DayStats: View {
     let store: TodayStore
 
     var body: some View {
         let day = store.day
         let done = (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0)
-        HStack(spacing: 12) {
-            tile("today.done", DurationFormat.hoursMinutes(done), provisional: day?.provisional == true)
-            tile("today.target", DurationFormat.hoursMinutes(day?.targetSeconds ?? 0))
-            tile("today.delta", DurationFormat.signed(day?.deltaSeconds ?? 0), provisional: day?.provisional == true)
-            tile("today.balance", DurationFormat.signed(store.account?.balanceSeconds ?? 0), provisional: store.account?.provisional == true)
-        }
-    }
-
-    private func tile(_ title: LocalizedStringKey, _ value: String, provisional: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit()
-            Text(provisional ? "common.provisional" : " ").font(.caption2).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 14))
-        .accessibilityElement(children: .combine)
-    }
-}
-
-private struct SegmentsSection: View {
-    let segments: [Segment]
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("today.segments").font(.headline)
-            if segments.isEmpty {
-                Text("today.no_segments").foregroundStyle(.secondary)
-            } else {
-                ForEach(segments) { SegmentRow(segment: $0, zone: model.dayCalendar.timeZone) }
+        let target = day?.targetSeconds ?? 0
+        let progress = target > 0 ? Double(done) / Double(target) : 0
+        VStack(spacing: TT.Space.m) {
+            Card {
+                HStack(spacing: TT.Space.xl) {
+                    ProgressRing(progress: progress, lineWidth: 12) {
+                        Text(verbatim: target > 0 ? "\(Int((progress * 100).rounded())) %" : "–").font(TTFont.statSmall).foregroundStyle(TT.textPrimary)
+                    }
+                    .frame(width: 104, height: 104)
+                    VStack(alignment: .leading, spacing: TT.Space.xs) {
+                        Text("today.done").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                        Text(verbatim: DurationFormat.hoursMinutes(done))
+                            .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
+                        Text("today.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        if day?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .combine)
             }
+            HStack(spacing: TT.Space.m) {
+                StatTile("today.delta", value: DurationFormat.signed(day?.deltaSeconds ?? 0), chip: day?.provisional == true ? "common.provisional" : nil,
+                         tone: deltaTone(day?.deltaSeconds ?? 0), symbol: "plusminus")
+                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0),
+                         chip: store.account?.provisional == true ? "common.provisional" : nil, symbol: "clock.arrow.circlepath")
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
 
-struct SegmentRow: View {
-    let segment: Segment
+private struct TodaySegments: View {
+    let store: TodayStore
     let zone: TimeZone
 
     var body: some View {
-        HStack {
-            Image(systemName: segment.kind.symbol).frame(width: 22).foregroundStyle(.secondary).accessibilityHidden(true)
-            Text(segment.kind.titleKey)
-            Spacer()
-            if let end = segment.endedAt {
-                Text("\(segment.startedAt.clockText(in: zone)) – \(end.clockText(in: zone))").monospacedDigit()
-                Text(DurationFormat.hoursMinutes(Int(end.timeIntervalSince(segment.startedAt))))
-                    .monospacedDigit().foregroundStyle(.secondary).frame(width: 50, alignment: .trailing)
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            SectionHeader("today.segments") { if !store.segments.isEmpty { Text(verbatim: "\(store.segments.count)") } }
+            if store.segments.isEmpty {
+                Card { EmptyState(symbol: "tray", title: "today.no_segments", message: "today.no_segments.hint") }
             } else {
-                Text("\(segment.startedAt.clockText(in: zone)) – …").monospacedDigit()
-                Text("segment.running").foregroundStyle(.green)
-            }
-            if segment.needsReview {
-                Image(systemName: "exclamationmark.triangle").foregroundStyle(.orange)
-                    .accessibilityLabel(Text("segment.needs_review"))
+                ListCard { ForEach(store.segments) { SegmentRow(segment: $0, zone: zone) } }
             }
         }
-        .padding(.vertical, 6)
-        .accessibilityElement(children: .combine)
     }
 }

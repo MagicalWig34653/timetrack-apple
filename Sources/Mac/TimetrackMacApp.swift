@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 @main
@@ -20,7 +21,13 @@ struct TimetrackMacApp: App {
                 .environment(model)
                 .environment(ui)
                 .frame(minWidth: 760, minHeight: 480)
-                .task { await model.restore() }
+                .ttTheme()
+                .task {
+                    await model.restore()
+                    #if DEBUG
+                    await DebugSnapshots.run(model: model, ui: ui)
+                    #endif
+                }
         }
         .commands { TimetrackCommands(model: model, ui: ui) }
 
@@ -33,6 +40,7 @@ struct TimetrackMacApp: App {
         Settings {
             SettingsView()
                 .environment(model)
+                .ttTheme()
         }
     }
 }

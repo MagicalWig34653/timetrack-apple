@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct RootView: View {
@@ -10,7 +11,11 @@ struct RootView: View {
         Group {
             switch model.phase {
             case .restoring:
-                ProgressView("root.loading").frame(maxWidth: .infinity, maxHeight: .infinity)
+                ZStack {
+                    TTBackdrop()
+                    VStack(spacing: TT.Space.l) { BrandMark(size: 72); ProgressView() }
+                        .accessibilityElement(children: .ignore).accessibilityLabel(Text("root.loading"))
+                }
             case .signedOut, .offline:
                 SignInView()
             case .recoveryRestricted:
@@ -57,7 +62,19 @@ struct MainView: View {
                                 .accessibilityIdentifier("sidebar.\(section.rawValue)")
                         }
                     }
+                    .listStyle(.sidebar)
+                    .scrollContentBackground(.hidden)
+                    .background { TTBackdrop() }
                     .navigationTitle("Timetrack")
+                    .safeAreaInset(edge: .bottom) {
+                        if let account = model.account {
+                            HStack(spacing: TT.Space.s) {
+                                Image(systemName: "person.crop.circle.fill").foregroundStyle(TT.textSecondary)
+                                Text(verbatim: account.displayName).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(1)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(TT.Space.l)
+                        }
+                    }
                 } detail: {
                     NavigationStack { SectionView(section: ui.selection) }
                 }
@@ -93,18 +110,17 @@ struct RecoveryRestrictedView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        ContentUnavailableView {
-            Label("recovery.title", systemImage: "key.horizontal")
-        } description: {
-            VStack(spacing: 8) {
-                Text("recovery.explanation")
-                if let error = model.lastError { error.messageText.foregroundStyle(.red) }
-            }
-        } actions: {
+        VStack(spacing: TT.Space.l) {
+            EmptyState(symbol: "key.horizontal.fill", title: "recovery.title", message: "recovery.explanation")
+            if let error = model.lastError { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { model.lastError = nil } }
             Button("recovery.add_passkey") { Task { await model.addPasskey(name: UIDevice.current.name) } }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.ttPrimary).controlSize(.large)
                 .disabled(model.isBusy)
-            Button("account.sign_out") { Task { await model.signOut() } }
+            Button("account.sign_out") { Task { await model.signOut() } }.buttonStyle(.ttSecondary)
         }
+        .padding(TT.Space.xl)
+        .frame(maxWidth: 520)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ttScreenBackground()
     }
 }

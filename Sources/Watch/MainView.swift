@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct MainView: View {
@@ -33,7 +34,7 @@ private struct TodayScreen: View {
         ScrollView {
             VStack(spacing: 10) {
                 if let error = store.error, !error.isUnauthorized {
-                    Text(verbatim: error.germanDescription).font(.footnote).foregroundStyle(.red)
+                    Text(verbatim: error.germanDescription).font(.footnote).foregroundStyle(TT.danger)
                 }
                 TimerSection(store: store)
                 SummarySection(store: store)
@@ -95,20 +96,24 @@ private struct TimerSection: View {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     let clock = RunningTimerDisplay(startedAt: running.startedAt).clock(at: context.date)
                     Text(clock)
-                        .font(.system(size: 34, weight: .semibold, design: .rounded))
+                        .font(.system(size: 36, weight: .semibold, design: .rounded))
                         .monospacedDigit()
+                        .foregroundStyle(TT.textPrimary)
                         .minimumScaleFactor(0.6)
                         .accessibilityLabel(Text("today.timer.accessibility \(clock)"))
                 }
-                Label(running.kind.titleKey, systemImage: running.kind.symbol).font(.footnote).foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    LiveDot(color: running.kind.ttTint)
+                    KindBadge(running.kind)
+                }
                 Button { Task { await store.stop() } } label: {
                     Label("today.stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
                 }
-                .tint(.red)
+                .tint(TT.danger)
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("watch.stop")
             } else {
-                Text("today.not_running").font(.footnote).foregroundStyle(.secondary)
+                Text("today.not_running").font(.footnote).foregroundStyle(TT.textSecondary)
                 // Compact: one row that opens the system list; the choice is remembered.
                 Picker("today.kind", selection: kind) {
                     ForEach(SegmentKind.selectable, id: \.self) { Label($0.titleKey, systemImage: $0.symbol).tag($0) }
@@ -118,7 +123,7 @@ private struct TimerSection: View {
                 Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
                     Label("today.start", systemImage: "play.fill").frame(maxWidth: .infinity)
                 }
-                .tint(.green)
+                .tint(Color(hex: TT.defaultAccentHex))
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("watch.start")
             }
@@ -132,20 +137,22 @@ private struct SummarySection: View {
     var body: some View {
         let day = store.day
         let done = (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0)
-        VStack(spacing: 4) {
+        let target = day?.targetSeconds ?? 0
+        VStack(spacing: 6) {
             row("today.done", DurationFormat.hoursMinutes(done), provisional: day?.provisional == true)
+            if target > 0 { ProgressBar(progress: Double(done) / Double(target), height: 5) }
             row("today.balance", DurationFormat.signed(store.account?.balanceSeconds ?? 0), provisional: store.account?.provisional == true)
         }
         .padding(10)
-        .background(.quaternary.opacity(0.4), in: .rect(cornerRadius: 12))
+        .background(TT.surface, in: .rect(cornerRadius: 14, style: .continuous))
     }
 
     private func row(_ title: LocalizedStringKey, _ value: String, provisional: Bool) -> some View {
         HStack {
-            Text(title).font(.footnote).foregroundStyle(.secondary)
+            Text(title).font(.footnote).foregroundStyle(TT.textSecondary)
             Spacer()
-            Text(value).font(.body.weight(.semibold)).monospacedDigit()
-            if provisional { Image(systemName: "clock").font(.caption2).foregroundStyle(.secondary).accessibilityLabel(Text("common.provisional")) }
+            Text(value).font(.system(.body, design: .rounded, weight: .semibold)).monospacedDigit()
+            if provisional { Image(systemName: "clock").font(.caption2).foregroundStyle(TT.textSecondary).accessibilityLabel(Text("common.provisional")) }
         }
         .accessibilityElement(children: .combine)
     }
@@ -157,23 +164,23 @@ private struct SegmentsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("today.segments").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
+            Text("today.segments").font(.footnote.weight(.semibold)).foregroundStyle(TT.textSecondary)
             if store.segments.isEmpty {
-                Text("today.no_segments").font(.footnote).foregroundStyle(.secondary)
+                Text("today.no_segments").font(.footnote).foregroundStyle(TT.textSecondary)
             } else {
                 ForEach(store.segments) { segment in
-                    HStack {
-                        Image(systemName: segment.kind.symbol).foregroundStyle(.secondary).accessibilityHidden(true)
+                    HStack(spacing: 8) {
+                        KindGlyph(symbol: segment.kind.ttSymbol, tint: segment.kind.ttTint, size: 28)
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(segment.kind.titleKey).font(.footnote)
                             Text("\(segment.startedAt.clockText(in: zone)) – \(segment.endedAt?.clockText(in: zone) ?? "…")")
-                                .font(.caption2).monospacedDigit().foregroundStyle(.secondary)
+                                .font(.system(.footnote, design: .rounded)).monospacedDigit()
+                            Text(segment.kind.titleKey).font(.caption2).foregroundStyle(segment.kind.ttTint)
                         }
                         Spacer()
                         if let end = segment.endedAt {
-                            Text(DurationFormat.hoursMinutes(Int(end.timeIntervalSince(segment.startedAt)))).font(.footnote).monospacedDigit()
+                            Text(DurationFormat.hoursMinutes(Int(end.timeIntervalSince(segment.startedAt)))).font(.system(.footnote, design: .rounded)).monospacedDigit()
                         } else {
-                            Text("segment.running").font(.caption2).foregroundStyle(.green)
+                            Text("segment.running").font(.caption2).foregroundStyle(TT.success)
                         }
                     }
                     .accessibilityElement(children: .combine)

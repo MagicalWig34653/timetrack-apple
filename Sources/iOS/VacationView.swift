@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 /// Read-only vacation overview (module `planning`). All numbers are computed by the backend.
@@ -11,7 +12,7 @@ struct VacationView: View {
             if let store = model.planning {
                 VacationContent(store: store)
             } else {
-                ContentUnavailableView("vacation.disabled", systemImage: "beach.umbrella")
+                ScrollView { EmptyState(symbol: "beach.umbrella", title: "vacation.disabled").padding(TT.Space.l) }.ttScreenBackground()
             }
         }
         .navigationTitle("sidebar.vacation")
@@ -21,14 +22,71 @@ struct VacationView: View {
 private struct VacationContent: View {
     let store: PlanningStore
     @Environment(AppModel.self) private var model
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        List {
-            if let error = store.error { ErrorBanner(error: error) { Task { await store.load() } }.listRowSeparator(.hidden) }
-            if let balance = store.balance {
-                Section("vacation.balance") {
-                    row("vacation.available", balance.availableHalfDays, emphasized: true)
-                    row("vacation.after_planned", balance.availableAfterPlannedHalfDays)
+        ScrollView {
+            VStack(alignment: .leading, spacing: TT.Space.l) {
+                yearSwitcher
+                if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
+                if sizeClass == .regular {
+                    HStack(alignment: .top, spacing: TT.Space.xl) {
+                        balance.frame(maxWidth: 440)
+                        absences
+                    }
+                } else {
+                    balance
+                    absences
+                }
+            }
+            .padding(.horizontal, TT.Space.l)
+            .padding(.vertical, TT.Space.s)
+            .frame(maxWidth: sizeClass == .regular ? 1100 : TT.contentWidth, alignment: .leading)
+            .frame(maxWidth: .infinity)
+        }
+        .ttScreenBackground()
+        .task { await store.load() }
+        .refreshable { await store.load() }
+    }
+
+    private var yearSwitcher: some View {
+        HStack {
+            Button { Task { await store.shiftYears(-1) } } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+                .accessibilityLabel(Text("vacation.previous_year"))
+            Spacer()
+            Text(verbatim: String(store.year)).font(TTFont.sectionTitle).monospacedDigit().foregroundStyle(TT.textPrimary)
+            Spacer()
+            Button { Task { await store.shiftYears(1) } } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+                .accessibilityLabel(Text("vacation.next_year"))
+        }
+        .buttonStyle(.borderless)
+        .padding(.horizontal, TT.Space.s)
+    }
+
+    @ViewBuilder private var balance: some View {
+        if let balance = store.balance {
+            VStack(alignment: .leading, spacing: TT.Space.s) {
+                SectionHeader("vacation.balance")
+                Card {
+                    let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
+                    layout {
+                        let total = balance.entitlementHalfDays + balance.carryOverHalfDays + balance.adjustmentHalfDays
+                        ProgressRing(progress: total > 0 ? Double(max(balance.availableHalfDays, 0)) / Double(total) : 0, lineWidth: 12, tint: TT.kindVacation) {
+                            Image(systemName: "beach.umbrella.fill").font(.title2).foregroundStyle(TT.kindVacation)
+                        }
+                        .frame(width: 96, height: 96)
+                        VStack(alignment: .leading, spacing: TT.Space.xs) {
+                            Text("vacation.available").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                            Text("vacation.days \(HalfDayFormat.days(balance.availableHalfDays))")
+                                .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
+                            Text("vacation.after_planned_short \(HalfDayFormat.days(balance.availableAfterPlannedHalfDays))")
+                                .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+                ListCard {
                     row("vacation.entitlement", balance.entitlementHalfDays)
                     if balance.carryOverHalfDays != 0 { row("vacation.carry_over", balance.carryOverHalfDays) }
                     if balance.adjustmentHalfDays != 0 { row("vacation.adjustment", balance.adjustmentHalfDays) }
@@ -36,40 +94,26 @@ private struct VacationContent: View {
                     row("vacation.planned", balance.plannedHalfDays)
                 }
             }
-            Section("vacation.absences") {
-                if store.absences.isEmpty && !store.isLoading {
-                    Text("vacation.none").foregroundStyle(.secondary)
-                }
-                ForEach(store.absences) { absence in
-                    AbsenceRow(absence: absence, calendar: model.dayCalendar)
-                }
-            }
-        }
-        .overlay { if store.balance == nil && store.isLoading { ProgressView() } }
-        .task { await store.load() }
-        .refreshable { await store.load() }
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Button { Task { await store.shiftYears(-1) } } label: { Label("vacation.previous_year", systemImage: "chevron.left") }
-                Spacer()
-                Text(verbatim: String(store.year)).font(.headline).monospacedDigit()
-                Spacer()
-                Button { Task { await store.shiftYears(1) } } label: { Label("vacation.next_year", systemImage: "chevron.right") }
-            }
-            .labelStyle(.iconOnly)
-            .padding(.horizontal, 16).padding(.vertical, 8)
-            .glassEffect(in: .capsule)
-            .padding(.horizontal, 16)
+        } else if store.isLoading {
+            SkeletonList(rows: 3)
         }
     }
 
-    private func row(_ title: LocalizedStringKey, _ halfDays: Int, emphasized: Bool = false) -> some View {
-        LabeledContent(title) {
-            Text("vacation.days \(HalfDayFormat.days(halfDays))")
-                .monospacedDigit()
-                .fontWeight(emphasized ? .semibold : .regular)
+    private var absences: some View {
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            SectionHeader("vacation.absences") { if !store.absences.isEmpty { Text(verbatim: "\(store.absences.count)") } }
+            if store.absences.isEmpty && !store.isLoading {
+                Card { EmptyState(symbol: "calendar", title: "vacation.none") }
+            } else {
+                ListCard {
+                    ForEach(store.absences) { AbsenceRow(absence: $0, calendar: model.dayCalendar) }
+                }
+            }
         }
-        .accessibilityElement(children: .combine)
+    }
+
+    private func row(_ title: LocalizedStringKey, _ halfDays: Int) -> some View {
+        FormRow(title) { Text("vacation.days \(HalfDayFormat.days(halfDays))").monospacedDigit() }
     }
 }
 
@@ -78,35 +122,38 @@ private struct AbsenceRow: View {
     let calendar: DayCalendar
 
     var body: some View {
-        HStack {
+        HStack(spacing: TT.Space.m) {
+            KindGlyph(symbol: absence.kind.ttSymbol, tint: absence.kind.ttTint)
             VStack(alignment: .leading, spacing: 2) {
-                Text(kindKey)
-                Text(range).font(.caption).foregroundStyle(.secondary)
+                Text(absence.kind.ttTitle).font(TTFont.body).foregroundStyle(TT.textPrimary)
+                Text(verbatim: range).font(TTFont.meta).foregroundStyle(TT.textSecondary)
             }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(statusKey).font(.caption)
+            Spacer(minLength: TT.Space.s)
+            VStack(alignment: .trailing, spacing: 4) {
+                StatusChip(statusKey, tone: statusTone)
                 if absence.kind == .vacation {
-                    Text("vacation.days \(HalfDayFormat.days(absence.countedHalfDays))").font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                    Text("vacation.days \(HalfDayFormat.days(absence.countedHalfDays))").font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
                 }
             }
         }
+        .padding(.horizontal, TT.Space.l)
+        .padding(.vertical, TT.Space.m)
         .accessibilityElement(children: .combine)
+    }
+
+    private var statusTone: TTTone {
+        switch absence.status {
+        case .approved, .taken: .success
+        case .planned, .requested: .accent
+        case .rejected, .cancelled: .danger
+        case .unknown: .neutral
+        }
     }
 
     private var range: String {
         absence.startDate == absence.endDate
             ? dayTitle(absence.startDate, calendar: calendar)
             : "\(dayTitle(absence.startDate, calendar: calendar)) – \(dayTitle(absence.endDate, calendar: calendar))"
-    }
-
-    private var kindKey: LocalizedStringKey {
-        switch absence.kind {
-        case .vacation: "absence.vacation"
-        case .sick: "absence.sick"
-        case .excused: "absence.excused"
-        case .other, .unknown: "absence.other"
-        }
     }
 
     private var statusKey: LocalizedStringKey {

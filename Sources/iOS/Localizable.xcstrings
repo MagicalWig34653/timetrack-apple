@@ -287,6 +287,17 @@
         }
       }
     },
+    "editor.time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit"
+          }
+        }
+      }
+    },
     "hint.break_missing_30": {
       "extractionState": "manual",
       "localizations": {
@@ -837,6 +848,17 @@
         }
       }
     },
+    "signin.brand": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack"
+          }
+        }
+      }
+    },
     "signin.cookie": {
       "extractionState": "manual",
       "localizations": {
@@ -1068,6 +1090,17 @@
         }
       }
     },
+    "signin.tagline": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Arbeitszeit, ruhig erfasst."
+          }
+        }
+      }
+    },
     "signin.title": {
       "extractionState": "manual",
       "localizations": {
@@ -1145,6 +1178,28 @@
         }
       }
     },
+    "time.of_target %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von %@ Soll"
+          }
+        }
+      }
+    },
+    "time.overview": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochenübersicht"
+          }
+        }
+      }
+    },
     "time.previous_week": {
       "extractionState": "manual",
       "localizations": {
@@ -1163,6 +1218,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "time.today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
           }
         }
       }
@@ -1233,6 +1299,17 @@
         }
       }
     },
+    "today.idle_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle eine Art und starte den Timer."
+          }
+        }
+      }
+    },
     "today.kind": {
       "extractionState": "manual",
       "localizations": {
@@ -1255,6 +1332,17 @@
         }
       }
     },
+    "today.no_segments.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobald du den Timer startest, erscheinen deine Abschnitte hier."
+          }
+        }
+      }
+    },
     "today.not_running": {
       "extractionState": "manual",
       "localizations": {
@@ -1262,6 +1350,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kein Zeitabschnitt läuft"
+          }
+        }
+      }
+    },
+    "today.of_target %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von %@ Soll"
+          }
+        }
+      }
+    },
+    "today.running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft"
           }
         }
       }
@@ -1350,6 +1460,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verfügbar nach Planung"
+          }
+        }
+      }
+    },
+    "vacation.after_planned_short %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Planung: %@ Tage"
           }
         }
       }
@@ -1471,6 +1592,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vorheriges Jahr"
+          }
+        }
+      }
+    },
+    "void.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Grund wird mit der Stornierung gespeichert."
           }
         }
       }

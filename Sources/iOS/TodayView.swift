@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct TodayView: View {
@@ -10,7 +11,7 @@ struct TodayView: View {
             if let store = model.today {
                 TodayContent(store: store)
             } else {
-                ProgressView()
+                ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
             }
         }
         .navigationTitle("sidebar.today")
@@ -21,155 +22,148 @@ private struct TodayContent: View {
     let store: TodayStore
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                if let error = store.error { ErrorBanner(error: error) { Task { await store.load() } } }
-                TimerCard(store: store)
-                SummaryGrid(store: store)
-                if let hints = store.day?.breakHints, !hints.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(hints, id: \.code) { hint in
-                            Label(breakHintKey(hint.code), systemImage: "cup.and.saucer")
+            VStack(alignment: .leading, spacing: TT.Space.l) {
+                Eyebrow(verbatim: dateLine).padding(.horizontal, TT.Space.xs)
+                if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
+                if sizeClass == .regular {
+                    HStack(alignment: .top, spacing: TT.Space.xl) {
+                        VStack(spacing: TT.Space.l) {
+                            TimerCard(store: store)
+                            DayStats(store: store)
+                        }
+                        .frame(maxWidth: 440)
+                        VStack(alignment: .leading, spacing: TT.Space.l) {
+                            hints
+                            TodaySegments(store: store, zone: model.dayCalendar.timeZone)
                         }
                     }
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                }
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("today.segments").font(.headline)
-                    if store.segments.isEmpty {
-                        Text("today.no_segments").foregroundStyle(.secondary)
-                    } else {
-                        ForEach(store.segments) { segment in
-                            SegmentRow(segment: segment, zone: model.dayCalendar.timeZone)
-                            if segment.id != store.segments.last?.id { Divider() }
-                        }
-                    }
+                } else {
+                    TimerCard(store: store)
+                    DayStats(store: store)
+                    hints
+                    TodaySegments(store: store, zone: model.dayCalendar.timeZone)
                 }
             }
-            .padding(20)
-            .frame(maxWidth: 720, alignment: .leading)
+            .padding(.horizontal, TT.Space.l)
+            .padding(.vertical, TT.Space.s)
+            .frame(maxWidth: sizeClass == .regular ? 1100 : TT.contentWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
+        .ttScreenBackground()
         .task { await store.load() }
         .refreshable { await store.load() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
+        .sensoryFeedback(trigger: store.running?.id) { old, new in
+            guard old != new else { return nil }
+            return new != nil ? .start : .stop
+        }
+        .animation(.smooth(duration: 0.35), value: store.running?.id)
+    }
+
+    @ViewBuilder private var hints: some View {
+        if let hints = store.day?.breakHints, !hints.isEmpty {
+            VStack(spacing: TT.Space.s) {
+                ForEach(hints, id: \.code) { HintBanner(breakHintKey($0.code), symbol: "cup.and.saucer.fill") }
+            }
+        }
+    }
+
+    private var dateLine: String {
+        Date.now.formatted(Date.FormatStyle(timeZone: model.dayCalendar.timeZone).weekday(.wide).day().month(.wide))
     }
 }
 
 private struct TimerCard: View {
     let store: TodayStore
-    @State private var kind: SegmentKind = .work
-    @Environment(\.dynamicTypeSize) private var typeSize
+    @AppStorage("ios.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+
+    private var kind: Binding<SegmentKind> {
+        Binding(get: { SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work },
+                set: { lastKindRaw = $0.rawValue })
+    }
 
     var body: some View {
-        VStack(spacing: 14) {
-            if let running = store.running {
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    let clock = RunningTimerDisplay(startedAt: running.startedAt).clock(at: context.date)
-                    Text(clock)
-                        .font(.system(size: 54, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .minimumScaleFactor(0.6)
-                        .accessibilityLabel(Text("today.timer.accessibility \(clock)"))
-                }
-                Label(running.kind.titleKey, systemImage: running.kind.symbol).foregroundStyle(.secondary)
+        TimerHero(startedAt: store.running?.startedAt, kind: store.running?.kind ?? kind.wrappedValue,
+                  idleTitle: "today.not_running", idleSubtitle: "today.idle_hint", runningCaption: "today.running") {
+            if store.running != nil {
                 Button { Task { await store.stop() } } label: {
-                    Label("today.stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
+                    Label("today.stop", systemImage: "stop.fill")
                 }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.ttDanger)
                 .controlSize(.large)
-                .tint(.red)
                 .accessibilityIdentifier("today.stop")
             } else {
-                Text("today.not_running").font(.title3).foregroundStyle(.secondary)
-                // Three segments no longer fit side by side at accessibility text sizes: switch to a menu there.
-                if typeSize.isAccessibilitySize {
-                    Picker("today.kind", selection: $kind) {
-                        ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
-                    }
-                    .pickerStyle(.menu)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    Picker("today.kind", selection: $kind) {
-                        ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                KindSelector(selection: kind)
+                Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
+                    Label("today.start", systemImage: "play.fill")
                 }
-                Button { Task { await store.start(kind: kind) } } label: {
-                    Label("today.start", systemImage: "play.fill").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
+                .buttonStyle(.ttPrimary)
                 .controlSize(.large)
                 .accessibilityIdentifier("today.start")
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(20)
-        .glassEffect(in: .rect(cornerRadius: 24))
     }
 }
 
-private struct SummaryGrid: View {
+private struct DayStats: View {
     let store: TodayStore
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let day = store.day
         let done = (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0)
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 12)], spacing: 12) {
-            tile("today.done", DurationFormat.hoursMinutes(done), provisional: day?.provisional == true)
-            tile("today.target", DurationFormat.hoursMinutes(day?.targetSeconds ?? 0))
-            tile("today.delta", DurationFormat.signed(day?.deltaSeconds ?? 0), provisional: day?.provisional == true)
-            tile("today.balance", DurationFormat.signed(store.account?.balanceSeconds ?? 0), provisional: store.account?.provisional == true)
+        let target = day?.targetSeconds ?? 0
+        let progress = target > 0 ? Double(done) / Double(target) : 0
+        VStack(spacing: TT.Space.m) {
+            Card {
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
+                layout {
+                    ProgressRing(progress: progress, lineWidth: 12) {
+                        Text(verbatim: target > 0 ? "\(Int((progress * 100).rounded())) %" : "–")
+                            .font(TTFont.statSmall).foregroundStyle(TT.textPrimary)
+                    }
+                    .frame(width: 104, height: 104)
+                    VStack(alignment: .leading, spacing: TT.Space.xs) {
+                        Text("today.done").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                        Text(verbatim: DurationFormat.hoursMinutes(done))
+                            .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
+                        Text("today.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        if day?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .combine)
+            }
+            let tiles = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: TT.Space.m)) : AnyLayout(HStackLayout(spacing: TT.Space.m))
+            tiles {
+                StatTile("today.delta", value: DurationFormat.signed(day?.deltaSeconds ?? 0), chip: day?.provisional == true ? "common.provisional" : nil,
+                         tone: deltaTone(day?.deltaSeconds ?? 0), symbol: "plusminus")
+                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0),
+                         chip: store.account?.provisional == true ? "common.provisional" : nil, symbol: "clock.arrow.circlepath")
+            }
+            .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    private func tile(_ title: LocalizedStringKey, _ value: String, provisional: Bool = false) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.title2.weight(.semibold)).monospacedDigit()
-            Text(provisional ? "common.provisional" : " ").font(.caption2).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 14))
-        .accessibilityElement(children: .combine)
     }
 }
 
-struct SegmentRow: View {
-    let segment: Segment
+private struct TodaySegments: View {
+    let store: TodayStore
     let zone: TimeZone
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Image(systemName: segment.kind.symbol).frame(width: 24).foregroundStyle(.secondary).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(segment.kind.titleKey)
-                if let note = segment.note, !note.isEmpty {
-                    Text(note).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            SectionHeader("today.segments") { if !store.segments.isEmpty { Text(verbatim: "\(store.segments.count)") } }
+            if store.segments.isEmpty {
+                Card { EmptyState(symbol: "tray", title: "today.no_segments", message: "today.no_segments.hint") }
+            } else {
+                ListCard {
+                    ForEach(store.segments) { SegmentRow(segment: $0, zone: zone) }
                 }
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                if let end = segment.endedAt {
-                    Text("\(segment.startedAt.clockText(in: zone)) – \(end.clockText(in: zone))").monospacedDigit().fixedSize()
-                    Text(DurationFormat.hoursMinutes(Int(end.timeIntervalSince(segment.startedAt))))
-                        .fixedSize()
-                        .font(.caption).monospacedDigit().foregroundStyle(.secondary)
-                } else {
-                    Text("\(segment.startedAt.clockText(in: zone)) – …").monospacedDigit().fixedSize()
-                    Text("segment.running").font(.caption).foregroundStyle(.green)
-                }
-            }
-            if segment.needsReview {
-                Image(systemName: "exclamationmark.triangle").foregroundStyle(.orange)
-                    .accessibilityLabel(Text("segment.needs_review"))
             }
         }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .combine)
     }
 }

@@ -2,57 +2,24 @@
   "sourceLanguage": "de",
   "version": "1.0",
   "strings": {
-    "sidebar.today": {
+    "account.sign_out": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heute"
+            "value": "Abmelden"
           }
         }
       }
     },
-    "sidebar.time": {
+    "account.signed_in_as %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeit"
-          }
-        }
-      }
-    },
-    "menu.time": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeit"
-          }
-        }
-      }
-    },
-    "command.start": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timer starten"
-          }
-        }
-      }
-    },
-    "command.stop": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timer stoppen"
+            "value": "Angemeldet als %@"
           }
         }
       }
@@ -79,40 +46,447 @@
         }
       }
     },
-    "root.loading": {
+    "command.start": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lade …"
+            "value": "Timer starten"
           }
         }
       }
     },
-    "account.signed_in_as %@": {
+    "command.stop": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Angemeldet als %@"
+            "value": "Timer stoppen"
           }
         }
       }
     },
-    "account.sign_out": {
+    "common.cancel": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abmelden"
+            "value": "Abbrechen"
           }
         }
       }
     },
-    "recovery.title": {
+    "common.provisional": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorläufig"
+          }
+        }
+      }
+    },
+    "common.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "common.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sichern"
+          }
+        }
+      }
+    },
+    "editor.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende"
+          }
+        }
+      }
+    },
+    "editor.has_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende gesetzt"
+          }
+        }
+      }
+    },
+    "editor.kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art"
+          }
+        }
+      }
+    },
+    "editor.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "editor.reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grund der Änderung"
+          }
+        }
+      }
+    },
+    "editor.reason.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Grund wird mit der Korrektur gespeichert; die Rohzeiten bleiben erhalten."
+          }
+        }
+      }
+    },
+    "editor.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn"
+          }
+        }
+      }
+    },
+    "editor.time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit"
+          }
+        }
+      }
+    },
+    "hint.break_missing_30": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis: Bei mehr als 6 Stunden Arbeit sind insgesamt 30 Minuten Pause vorgesehen."
+          }
+        }
+      }
+    },
+    "hint.break_missing_45": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis: Bei mehr als 9 Stunden Arbeit sind insgesamt 45 Minuten Pause vorgesehen."
+          }
+        }
+      }
+    },
+    "hint.break_part_too_short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis: Pausenteile unter 15 Minuten zählen nicht."
+          }
+        }
+      }
+    },
+    "hint.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis zur Pause"
+          }
+        }
+      }
+    },
+    "hint.work_over_6h_without_break": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis: Mehr als 6 Stunden am Stück ohne Pause."
+          }
+        }
+      }
+    },
+    "kind.school": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schule"
+          }
+        }
+      }
+    },
+    "kind.travel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrt"
+          }
+        }
+      }
+    },
+    "kind.work": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeit"
+          }
+        }
+      }
+    },
+    "mark.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigestellt"
+          }
+        }
+      }
+    },
+    "mark.holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag"
+          }
+        }
+      }
+    },
+    "mark.school_credit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulgutschrift"
+          }
+        }
+      }
+    },
+    "mark.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krank"
+          }
+        }
+      }
+    },
+    "mark.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub"
+          }
+        }
+      }
+    },
+    "menu.time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit"
+          }
+        }
+      }
+    },
+    "menubar.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack öffnen"
+          }
+        }
+      }
+    },
+    "menubar.quit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack beenden"
+          }
+        }
+      }
+    },
+    "menubar.reload": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "menubar.running_since %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft seit %@"
+          }
+        }
+      }
+    },
+    "menubar.signed_out": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht angemeldet"
+          }
+        }
+      }
+    },
+    "menubar.today_total %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute: %1$@ von %2$@"
+          }
+        }
+      }
+    },
+    "module.automation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatik und Shortcuts"
+          }
+        }
+      }
+    },
+    "module.mcp": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-Zugang (MCP)"
+          }
+        }
+      }
+    },
+    "module.planning": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub und Planung"
+          }
+        }
+      }
+    },
+    "module.reports": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichtsheft"
+          }
+        }
+      }
+    },
+    "module.transfer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import und Export"
+          }
+        }
+      }
+    },
+    "module.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiteres Modul"
+          }
+        }
+      }
+    },
+    "recovery.add_passkey": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -134,7 +508,7 @@
         }
       }
     },
-    "recovery.add_passkey": {
+    "recovery.title": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -145,18 +519,128 @@
         }
       }
     },
-    "signin.title": {
+    "root.loading": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bei Timetrack anmelden"
+            "value": "Lade …"
           }
         }
       }
     },
-    "signin.server": {
+    "segment.needs_review": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte prüfen"
+          }
+        }
+      }
+    },
+    "segment.running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "läuft"
+          }
+        }
+      }
+    },
+    "settings.about": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Über Timetrack"
+          }
+        }
+      }
+    },
+    "settings.account": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konto"
+          }
+        }
+      }
+    },
+    "settings.change_server": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server wechseln"
+          }
+        }
+      }
+    },
+    "settings.license": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lizenz"
+          }
+        }
+      }
+    },
+    "settings.module.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aus"
+          }
+        }
+      }
+    },
+    "settings.module.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "an"
+          }
+        }
+      }
+    },
+    "settings.modules": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module"
+          }
+        }
+      }
+    },
+    "settings.modules.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module werden auf dem Server und im Konto geschaltet. Abgeschaltete Funktionen blendet die App aus."
+          }
+        }
+      }
+    },
+    "settings.server": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -167,79 +651,112 @@
         }
       }
     },
-    "signin.server.prompt": {
+    "settings.server_url": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "zeit.example.org"
+            "value": "Adresse"
           }
         }
       }
     },
-    "signin.mode": {
+    "settings.timezone": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Anmeldeart"
+            "value": "Zeitzone"
           }
         }
       }
     },
-    "signin.mode.passkey": {
+    "settings.version": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Passkey"
+            "value": "Version"
           }
         }
       }
     },
-    "signin.mode.recovery": {
+    "sidebar.settings": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wiederherstellung"
+            "value": "Einstellungen"
           }
         }
       }
     },
-    "signin.mode.developer": {
+    "sidebar.time": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entwickler"
+            "value": "Zeit"
           }
         }
       }
     },
-    "signin.passkey.hint": {
+    "sidebar.today": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Meldet dich mit einem auf diesem Mac gespeicherten Passkey an."
+            "value": "Heute"
           }
         }
       }
     },
-    "signin.passkey.button": {
+    "signin.brand": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mit Passkey anmelden"
+            "value": "Timetrack"
+          }
+        }
+      }
+    },
+    "signin.cookie": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitzungs-Cookie tt_session"
+          }
+        }
+      }
+    },
+    "signin.developer.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitzung übernehmen"
+          }
+        }
+      }
+    },
+    "signin.developer.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur für Entwicklung: Wert des Cookies tt_session aus einer Browser-Sitzung auf demselben Server einfügen."
           }
         }
       }
@@ -288,6 +805,83 @@
         }
       }
     },
+    "signin.mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anmeldeart"
+          }
+        }
+      }
+    },
+    "signin.mode.developer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entwickler"
+          }
+        }
+      }
+    },
+    "signin.mode.passkey": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkey"
+          }
+        }
+      }
+    },
+    "signin.mode.recovery": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellung"
+          }
+        }
+      }
+    },
+    "signin.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Server ist nicht erreichbar. Gespeicherte Anmeldedaten bleiben erhalten."
+          }
+        }
+      }
+    },
+    "signin.passkey.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit Passkey anmelden"
+          }
+        }
+      }
+    },
+    "signin.passkey.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldet dich mit einem auf diesem Mac gespeicherten Passkey an."
+          }
+        }
+      }
+    },
     "signin.proof.code": {
       "extractionState": "manual",
       "localizations": {
@@ -310,17 +904,6 @@
         }
       }
     },
-    "signin.recovery.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Wiederherstellung öffnet nur eine eingeschränkte Sitzung. Danach richtest du einen Passkey ein."
-          }
-        }
-      }
-    },
     "signin.recovery.button": {
       "extractionState": "manual",
       "localizations": {
@@ -332,46 +915,13 @@
         }
       }
     },
-    "signin.cookie": {
+    "signin.recovery.hint": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sitzungs-Cookie tt_session"
-          }
-        }
-      }
-    },
-    "signin.developer.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nur für Entwicklung: Wert des Cookies tt_session aus einer Browser-Sitzung auf demselben Server einfügen."
-          }
-        }
-      }
-    },
-    "signin.developer.button": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sitzung übernehmen"
-          }
-        }
-      }
-    },
-    "signin.offline": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Server ist nicht erreichbar. Gespeicherte Anmeldedaten bleiben erhalten."
+            "value": "Die Wiederherstellung öffnet nur eine eingeschränkte Sitzung. Danach richtest du einen Passkey ein."
           }
         }
       }
@@ -387,343 +937,68 @@
         }
       }
     },
-    "common.retry": {
+    "signin.server": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erneut versuchen"
+            "value": "Server"
           }
         }
       }
     },
-    "common.cancel": {
+    "signin.server.prompt": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Abbrechen"
+            "value": "zeit.example.org"
           }
         }
       }
     },
-    "common.save": {
+    "signin.tagline": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sichern"
+            "value": "Deine Arbeitszeit, ruhig erfasst."
           }
         }
       }
     },
-    "common.provisional": {
+    "signin.title": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "vorläufig"
+            "value": "Bei Timetrack anmelden"
           }
         }
       }
     },
-    "today.timer.accessibility %@": {
+    "time.add_to_day %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laufzeit %@"
+            "value": "Eintrag hinzufügen am %@"
           }
         }
       }
     },
-    "today.stop": {
+    "time.day_total %@ %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stoppen"
-          }
-        }
-      }
-    },
-    "today.start": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starten"
-          }
-        }
-      }
-    },
-    "today.not_running": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Zeitabschnitt läuft"
-          }
-        }
-      }
-    },
-    "today.kind": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Art"
-          }
-        }
-      }
-    },
-    "today.done": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erfasst"
-          }
-        }
-      }
-    },
-    "today.target": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soll"
-          }
-        }
-      }
-    },
-    "today.delta": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Differenz"
-          }
-        }
-      }
-    },
-    "today.balance": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitkonto"
-          }
-        }
-      }
-    },
-    "today.segments": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitabschnitte heute"
-          }
-        }
-      }
-    },
-    "today.no_segments": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch keine Einträge heute."
-          }
-        }
-      }
-    },
-    "segment.running": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "läuft"
-          }
-        }
-      }
-    },
-    "segment.needs_review": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bitte prüfen"
-          }
-        }
-      }
-    },
-    "kind.work": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeit"
-          }
-        }
-      }
-    },
-    "kind.travel": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fahrt"
-          }
-        }
-      }
-    },
-    "kind.school": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schule"
-          }
-        }
-      }
-    },
-    "hint.break_missing_30": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hinweis: Bei mehr als 6 Stunden Arbeit sind insgesamt 30 Minuten Pause vorgesehen."
-          }
-        }
-      }
-    },
-    "hint.break_missing_45": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hinweis: Bei mehr als 9 Stunden Arbeit sind insgesamt 45 Minuten Pause vorgesehen."
-          }
-        }
-      }
-    },
-    "hint.break_part_too_short": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hinweis: Pausenteile unter 15 Minuten zählen nicht."
-          }
-        }
-      }
-    },
-    "hint.work_over_6h_without_break": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hinweis: Mehr als 6 Stunden am Stück ohne Pause."
-          }
-        }
-      }
-    },
-    "hint.unknown": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hinweis zur Pause"
-          }
-        }
-      }
-    },
-    "mark.holiday": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feiertag"
-          }
-        }
-      }
-    },
-    "mark.vacation": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Urlaub"
-          }
-        }
-      }
-    },
-    "mark.sick": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Krank"
-          }
-        }
-      }
-    },
-    "mark.excused": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Freigestellt"
-          }
-        }
-      }
-    },
-    "mark.school_credit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schulgutschrift"
-          }
-        }
-      }
-    },
-    "time.no_entries": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Einträge"
+            "value": "%1$@ von %2$@"
           }
         }
       }
@@ -739,13 +1014,35 @@
         }
       }
     },
-    "time.void": {
+    "time.next_week": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stornieren"
+            "value": "Nächste Woche"
+          }
+        }
+      }
+    },
+    "time.no_entries": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Einträge"
+          }
+        }
+      }
+    },
+    "time.of_target %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von %@ Soll"
           }
         }
       }
@@ -761,17 +1058,6 @@
         }
       }
     },
-    "time.next_week": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nächste Woche"
-          }
-        }
-      }
-    },
     "time.this_week": {
       "extractionState": "manual",
       "localizations": {
@@ -779,6 +1065,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "time.today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
+          }
+        }
+      }
+    },
+    "time.void": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stornieren"
           }
         }
       }
@@ -805,29 +1113,51 @@
         }
       }
     },
-    "time.day_total %@ %@": {
+    "today.balance": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ von %2$@"
+            "value": "Zeitkonto"
           }
         }
       }
     },
-    "time.add_to_day %@": {
+    "today.delta": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eintrag hinzufügen am %@"
+            "value": "Differenz"
           }
         }
       }
     },
-    "editor.kind": {
+    "today.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erfasst"
+          }
+        }
+      }
+    },
+    "today.idle_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle eine Art und starte den Timer."
+          }
+        }
+      }
+    },
+    "today.kind": {
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -838,68 +1168,123 @@
         }
       }
     },
-    "editor.start": {
+    "today.no_segments": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beginn"
+            "value": "Noch keine Einträge heute."
           }
         }
       }
     },
-    "editor.has_end": {
+    "today.no_segments.hint": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ende gesetzt"
+            "value": "Sobald du den Timer startest, erscheinen deine Abschnitte hier."
           }
         }
       }
     },
-    "editor.end": {
+    "today.not_running": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ende"
+            "value": "Kein Zeitabschnitt läuft"
           }
         }
       }
     },
-    "editor.note": {
+    "today.of_target %@": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Notiz"
+            "value": "von %@ Soll"
           }
         }
       }
     },
-    "editor.reason": {
+    "today.running": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Grund der Änderung"
+            "value": "Läuft"
           }
         }
       }
     },
-    "editor.reason.hint": {
+    "today.segments": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Grund wird mit der Korrektur gespeichert; die Rohzeiten bleiben erhalten."
+            "value": "Zeitabschnitte heute"
+          }
+        }
+      }
+    },
+    "today.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten"
+          }
+        }
+      }
+    },
+    "today.stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoppen"
+          }
+        }
+      }
+    },
+    "today.target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll"
+          }
+        }
+      }
+    },
+    "today.timer.accessibility %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laufzeit %@"
+          }
+        }
+      }
+    },
+    "void.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Grund wird mit der Stornierung gespeichert."
           }
         }
       }
@@ -911,237 +1296,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eintrag stornieren"
-          }
-        }
-      }
-    },
-    "settings.server": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Server"
-          }
-        }
-      }
-    },
-    "settings.server_url": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adresse"
-          }
-        }
-      }
-    },
-    "settings.account": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Konto"
-          }
-        }
-      }
-    },
-    "settings.timezone": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitzone"
-          }
-        }
-      }
-    },
-    "settings.modules": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Module"
-          }
-        }
-      }
-    },
-    "settings.module.on": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "an"
-          }
-        }
-      }
-    },
-    "settings.module.off": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "aus"
-          }
-        }
-      }
-    },
-    "settings.modules.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Module werden auf dem Server und im Konto geschaltet. Abgeschaltete Funktionen blendet die App aus."
-          }
-        }
-      }
-    },
-    "settings.change_server": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Server wechseln"
-          }
-        }
-      }
-    },
-    "module.reports": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Berichtsheft"
-          }
-        }
-      }
-    },
-    "module.planning": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Urlaub und Planung"
-          }
-        }
-      }
-    },
-    "module.transfer": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Import und Export"
-          }
-        }
-      }
-    },
-    "module.automation": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatik und Shortcuts"
-          }
-        }
-      }
-    },
-    "module.mcp": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "KI-Zugang (MCP)"
-          }
-        }
-      }
-    },
-    "module.unknown": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weiteres Modul"
-          }
-        }
-      }
-    },
-    "menubar.running_since %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Läuft seit %@"
-          }
-        }
-      }
-    },
-    "menubar.today_total %@ %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute: %1$@ von %2$@"
-          }
-        }
-      }
-    },
-    "menubar.signed_out": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nicht angemeldet"
-          }
-        }
-      }
-    },
-    "menubar.open": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timetrack öffnen"
-          }
-        }
-      }
-    },
-    "menubar.reload": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktualisieren"
-          }
-        }
-      }
-    },
-    "menubar.quit": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timetrack beenden"
           }
         }
       }

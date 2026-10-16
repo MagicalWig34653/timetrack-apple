@@ -1,5 +1,6 @@
 import SwiftUI
 import Testing
+import TimetrackCore
 @testable import TimetrackDesign
 
 @MainActor
@@ -77,6 +78,35 @@ import Testing
     @Test func colorHexRoundTrip() {
         for hex in [UInt32(0x2563EB), 0x0EA5A4, 0xF97316, 0x52525B, 0x000000, 0xFFFFFF] {
             #expect(Color(hex: hex).ttHexString() == AccentDerivation.string(hex))
+        }
+    }
+}
+
+@Suite struct AccountAccentMappingTests {
+    @Test func presetIdsMatchTheContract() {
+        #expect(AccentChoice.allCases.map(\.rawValue) == AccentPreset.allCases.map(\.rawValue))
+        #expect(SchemeChoice.allCases.map(\.rawValue) == ColorSchemePreference.allCases.map(\.rawValue))
+    }
+
+    @Test func effectiveHexResolvesPresetsAndCustom() {
+        #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "orange", customHex: "#112233", scheme: "system")) == "#F97316")
+        #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "custom", customHex: "#112233", scheme: "system")) == "#112233")
+        #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "magenta", customHex: "#112233", scheme: "system")) == "#2563EB")
+    }
+
+    @Test func widgetInkKeepsContrastForEveryAccount­Preset() {
+        // Widgets and the complication derive their colours from the snapshot hex exactly like the app does.
+        for choice in AccentChoice.allCases {
+            let hex = AccentChoice.resolvedHex(choice: choice.rawValue, custom: "#808080")
+            let base = TTTheme(accentHex: hex).baseHex
+            let tokens = AccentDerivation.tokens(for: base)
+            for background in AccentDerivation.darkSurfaces.backgrounds {
+                #expect(AccentDerivation.contrast(tokens.inkDark, background) >= AccentDerivation.minTextContrast, "\(choice) dark ink")
+            }
+            for background in AccentDerivation.lightSurfaces.backgrounds {
+                #expect(AccentDerivation.contrast(tokens.inkLight, background) >= AccentDerivation.minTextContrast, "\(choice) light ink")
+            }
+            #expect(AccentDerivation.contrast(tokens.onFillLight, tokens.fillLight) >= AccentDerivation.minTextContrast, "\(choice) onFill")
         }
     }
 }

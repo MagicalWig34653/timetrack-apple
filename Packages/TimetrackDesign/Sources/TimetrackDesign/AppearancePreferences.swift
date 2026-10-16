@@ -1,4 +1,5 @@
 import SwiftUI
+import TimetrackCore
 
 /// In-app accent choices: the six hues of the app icon (`IconAccent`), a neutral graphite and a custom colour.
 /// The choice is independent from the app icon (changing one never changes the other).
@@ -68,11 +69,17 @@ public enum SchemeChoice: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// UserDefaults keys of the local (per device) appearance settings.
+/// UserDefaults keys of the local appearance cache. Since A8 the values are account settings (`AppearanceSync` reconciles
+/// them with the account); the cache stays the instant source for the views and the offline fallback.
 public enum AppearanceKeys {
-    public static let accent = "appearance.accent"
-    public static let customHex = "appearance.customHex"
-    public static let scheme = "appearance.scheme"
+    public static let accent = AppearanceStorageKeys.accent
+    public static let customHex = AppearanceStorageKeys.customHex
+    public static let scheme = AppearanceStorageKeys.scheme
+
+    /// Base accent `#RRGGBB` of a stored choice (preset hues are the native tokens, see `AccentChoice.presetHex`).
+    public static func effectiveHex(_ local: LocalAppearance) -> String {
+        AccentChoice.resolvedHex(choice: local.accent, custom: local.customHex)
+    }
 }
 
 /// Applies the stored accent and appearance mode to a subtree. Use once at every app root (also the macOS Settings scene).

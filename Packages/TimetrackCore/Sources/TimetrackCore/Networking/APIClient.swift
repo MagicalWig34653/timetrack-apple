@@ -2,7 +2,7 @@ import Foundation
 
 /// REST client for `/api/v1` (contract v0.10.3): cookie session `tt_session` plus `X-CSRF-Token` on every non-GET request.
 /// Personal bearer tokens are not accepted by REST (only `/mcp`), so native clients always use the cookie session.
-public actor APIClient {
+public actor APIClient: PreferencesService {
     public static let basePath = "/api/v1"
 
     public nonisolated let baseURL: URL
@@ -218,6 +218,13 @@ public actor APIClient {
     }
 
     public func getDay(_ date: LocalDay) async throws -> DayEvaluation { try await get("/time/days/\(date)") }
+
+    // MARK: - Preferences (account-level appearance, contract v0.14.0)
+
+    public func getPreferences() async throws -> Preferences { try await get("/me/preferences") }
+
+    /// Merge-patch: only the keys in `patch` change. Answers the full object.
+    public func updatePreferences(_ patch: PreferencesPatch) async throws -> Preferences { try await send(.patch, "/me/preferences", body: patch) }
 
     public func getTimeAccount(asOf: LocalDay? = nil) async throws -> TimeAccount {
         try await get("/time/account", query: asOf.map { [URLQueryItem(name: "asOf", value: $0)] } ?? [])

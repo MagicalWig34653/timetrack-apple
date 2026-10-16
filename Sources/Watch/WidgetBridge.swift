@@ -7,10 +7,11 @@ import WidgetKit
 /// Writes the complication's display state (App Group defaults) and asks WidgetKit to redraw.
 /// Only non-secret values are written; see `WidgetSnapshot`.
 enum WidgetBridge {
-    static func publish(running: Segment?, todaySeconds: Int, day: String, timeZone: String) {
+    static func publish(running: Segment?, todaySeconds: Int, day: String, timeZone: String, accentHex: String?, colorScheme: String?) {
         let snapshot = WidgetSnapshot(
             isRunning: running != nil, kind: running?.kind ?? .work, startedAt: running?.startedAt,
-            todaySeconds: todaySeconds, day: day, timeZone: timeZone, updatedAt: .now
+            todaySeconds: todaySeconds, day: day, timeZone: timeZone, updatedAt: .now,
+            accentHex: accentHex, colorScheme: colorScheme
         )
         let store = WidgetSnapshotStore()
         guard store.read() != snapshot.withUpdatedAt(store.read()?.updatedAt) else { return }

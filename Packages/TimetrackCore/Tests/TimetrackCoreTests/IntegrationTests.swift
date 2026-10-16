@@ -58,4 +58,37 @@ import Testing
 
         await auth.signOut()
     }
+
+    @Test func preferencesRoundTripAgainstRealBackend() async throws {
+        let env = ProcessInfo.processInfo.environment
+        let url = try AuthService.normalizeServerURL(try #require(env["TT_INTEGRATION_URL"]))
+        #expect(url.port != 18080, "never the live instance")
+        let cookie = try String(contentsOfFile: try #require(env["TT_INTEGRATION_COOKIE_FILE"]), encoding: .utf8)
+        let auth = AuthService(secrets: InMemorySecretStore(), transport: URLSessionTransport())
+        let context = try await auth.signInWithSessionCookie(server: url, cookieValue: cookie)
+        let client = context.client
+
+        // The session carries the same object as GET /me/preferences.
+        let initial = try await client.getPreferences()
+        #expect(context.session.account.preferences?.accent == initial.accent)
+
+        let saved = try await client.updatePreferences(PreferencesPatch(accent: "orange", colorScheme: "dark"))
+        #expect(saved.accent == "orange" && saved.scheme == .dark && saved.accentCustomHex == nil && saved.updatedAt != nil)
+        let custom = try await client.updatePreferences(PreferencesPatch(accent: "custom", colorScheme: "dark", customHex: .set("#ab12cd")))
+        #expect(custom.customHex == "#AB12CD")
+        // A preset clears the hex; merge-patch leaves untouched keys alone.
+        let preset = try await client.updatePreferences(PreferencesPatch(accent: "teal"))
+        #expect(preset.accent == "teal" && preset.accentCustomHex == nil && preset.scheme == .dark)
+        do {
+            _ = try await client.updatePreferences(PreferencesPatch(accent: "blue", customHex: .set("#AB12CD")))
+            Issue.record("a hex with a preset must be refused")
+        } catch let error as TimetrackError {
+            #expect(error.status == 400 && error.knownCode == .badRequest)
+        }
+        #expect(try await client.refreshSession().account.preferences?.accent == "teal")
+
+        // Leave the throwaway account at the defaults.
+        _ = try await client.updatePreferences(PreferencesPatch(accent: "blue", colorScheme: "system"))
+        await auth.signOut()
+    }
 }

@@ -20,6 +20,8 @@ struct TimetrackEntry: TimelineEntry {
     var balanceSeconds: Int? { snapshot?.balanceSeconds }
     var segments: [WidgetSegment] { snapshot?.segments(at: date) ?? [] }
     var zone: TimeZone { snapshot.flatMap { TimeZone(identifier: $0.timeZone) } ?? .current }
+    /// The account accent written by the app (default blue when absent); derivation as in the app.
+    var theme: TTTheme { TTTheme(accentHex: snapshot?.accentHex) }
     var isStale: Bool { snapshot?.isStale(at: date) ?? false }
 
     /// 0...1 progress of the finished time against the target; nil without a target.

@@ -17,9 +17,11 @@ struct SettingsView: View {
 }
 
 private struct AppearanceSettingsView: View {
+    @Environment(AppModel.self) private var model
+
     var body: some View {
         ScrollView {
-            AppearanceSettingsPage {
+            AppearanceSettingsPage(sync: model.appearance) {
                 FormSection("appearance.icon") {
                     // The Dock icon of a Mac app cannot be switched at runtime; it follows the default icon.
                     Label("appearance.icon.mac", systemImage: "info.circle")

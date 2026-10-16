@@ -63,7 +63,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gilt nur für diese App auf diesem Gerät und ist unabhängig vom App-Symbol. Schrift- und Schaltflächenfarben werden automatisch so angepasst, dass sie gut lesbar bleiben."
+            "value": "Gilt für dein Konto auf allen Geräten, auf denen du angemeldet bist, und ist unabhängig vom App-Symbol (das nur für dieses Gerät gilt). Schrift- und Schaltflächenfarben werden automatisch so angepasst, dass sie gut lesbar bleiben."
           }
         }
       }
@@ -162,7 +162,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das Dock-Symbol folgt dem Standardsymbol der App. Auf dem Mac lässt sich kein anderes Symbol wählen."
+            "value": "Das Dock-Symbol gilt nur für dieses Gerät und folgt dem Standardsymbol der App. Auf dem Mac lässt sich kein anderes Symbol wählen."
           }
         }
       }
@@ -250,7 +250,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "„System“ folgt der Einstellung des Geräts."
+            "value": "„System“ folgt der Einstellung des Geräts. Die Wahl gilt für dein Konto."
           }
         }
       }
@@ -273,6 +273,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "System"
+          }
+        }
+      }
+    },
+    "appearance.sync.failed %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht synchronisiert: %@"
+          }
+        }
+      }
+    },
+    "appearance.sync.local": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur auf diesem Gerät gespeichert"
+          }
+        }
+      }
+    },
+    "appearance.sync.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur auf diesem Gerät, wird gesendet, sobald du online bist"
+          }
+        }
+      }
+    },
+    "appearance.sync.synced": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit deinem Konto synchronisiert"
+          }
+        }
+      }
+    },
+    "appearance.sync.syncing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird mit deinem Konto synchronisiert …"
           }
         }
       }

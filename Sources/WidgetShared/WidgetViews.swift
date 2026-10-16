@@ -31,11 +31,11 @@ struct TimetrackWidgetView: View {
 
 // MARK: - Shared pieces
 
-private let startTint = TTTheme().accent
-
 /// Start/stop pill. Interactive on iOS (the intent runs without opening the app); on macOS the widget is display only.
 private struct TimerActionButton: View {
     let running: Bool
+    /// Account accent from the snapshot; the start pill uses its fill and the matching on-accent text colour (>= 4.5:1).
+    let theme: TTTheme
     var compact = false
 
     var body: some View {
@@ -59,11 +59,11 @@ private struct TimerActionButton: View {
             if !compact { (running ? wtext("w.stop") : wtext("w.start")).lineLimit(1) }
         }
         .font(.system(.footnote, design: .rounded, weight: .semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(running ? Color.white : theme.onAccent)
         .padding(.horizontal, compact ? 10 : 14)
         .padding(.vertical, 7)
         .frame(minWidth: compact ? 34 : nil)
-        .background(running ? TT.dangerFill : startTint, in: .capsule)
+        .background(running ? TT.dangerFill : theme.accent, in: .capsule)
     }
 }
 
@@ -145,7 +145,7 @@ private struct DayRing: View {
     var lineWidth: CGFloat = 9
 
     var body: some View {
-        ProgressRing(progress: entry.progress ?? 0, lineWidth: lineWidth, tint: entry.progress.map { $0 >= 1 ? TT.success : startTint } ?? TT.textTertiary) {
+        ProgressRing(progress: entry.progress ?? 0, lineWidth: lineWidth, tint: entry.progress.map { $0 >= 1 ? TT.success : entry.theme.accent } ?? TT.textTertiary) {
             VStack(spacing: 0) {
                 TodayTotalText(entry: entry)
                     .font(.system(.title3, design: .rounded, weight: .bold)).monospacedDigit()
@@ -183,7 +183,7 @@ struct SmallWidget: View {
                         .foregroundStyle(TT.textPrimary)
                     wtext("w.since \(since.widgetClock(in: entry.zone))").font(.system(.caption, weight: .medium)).foregroundStyle(TT.textSecondary)
                     Spacer(minLength: 2)
-                    HStack { TimerActionButton(running: true); Spacer(minLength: 0) }
+                    HStack { TimerActionButton(running: true, theme: entry.theme); Spacer(minLength: 0) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             } else {
@@ -191,7 +191,7 @@ struct SmallWidget: View {
                     HStack(alignment: .top) {
                         wtext("w.idle").font(.system(.footnote, weight: .semibold)).foregroundStyle(TT.textSecondary)
                         Spacer(minLength: 0)
-                        TimerActionButton(running: false, compact: true)
+                        TimerActionButton(running: false, theme: entry.theme, compact: true)
                     }
                     DayRing(entry: entry, lineWidth: 8)
                     StaleNote(entry: entry)
@@ -241,14 +241,14 @@ struct MediumContent: View {
                                 .font(.system(size: 32, weight: .bold, design: .rounded)).minimumScaleFactor(0.5).lineLimit(1)
                             wtext("w.since \(since.widgetClock(in: entry.zone))").font(.system(.caption, weight: .medium)).foregroundStyle(TT.textSecondary)
                             Spacer(minLength: 2)
-                            HStack { TimerActionButton(running: true); Spacer(minLength: 0) }
+                            HStack { TimerActionButton(running: true, theme: entry.theme); Spacer(minLength: 0) }
                         }
                     } else {
                         VStack(alignment: .leading, spacing: 4) {
                             wtext("w.idle").font(.system(.footnote, weight: .semibold)).foregroundStyle(TT.textSecondary)
                             DayRing(entry: entry, lineWidth: 7).frame(maxWidth: .infinity, maxHeight: 76)
                             Spacer(minLength: 2)
-                            HStack { TimerActionButton(running: false); Spacer(minLength: 0) }
+                            HStack { TimerActionButton(running: false, theme: entry.theme); Spacer(minLength: 0) }
                         }
                     }
                 }

@@ -6,12 +6,27 @@ public struct Account: Codable, Sendable, Hashable, Identifiable {
     public let handle: String
     public let displayName: String
     public let role: Role
+    /// Account-level appearance (`account.preferences` in the session response); nil from servers older than contract v0.14.0.
+    public let preferences: Preferences?
 
-    public init(id: UUID, handle: String, displayName: String, role: Role) {
+    public init(id: UUID, handle: String, displayName: String, role: Role, preferences: Preferences? = nil) {
         self.id = id
         self.handle = handle
         self.displayName = displayName
         self.role = role
+        self.preferences = preferences
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, handle, displayName, role, preferences }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        handle = try c.decode(String.self, forKey: .handle)
+        displayName = try c.decode(String.self, forKey: .displayName)
+        role = try c.decode(Role.self, forKey: .role)
+        // Appearance is cosmetic: a malformed block must never break signing in.
+        preferences = (try? c.decodeIfPresent(Preferences.self, forKey: .preferences)) ?? nil
     }
 }
 

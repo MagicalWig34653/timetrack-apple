@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import WidgetKit
 
 /// Everything a complication needs to draw: the shared non-secret snapshot and the moment it is rendered for.
@@ -9,6 +10,8 @@ struct ComplicationEntry: TimelineEntry {
 
     var runningSince: Date? { snapshot.isRunning ? snapshot.startedAt : nil }
     var todaySeconds: Int? { snapshot.todaySeconds(at: date) }
+    /// Account accent from the snapshot, with the same derivation as in the apps; watch faces are dark, so the dark `ink` is used.
+    var accentInk: Color { Color(hex: AccentDerivation.tokens(for: TTTheme(accentHex: snapshot.accentHex).baseHex).inkDark) }
 }
 
 /// Complication strings live in their own table so the watch app can include them for the debug gallery without a name clash.
@@ -68,7 +71,7 @@ struct ComplicationView: View {
             AccessoryWidgetBackground()
             VStack(spacing: 0) {
                 Image(systemName: entry.runningSince == nil ? "pause.fill" : entry.snapshot.kind.complicationSymbol)
-                    .font(.caption2)
+                    .font(.caption2).foregroundStyle(entry.accentInk)
                 if let since = entry.runningSince {
                     LiveTimer(since: since).font(.system(size: 13, weight: .semibold, design: .rounded)).minimumScaleFactor(0.5).lineLimit(1)
                 } else {
@@ -84,7 +87,7 @@ struct ComplicationView: View {
     private var rectangular: some View {
         HStack(spacing: 6) {
             Image(systemName: entry.runningSince == nil ? "pause.circle" : entry.snapshot.kind.complicationSymbol)
-                .font(.title3).widgetAccentable()
+                .font(.title3).foregroundStyle(entry.accentInk).widgetAccentable()
             VStack(alignment: .leading, spacing: 1) {
                 if let since = entry.runningSince {
                     loc(entry.snapshot.kind.complicationTitle).font(.caption2).foregroundStyle(.secondary)

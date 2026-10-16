@@ -128,30 +128,52 @@ public struct SegmentRowCell: View {
         self.needsReview = needsReview
     }
 
-    public var body: some View {
-        HStack(alignment: .center, spacing: TT.Space.m) {
-            KindGlyph(symbol: kind.ttSymbol, tint: kind.ttTint)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: timeRange).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
-                HStack(spacing: 6) {
-                    Text(kind.ttTitle).foregroundStyle(kind.ttTint)
-                    if let note, !note.isEmpty {
-                        Text(verbatim: "·").foregroundStyle(TT.textTertiary)
-                        Text(verbatim: note).foregroundStyle(TT.textSecondary).lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
-                    }
-                }
-                .font(TTFont.meta)
+    private var kindLine: some View {
+        HStack(spacing: 6) {
+            Text(kind.ttTitle).foregroundStyle(kind.ttTint)
+            if let note, !note.isEmpty {
+                Text(verbatim: "·").foregroundStyle(TT.textTertiary)
+                Text(verbatim: note).foregroundStyle(TT.textSecondary).lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
             }
-            Spacer(minLength: TT.Space.s)
-            VStack(alignment: .trailing, spacing: 4) {
-                if isRunning {
-                    StatusChip("segment.running", tone: .success, symbol: "circle.fill")
-                } else if let duration {
-                    Text(verbatim: duration).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
+        }
+        .font(TTFont.meta)
+    }
+
+    private var trailing: some View {
+        VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 4) {
+            if isRunning {
+                StatusChip("segment.running", tone: .success, symbol: "circle.fill")
+            } else if let duration {
+                Text(verbatim: duration).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
+            }
+            if needsReview {
+                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(TT.warning).imageScale(.small)
+                    .accessibilityLabel(Text("segment.needs_review"))
+            }
+        }
+    }
+
+    public var body: some View {
+        Group {
+            if typeSize.isAccessibilitySize {
+                // Everything stacked: nothing competes for width at accessibility sizes.
+                VStack(alignment: .leading, spacing: TT.Space.s) {
+                    HStack(spacing: TT.Space.m) {
+                        KindGlyph(symbol: kind.ttSymbol, tint: kind.ttTint)
+                        Text(verbatim: timeRange).font(TTFont.numeral).foregroundStyle(TT.textPrimary).fixedSize(horizontal: false, vertical: true)
+                    }
+                    kindLine
+                    trailing
                 }
-                if needsReview {
-                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(TT.warning).imageScale(.small)
-                        .accessibilityLabel(Text("segment.needs_review"))
+            } else {
+                HStack(alignment: .center, spacing: TT.Space.m) {
+                    KindGlyph(symbol: kind.ttSymbol, tint: kind.ttTint)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: timeRange).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
+                        kindLine
+                    }
+                    Spacer(minLength: TT.Space.s)
+                    trailing
                 }
             }
         }

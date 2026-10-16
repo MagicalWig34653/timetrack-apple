@@ -26,3 +26,6 @@ Sitzungsübergabe vom iPhone per WatchConnectivity (Kern: `Sync/`). Zahlen und G
 Nachtrag 16.10.2026 (Paket A5, Branch a5-watch-extras, nicht gemergt): Typauswahl auf der Uhr, WidgetKit-Komplikation (App Group group.de.linolaske.timetrack, nur nicht geheimer Snapshot),
 iPhone-Knopf "Sitzung an Uhr senden", Dynamic-Type-Korrektur auf Heute. 69 Kerntests bestanden; Watch-, iOS- (mit Widget) und macOS-Build erfolgreich (CODE_SIGNING_ALLOWED=NO).
 Signierung mit App Group und echte Komplikation auf dem Zifferblatt nicht geprüft. Details: docs/handoffs/A5.md.
+
+Nachtrag 16.10.2026 (Paket A6, Branch a6-design, nicht gemergt): Designpass mit neuem Paket `Packages/TimetrackDesign` (Tokens, Komponenten), neu gestaltete iOS/iPadOS-, macOS- und Watch-Heute-Oberflächen, App-Icon (iOS/macOS/watchOS) und Startfarbe.
+69 Kerntests + 3 Design-Tests bestanden; iOS-, Watch- und macOS-Build erfolgreich (CODE_SIGNING_ALLOWED=NO). Screenshots unter docs/screenshots/; macOS nur als Fensterabbild gesehen, Watch nur Leerlauf. Details und Schwächen: docs/handoffs/A6.md, docs/DESIGN-NATIVE.md.

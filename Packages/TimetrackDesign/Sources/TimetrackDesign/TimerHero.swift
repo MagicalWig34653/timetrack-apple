@@ -6,6 +6,7 @@ public struct KindSelector: View {
     @Binding private var selection: SegmentKind
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.colorScheme) private var scheme
+    @ScaledMetric(relativeTo: .subheadline) private var iconWidth: CGFloat = 20
 
     public init(selection: Binding<SegmentKind>) { _selection = selection }
 
@@ -15,8 +16,8 @@ public struct KindSelector: View {
             ForEach(SegmentKind.selectable, id: \.self) { kind in
                 let selected = selection == kind
                 Button { selection = kind } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: kind.ttSymbol).frame(width: 20, height: 20)
+                    HStack(spacing: 8) {
+                        Image(systemName: kind.ttSymbol).frame(minWidth: iconWidth)
                         Text(kind.ttTitle)
                     }
                         .font(TTFont.label)

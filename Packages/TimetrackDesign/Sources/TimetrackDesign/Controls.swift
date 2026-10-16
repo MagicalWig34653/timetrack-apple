@@ -10,7 +10,7 @@ public struct TTPrimaryButtonStyle: ButtonStyle {
     public init(danger: Bool = false) { self.danger = danger }
 
     public func makeBody(configuration: Configuration) -> some View {
-        let fill = danger ? TT.danger : theme.accent
+        let fill = danger ? TT.dangerFill : theme.accent
         configuration.label
             .font(.system(.body, weight: .semibold))
             .foregroundStyle(.white)

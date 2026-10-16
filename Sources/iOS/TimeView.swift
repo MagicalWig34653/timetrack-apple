@@ -117,6 +117,7 @@ private struct TimeContent: View {
 /// Week navigation + total with progress against the week's target.
 private struct WeekHeader: View {
     let store: TimeListStore
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let done = store.weekEvaluatedSeconds
@@ -130,6 +131,7 @@ private struct WeekHeader: View {
                     VStack(spacing: 2) {
                         Text(verbatim: weekRangeText(start: store.weekStart, end: store.weekEnd, calendar: store.calendar))
                             .font(TTFont.cardTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center)
+                            .lineLimit(2).minimumScaleFactor(0.7)
                         Button("time.this_week") { Task { await store.goToCurrentWeek() } }.font(TTFont.meta)
                     }
                     Spacer(minLength: 0)
@@ -138,10 +140,11 @@ private struct WeekHeader: View {
                 }
                 .buttonStyle(.borderless)
                 ProgressBar(progress: target > 0 ? Double(done) / Double(target) : 0)
-                HStack(alignment: .firstTextBaseline) {
-                    Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary)
+                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
+                layout {
+                    Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.5)
                     Text("time.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                    Spacer()
+                    if !typeSize.isAccessibilitySize { Spacer() }
                     if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
                 }
                 .accessibilityElement(children: .combine)
@@ -203,7 +206,8 @@ private struct DayHeader: View {
 
     var body: some View {
         let done = day.evaluatedWorkSeconds + day.creditSeconds
-        HStack(alignment: .center, spacing: TT.Space.s) {
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .center, spacing: TT.Space.s))
+        layout {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
@@ -211,9 +215,9 @@ private struct DayHeader: View {
                 }
                 if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
             }
-            Spacer(minLength: TT.Space.xs)
+            if !typeSize.isAccessibilitySize { Spacer(minLength: TT.Space.xs) }
             if day.targetSeconds > 0 || done > 0 {
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
                     Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
                         .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
                     if day.deltaSeconds != 0 {

@@ -74,6 +74,8 @@ public enum TT {
     public static let success = Color(light: 0x15803D, dark: 0x4ADE80)
     public static let warning = Color(light: 0xB45309, dark: 0xFBBF24)
     public static let danger = Color(light: 0xDC2626, dark: 0xF87171)
+    /// Solid fill behind white text (same in both modes; 4.8:1 against white).
+    public static let dangerFill = Color(hex: 0xDC2626)
 
     // Kinds: segments (PWA DayTimeline: sky / amber / violet) and absences (PWA ABSENCE_CLASSES).
     public static let kindWork = Color(light: 0x0284C7, dark: 0x38BDF8)

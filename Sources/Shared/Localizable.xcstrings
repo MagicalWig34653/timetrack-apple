@@ -1,0 +1,7 @@
+{
+  "sourceLanguage" : "de",
+  "version" : "1.0",
+  "strings" : {
+    "placeholder.description %@" : { "extractionState" : "manual", "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Die iOS-Oberfläche folgt. Der gemeinsame Kern ist eingebunden (Beispiel: Tages-Soll %@)." } } } }
+  }
+}

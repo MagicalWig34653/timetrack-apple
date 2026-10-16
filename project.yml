@@ -1,31 +1,73 @@
 name: Timetrack
 options:
-  bundleIdPrefix: app.timetrack
+  bundleIdPrefix: de.linolaske
+  developmentLanguage: de
+packages:
+  TimetrackCore:
+    path: Packages/TimetrackCore
 settings:
   base:
     SWIFT_VERSION: "6.0"
     GENERATE_INFOPLIST_FILE: YES
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: J2DU2P47XW
     MARKETING_VERSION: "0.0.1"
     CURRENT_PROJECT_VERSION: 1
+    SWIFT_EMIT_LOC_STRINGS: YES
 targets:
   TimetrackMac:
     type: application
     platform: macOS
     deploymentTarget: "27.0"
-    sources: [Sources/Shared]
+    sources: [Sources/Mac]
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+      - package: TimetrackCore
+        product: TimetrackStores
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.timetrack.mac
+        # Universal purchase: iOS and macOS share one bundle ID. A future watchOS app uses de.linolaske.timetrack.watchkitapp.
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
+        PRODUCT_NAME: Timetrack
         ENABLE_APP_SANDBOX: YES
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+        ENABLE_HARDENED_RUNTIME: YES
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+    info:
+      path: Sources/Mac/Info.plist
+      properties:
+        # Plain http is allowed only for local networking (development servers on localhost / the LAN).
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
   TimetrackIOS:
     type: application
     platform: iOS
     deploymentTarget: "27.0"
     sources: [Sources/Shared]
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+      - package: TimetrackCore
+        product: TimetrackStores
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.timetrack.ios
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
+        PRODUCT_NAME: Timetrack
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    info:
+      path: Sources/Shared/Info.plist
+      properties:
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+schemes:
+  TimetrackMac:
+    build:
+      targets: { TimetrackMac: all }
+    run: { config: Debug }
+  TimetrackIOS:
+    build:
+      targets: { TimetrackIOS: all }
+    run: { config: Debug }

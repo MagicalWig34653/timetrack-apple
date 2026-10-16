@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Closed ring, centre (512,512), radius 262, stroke 92; vertical gradient light (top) -> strong (bottom). -->
+  <defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="204" x2="0" y2="820">
+    <stop offset="0" stop-color="#FEB692"/><stop offset="1" stop-color="#F97316"/></linearGradient></defs>
+  <circle cx="512" cy="512" r="262" fill="none" stroke="url(#g)" stroke-width="92"/>
+</svg>

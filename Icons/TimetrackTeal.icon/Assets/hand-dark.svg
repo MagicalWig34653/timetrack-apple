@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- Pointer (Zeiger): clock hand from the hub towards ~2 o'clock, ends inside the arc. Accent #2DD4BF. -->
-  <line x1="512" y1="540" x2="652" y2="338" stroke="#2DD4BF" stroke-width="60" stroke-linecap="round"/>
-  <circle cx="512" cy="540" r="64" fill="#2DD4BF"/>
-</svg>

@@ -1,37 +1,42 @@
 {
   "fill": {
-    "solid": "srgb:0.95686,0.95686,0.96078,1.00000"
+    "linear-gradient": [
+      "srgb:0.12157,0.16471,0.30196,1.00000",
+      "srgb:0.03922,0.05882,0.13333,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
   },
   "groups": [
     {
       "layers": [
         {
-          "name": "Hand",
-          "image-name": "hand.svg",
-          "glass": true,
+          "name": "Hands",
+          "image-name": "hands.svg",
+          "glass": false,
           "image-name-specializations": [
             {
-              "appearance": "dark",
-              "value": "hand-dark.svg"
-            },
-            {
               "appearance": "tinted",
-              "value": "hand-tinted.svg"
+              "value": "hands-tinted.svg"
             }
           ]
         },
         {
-          "name": "Arc",
-          "image-name": "arc.svg",
-          "glass": true,
+          "name": "Ring",
+          "image-name": "ring.svg",
+          "glass": false,
           "image-name-specializations": [
             {
-              "appearance": "dark",
-              "value": "arc-dark.svg"
-            },
-            {
               "appearance": "tinted",
-              "value": "arc-tinted.svg"
+              "value": "ring-tinted.svg"
             }
           ]
         }
@@ -53,13 +58,5 @@
       "watchOS"
     ],
     "squares": "shared"
-  },
-  "fill-specializations": [
-    {
-      "appearance": "dark",
-      "value": {
-        "solid": "srgb:0.09412,0.09412,0.10588,1.00000"
-      }
-    }
-  ]
+  }
 }

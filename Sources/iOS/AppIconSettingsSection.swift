@@ -1,35 +1,51 @@
 import SwiftUI
 import UIKit
 
-/// Self-contained settings section to choose the app icon (primary or alternate).
-/// Alternate icon names match the `.icon` bundles in Icons/ (see docs/ICONS.md).
-/// Previews are small SwiftUI approximations of the icons (arc + pointer on a surface).
-struct AppIconPickerSection: View {
-    private struct Choice: Identifiable {
-        let id: String?          // nil = primary icon
-        let title: String
-        let surface: Color
-        let arc: Color
-        let hand: Color
-    }
+/// Accent colours of the app icon. Single source for the icon picker; the lead may later also use
+/// them to drive the in-app accent colour (hex values are documented in docs/ICONS.md and generated
+/// from `scripts/icons/build_icons.py`, keep the three in sync).
+struct IconAccent: Identifiable, Equatable {
+    /// Name of the alternate icon bundle; nil is the primary icon (Blau).
+    let iconName: String?
+    /// Name of the preview image set in `IconPreviews.xcassets`.
+    let previewAsset: String
+    /// German label.
+    let title: String
+    /// Stronger tone (bottom of the ring gradient), sRGB hex.
+    let strongHex: UInt32
+    /// Lighter tone (top of the ring gradient), sRGB hex.
+    let lightHex: UInt32
+    /// False for the light-surface variant, which is not a plain accent colour.
+    let isAccent: Bool
 
-    private static let choices: [Choice] = [
-        Choice(id: nil, title: String(localized: "Standard", defaultValue: "Standard"),
-               surface: Color(red: 0.957, green: 0.957, blue: 0.961), arc: Color(red: 0.631, green: 0.631, blue: 0.667),
-               hand: Color(red: 0.145, green: 0.388, blue: 0.922)),
-        Choice(id: "TimetrackLight", title: String(localized: "Hell", defaultValue: "Hell"),
-               surface: Color(red: 0.98, green: 0.98, blue: 0.98), arc: Color(red: 0.831, green: 0.831, blue: 0.847),
-               hand: Color(red: 0.145, green: 0.388, blue: 0.922)),
-        Choice(id: "TimetrackDark", title: String(localized: "Dunkel", defaultValue: "Dunkel"),
-               surface: Color(red: 0.094, green: 0.094, blue: 0.106), arc: Color(red: 0.322, green: 0.322, blue: 0.357),
-               hand: Color(red: 0.231, green: 0.510, blue: 0.965)),
-        Choice(id: "TimetrackMono", title: String(localized: "Kontrast", defaultValue: "Kontrast"),
-               surface: .black, arc: .white, hand: .white),
-        Choice(id: "TimetrackTeal", title: String(localized: "Petrol", defaultValue: "Petrol"),
-               surface: Color(red: 0.957, green: 0.957, blue: 0.961), arc: Color(red: 0.631, green: 0.631, blue: 0.667),
-               hand: Color(red: 0.051, green: 0.580, blue: 0.533)),
+    var id: String { iconName ?? "primary" }
+    var strong: Color { Color(hex: strongHex) }
+    var light: Color { Color(hex: lightHex) }
+
+    static let accents: [IconAccent] = [
+        IconAccent(iconName: nil, previewAsset: "IconPreview-blue", title: "Blau", strongHex: 0x2563EB, lightHex: 0x5E93FC, isAccent: true),
+        IconAccent(iconName: "TimetrackTeal", previewAsset: "IconPreview-teal", title: "Türkis", strongHex: 0x0EA5A4, lightHex: 0x61CDCB, isAccent: true),
+        IconAccent(iconName: "TimetrackViolet", previewAsset: "IconPreview-violet", title: "Violett", strongHex: 0x7C3AED, lightHex: 0x9D79FE, isAccent: true),
+        IconAccent(iconName: "TimetrackGreen", previewAsset: "IconPreview-green", title: "Grün", strongHex: 0x16A34A, lightHex: 0x60CA79, isAccent: true),
+        IconAccent(iconName: "TimetrackOrange", previewAsset: "IconPreview-orange", title: "Orange", strongHex: 0xF97316, lightHex: 0xFEB692, isAccent: true),
+        IconAccent(iconName: "TimetrackPink", previewAsset: "IconPreview-pink", title: "Rosa", strongHex: 0xEC4899, lightHex: 0xFE91BF, isAccent: true),
     ]
 
+    /// Everything the picker offers, in display order.
+    static let all: [IconAccent] = accents
+}
+
+extension Color {
+    fileprivate init(hex: UInt32) {
+        self.init(red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255,
+                  blue: Double(hex & 0xFF) / 255)
+    }
+}
+
+/// Self-contained settings section to choose the app icon (primary or alternate).
+/// UIKit cannot load alternate icon images, so the tiles use preview images shipped in
+/// `IconPreviews.xcassets` (rendered from the `.icon` files by the generator script).
+struct AppIconPickerSection: View {
     @State private var current: String? = UIApplication.shared.alternateIconName
     @State private var errorMessage: String?
 
@@ -37,11 +53,11 @@ struct AppIconPickerSection: View {
         Section {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    ForEach(Self.choices) { choice in
+                    ForEach(IconAccent.all) { choice in
                         Button { select(choice) } label: { tile(choice) }
                             .buttonStyle(.plain)
                             .accessibilityLabel(choice.title)
-                            .accessibilityAddTraits(choice.id == current ? [.isSelected] : [])
+                            .accessibilityAddTraits(choice.iconName == current ? [.isSelected] : [])
                     }
                 }
                 .padding(.vertical, 4)
@@ -54,58 +70,44 @@ struct AppIconPickerSection: View {
         }
     }
 
-    private func tile(_ choice: Choice) -> some View {
-        let selected = choice.id == current
+    private func tile(_ choice: IconAccent) -> some View {
+        let selected = choice.iconName == current
         return VStack(spacing: 6) {
-            IconThumbnail(surface: choice.surface, arc: choice.arc, hand: choice.hand)
-                .frame(width: 64, height: 64)
+            Image(choice.previewAsset)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .padding(3)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 15, style: .continuous)
-                        .stroke(selected ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1)
+                    RoundedRectangle(cornerRadius: 17, style: .continuous)
+                        .stroke(selected ? choice.strong : Color.secondary.opacity(0.25), lineWidth: selected ? 3 : 1)
                 )
+                .overlay(alignment: .bottomTrailing) {
+                    if selected {
+                        Image(systemName: "checkmark.circle.fill")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, choice.strong)
+                            .font(.system(size: 20))
+                            .offset(x: 4, y: 4)
+                    }
+                }
             Text(choice.title).font(.caption)
-                .foregroundStyle(selected ? Color.accentColor : Color.secondary)
+                .foregroundStyle(selected ? Color.primary : Color.secondary)
         }
     }
 
-    private func select(_ choice: Choice) {
-        guard UIApplication.shared.supportsAlternateIcons, choice.id != current else { return }
-        UIApplication.shared.setAlternateIconName(choice.id) { error in
+    private func select(_ choice: IconAccent) {
+        guard UIApplication.shared.supportsAlternateIcons, choice.iconName != current else { return }
+        UIApplication.shared.setAlternateIconName(choice.iconName) { error in
             DispatchQueue.main.async {
                 if let error {
                     errorMessage = String(localized: "Symbol konnte nicht gewechselt werden: \(error.localizedDescription)")
                 } else {
                     errorMessage = nil
-                    current = choice.id
+                    current = choice.iconName
                 }
             }
         }
-    }
-}
-
-/// Approximation of the icon artwork (see Icons/source/*.svg), drawn on a 1024 grid.
-private struct IconThumbnail: View {
-    let surface: Color, arc: Color, hand: Color
-
-    var body: some View {
-        GeometryReader { geo in
-            let k = geo.size.width / 1024
-            ZStack {
-                surface
-                Path { p in
-                    p.addArc(center: CGPoint(x: 512 * k, y: 540 * k), radius: 280 * k,
-                             startAngle: .degrees(120), endAngle: .degrees(60), clockwise: false)
-                }
-                .stroke(arc, style: StrokeStyle(lineWidth: 52 * k, lineCap: .round))
-                Path { p in
-                    p.move(to: CGPoint(x: 512 * k, y: 540 * k))
-                    p.addLine(to: CGPoint(x: 652 * k, y: 338 * k))
-                }
-                .stroke(hand, style: StrokeStyle(lineWidth: 60 * k, lineCap: .round))
-                Circle().fill(hand).frame(width: 128 * k, height: 128 * k)
-                    .position(x: 512 * k, y: 540 * k)
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 }

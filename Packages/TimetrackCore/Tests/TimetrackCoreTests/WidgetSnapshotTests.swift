@@ -19,7 +19,7 @@ import Testing
     @Test func carriesNoSecretsOrAccountData() throws {
         let data = try JSONEncoder().encode(WidgetSnapshot.empty)
         let keys = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any]).keys
-        #expect(Set(keys).isSubset(of: ["isRunning", "kind", "startedAt", "todaySeconds", "day", "timeZone", "updatedAt"]))
+        #expect(Set(keys).isSubset(of: ["isRunning", "kind", "startedAt", "todaySeconds", "day", "timeZone", "updatedAt", "targetSeconds", "balanceSeconds", "segments"]))
     }
 
     @Test func staleTotalIsHiddenOnAnotherDay() {
@@ -40,5 +40,37 @@ import Testing
         let store = WidgetSnapshotStore(suiteName: nil)
         store.write(.empty)
         #expect(store.read() == nil)
+    }
+
+    @Test func olderSnapshotWithoutNewFieldsStillDecodes() throws {
+        let json = #"{"isRunning":false,"kind":"work","todaySeconds":60,"day":"2026-10-16","timeZone":"Europe\/Berlin","updatedAt":1800000000}"#
+        let snapshot = try JSONDecoder().decode(WidgetSnapshot.self, from: Data(json.utf8))
+        #expect(snapshot.targetSeconds == nil && snapshot.balanceSeconds == nil && snapshot.segments == nil)
+        #expect(snapshot.todaySeconds == 60)
+    }
+
+    @Test func makeBuildsFromDayAccountAndSegments() throws {
+        let zone = try #require(TimeZone(identifier: "Europe/Berlin"))
+        let now = Date(timeIntervalSince1970: 1_792_150_000)
+        let first = Segment(id: UUID(), kind: .work, startedAt: now.addingTimeInterval(-7200), endedAt: now.addingTimeInterval(-3600))
+        let voided = Segment(id: UUID(), kind: .travel, startedAt: now.addingTimeInterval(-9000), endedAt: now.addingTimeInterval(-8000), voided: true)
+        let running = Segment(id: UUID(), kind: .school, startedAt: now.addingTimeInterval(-600))
+        let day = DayEvaluation(date: "2026-10-16", targetSeconds: 28_800, evaluatedWorkSeconds: 3600, creditSeconds: 600)
+        let account = TimeAccount(asOf: "2026-10-16", balanceSeconds: -1800)
+        let snapshot = WidgetSnapshot.make(running: running, day: day, account: account, segments: [running, first, voided], zone: zone, now: now)
+        #expect(snapshot.isRunning && snapshot.kind == .school)
+        #expect(snapshot.todaySeconds == 4200 && snapshot.targetSeconds == 28_800 && snapshot.balanceSeconds == -1800)
+        #expect(snapshot.segments?.map(\.kind) == [.work, .school])
+        #expect(snapshot.timeZone == "Europe/Berlin")
+    }
+
+    @Test func segmentListIsCappedAndStalenessIsReported() {
+        let many = (0..<20).map { WidgetSegment(kind: .work, startedAt: Date(timeIntervalSince1970: Double($0) * 100), endedAt: nil) }
+        let snapshot = WidgetSnapshot(isRunning: false, kind: .work, startedAt: nil, todaySeconds: 0, day: "", timeZone: "UTC",
+                                      updatedAt: Date(timeIntervalSince1970: 1000), segments: many)
+        #expect(snapshot.segments?.count == WidgetSnapshot.maxSegments)
+        #expect(snapshot.segments?.last == many.last)
+        #expect(!snapshot.isStale(at: Date(timeIntervalSince1970: 1000 + 600)))
+        #expect(snapshot.isStale(at: Date(timeIntervalSince1970: 1000 + 3600)))
     }
 }

@@ -12,6 +12,8 @@ public final class TodayStore {
     public private(set) var account: TimeAccount?
     public private(set) var segments: [Segment] = []
     public private(set) var isLoading = false
+    /// When the last successful load finished (widgets publish a fresh "updated" time from it).
+    public private(set) var lastLoaded: Date?
     public var error: TimetrackError?
 
     private let client: APIClient
@@ -38,6 +40,7 @@ public final class TodayStore {
             account = accountValue
             segments = (dayValue.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
             error = nil
+            lastLoaded = .now
         } catch let failure as TimetrackError {
             if failure != .cancelled { error = failure }
         } catch {

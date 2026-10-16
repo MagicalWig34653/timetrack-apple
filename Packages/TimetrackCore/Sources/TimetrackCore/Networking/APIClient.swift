@@ -193,6 +193,16 @@ public actor APIClient {
         return try await send(.post, "/time/timer/stop", body: Body(clientEventId: clientEventId))
     }
 
+    // MARK: - Planning (module `planning`, read-only here)
+
+    public func listAbsences(from: LocalDay, to: LocalDay) async throws -> [Absence] {
+        try await get("/absences", query: [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)])
+    }
+
+    public func getVacationBalance(year: Int) async throws -> VacationBalance {
+        try await get("/vacation/balance", query: [URLQueryItem(name: "year", value: String(year))])
+    }
+
     // MARK: - Evaluation and account
 
     /// The API allows at most 93 days per request; longer ranges are loaded in chunks.

@@ -45,7 +45,7 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "27.0"
-    sources: [Sources/Shared]
+    sources: [Sources/iOS]
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
@@ -57,11 +57,40 @@ targets:
         PRODUCT_NAME: Timetrack
         TARGETED_DEVICE_FAMILY: "1,2"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+      configs:
+        Debug:
+          # Debug also trusts the test instance (developer mode skips Apple's CDN for AASA lookups).
+          CODE_SIGN_ENTITLEMENTS: Sources/iOS/TimetrackDebug.entitlements
+        Release:
+          CODE_SIGN_ENTITLEMENTS: Sources/iOS/Timetrack.entitlements
     info:
-      path: Sources/Shared/Info.plist
+      path: Sources/iOS/Info.plist
       properties:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: de.linolaske.timetrack.quick.start
+            UIApplicationShortcutItemTitle: Timer starten
+            UIApplicationShortcutItemIconSymbolName: play.fill
+          - UIApplicationShortcutItemType: de.linolaske.timetrack.quick.stop
+            UIApplicationShortcutItemTitle: Timer stoppen
+            UIApplicationShortcutItemIconSymbolName: stop.fill
+  TimetrackIOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources: [Tests/iOSUI]
+    dependencies:
+      - target: TimetrackIOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.uitests
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   TimetrackMac:
     build:
@@ -70,4 +99,6 @@ schemes:
   TimetrackIOS:
     build:
       targets: { TimetrackIOS: all }
+    test:
+      targets: [TimetrackIOSUITests]
     run: { config: Debug }

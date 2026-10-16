@@ -1,34 +1,38 @@
-# App icons (A6b)
+# App icons (A6b, redesigned in A6c)
 
 ## Design
-A calm 300 degree arc ("ruhiger Bogen", zinc) with a clock hand ("Zeiger") in the accent #2563EB on a calm zinc surface.
-Few shapes, thick round-capped strokes so it reads at small sizes. The hand ends inside the arc.
+Dark navy surface (subtle top-to-bottom gradient `#1F2A4D` to `#0A0F22`), a thick **closed** ring with a vertical accent gradient (lighter at the top, stronger at the bottom) and two white rounded hands forming an "L" (12 and 3 o'clock). Reference look: user screenshot of an icon with an open ring; here the ring is closed.
 
 ## Layers (Icons/source/*.svg, 1024x1024)
-- `background.svg`: surface colour (zinc-100). In the `.icon` it is the document `fill` (so dark specialization works), the SVG is the colour source/preview.
-- `arc.svg`, `hand.svg`: the two glass layers (group has neutral shadow, specular on, translucency off).
-- `highlight.svg`: optional marker, unused by default.
+- `ring.svg`: circle r=262, stroke 92, SVG linear gradient (userSpaceOnUse), blue default.
+- `hands.svg`: white L path, stroke 56, round caps/join.
+- `background.svg`: preview of the surface; in the `.icon` it is the document `fill` (linear-gradient).
+The per-variant SVGs are generated into each bundle's `Assets/`.
 
-## Variants (Icons/*.icon)
-| Bundle | Role | Description |
-|---|---|---|
-| TimetrackPrimary | primary | light surface, dark appearance specialized (zinc-900, lighter blue) |
-| TimetrackLight | alternate | light surface everywhere |
-| TimetrackDark | alternate | dark surface everywhere |
-| TimetrackMono | alternate | black/white high contrast |
-| TimetrackTeal | alternate | teal accent (#0D9488, dark #2DD4BF) |
+## Accents (single source: `ACCENTS` in scripts/icons/build_icons.py, mirrored in `IconAccent.accents`)
+The light tone is derived in OKLCH from the strong tone: lightness +0.13, chroma x0.9, same hue (sRGB gamut-clamped).
 
-All have a `tinted` image specialization with a white hand.
+| Label | Bundle | Strong | Light |
+|---|---|---|---|
+| Blau (primary) | TimetrackPrimary | #2563EB | #5E93FC |
+| Türkis | TimetrackTeal | #0EA5A4 | #61CDCB |
+| Violett | TimetrackViolet | #7C3AED | #9D79FE |
+| Grün | TimetrackGreen | #16A34A | #60CA79 |
+| Orange | TimetrackOrange | #F97316 | #FEB692 |
+| Rosa | TimetrackPink | #EC4899 | #FE91BF |
+| Hell | TimetrackLight | #2563EB | #5E93FC (light surface, dark hands) |
+
+The in-app accent is NOT wired to these yet; `IconAccent.accents` (Sources/iOS/AppIconSettingsSection.swift) is ready to drive it.
 
 ## Regenerate
-`python3 scripts/icons/build_icons.py` rewrites every `Icons/*.icon` from `Icons/source`. Do not hand-edit generated bundles (or copy them out afterwards). Open one in Icon Composer (`open Icons/TimetrackPrimary.icon`) to inspect or tweak; port tweaks into the script.
+`python3 scripts/icons/build_icons.py` rewrites all `Icons/*.icon`, `Icons/source`, the picker previews (`Sources/iOS/IconPreviews.xcassets`, rendered with ictool at 180 px) and `Icons/preview-variants.png` (rows = variants, columns = Default, Dark, TintedDark, TintedLight; needs Pillow, otherwise skipped). Do not hand-edit generated files.
 
-## Schema notes
-Derived from the Xcode icon template and Icon Composer's strings (`fill`, `fill-specializations`, `groups[].layers[].image-name(-specializations)`, `glass`, `shadow`, `specular`, `translucency`, `lighting`, `supported-platforms`). Render previews with
-`.../Icon Composer.app/Contents/Executables/ictool X.icon --export-image --output-file o.png --platform iOS --rendition Default|Dark|TintedLight|TintedDark|ClearLight|ClearDark --width 512 --height 512 --scale 1`.
+## Schema / rendering findings
+- Document `fill` accepts `{"linear-gradient": [c1, c2], "orientation": {"start":{x,y},"stop":{x,y}}}` and SVG layers keep their `linearGradient`s (verified with ictool and on a simulator).
+- Layers use `glass: false`: with glass the ring looked washed out compared to the reference.
+- ictool 27 and actool ignored the `image-name-specializations` / `fill-specializations` (dark, tinted) in tests (a red test specialization did not show; the compiled catalog contains no specialization vectors). The files still carry them (harmless), but do not rely on them. Consequences: Dark appearance uses the system derivation (looks right on the simulator: navy surface, blue ring, white hands); the "Hell" variant has dark hands that become hard to see in Dark/Tinted renditions (see handoff).
+- The "dark hand in tinted" observed in A6b is the system mapping white to the tint colour (dark tint = darker). With a gradient ring in TintedDark the ring is dim and the hands carry the tint colour; acceptable, not a bug.
+- Preview: `ictool X.icon --export-image --output-file o.png --platform iOS --rendition Default|Dark|TintedLight|TintedDark --width N --height N --scale 1 [--tint-color --tint-strength]`.
 
 ## Build integration
-project.yml: `.icon` files are resources; `ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary` on all three targets; iOS also `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`. The picker is `Sources/iOS/AppIconSettingsSection.swift`.
-
-## Known limitation
-In `TintedDark` the hand rendered dark in ictool previews (tinted image specialization seemingly not used there); tune after seeing it on a device.
+project.yml (`# A6b`/`# A6c`): `.icon` files are resources; `ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary` on all targets; iOS also lists the alternates. Picker: `AppIconPickerSection` in `Sources/iOS/AppIconSettingsSection.swift` (uses preview image sets because UIKit cannot load alternate icon images).

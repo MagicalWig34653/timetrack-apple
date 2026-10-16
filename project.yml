@@ -62,8 +62,10 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
       configs:
         Debug:
-          # Debug also trusts the test instance (developer mode skips Apple's CDN for AASA lookups).
-          CODE_SIGN_ENTITLEMENTS: Sources/iOS/TimetrackDebug.entitlements
+          # Debug has no Associated Domains so it signs with a free personal team (device runs, cookie import).
+          # With a paid Developer Program team set CODE_SIGN_ENTITLEMENTS to Sources/iOS/TimetrackDebug.entitlements
+          # (also trusts the test instance via ?mode=developer) to try passkeys.
+          CODE_SIGN_ENTITLEMENTS: ""
         Release:
           CODE_SIGN_ENTITLEMENTS: Sources/iOS/Timetrack.entitlements
     info:

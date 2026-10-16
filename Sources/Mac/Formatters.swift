@@ -4,7 +4,7 @@ import TimetrackCore
 extension Date {
     /// Wall-clock time in the work model's zone (`HH:mm`), independent of the Mac's own zone.
     func clockText(in zone: TimeZone) -> String {
-        formatted(Date.FormatStyle(timeZone: zone).hour(.twoDigits(amPM: .omitted)).minute())
+        formatted(Date.FormatStyle(timeZone: zone).hour(.twoDigits(amPM: .omitted)).minute(.twoDigits))
     }
 }
 

@@ -1,0 +1,50 @@
+import XCTest
+
+/// Smoke test against a THROWAWAY backend. Needs TT_DEV_SERVER and TT_DEV_COOKIE in the test runner's environment
+/// (xcodebuild passes `TEST_RUNNER_TT_DEV_SERVER` / `TEST_RUNNER_TT_DEV_COOKIE`); skipped otherwise.
+final class SmokeTests: XCTestCase {
+    func testTimerAndTabs() throws {
+        let env = ProcessInfo.processInfo.environment
+        let server = try XCTUnwrap(env["TT_DEV_SERVER"], "no throwaway server configured")
+        let cookie = try XCTUnwrap(env["TT_DEV_COOKIE"])
+        let app = XCUIApplication()
+        app.launchEnvironment["TT_DEV_SERVER"] = server
+        app.launchEnvironment["TT_DEV_COOKIE"] = cookie
+        app.launch()
+
+        let start = app.buttons["today.start"]
+        XCTAssertTrue(start.waitForExistence(timeout: 20))
+        start.tap()
+        XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
+        shot("running")
+        app.buttons["today.stop"].tap()
+        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 10))
+
+        open(app, "Zeit", "time")
+        XCTAssertTrue(app.buttons["time.new"].waitForExistence(timeout: 10))
+        shot("time")
+        app.buttons["time.new"].tap()
+        XCTAssertTrue(app.buttons["Sichern"].waitForExistence(timeout: 5))
+        shot("editor")
+        app.buttons["Abbrechen"].tap()
+
+        open(app, "Urlaub", "vacation")
+        XCTAssertTrue(app.staticTexts["Urlaubskonto"].waitForExistence(timeout: 10))
+        shot("vacation")
+
+        open(app, "Einstellungen", "settings")
+        XCTAssertTrue(app.buttons["settings.sign_out"].waitForExistence(timeout: 5))
+        shot("settings")
+    }
+
+    /// iPhone: tab bar button; iPad (regular width): sidebar row.
+    private func open(_ app: XCUIApplication, _ title: String, _ id: String) {
+        let tab = app.tabBars.buttons[title]
+        if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.\(id)"].firstMatch.tap() }
+    }
+
+    private func shot(_ name: String) {
+        let dir = ProcessInfo.processInfo.environment["TT_SHOT_DIR"] ?? NSTemporaryDirectory()
+        try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(name).png"))
+    }
+}

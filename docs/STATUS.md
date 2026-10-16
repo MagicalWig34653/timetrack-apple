@@ -15,3 +15,7 @@ Nachtrag 16.10.2026 (Paket A1, Branch a1-core-mac, nicht gemergt): Swift-Paket P
 macOS-App mit Heute, Zeit, Einstellungen und Menüleiste; Team J2DU2P47XW, Bundle-ID de.linolaske.timetrack. Tests: 42 Unit-Tests plus 1 Integrationstest
 gegen einen Wegwerf-Backend (Port 18091) bestanden; macOS- und iOS-Simulator-Build erfolgreich (CODE_SIGNING_ALLOWED=NO), watchOS-Simulator-Build des Kerns erfolgreich.
 Passkey-Anmeldung noch nicht testbar (Domain, Associated Domains, AASA im Backend fehlen). Oberfläche nicht visuell geprüft. Details: docs/handoffs/A1.md.
+
+Nachtrag 16.10.2026 (Paket A3, Branch a3-ios, nicht gemergt): iOS/iPadOS-App (Heute, Zeit, Urlaub lesend, Einstellungen, Quick Actions, App Intents), PlanningStore/TimerCommand im Kern.
+50 Unit-Tests bestanden; iOS-Simulator- und macOS-Build erfolgreich; XCUITest-Smoke auf iPhone- und iPad-Simulator gegen Wegwerf-Backend bestanden. Signierter Build scheitert:
+persönliches Team unterstützt Associated Domains nicht (Passkeys brauchen bezahltes Developer Program). Details: docs/handoffs/A3.md.

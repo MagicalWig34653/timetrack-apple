@@ -23,6 +23,8 @@ public final class AppModel {
     public private(set) var workModel: WorkModel?
     public private(set) var today: TodayStore?
     public private(set) var timeList: TimeListStore?
+    /// Created only while the `planning` module is on.
+    public private(set) var planning: PlanningStore?
     public private(set) var isBusy = false
     public var lastError: TimetrackError?
 
@@ -118,6 +120,7 @@ public final class AppModel {
         let calendar = dayCalendar
         today = TodayStore(client: client, calendar: calendar)
         timeList = TimeListStore(client: client, calendar: calendar)
+        planning = modules.isEnabled(.planning) ? PlanningStore(client: client, calendar: calendar) : nil
         phase = .signedIn
         Task { await today?.load() }
     }
@@ -125,6 +128,11 @@ public final class AppModel {
     public func refreshModules() async {
         guard let context, let statuses = try? await context.client.listModules() else { return }
         modules = ModuleSwitches(statuses)
+        if !modules.isEnabled(.planning) {
+            planning = nil
+        } else if planning == nil {
+            planning = PlanningStore(client: context.client, calendar: dayCalendar)
+        }
     }
 
     private func reset(to phase: Phase) {
@@ -132,6 +140,7 @@ public final class AppModel {
         account = nil
         today = nil
         timeList = nil
+        planning = nil
         workModel = nil
         modules = ModuleSwitches()
         self.phase = phase

@@ -7,39 +7,70 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06D674907DEC9A1604862D3C /* TimerIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */; };
 		281B755166F4633E094FD1E6 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CDA84E0B407AA96EB192CE /* Formatters.swift */; };
 		2836437453435B3BCF7189E7 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4DB0741E3449BE34F2E06C70 /* TimetrackCore */; };
+		33498551A1390B374E810D86 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD733A09D977D0687741719F /* TimeView.swift */; };
+		348AA21EE70CC4E13FAF50CE /* VacationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBBB09E08E4FE6BC5926BE4B /* VacationView.swift */; };
+		4EC6345AFEE693CB207F979F /* TimetrackIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7F011F68766315CA396856B /* TimetrackIOSApp.swift */; };
+		4F94CA4FF145D972892E7F74 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECDC8FE21F7D43A58B7F2A6 /* TodayView.swift */; };
+		54BD5DCFCEF0F95C8BDFF8BB /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F6FBAEB436FC29D5E36E45 /* Formatters.swift */; };
 		55F5836DB4717CB79B66A314 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = DAABA6D6BDB345B9792F50C9 /* TimetrackStores */; };
 		56D2B9931A45D34C7740D856 /* MenuBarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B35ED7860A36405405B0711 /* MenuBarContent.swift */; };
+		734927ED72C96E14E7E76889 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45107C842B9211EE861FA97 /* SettingsView.swift */; };
 		7840AAB7105F1D144F6CDFB4 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 17381ACB307D0628A0B2706B /* Localizable.xcstrings */; };
 		7CC25E24BCAD1DBB8BF8E25B /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6889DC9B2C11ACD574AEE593 /* TimeView.swift */; };
 		7F4458A94BE4B310ECC96FF2 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = C4595BB1B563B857A4772ADA /* TimetrackCore */; };
 		80269B3C174A73B5EA721B7C /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818ECBA7BD8240465F832821 /* TodayView.swift */; };
+		828137061B385FD65C835D56 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */; };
 		A4895B951818FA56A9B32BAD /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F94BC7DC26E230FC2EF77F /* RootView.swift */; };
+		A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */; };
 		C5F53D83EC8C94AFA44D91D2 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 8B1C4EF1FB7F7021FD68BECF /* TimetrackStores */; };
 		CD03C15E5CD2BCA1077F1045 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F0A803D3DB0919C873148 /* SignInView.swift */; };
 		CF1E200A0644E500E5B5F49C /* TimetrackMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDA3D3AF17289B8F42E7594 /* TimetrackMacApp.swift */; };
-		D5C6422C9412308EA1336BAD /* TimetrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E86C52DD27E683CF74D96D17 /* TimetrackApp.swift */; };
+		EA2C0B9A74F7A4A74FFABF97 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DEE4BE7051A858A40C724C /* RootView.swift */; };
 		ED52BD1346D78AD51B2333D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73F39B90E98816E491A9DAA /* SettingsView.swift */; };
-		FC3976A3DDD1BDDEFE4D4D93 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 050924A59C1CAB43A5593B4E /* Localizable.xcstrings */; };
+		FCE0D9FD218D559D40EC67AE /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CA38F0CFAEA12FDCC59C72 /* SignInView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		144D96E2B974B2B9B58C5557 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1C8C63149643BE7631A07B5B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1C2B4C3E0D1EFB67F5E453E8;
+			remoteInfo = TimetrackIOS;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0460EDC2CEE74D3D22F4AF2D /* TimetrackMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimetrackMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		050924A59C1CAB43A5593B4E /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0DF2BC64DAE7C1D504383128 /* TimetrackIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TimetrackIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10DEE4BE7051A858A40C724C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		10F94BC7DC26E230FC2EF77F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		17381ACB307D0628A0B2706B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		1B42933A0DF95E4C418E81E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerIntents.swift; sourceTree = "<group>"; };
 		20F6CD08AEBBEA531E9C333B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2ECDC8FE21F7D43A58B7F2A6 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		35F6FBAEB436FC29D5E36E45 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		43ED479EF914202229D38394 /* TimetrackCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TimetrackCore; path = Packages/TimetrackCore; sourceTree = SOURCE_ROOT; };
+		45BBA98930EA7F814FC99E21 /* TimetrackDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackDebug.entitlements; sourceTree = "<group>"; };
 		4B35ED7860A36405405B0711 /* MenuBarContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContent.swift; sourceTree = "<group>"; };
+		4C0C49D7FA292920DEE517AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		56CA38F0CFAEA12FDCC59C72 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		6889DC9B2C11ACD574AEE593 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
 		818ECBA7BD8240465F832821 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		9499107E72D8186A6CCD94FD /* TimetrackIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TimetrackIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A35F0A803D3DB0919C873148 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
 		B73F39B90E98816E491A9DAA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B7F011F68766315CA396856B /* TimetrackIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackIOSApp.swift; sourceTree = "<group>"; };
+		BD733A09D977D0687741719F /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
+		D824D708214E9557BC2C2140 /* Timetrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Timetrack.entitlements; sourceTree = "<group>"; };
+		DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		E0CDA84E0B407AA96EB192CE /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
-		E86C52DD27E683CF74D96D17 /* TimetrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackApp.swift; sourceTree = "<group>"; };
+		E45107C842B9211EE861FA97 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EBBB09E08E4FE6BC5926BE4B /* VacationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationView.swift; sourceTree = "<group>"; };
 		EDDA3D3AF17289B8F42E7594 /* TimetrackMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackMacApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,23 +96,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		05EBB8044495C62BE718391B /* Shared */ = {
+		6FC5DBA0AC8271B57359805C /* iOSUI */ = {
 			isa = PBXGroup;
 			children = (
-				1B42933A0DF95E4C418E81E2 /* Info.plist */,
-				050924A59C1CAB43A5593B4E /* Localizable.xcstrings */,
-				E86C52DD27E683CF74D96D17 /* TimetrackApp.swift */,
+				703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */,
 			);
-			name = Shared;
-			path = Sources/Shared;
+			name = iOSUI;
+			path = Tests/iOSUI;
 			sourceTree = "<group>";
 		};
 		76B9621E5DF5F5D241F071E8 = {
 			isa = PBXGroup;
 			children = (
+				FFC091571A1035DEFBD92A24 /* iOS */,
+				6FC5DBA0AC8271B57359805C /* iOSUI */,
 				7D7FA66EA86FF5415E93AF99 /* Mac */,
 				A434D1AF8E497422BF1E3343 /* Packages */,
-				05EBB8044495C62BE718391B /* Shared */,
 				F4A4CAE7E70C894A9AB3059E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -116,9 +146,31 @@
 			isa = PBXGroup;
 			children = (
 				0DF2BC64DAE7C1D504383128 /* TimetrackIOS.app */,
+				9499107E72D8186A6CCD94FD /* TimetrackIOSUITests.xctest */,
 				0460EDC2CEE74D3D22F4AF2D /* TimetrackMac.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FFC091571A1035DEFBD92A24 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				35F6FBAEB436FC29D5E36E45 /* Formatters.swift */,
+				4C0C49D7FA292920DEE517AB /* Info.plist */,
+				DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */,
+				10DEE4BE7051A858A40C724C /* RootView.swift */,
+				E45107C842B9211EE861FA97 /* SettingsView.swift */,
+				56CA38F0CFAEA12FDCC59C72 /* SignInView.swift */,
+				1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */,
+				D824D708214E9557BC2C2140 /* Timetrack.entitlements */,
+				45BBA98930EA7F814FC99E21 /* TimetrackDebug.entitlements */,
+				B7F011F68766315CA396856B /* TimetrackIOSApp.swift */,
+				BD733A09D977D0687741719F /* TimeView.swift */,
+				2ECDC8FE21F7D43A58B7F2A6 /* TodayView.swift */,
+				EBBB09E08E4FE6BC5926BE4B /* VacationView.swift */,
+			);
+			name = iOS;
+			path = Sources/iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,6 +196,24 @@
 			productName = TimetrackIOS;
 			productReference = 0DF2BC64DAE7C1D504383128 /* TimetrackIOS.app */;
 			productType = "com.apple.product-type.application";
+		};
+		36F1613A85A5B5C8A514824E /* TimetrackIOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5952FAA8125B6312C911164D /* Build configuration list for PBXNativeTarget "TimetrackIOSUITests" */;
+			buildPhases = (
+				DBFFEA5FCE400FF03E934F54 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3708C25BAA600BD9776F289F /* PBXTargetDependency */,
+			);
+			name = TimetrackIOSUITests;
+			packageProductDependencies = (
+			);
+			productName = TimetrackIOSUITests;
+			productReference = 9499107E72D8186A6CCD94FD /* TimetrackIOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		6900156950472655D09B9061 /* TimetrackMac */ = {
 			isa = PBXNativeTarget;
@@ -179,6 +249,11 @@
 						DevelopmentTeam = J2DU2P47XW;
 						ProvisioningStyle = Automatic;
 					};
+					36F1613A85A5B5C8A514824E = {
+						DevelopmentTeam = J2DU2P47XW;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 1C2B4C3E0D1EFB67F5E453E8;
+					};
 					6900156950472655D09B9061 = {
 						DevelopmentTeam = J2DU2P47XW;
 						ProvisioningStyle = Automatic;
@@ -204,6 +279,7 @@
 			targets = (
 				6900156950472655D09B9061 /* TimetrackMac */,
 				1C2B4C3E0D1EFB67F5E453E8 /* TimetrackIOS */,
+				36F1613A85A5B5C8A514824E /* TimetrackIOSUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -213,7 +289,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FC3976A3DDD1BDDEFE4D4D93 /* Localizable.xcstrings in Resources */,
+				828137061B385FD65C835D56 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,11 +323,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D5C6422C9412308EA1336BAD /* TimetrackApp.swift in Sources */,
+				54BD5DCFCEF0F95C8BDFF8BB /* Formatters.swift in Sources */,
+				EA2C0B9A74F7A4A74FFABF97 /* RootView.swift in Sources */,
+				734927ED72C96E14E7E76889 /* SettingsView.swift in Sources */,
+				FCE0D9FD218D559D40EC67AE /* SignInView.swift in Sources */,
+				33498551A1390B374E810D86 /* TimeView.swift in Sources */,
+				06D674907DEC9A1604862D3C /* TimerIntents.swift in Sources */,
+				4EC6345AFEE693CB207F979F /* TimetrackIOSApp.swift in Sources */,
+				4F94CA4FF145D972892E7F74 /* TodayView.swift in Sources */,
+				348AA21EE70CC4E13FAF50CE /* VacationView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DBFFEA5FCE400FF03E934F54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3708C25BAA600BD9776F289F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1C2B4C3E0D1EFB67F5E453E8 /* TimetrackIOS */;
+			targetProxy = 144D96E2B974B2B9B58C5557 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		025A4AA16310E285701BE037 /* Debug */ = {
@@ -325,9 +425,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/iOS/Timetrack.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				INFOPLIST_FILE = Sources/Shared/Info.plist;
+				INFOPLIST_FILE = Sources/iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Timetrack;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -344,9 +448,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/iOS/TimetrackDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				INFOPLIST_FILE = Sources/Shared/Info.plist;
+				INFOPLIST_FILE = Sources/iOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Timetrack;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -463,6 +571,42 @@
 			};
 			name = Release;
 		};
+		D44A3983A9F0B825F642C433 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = de.linolaske.timetrack.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TimetrackIOS;
+			};
+			name = Release;
+		};
+		F29A697C9921E612E242F835 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = de.linolaske.timetrack.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TimetrackIOS;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -471,6 +615,15 @@
 			buildConfigurations = (
 				C43B7BB01B28D3F74FF7D8A3 /* Debug */,
 				D27027034E1434AE79D5EB3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5952FAA8125B6312C911164D /* Build configuration list for PBXNativeTarget "TimetrackIOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F29A697C9921E612E242F835 /* Debug */,
+				D44A3983A9F0B825F642C433 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

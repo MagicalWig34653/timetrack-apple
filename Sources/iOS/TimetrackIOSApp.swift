@@ -23,6 +23,7 @@ struct TimetrackIOSApp: App {
             RootView()
                 .environment(model)
                 .environment(ui)
+                .widgetSync(model) // A7: widget snapshot, Live Activity
                 .environment(\.watchSender, watchSender)
                 .ttTheme()
                 .task { await watchSender.start() }

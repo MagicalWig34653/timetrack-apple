@@ -23,6 +23,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/Mac
+      - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
         buildPhase: resources
@@ -33,6 +34,8 @@ targets:
         product: TimetrackStores
       - package: TimetrackDesign
         product: TimetrackDesign
+      - target: TimetrackWidgetMac # A7
+        embed: true
     settings:
       base:
         # Universal purchase: iOS and macOS share one bundle ID. A future watchOS app uses de.linolaske.timetrack.watchkitapp.
@@ -40,6 +43,7 @@ targets:
         PRODUCT_NAME: Timetrack
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_APP_SANDBOX: YES
+        CODE_SIGN_ENTITLEMENTS: Sources/Mac/TimetrackMac.entitlements # A7: App Group for the widget snapshot
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
@@ -57,6 +61,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/iOS
+      - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
         buildPhase: resources
@@ -80,6 +85,8 @@ targets:
         product: TimetrackDesign
       - target: TimetrackWatch
         embed: true
+      - target: TimetrackWidgetIOS # A7
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
@@ -98,7 +105,7 @@ targets:
           # Debug has no Associated Domains so it signs with a free personal team (device runs, cookie import).
           # With a paid Developer Program team set CODE_SIGN_ENTITLEMENTS to Sources/iOS/TimetrackDebug.entitlements
           # (also trusts the test instance via ?mode=developer) to try passkeys.
-          CODE_SIGN_ENTITLEMENTS: ""
+          CODE_SIGN_ENTITLEMENTS: Sources/iOS/TimetrackPersonal.entitlements # A7: App Group + shared keychain group (was "")
         Release:
           CODE_SIGN_ENTITLEMENTS: Sources/iOS/Timetrack.entitlements
     info:
@@ -106,6 +113,7 @@ targets:
       properties:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        NSSupportsLiveActivities: true # A7
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIApplicationShortcutItems:
@@ -176,6 +184,64 @@ targets:
         SKIP_INSTALL: YES
     info:
       path: Sources/Widget/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+  # A7: iOS/iPadOS widgets, Lock Screen widgets, Live Activity and Control Center control
+  TimetrackWidgetIOS:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources:
+      - Sources/WidgetIOS
+      - Sources/WidgetShared
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+      - package: TimetrackCore
+        product: TimetrackStores
+      - package: TimetrackDesign
+        product: TimetrackDesign
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.widget
+        PRODUCT_NAME: TimetrackWidgetIOS
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_ENTITLEMENTS: Sources/WidgetIOS/TimetrackWidgetIOS.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SKIP_INSTALL: YES
+    info:
+      path: Sources/WidgetIOS/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSSupportsLiveActivities: true
+  # A7: macOS widgets (display only)
+  TimetrackWidgetMac:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "27.0"
+    sources:
+      - Sources/WidgetMac
+      - Sources/WidgetShared
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+      - package: TimetrackCore
+        product: TimetrackStores
+      - package: TimetrackDesign
+        product: TimetrackDesign
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.widget
+        PRODUCT_NAME: TimetrackWidgetMac
+        CODE_SIGN_ENTITLEMENTS: Sources/WidgetMac/TimetrackWidgetMac.entitlements
+        ENABLE_APP_SANDBOX: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        SKIP_INSTALL: YES
+    info:
+      path: Sources/WidgetMac/Info.plist
       properties:
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension

@@ -20,6 +20,7 @@ struct TimetrackMacApp: App {
             RootView()
                 .environment(model)
                 .environment(ui)
+                .widgetSync(model) // A7: widget snapshot
                 .frame(minWidth: 760, minHeight: 480)
                 .ttTheme()
                 .task {

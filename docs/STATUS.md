@@ -34,3 +34,6 @@ Nachtrag 16.10.2026 (Paket A6, Branch a6-design, nicht gemergt): Designpass mit 
 
 ## A6c (icon redesign), branch a6c-icon-accents
 New icon (navy surface, closed blue gradient ring, white L hands), accents Blau/Türkis/Violett/Grün/Orange/Rosa + Hell, picker with preview thumbnails; still not wired into SettingsView. See docs/ICONS.md and docs/handoffs/A6c.md.
+
+## A7 (widgets), branch a7-widgets
+Home/Lock Screen widgets, Live Activity, Control Center toggle and macOS widgets (display only) via the shared non-secret `WidgetSnapshot` (extended additively). 72 core tests + 3 design tests pass; iOS, macOS, watchOS builds succeed (unsigned) and signed iOS/macOS builds embed App Group (+ keychain group on iOS) with the personal team. Real widget placement, Live Activity, Dynamic Island, Control Center and intents were not run; see docs/handoffs/A7.md.

@@ -63,4 +63,16 @@ public struct KeychainSecretStore: SecretStore {
     }
 
     public func delete(_ key: String) { SecItemDelete(query(key) as CFDictionary) }
+
+    /// Re-creates the stored secrets without an explicit access group, so they land in the app's default group (the first
+    /// `keychain-access-groups` entry, which the iOS widget extension shares). Items written by builds that had no such entitlement
+    /// sit in the application-identifier group, which the extension cannot read. Idempotent; without the entitlement it is a no-op move.
+    public func migrateToDefaultAccessGroup() {
+        for key in [SecretKey.serverURL, SecretKey.sessionCookie] {
+            guard let value = read(key) else { continue }
+            delete(key)
+            write(value, for: key)
+            if read(key) == nil { write(value, for: key) }
+        }
+    }
 }

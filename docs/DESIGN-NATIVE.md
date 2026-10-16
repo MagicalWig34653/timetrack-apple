@@ -47,3 +47,8 @@ Screenshots (synthetische Daten, Wegwerf-Backend) unter `docs/screenshots/`; Lis
 Wiederholbar: `scripts/seed-throwaway.py` (Backend-Binary, Arbeitsverzeichnis, Port >= 18500) und `Tests/iOSUI/ScreenshotTests.swift` (`TEST_RUNNER_TT_DEV_SERVER`, `..._COOKIE`, `..._TT_SHOT_DIR`, `..._TT_SHOT_PREFIX`, optional `..._TT_SHOT_LANDSCAPE`).
 macOS: Debug-Hook `TT_DEV_SNAPSHOT_DIR` (zusammen mit `TT_DEV_SERVER`/`TT_DEV_COOKIE`) schreibt die Fensteransicht als PNG; der Tester kann Bildschirmfotos hier nicht erstellen, und Glas sowie die Seitenleisten-Liste erscheinen in dieser Aufnahme nicht.
 Paket-Test: `swift test` rendert mit `TT_GALLERY_OUT=<Ordner>` die Galerie als macOS-PNG (ohne Glas).
+
+## Widgets (A7)
+
+Home-Widgets (small/medium/large), Sperrbildschirm (circular/rectangular/inline), Live Activity, Kontrollzentrum-Schalter und macOS-Widgets nutzen dieselben Tokens (`TT.background`, `surface`, Artenfarben, `ProgressRing`, `KindGlyph`); Quelle `Sources/WidgetShared`.
+Regeln: laufend = Artenabzeichen + systemseitiger `Text(timerInterval:)`, Stopp rot; Leerlauf = Ring Heute/Soll, Start im Akzent; große Zahlen gerundet/tabellarisch; Zeiten in der Zone des Arbeitsmodells; "Aktualisiert um hh:mm" nur wenn der Snapshot älter als 30 Minuten ist; Sperrbildschirm ohne eigene Farben (Vibrancy). Der Akzent der Widgets ist der Standardakzent (der App-Akzent aus A6d ist nicht im Snapshot). Debug: `TT_DEV_WIDGET_GALLERY`. Details: `docs/handoffs/A7.md`.

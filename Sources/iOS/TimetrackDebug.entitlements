@@ -7,5 +7,13 @@
 		<string>webcredentials:timetrack.linolaske.de</string>
 		<string>webcredentials:test.example.org?mode=developer</string>
 	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.de.linolaske.timetrack</string>
+	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)de.linolaske.timetrack.shared</string>
+	</array>
 </dict>
 </plist>

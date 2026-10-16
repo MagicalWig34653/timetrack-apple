@@ -19,7 +19,11 @@ targets:
     type: application
     platform: macOS
     deploymentTarget: "27.0"
-    sources: [Sources/Mac]
+    sources:
+      - Sources/Mac
+      # A6b: Icon Composer icon (primary). See docs/ICONS.md.
+      - path: Icons/TimetrackPrimary.icon
+        buildPhase: resources
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
@@ -35,6 +39,7 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary # A6b
     info:
       path: Sources/Mac/Info.plist
       properties:
@@ -45,7 +50,19 @@ targets:
     type: application
     platform: iOS
     deploymentTarget: "27.0"
-    sources: [Sources/iOS]
+    sources:
+      - Sources/iOS
+      # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
+      - path: Icons/TimetrackPrimary.icon
+        buildPhase: resources
+      - path: Icons/TimetrackLight.icon
+        buildPhase: resources
+      - path: Icons/TimetrackDark.icon
+        buildPhase: resources
+      - path: Icons/TimetrackMono.icon
+        buildPhase: resources
+      - path: Icons/TimetrackTeal.icon
+        buildPhase: resources
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
@@ -58,6 +75,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack
         PRODUCT_NAME: Timetrack
         TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary # A6b
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "TimetrackLight TimetrackDark TimetrackMono TimetrackTeal" # A6b
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
@@ -90,6 +109,9 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/Watch
+      # A6b: primary Icon Composer icon.
+      - path: Icons/TimetrackPrimary.icon
+        buildPhase: resources
       # Debug gallery renders the complication views inside the app (no complication placement possible headlessly).
       - path: Sources/Widget/ComplicationView.swift
       - path: Sources/Widget/Complication.xcstrings
@@ -110,6 +132,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "4"
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
         INFOPLIST_KEY_WKCompanionAppBundleIdentifier: de.linolaske.timetrack
+        ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary # A6b
     info:
       path: Sources/Watch/Info.plist
       properties:

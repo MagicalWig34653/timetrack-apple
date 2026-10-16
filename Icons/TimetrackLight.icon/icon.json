@@ -1,0 +1,49 @@
+{
+  "fill": {
+    "solid": "srgb:0.98039,0.98039,0.98039,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Hand",
+          "image-name": "hand.svg",
+          "glass": true,
+          "image-name-specializations": [
+            {
+              "appearance": "tinted",
+              "value": "hand-tinted.svg"
+            }
+          ]
+        },
+        {
+          "name": "Arc",
+          "image-name": "arc.svg",
+          "glass": true,
+          "image-name-specializations": [
+            {
+              "appearance": "tinted",
+              "value": "arc-tinted.svg"
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "lighting": "combined"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

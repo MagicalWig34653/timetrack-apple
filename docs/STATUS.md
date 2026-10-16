@@ -37,3 +37,6 @@ New icon (navy surface, closed blue gradient ring, white L hands), accents Blau/
 
 ## A7 (widgets), branch a7-widgets
 Home/Lock Screen widgets, Live Activity, Control Center toggle and macOS widgets (display only) via the shared non-secret `WidgetSnapshot` (extended additively). 72 core tests + 3 design tests pass; iOS, macOS, watchOS builds succeed (unsigned) and signed iOS/macOS builds embed App Group (+ keychain group on iOS) with the personal team. Real widget placement, Live Activity, Dynamic Island, Control Center and intents were not run; see docs/handoffs/A7.md.
+
+## A8 (account accent), branch a8-account-accent
+Accent and colour scheme are account settings now (GET/PATCH /me/preferences, v0.14.0): Core models/API/`AppearanceSync`, reconcile as in the P2 handoff, status line on Darstellung (iOS, macOS), accent in the widget snapshot (widgets, complication). 93 core tests + 14 design tests pass; iOS, macOS, watchOS builds succeed (unsigned). Verified against a throwaway backend incl. iPhone simulator (change via UI, fresh install picks the account accent). Not seen: macOS UI, real widgets/complication. See docs/handoffs/A8.md.

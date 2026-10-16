@@ -62,6 +62,7 @@ private struct TodayContent: View {
 private struct TimerCard: View {
     let store: TodayStore
     @State private var kind: SegmentKind = .work
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(spacing: 14) {
@@ -84,10 +85,19 @@ private struct TimerCard: View {
                 .accessibilityIdentifier("today.stop")
             } else {
                 Text("today.not_running").font(.title3).foregroundStyle(.secondary)
-                Picker("today.kind", selection: $kind) {
-                    ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
+                // Three segments no longer fit side by side at accessibility text sizes: switch to a menu there.
+                if typeSize.isAccessibilitySize {
+                    Picker("today.kind", selection: $kind) {
+                        ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Picker("today.kind", selection: $kind) {
+                        ForEach(SegmentKind.selectable, id: \.self) { Text($0.titleKey).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
                 Button { Task { await store.start(kind: kind) } } label: {
                     Label("today.start", systemImage: "play.fill").frame(maxWidth: .infinity)
                 }

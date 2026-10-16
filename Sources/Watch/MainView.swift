@@ -43,6 +43,9 @@ private struct TodayScreen: View {
         .navigationTitle("sidebar.today")
         .task { await store.load() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
+        // Keep the complication's non-secret snapshot in step with what this screen shows.
+        .onChange(of: ComplicationState(store: store)) { publishSnapshot() }
+        .task { publishSnapshot() }
         // 401 while in use: the session ended; ask for a new hand-over instead of showing a raw error.
         .onChange(of: store.error) {
             if store.error?.isUnauthorized == true { Task { await model.discardSessionLocally() } }
@@ -50,8 +53,41 @@ private struct TodayScreen: View {
     }
 }
 
+private extension TodayScreen {
+    @MainActor func publishSnapshot() {
+        let zone = model.dayCalendar
+        let day = store.day
+        WidgetBridge.publish(
+            running: store.running,
+            todaySeconds: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
+            day: zone.day(for: .now), timeZone: zone.timeZone.identifier
+        )
+    }
+}
+
+/// Equatable digest of the store values the complication shows, so `onChange` fires only when they change.
+private struct ComplicationState: Equatable {
+    let runningID: UUID?
+    let kind: SegmentKind?
+    let todaySeconds: Int
+    @MainActor init(store: TodayStore) {
+        runningID = store.running?.id
+        kind = store.running?.kind
+        todaySeconds = (store.day?.evaluatedWorkSeconds ?? 0) + (store.day?.creditSeconds ?? 0)
+    }
+}
+
 private struct TimerSection: View {
     let store: TodayStore
+    /// Last chosen kind survives restarts (a non-secret preference).
+    @AppStorage("watch.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+
+    private var kind: Binding<SegmentKind> {
+        Binding(
+            get: { SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work },
+            set: { lastKindRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -73,7 +109,13 @@ private struct TimerSection: View {
                 .accessibilityIdentifier("watch.stop")
             } else {
                 Text("today.not_running").font(.footnote).foregroundStyle(.secondary)
-                Button { Task { await store.start() } } label: {
+                // Compact: one row that opens the system list; the choice is remembered.
+                Picker("today.kind", selection: kind) {
+                    ForEach(SegmentKind.selectable, id: \.self) { Label($0.titleKey, systemImage: $0.symbol).tag($0) }
+                }
+                .pickerStyle(.navigationLink)
+                .accessibilityIdentifier("watch.kind")
+                Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
                     Label("today.start", systemImage: "play.fill").frame(maxWidth: .infinity)
                 }
                 .tint(.green)

@@ -88,14 +88,22 @@ targets:
     type: application
     platform: watchOS
     deploymentTarget: "27.0"
-    sources: [Sources/Watch]
+    sources:
+      - Sources/Watch
+      # Debug gallery renders the complication views inside the app (no complication placement possible headlessly).
+      - path: Sources/Widget/ComplicationView.swift
+      - path: Sources/Widget/Complication.xcstrings
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
       - package: TimetrackCore
         product: TimetrackStores
+      - target: TimetrackWidget
+        embed: true
     settings:
       base:
+        # App Group for the complication's non-secret snapshot. Needs a team that can provision App Groups (see docs/handoffs/A5.md).
+        CODE_SIGN_ENTITLEMENTS: Sources/Watch/TimetrackWatch.entitlements
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.watchkitapp
         PRODUCT_NAME: Timetrack
         SDKROOT: watchos
@@ -111,6 +119,28 @@ targets:
         WKRunsIndependentlyOfCompanionApp: true
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+  TimetrackWidget:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "27.0"
+    sources: [Sources/Widget]
+    dependencies:
+      - package: TimetrackCore
+        product: TimetrackCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.watchkitapp.widget
+        PRODUCT_NAME: TimetrackWidget
+        SDKROOT: watchos
+        TARGETED_DEVICE_FAMILY: "4"
+        CODE_SIGN_ENTITLEMENTS: Sources/Widget/TimetrackWidget.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        SKIP_INSTALL: YES
+    info:
+      path: Sources/Widget/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
   TimetrackIOSUITests:
     type: bundle.ui-testing
     platform: iOS

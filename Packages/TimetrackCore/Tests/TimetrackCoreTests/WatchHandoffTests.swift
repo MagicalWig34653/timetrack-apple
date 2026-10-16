@@ -10,12 +10,18 @@ final class MockChannel: WatchSessionChannel, @unchecked Sendable {
     private(set) var sent: [[String: String]] = []
     private(set) var resendRequests = 0
     var received: [String: String] = [:]
+    var link: WatchLinkState = .reachable
+    var failSend = false
 
     func activate(handler: @escaping @Sendable (WatchChannelEvent) -> Void) { lock.withLock { self.handler = handler } }
-    func send(context: [String: String]) throws { lock.withLock { sent.append(context) } }
+    func send(context: [String: String]) throws {
+        if failSend { throw URLError(.unknown) }
+        lock.withLock { sent.append(context) }
+    }
     var receivedContext: [String: String] { lock.withLock { received } }
     func requestResend() { lock.withLock { resendRequests += 1 } }
     func emit(_ event: WatchChannelEvent) { lock.withLock { handler }?(event) }
+    func clearSent() { lock.withLock { sent.removeAll() } }
 }
 
 actor Recorder {
@@ -158,5 +164,63 @@ actor Recorder {
             try await Task.sleep(for: .milliseconds(10))
         }
         Issue.record("condition not reached")
+    }
+}
+
+@Suite struct ManualHandoffTests {
+    let server = URL(string: "http://localhost:18090")!
+
+    private func makeSender(_ channel: MockChannel, signedIn: Bool?, withSecrets: Bool = true) async -> WatchHandoffSender {
+        let secrets = InMemorySecretStore()
+        if withSecrets {
+            secrets.write(server.absoluteString, for: SecretKey.serverURL)
+            secrets.write("cookie-1", for: SecretKey.sessionCookie)
+        }
+        let sender = WatchHandoffSender(channel: channel, secrets: secrets)
+        if let signedIn { await sender.update(isSignedIn: signedIn) }
+        channel.clearSent()
+        return sender
+    }
+
+    @Test func sendsSessionWhenWatchIsReachable() async {
+        let channel = MockChannel()
+        let sender = await makeSender(channel, signedIn: true)
+        #expect(await sender.sendNow() == .sent)
+        #expect(channel.sent.count == 1)
+        #expect(HandoffPayload.decode(channel.sent[0])?.payload == .session(server: server, cookie: "cookie-1"))
+    }
+
+    @Test func reportsNotPairedWithoutSending() async {
+        let channel = MockChannel()
+        channel.link = .notPaired
+        let sender = await makeSender(channel, signedIn: true)
+        #expect(await sender.sendNow() == .notPaired)
+        #expect(channel.sent.isEmpty)
+    }
+
+    @Test func queuesWhenUnreachable() async {
+        let channel = MockChannel()
+        channel.link = .unreachable
+        let sender = await makeSender(channel, signedIn: true)
+        #expect(await sender.sendNow() == .queuedUnreachable)
+        #expect(channel.sent.count == 1) // application context is delivered later by the system
+    }
+
+    @Test func neverSignsTheWatchOutManually() async {
+        let channel = MockChannel()
+        let signedOut = await makeSender(channel, signedIn: false)
+        #expect(await signedOut.sendNow() == .notSignedIn)
+        let unknown = await makeSender(channel, signedIn: nil)
+        #expect(await unknown.sendNow() == .notSignedIn)
+        let noSecrets = await makeSender(channel, signedIn: true, withSecrets: false)
+        #expect(await noSecrets.sendNow() == .notSignedIn)
+        #expect(channel.sent.isEmpty)
+    }
+
+    @Test func reportsFailureWhenChannelThrows() async {
+        let channel = MockChannel()
+        let sender = await makeSender(channel, signedIn: true)
+        channel.failSend = true
+        #expect(await sender.sendNow() == .failed)
     }
 }

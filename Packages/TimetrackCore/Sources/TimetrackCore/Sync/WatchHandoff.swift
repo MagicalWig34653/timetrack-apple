@@ -53,6 +53,26 @@ public protocol WatchSessionChannel: Sendable {
     var receivedContext: [String: String] { get }
     /// Best-effort live request to the counterpart; ignored when it is not reachable.
     func requestResend()
+    /// iPhone side: whether a watch with the app is paired and whether it can be reached right now.
+    var link: WatchLinkState { get }
+}
+
+public enum WatchLinkState: Sendable, Equatable {
+    /// No paired watch, no installed watch app, or WatchConnectivity is unavailable.
+    case notPaired
+    /// Paired, but the watch app cannot be reached right now (context delivery is queued by the system).
+    case unreachable
+    case reachable
+}
+
+/// Outcome of a manual "send session to watch" action.
+public enum WatchHandoffResult: Sendable, Equatable {
+    case notPaired
+    case notSignedIn
+    /// Paired but not reachable: the context was queued and arrives when the watch app next runs.
+    case queuedUnreachable
+    case sent
+    case failed
 }
 
 /// iPhone side: pushes the current session to the watch whenever it changes or the watch asks.
@@ -85,8 +105,18 @@ public actor WatchHandoffSender {
         push()
     }
 
-    private func push() {
-        guard let isSignedIn else { return }
+    /// Manual push ("Sitzung an Uhr senden"). Never signs the watch out: without an active session nothing is sent.
+    public func sendNow() -> WatchHandoffResult {
+        let link = channel.link
+        guard link != .notPaired else { return .notPaired }
+        guard isSignedIn == true, secrets.read(SecretKey.serverURL) != nil, secrets.read(SecretKey.sessionCookie) != nil else { return .notSignedIn }
+        guard push() else { return .failed }
+        return link == .reachable ? .sent : .queuedUnreachable
+    }
+
+    @discardableResult
+    private func push() -> Bool {
+        guard let isSignedIn else { return false }
         let payload: HandoffPayload
         if isSignedIn, let server = secrets.read(SecretKey.serverURL).flatMap({ URL(string: $0) }), let cookie = secrets.read(SecretKey.sessionCookie) {
             payload = .session(server: server, cookie: cookie)
@@ -97,7 +127,7 @@ public actor WatchHandoffSender {
         var stamp = now()
         if let lastStamp, stamp <= lastStamp { stamp = lastStamp.addingTimeInterval(0.001) }
         lastStamp = stamp
-        try? channel.send(context: payload.encoded(stamp: stamp))
+        do { try channel.send(context: payload.encoded(stamp: stamp)); return true } catch { return false }
     }
 }
 

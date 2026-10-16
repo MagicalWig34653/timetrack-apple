@@ -13,7 +13,7 @@ public struct TTPrimaryButtonStyle: ButtonStyle {
         let fill = danger ? TT.dangerFill : theme.accent
         configuration.label
             .font(.system(.body, weight: .semibold))
-            .foregroundStyle(.white)
+            .foregroundStyle(danger ? Color.white : theme.onAccent)
             .frame(maxWidth: .infinity, minHeight: controlSize == .large ? 54 : 44)
             .padding(.horizontal, TT.Space.l)
             .background(fill.gradient, in: .rect(cornerRadius: TT.Radius.control + 2, style: .continuous))
@@ -36,7 +36,7 @@ public struct TTSecondaryButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(.body, weight: .medium))
-            .foregroundStyle(theme.accent)
+            .foregroundStyle(theme.ink)
             .frame(maxWidth: .infinity, minHeight: controlSize == .large ? 54 : 44)
             .padding(.horizontal, TT.Space.l)
             .background(theme.accent.opacity(configuration.isPressed ? 0.16 : 0.09), in: .rect(cornerRadius: TT.Radius.control + 2, style: .continuous))

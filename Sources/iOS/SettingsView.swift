@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.watchSender) private var watchSender
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.ttTheme) private var theme
     @State private var confirmingServerChange = false
     @State private var watchStatus: WatchHandoffResult?
 
@@ -19,6 +20,21 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 accountCard
+                FormSection {
+                    NavigationLink {
+                        AppearanceView()
+                    } label: {
+                        HStack {
+                            Label("settings.appearance", systemImage: "paintpalette")
+                                .foregroundStyle(TT.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                        }
+                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("settings.appearance")
+                }
                 FormSection("settings.server") {
                     FormRow("settings.server_url", stacked: true) { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled) }
                     if let workModel = model.workModel {
@@ -85,9 +101,9 @@ struct SettingsView: View {
                 HStack(spacing: TT.Space.l) {
                     Text(verbatim: String(account.displayName.prefix(1)).uppercased())
                         .font(.system(.title2, design: .rounded, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(theme.onAccent)
                         .frame(width: 56, height: 56)
-                        .background(LinearGradient(colors: [Color(hex: 0x3B82F6), Color(hex: 0x1D4ED8)], startPoint: .top, endPoint: .bottom), in: .circle)
+                        .background(theme.accent.gradient, in: .circle)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(verbatim: account.displayName).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)

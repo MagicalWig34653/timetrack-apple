@@ -1,4 +1,5 @@
 import SwiftUI
+import TimetrackDesign
 import UIKit
 
 /// Accent colours of the app icon. Single source for the icon picker; the lead may later also use
@@ -19,8 +20,8 @@ struct IconAccent: Identifiable, Equatable {
     let isAccent: Bool
 
     var id: String { iconName ?? "primary" }
-    var strong: Color { Color(hex: strongHex) }
-    var light: Color { Color(hex: lightHex) }
+    var strong: Color { Color(iconHex: strongHex) }
+    var light: Color { Color(iconHex: lightHex) }
 
     static let accents: [IconAccent] = [
         IconAccent(iconName: nil, previewAsset: "IconPreview-blue", title: "Blau", strongHex: 0x2563EB, lightHex: 0x5E93FC, isAccent: true),
@@ -36,13 +37,14 @@ struct IconAccent: Identifiable, Equatable {
 }
 
 extension Color {
-    fileprivate init(hex: UInt32) {
+    fileprivate init(iconHex hex: UInt32) {
         self.init(red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255,
                   blue: Double(hex & 0xFF) / 255)
     }
 }
 
-/// Self-contained settings section to choose the app icon (primary or alternate).
+/// Content of the app-icon section (wrapped in a `FormSection` by the Darstellung page) to choose the app icon (primary or alternate).
+/// The icon is independent from the in-app accent colour.
 /// UIKit cannot load alternate icon images, so the tiles use preview images shipped in
 /// `IconPreviews.xcassets` (rendered from the `.icon` files by the generator script).
 struct AppIconPickerSection: View {
@@ -50,7 +52,7 @@ struct AppIconPickerSection: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
                     ForEach(IconAccent.all) { choice in
@@ -60,13 +62,11 @@ struct AppIconPickerSection: View {
                             .accessibilityAddTraits(choice.iconName == current ? [.isSelected] : [])
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
             }
             if let errorMessage {
-                Text(errorMessage).font(.footnote).foregroundStyle(.red)
+                Text(errorMessage).font(TTFont.meta).foregroundStyle(TT.danger).padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m)
             }
-        } header: {
-            Text(String(localized: "App-Symbol", defaultValue: "App-Symbol"))
         }
     }
 
@@ -93,7 +93,7 @@ struct AppIconPickerSection: View {
                     }
                 }
             Text(choice.title).font(.caption)
-                .foregroundStyle(selected ? Color.primary : Color.secondary)
+                .foregroundStyle(selected ? TT.textPrimary : TT.textSecondary)
         }
     }
 

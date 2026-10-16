@@ -132,7 +132,8 @@ private struct DayStats: View {
                         Text(verbatim: DurationFormat.hoursMinutes(done))
                             .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
                         Text("today.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                        if day?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }
+                        // One "vorläufig" indicator for the whole screen (day or balance); the tiles below stay quiet.
+                        if day?.provisional == true || store.account?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -140,10 +141,8 @@ private struct DayStats: View {
             }
             let tiles = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: TT.Space.m)) : AnyLayout(HStackLayout(spacing: TT.Space.m))
             tiles {
-                StatTile("today.delta", value: DurationFormat.signed(day?.deltaSeconds ?? 0), chip: day?.provisional == true ? "common.provisional" : nil,
-                         tone: deltaTone(day?.deltaSeconds ?? 0), symbol: "plusminus")
-                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0),
-                         chip: store.account?.provisional == true ? "common.provisional" : nil, symbol: "clock.arrow.circlepath")
+                StatTile("today.delta", value: DurationFormat.signed(day?.deltaSeconds ?? 0), tone: deltaTone(day?.deltaSeconds ?? 0), symbol: "plusminus")
+                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0), symbol: "clock.arrow.circlepath")
             }
             .fixedSize(horizontal: false, vertical: true)
         }

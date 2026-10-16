@@ -32,7 +32,7 @@ public struct StatTile: View {
             }
             Text(verbatim: value)
                 .font(TTFont.stat)
-                .foregroundStyle(tone.map { $0.color(accent: theme.accent) } ?? TT.textPrimary)
+                .foregroundStyle(tone.map { $0.color(accent: theme.ink) } ?? TT.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             if let caption { Text(caption).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
@@ -204,7 +204,7 @@ public struct EmptyState: View {
         VStack(spacing: TT.Space.s) {
             Image(systemName: symbol)
                 .font(.system(size: 26, weight: .medium))
-                .foregroundStyle(theme.accent)
+                .foregroundStyle(theme.ink)
                 .frame(width: 56, height: 56)
                 .background(theme.accent.opacity(0.10), in: .circle)
                 .padding(.bottom, TT.Space.xs)

@@ -45,7 +45,7 @@ private struct TodayScreen: View {
         .task { await store.load() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         // Keep the complication's non-secret snapshot in step with what this screen shows.
-        .onChange(of: ComplicationState(store: store)) { publishSnapshot() }
+        .onChange(of: ComplicationState(store: store, appearance: model.appearance.local)) { publishSnapshot() }
         .task { publishSnapshot() }
         // 401 while in use: the session ended; ask for a new hand-over instead of showing a raw error.
         .onChange(of: store.error) {
@@ -61,7 +61,8 @@ private extension TodayScreen {
         WidgetBridge.publish(
             running: store.running,
             todaySeconds: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
-            day: zone.day(for: .now), timeZone: zone.timeZone.identifier
+            day: zone.day(for: .now), timeZone: zone.timeZone.identifier,
+            accentHex: AppearanceKeys.effectiveHex(model.appearance.local), colorScheme: model.appearance.local.scheme
         )
     }
 }
@@ -71,7 +72,9 @@ private struct ComplicationState: Equatable {
     let runningID: UUID?
     let kind: SegmentKind?
     let todaySeconds: Int
-    @MainActor init(store: TodayStore) {
+    let appearance: LocalAppearance
+    @MainActor init(store: TodayStore, appearance: LocalAppearance) {
+        self.appearance = appearance
         runningID = store.running?.id
         kind = store.running?.kind
         todaySeconds = (store.day?.evaluatedWorkSeconds ?? 0) + (store.day?.creditSeconds ?? 0)

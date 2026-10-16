@@ -21,11 +21,19 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var balanceSeconds: Int?
     /// Finished and running segments of `day` in start order (capped at `maxSegments`); no notes, places or ids.
     public var segments: [WidgetSegment]?
+    /// Added with the account-level appearance (A8, optional): the effective base accent `#RRGGBB` and the colour scheme id
+    /// (`system|light|dark`). Widgets derive fill/ink from the hex with `AccentDerivation`; the scheme is informational
+    /// (widgets follow the system appearance). No account data, nothing secret.
+    public var accentHex: String?
+    public var colorScheme: String?
 
     public static let maxSegments = 8
 
     public init(isRunning: Bool, kind: SegmentKind, startedAt: Date?, todaySeconds: Int, day: String, timeZone: String, updatedAt: Date,
-                targetSeconds: Int? = nil, balanceSeconds: Int? = nil, segments: [WidgetSegment]? = nil) {
+                targetSeconds: Int? = nil, balanceSeconds: Int? = nil, segments: [WidgetSegment]? = nil,
+                accentHex: String? = nil, colorScheme: String? = nil) {
+        self.accentHex = accentHex.flatMap(Preferences.normalizedHex)
+        self.colorScheme = colorScheme.flatMap { ColorSchemePreference(rawValue: $0)?.rawValue }
         self.targetSeconds = targetSeconds
         self.balanceSeconds = balanceSeconds
         self.segments = segments.map { Array($0.suffix(Self.maxSegments)) }
@@ -42,7 +50,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public static let empty = WidgetSnapshot(isRunning: false, kind: .work, startedAt: nil, todaySeconds: 0, day: "", timeZone: "Europe/Berlin", updatedAt: .distantPast)
 
     /// Builds the snapshot from what the app currently shows. `todaySeconds` is evaluated work plus credits (as on the Heute screen).
-    public static func make(running: Segment?, day: DayEvaluation?, account: TimeAccount?, segments: [Segment], zone: TimeZone, now: Date = .now) -> WidgetSnapshot {
+    public static func make(running: Segment?, day: DayEvaluation?, account: TimeAccount?, segments: [Segment], zone: TimeZone, now: Date = .now,
+                            accentHex: String? = nil, colorScheme: String? = nil) -> WidgetSnapshot {
         let calendar = DayCalendar(timeZone: zone)
         let ordered = segments.filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
         return WidgetSnapshot(
@@ -50,7 +59,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
             todaySeconds: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
             day: calendar.day(for: now), timeZone: zone.identifier, updatedAt: now,
             targetSeconds: day?.targetSeconds, balanceSeconds: account?.balanceSeconds,
-            segments: ordered.map { WidgetSegment(kind: $0.kind, startedAt: $0.startedAt, endedAt: $0.endedAt) }
+            segments: ordered.map { WidgetSegment(kind: $0.kind, startedAt: $0.startedAt, endedAt: $0.endedAt) },
+            accentHex: accentHex, colorScheme: colorScheme
         )
     }
 

@@ -28,11 +28,15 @@ public final class AppModel {
     public private(set) var isBusy = false
     public var lastError: TimetrackError?
 
+    /// Account-level accent / colour scheme: reconciles the local cache with the account (see `AppearanceSync`).
+    public let appearance: AppearanceSync
+
     private let auth: AuthService
     private var context: AuthContext?
 
-    public init(auth: AuthService) {
+    public init(auth: AuthService, appearance: AppearanceSync = AppearanceSync()) {
         self.auth = auth
+        self.appearance = appearance
     }
 
     public var dayCalendar: DayCalendar {
@@ -117,6 +121,9 @@ public final class AppModel {
         self.context = context
         account = context.session.account
         serverURL = context.client.baseURL
+        // Recovery sessions may read but not write preferences (403): they only apply them.
+        await appearance.connect(accountId: context.session.account.id, service: context.client,
+                                 serverPreferences: context.session.account.preferences, canWrite: !context.session.recovery)
         guard !context.session.recovery else {
             phase = .recoveryRestricted
             return
@@ -148,6 +155,7 @@ public final class AppModel {
     }
 
     private func reset(to phase: Phase) {
+        appearance.disconnect()
         context = nil
         account = nil
         today = nil

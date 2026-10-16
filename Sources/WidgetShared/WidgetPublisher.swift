@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 import WidgetKit
 #if os(iOS)
@@ -12,6 +13,12 @@ import ActivityKit
 enum WidgetPublisher {
     /// Writes `snapshot` and reloads. Unchanged content still gets a fresh `updatedAt` so the "Aktualisiert um" note stays truthful.
     static func publish(_ snapshot: WidgetSnapshot, store: WidgetSnapshotStore = WidgetSnapshotStore()) async {
+        var snapshot = snapshot
+        // Intents refresh without the app's appearance state: keep the accent the app wrote last.
+        if snapshot.accentHex == nil, let previous = store.read() {
+            snapshot.accentHex = previous.accentHex
+            snapshot.colorScheme = previous.colorScheme
+        }
         store.write(snapshot)
         reloadAll()
         #if os(iOS)
@@ -56,8 +63,10 @@ private struct SyncSignature: Equatable {
     let loaded: Date?
     let runningID: UUID?
     let segmentCount: Int
+    let appearance: LocalAppearance
 
     @MainActor init(model: AppModel) {
+        appearance = model.appearance.local
         phase = model.phase
         loaded = model.today?.lastLoaded
         runningID = model.today?.running?.id
@@ -86,7 +95,9 @@ private struct WidgetSyncModifier: ViewModifier {
         case .signedIn:
             guard let today = model.today, today.lastLoaded != nil else { return }
             let zone = model.dayCalendar.timeZone
-            await WidgetPublisher.publish(.make(running: today.running, day: today.day, account: today.account, segments: today.segments, zone: zone))
+            let appearance = model.appearance.local
+            await WidgetPublisher.publish(.make(running: today.running, day: today.day, account: today.account, segments: today.segments, zone: zone,
+                                                accentHex: AppearanceKeys.effectiveHex(appearance), colorScheme: appearance.scheme))
         case .restoring, .offline:
             break // credentials stay; keep showing the last snapshot (marked stale after a while)
         }

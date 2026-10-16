@@ -1,4 +1,5 @@
 import SwiftUI
+import TimetrackCore
 
 #if !os(watchOS) // the page needs ColorPicker and segmented pickers, neither exists on watchOS
 
@@ -6,18 +7,24 @@ import SwiftUI
 /// `icon` is the platform-specific app-icon section (a picker on iOS, a note on macOS); it is chosen independently from the accent.
 public struct AppearanceSettingsPage<Icon: View>: View {
     private let icon: Icon
+    private let sync: AppearanceSync?
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.blue.rawValue
     @AppStorage(AppearanceKeys.customHex) private var customHex = "#2563EB"
     @AppStorage(AppearanceKeys.scheme) private var scheme = SchemeChoice.system.rawValue
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
-    public init(@ViewBuilder icon: () -> Icon) { self.icon = icon() }
+    /// `sync` writes accent and scheme through to the account; nil keeps the page purely local (previews).
+    public init(sync: AppearanceSync? = nil, @ViewBuilder icon: () -> Icon) {
+        self.sync = sync
+        self.icon = icon()
+    }
 
     private var selected: AccentChoice { AccentChoice(rawValue: accent) ?? .blue }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: TT.Space.xl) {
             AccentPreviewCard()
+            if let sync { SyncStatusLine(sync: sync) }
             accentSection
             FormSection("appearance.scheme", footer: "appearance.scheme.footer") {
                 Picker("appearance.scheme", selection: $scheme) {
@@ -35,6 +42,10 @@ public struct AppearanceSettingsPage<Icon: View>: View {
             }
             icon
         }
+        .onChange(of: accent) { sync?.localChanged() }
+        .onChange(of: customHex) { sync?.localChanged() }
+        .onChange(of: scheme) { sync?.localChanged() }
+        .task { await sync?.refreshFromServer() }
     }
 
     private var accentSection: some View {
@@ -88,6 +99,57 @@ public struct AppearanceSettingsPage<Icon: View>: View {
         }
         .frame(maxWidth: .infinity)
         .contentShape(.rect)
+    }
+}
+
+/// One quiet line about where the choice is stored; the error variant carries the German message of the failed request.
+struct SyncStatusLine: View {
+    let sync: AppearanceSync
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: TT.Space.s) {
+            Image(systemName: symbol).imageScale(.small).foregroundStyle(color).accessibilityHidden(true)
+            text.font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, TT.Space.xs)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("appearance.sync")
+        .accessibilityValue(Text(verbatim: stateName))
+    }
+
+    private var stateName: String {
+        switch sync.status {
+        case .localOnly: "local"
+        case .synced: "synced"
+        case .syncing: "syncing"
+        case .pending: "pending"
+        case .failed: "failed"
+        }
+    }
+
+    private var symbol: String {
+        switch sync.status {
+        case .synced: "checkmark.icloud"
+        case .syncing: "arrow.triangle.2.circlepath.icloud"
+        case .pending, .localOnly: "icloud.slash"
+        case .failed: "exclamationmark.icloud"
+        }
+    }
+
+    private var color: Color {
+        if case .failed = sync.status { return TT.warning }
+        return TT.textSecondary
+    }
+
+    @ViewBuilder private var text: some View {
+        switch sync.status {
+        case .synced: Text("appearance.sync.synced")
+        case .syncing: Text("appearance.sync.syncing")
+        case .pending: Text("appearance.sync.pending")
+        case .localOnly: Text("appearance.sync.local")
+        case .failed(let error): Text("appearance.sync.failed \(error.germanDescription)")
+        }
     }
 }
 

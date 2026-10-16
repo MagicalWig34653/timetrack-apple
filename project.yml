@@ -173,6 +173,8 @@ targets:
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
+      - package: TimetrackDesign # A8: accent derivation for the account accent
+        product: TimetrackDesign
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: de.linolaske.timetrack.watchkitapp.widget

@@ -6,11 +6,13 @@
 # Documentation: docs/CI.md in the backend repository.
 name: CI
 
+# Disabled until a runner with Xcode 27 exists (decision 17.10.2026): only manual runs (workflow_dispatch).
+# Re-enable by restoring the `push` and `pull_request` triggers below, then set the repository variable APPLE_RUNNER.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
+  # push:
+  #   branches: [main]
+  # pull_request:
 
 permissions:
   contents: read

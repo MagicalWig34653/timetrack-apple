@@ -52,7 +52,7 @@ public struct AppearanceSettingsPage<Icon: View>: View {
         FormSection("appearance.accent", footer: "appearance.accent.footer") {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: TT.Space.s)], alignment: .leading, spacing: TT.Space.m) {
                 ForEach(AccentChoice.allCases) { choice in
-                    Button { accent = choice.rawValue } label: { swatch(choice) }
+                    Button { if accent != choice.rawValue { TTHaptics.play(.selection) }; accent = choice.rawValue } label: { swatch(choice) }
                         .buttonStyle(.plain)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel(Text(choice.titleKey))

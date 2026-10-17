@@ -63,11 +63,12 @@ private struct CalendarContent: View {
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         .gesture(DragGesture(minimumDistance: 40).onEnded { value in
             guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
+            TTHaptics.play(.softTap)
             Task { await store.shiftMonths(value.translation.width < 0 ? 1 : -1) }
         })
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { Task { await store.goToToday() } } label: { Text("calendar.today") }.accessibilityIdentifier("calendar.today")
+                Button { TTHaptics.play(.softTap); Task { await store.goToToday() } } label: { Text("calendar.today") }.accessibilityIdentifier("calendar.today")
                 Menu {
                     AbsenceQuickMenuItems(start: focusDay, end: focusDay) { absenceRequest = $0 }
                     Divider()
@@ -98,7 +99,7 @@ private struct CalendarContent: View {
 
     private var header: some View {
         HStack(spacing: TT.Space.s) {
-            Button { Task { await store.shiftMonths(-1) } } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+            Button { TTHaptics.play(.softTap); Task { await store.shiftMonths(-1) } } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
                 .accessibilityLabel(Text("calendar.previous_month")).accessibilityIdentifier("calendar.prev")
             Spacer()
             Button { picker = true } label: {
@@ -111,7 +112,7 @@ private struct CalendarContent: View {
             .accessibilityHint(Text("calendar.picker.hint"))
             .popover(isPresented: $picker) { MonthPicker(store: store) { picker = false }.presentationCompactAdaptation(.popover) }
             Spacer()
-            Button { Task { await store.shiftMonths(1) } } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+            Button { TTHaptics.play(.softTap); Task { await store.shiftMonths(1) } } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
                 .accessibilityLabel(Text("calendar.next_month")).accessibilityIdentifier("calendar.next")
         }
         .buttonStyle(.borderless)
@@ -144,13 +145,23 @@ private struct CalendarContent: View {
     }
 
     private func tap(_ day: LocalDay) {
-        if store.isRangeMode { store.tapInRangeMode(day); return }
+        if store.isRangeMode {
+            // First tap (or a restart) marks the start, the second completes the range.
+            let completes = store.rangeStart != nil && store.rangeEnd == nil
+            TTHaptics.play(completes ? .success : .tap)
+            store.tapInRangeMode(day)
+            return
+        }
+        TTHaptics.play(.selection)
         Task { await store.select(day) }
         if !wide { daySheet = true }
         if !store.isInVisibleMonth(day), let p = LocalDays.parse(day) { Task { await store.goTo(year: p.year, month: p.month) } }
     }
 
-    private func longPress(_ day: LocalDay) { store.beginRange(at: day) }
+    private func longPress(_ day: LocalDay) {
+        TTHaptics.play(.tap)
+        store.beginRange(at: day)
+    }
 }
 
 private struct MonthPicker: View {
@@ -170,7 +181,7 @@ private struct MonthPicker: View {
             .buttonStyle(.borderless)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: TT.Space.s) {
                 ForEach(1...12, id: \.self) { month in
-                    Button { Task { await store.goTo(year: year, month: month) }; done() } label: {
+                    Button { TTHaptics.play(.selection); Task { await store.goTo(year: year, month: month) }; done() } label: {
                         Text(verbatim: String(PlanFormat.monthName(month, calendar: store.calendar).prefix(3))).frame(maxWidth: .infinity).padding(.vertical, 6)
                     }
                     .buttonStyle(.bordered).tint(month == store.month && year == store.year ? nil : TT.textSecondary)

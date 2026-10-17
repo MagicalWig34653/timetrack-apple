@@ -15,7 +15,7 @@ public struct KindSelector: View {
         layout {
             ForEach(SegmentKind.selectable, id: \.self) { kind in
                 let selected = selection == kind
-                Button { selection = kind } label: {
+                Button { if selection != kind { TTHaptics.play(.selection) }; selection = kind } label: {
                     HStack(spacing: 8) {
                         Image(systemName: kind.ttSymbol).frame(minWidth: iconWidth)
                         Text(kind.ttTitle)

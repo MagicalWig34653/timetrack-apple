@@ -12,7 +12,9 @@ struct TimetrackMacApp: App {
     init() {
         let passkeys = PlatformPasskeyAuthenticator { NSApplication.shared.keyWindow ?? NSApplication.shared.windows.first ?? NSWindow() }
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
-        _model = State(initialValue: AppModel(auth: auth))
+        let model = AppModel(auth: auth)
+        model.onOutcome = { TTHaptics.handle($0) } // trackpad feedback for explicit actions only
+        _model = State(initialValue: model)
     }
 
     var body: some Scene {

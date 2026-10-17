@@ -15,6 +15,8 @@ public final class TodayStore {
     /// When the last successful load finished (widgets publish a fresh "updated" time from it).
     public private(set) var lastLoaded: Date?
     public var error: TimetrackError?
+    /// Reports user-initiated start/stop results (never loads); the app maps them to feedback.
+    public var onOutcome: StoreOutcomeHandler?
 
     private let client: APIClient
     private let calendar: DayCalendar
@@ -51,7 +53,7 @@ public final class TodayStore {
     public func start(kind: SegmentKind = .work) async {
         let eventId = UUID()
         let client = client
-        await perform {
+        await perform(success: .timerStarted) {
             let segment = try await retryOnNetworkError { try await client.startTimer(clientEventId: eventId, kind: kind) }
             self.running = segment
         }
@@ -60,21 +62,23 @@ public final class TodayStore {
     public func stop() async {
         let eventId = UUID()
         let client = client
-        await perform {
+        await perform(success: .timerStopped) {
             _ = try await retryOnNetworkError { try await client.stopTimer(clientEventId: eventId) }
             self.running = nil
         }
     }
 
-    private func perform(_ action: () async throws -> Void) async {
+    private func perform(success: StoreOutcome, _ action: () async throws -> Void) async {
         var failure: TimetrackError?
         do {
             try await action()
+            onOutcome?(success)
         } catch let thrown as TimetrackError {
             failure = thrown
         } catch {
             failure = .cancelled
         }
+        if let failure, failure != .cancelled { onOutcome?(.failed) }
         await load()
         if let failure { error = failure }
     }

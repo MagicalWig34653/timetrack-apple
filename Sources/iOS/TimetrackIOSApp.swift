@@ -15,7 +15,9 @@ struct TimetrackIOSApp: App {
     init() {
         let passkeys = PlatformPasskeyAuthenticator { Self.keyWindow() }
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
-        _model = State(initialValue: AppModel(auth: auth))
+        let model = AppModel(auth: auth)
+        model.onOutcome = { TTHaptics.handle($0) } // user-initiated results only; the stores never report loads
+        _model = State(initialValue: model)
     }
 
     var body: some Scene {

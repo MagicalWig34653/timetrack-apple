@@ -11,6 +11,7 @@ struct TimetrackWatchApp: App {
     init() {
         let secrets = KeychainSecretStore()
         let model = AppModel(auth: AuthService(secrets: secrets, transport: URLSessionTransport()))
+        model.onOutcome = { TTHaptics.handle($0) }
         _model = State(initialValue: model)
         // The session arrives from the iPhone over WatchConnectivity and is stored in this watch's own Keychain.
         receiver = WatchHandoffReceiver(

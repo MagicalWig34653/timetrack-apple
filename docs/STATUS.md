@@ -17,6 +17,7 @@ Projektstatus: **Alpha**. Das Repository ist seit 17.10.2026 öffentlich (AGPL-3
 | A8 | Akzent und Erscheinungsbild aus dem Konto (`GET/PATCH /me/preferences`, Vertrag v0.14.0, ADR-0020) mit lokalem Cache, Akzent im Widget-Snapshot | 93 Kerntests + 14 Design-Tests; „Heute“ nach Neuinstallation mit Konto-Akzent gesichtet |
 | A10 | Planung nativ: Kalender-Tab, Abwesenheiten anlegen/bearbeiten/stornieren (Urlaub, Krank mit Krankschein-Stand, Freigestellt, Sonstiges), Urlaubseinstellungen, Schnellaktionen auf Heute (`docs/handoffs/A10.md`) | 112 Kerntests + 14 Design-Tests; iOS-UI-Durchlauf auf iPhone (hell/dunkel) und iPad; macOS nur gebaut |
 | A9 | Absturz beim Stornieren in „Zeit“ (TestFlight 0.0.1 (1)) behoben: `swipeActions` mit `role: .destructive` + später geänderte Daten verletzten die UICollectionView-Stapelaktualisierung; zudem eine Zeilenliste je Tag mit stabilen IDs, Storno entfernt lokal in einem Schritt; Build 0.0.1 (2) | Reproduziert und behoben im Simulator (iPhone, iPad), Regressionstest `VoidSegmentTests`; Gerät nicht erneut geprüft, siehe `docs/handoffs/A9.md` |
+| H1 | Haptisches Feedback: zentrale Schicht in `TimetrackDesign`, Ergebnis-Meldungen der Stores, Einstellung Aus/Dezent/Normal (`docs/handoffs/H1.md`) | 120 Kern- + 22 Design-Tests; Smoke/Void-UI-Tests grün; **Gefühl auf Gerät/Uhr nicht geprüft** |
 | W1 | GitHub-Actions-Workflows, Vorlagen, TestFlight-Gerüst (`docs/handoffs/W1.md`) | actionlint; Workflows laufen auf GitHub |
 
 Die Backend-Seite (A2: `/.well-known/apple-app-site-association`, WebAuthn-Origin für native Apps) ist im Backend-Repo integriert.
@@ -26,8 +27,8 @@ Ziele: macOS 27, iOS/iPadOS 27, watchOS 27 (Deployment Target 27.0). Targets: `T
 
 ```sh
 xcodegen generate                              # Timetrack.xcodeproj aus project.yml (XcodeGen 2.46.0)
-(cd Packages/TimetrackCore && swift test --build-system native)    # 112 Tests (1 Integrationstest nur mit TT_INTEGRATION_URL)
-(cd Packages/TimetrackDesign && swift test --build-system native)  # 14 Tests
+(cd Packages/TimetrackCore && swift test --build-system native)    # 120 Tests (1 Integrationstest nur mit TT_INTEGRATION_URL)
+(cd Packages/TimetrackDesign && swift test --build-system native)  # 22 Tests
 xcodebuild -project Timetrack.xcodeproj -scheme TimetrackMac -configuration Debug CODE_SIGNING_ALLOWED=NO build   # analog TimetrackIOS (-destination 'generic/platform=iOS Simulator') und TimetrackWatch
 ```
 
@@ -51,6 +52,7 @@ Wegwerf-Backend für lokale Läufe: `scripts/seed-throwaway.py` (synthetische Da
 
 ## Nicht geprüft / bekannte Lücken
 
+- **Haptik (H1)**: Simulator spielt keine Haptik; Stärke und Abstimmung auf iPhone, Uhr und Mac-Trackpad ungeprüft.
 - **Echtgeräte**: Passkey-Anmeldung (braucht Produktions-AASA), WatchConnectivity auf gekoppeltem Gerätepaar, Komplikation auf dem Zifferblatt, Widgets, Live Activity/Dynamic Island, Control Center, App Intents/Kurzbefehle, Keychain-Lesen aus Erweiterungen, VoiceOver, Dynamic Type auf allen Bildschirmen.
 - **macOS-Client**: nur gebaut und teilweise als Fensterabbild gesichtet; keine vollständige visuelle Prüfung der Mac-Oberfläche; macOS-Widgets ungesehen.
 - **Konto-Akzent (A8)**: Offline-/Fehlerzustände der Statuszeile, „Eigene Farbe“ per UI, Zwei-Geräte-Konflikt, Wechsel zwischen Konten mit ungesendeter Änderung (nur eine Cache-Marke). Native Farbtöne weichen bei Türkis/Orange/Rosa von der PWA ab (`docs/DESIGN-NATIVE.md`); die Watch-App selbst nutzt Standardblau, nur die Komplikation folgt dem Akzent.
@@ -65,5 +67,5 @@ Wegwerf-Backend für lokale Läufe: `scripts/seed-throwaway.py` (synthetische Da
 | `AGENTS.md`, `CLAUDE.md` | Einstieg für Coding-Agents |
 | `docs/DESIGN-NATIVE.md` | Native Designsprache (Tokens, Komponenten, Akzent-System, Abweichungen von der PWA) |
 | `docs/ICONS.md` | App-Symbole und Akzent-Varianten |
-| `docs/handoffs/` | Übergaben A1, A3–A9 (A6b–A6d), W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
+| `docs/handoffs/` | Übergaben A1, A3–A10 (A6b–A6d), H1, W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
 | `docs/screenshots/` | Simulator-Aufnahmen der Sichtprüfungen (synthetische Daten) |

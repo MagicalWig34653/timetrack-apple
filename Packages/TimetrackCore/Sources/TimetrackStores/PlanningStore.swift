@@ -15,6 +15,8 @@ public final class PlanningStore {
     public var error: TimetrackError?
     /// Called after every successful absence change (the calendar reloads its month).
     public var onAbsencesChanged: (@MainActor () -> Void)?
+    /// Reports the result of absence and settings writes (never loads).
+    public var onOutcome: StoreOutcomeHandler?
 
     private let client: APIClient
     public let calendar: DayCalendar
@@ -68,6 +70,7 @@ public final class PlanningStore {
                 stored = try await client.createAbsence(input)
             }
             error = nil
+            onOutcome?(.saved)
             await load()
             onAbsencesChanged?()
             return stored
@@ -82,6 +85,7 @@ public final class PlanningStore {
         do {
             try await client.deleteAbsence(id: absence.id)
             error = nil
+            onOutcome?(.deleted)
             await load()
             onAbsencesChanged?()
             return true
@@ -98,7 +102,7 @@ public final class PlanningStore {
             settings = try await client.getVacationSettings()
             entries = try await client.listVacationEntries(year: year)
             error = nil
-        } catch { record(error) }
+        } catch { record(error, notify: false) }
     }
 
     @discardableResult
@@ -106,6 +110,7 @@ public final class PlanningStore {
         do {
             settings = try await client.putVacationSettings(new)
             error = nil
+            onOutcome?(.saved)
             await load()
             return true
         } catch {
@@ -133,6 +138,7 @@ public final class PlanningStore {
         do {
             try await action()
             error = nil
+            onOutcome?(.saved)
             entries = try await client.listVacationEntries(year: year)
             await load()
             return true
@@ -142,9 +148,13 @@ public final class PlanningStore {
         }
     }
 
-    private func record(_ failure: Error) {
+    /// `notify: false` for reads (a failed load shows the error banner, not a failure haptic).
+    private func record(_ failure: Error, notify: Bool = true) {
         if let failure = failure as? TimetrackError {
-            if failure != .cancelled { error = failure }
+            if failure != .cancelled {
+                error = failure
+                if notify { onOutcome?(.failed) }
+            }
         } else {
             error = .cancelled
         }

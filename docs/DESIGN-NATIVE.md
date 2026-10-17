@@ -78,3 +78,10 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 - iPhone: Tipp öffnet ein Tagesblatt (Detents mittel/groß); iPad/Mac: Raster links, Tagesdetail rechts (max. 1200 pt Breite). Bereichsauswahl per Langdruck oder „+ > Zeitraum wählen“, Aktionsleiste oben mit Urlaub/Krank/Abbrechen.
 - Editor als Sheet im Formularstil (`FormSection`, `EditorRow`); Hinweisbänder (`HintBanner`) für Verbrauch („berechnet der Server nach dem Speichern“). Destruktives (Stornieren/Löschen) als leise Zweitaktion mit Bestätigungsdialog, Bestätigungsknöpfe tragen eindeutige Texte.
 - Änderungen erscheinen sofort im Raster (optimistisch) und werden mit der Serverantwort abgeglichen; bei Fehler Rückabwicklung plus `ErrorBanner` in Klartext.
+
+## Haptisches Feedback (H1)
+- Eine zentrale Schicht in `TimetrackDesign` (`Haptics.swift`): Bedeutungen statt Mechanik (`TTHaptic`), ein Aufruf je Interaktion (`TTHaptics.play(_:)` oder `.ttHaptic(_:trigger:)`). Details und Zuordnung: `docs/handoffs/H1.md`.
+- Regeln: nur bei ausdrücklichen Nutzeraktionen, nie bei Ladevorgängen, Timer-Takt, Widgets oder im Hintergrund; höchstens eine Haptik je 80 ms; keine zweite Haptik, wo das System bereits eine liefert (Toggle, Menü, Swipe, Pull-to-Refresh-Beginn).
+- Ergebnisse von Aktionen kommen aus den Stores (`StoreOutcome`), nicht aus den Ansichten; so gibt es Erfolg/Fehler genau einmal je Aktion.
+- Einstellung „Haptisches Feedback“ (Aus / Dezent / Normal) nur lokal (`appearance.haptics`), auf der Darstellungsseite. Nicht in der Simulation prüfbar.
+

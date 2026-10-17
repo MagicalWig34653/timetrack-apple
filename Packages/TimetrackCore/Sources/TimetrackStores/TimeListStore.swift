@@ -35,6 +35,8 @@ public final class TimeListStore {
     public private(set) var days: [DayEvaluation] = []
     public private(set) var isLoading = false
     public var error: TimetrackError?
+    /// Reports the result of create/correct/void (never loads).
+    public var onOutcome: StoreOutcomeHandler?
 
     private let client: APIClient
     public let calendar: DayCalendar
@@ -102,12 +104,14 @@ public final class TimeListStore {
             try await client.voidSegment(id: segment.id, reason: reason)
         } catch let failure as TimetrackError {
             error = failure
+            if failure != .cancelled { onOutcome?(.failed) }
             return false
         } catch {
             self.error = .cancelled
             return false
         }
         error = nil
+        onOutcome?(.deleted)
         loadGeneration += 1 // invalidates reloads that started before the void and would bring the segment back
         days = days.map { $0.removingSegment(segment.id) }
         Task { await self.load() }
@@ -120,10 +124,12 @@ public final class TimeListStore {
         do {
             try await action()
             error = nil
+            onOutcome?(.saved)
             await load()
             return true
         } catch let failure as TimetrackError {
             error = failure
+            if failure != .cancelled { onOutcome?(.failed) }
         } catch {
             self.error = .cancelled
         }

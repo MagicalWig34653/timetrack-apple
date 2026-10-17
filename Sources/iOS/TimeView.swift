@@ -114,7 +114,7 @@ private struct TimeContent: View {
         // Data refreshes must not compete with row animations (A9: crash in the collection view's batch update).
         .transaction(value: store.days) { $0.animation = nil }
         .task { await store.load() }
-        .refreshable { await store.load() }
+        .refreshable { await store.load(); TTHaptics.play(.softTap) }
     }
 }
 
@@ -129,17 +129,17 @@ private struct WeekHeader: View {
         Card {
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 HStack(spacing: TT.Space.s) {
-                    Button { Task { await store.shiftWeeks(-1) } } label: { Image(systemName: "chevron.left").frame(width: 36, height: 36) }
+                    Button { TTHaptics.play(.softTap); Task { await store.shiftWeeks(-1) } } label: { Image(systemName: "chevron.left").frame(width: 36, height: 36) }
                         .accessibilityLabel(Text("time.previous_week"))
                     Spacer(minLength: 0)
                     VStack(spacing: 2) {
                         Text(verbatim: weekRangeText(start: store.weekStart, end: store.weekEnd, calendar: store.calendar))
                             .font(TTFont.cardTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center)
                             .lineLimit(2).minimumScaleFactor(0.7)
-                        Button("time.this_week") { Task { await store.goToCurrentWeek() } }.font(TTFont.meta)
+                        Button("time.this_week") { TTHaptics.play(.softTap); Task { await store.goToCurrentWeek() } }.font(TTFont.meta)
                     }
                     Spacer(minLength: 0)
-                    Button { Task { await store.shiftWeeks(1) } } label: { Image(systemName: "chevron.right").frame(width: 36, height: 36) }
+                    Button { TTHaptics.play(.softTap); Task { await store.shiftWeeks(1) } } label: { Image(systemName: "chevron.right").frame(width: 36, height: 36) }
                         .accessibilityLabel(Text("time.next_week"))
                 }
                 .buttonStyle(.borderless)
@@ -376,6 +376,6 @@ private struct VoidSheet: View {
             }
         }
         .presentationDetents([.medium])
-        .onAppear { store.error = nil }
+        .onAppear { store.error = nil; TTHaptics.play(.confirmDestructive) } // the confirmation appeared; success follows from the store
     }
 }

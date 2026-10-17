@@ -93,6 +93,7 @@ struct SettingsView: View {
         .confirmationDialog("settings.change_server.confirm", isPresented: $confirmingServerChange, titleVisibility: .visible) {
             Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
         }
+        .ttHaptic(.confirmDestructive, whenBecomesTrue: confirmingServerChange)
     }
 
     @ViewBuilder private var accountCard: some View {

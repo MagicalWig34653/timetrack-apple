@@ -914,6 +914,72 @@
         }
       }
     },
+    "haptics.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurze Vibrationen bei Aktionen wie Start, Stopp, Speichern oder Auswahl. „Dezent“ meldet nur Ergebnisse, nicht jede Auswahl. Die Einstellung gilt nur auf diesem Gerät; die Systemeinstellung „System-Haptik“ gilt zusätzlich."
+          }
+        }
+      }
+    },
+    "haptics.normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        }
+      }
+    },
+    "haptics.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "haptics.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dezent"
+          }
+        }
+      }
+    },
+    "haptics.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptisches Feedback"
+          }
+        }
+      }
+    },
+    "haptics.try": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probieren"
+          }
+        }
+      }
+    },
     "hint.break_missing_30": {
       "extractionState": "manual",
       "localizations": {

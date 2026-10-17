@@ -89,7 +89,7 @@ private struct TimerSection: View {
     private var kind: Binding<SegmentKind> {
         Binding(
             get: { SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work },
-            set: { lastKindRaw = $0.rawValue }
+            set: { if $0.rawValue != lastKindRaw { TTHaptics.play(.selection) }; lastKindRaw = $0.rawValue }
         )
     }
 

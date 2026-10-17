@@ -35,10 +35,16 @@ public final class AppModel {
     private let auth: AuthService
     private var context: AuthContext?
 
+    /// Forwarded to every store created after sign-in: user-initiated results (start/stop/save/delete/failure), never loads.
+    /// The app target maps it to haptics (see `TTHaptics.handle`).
+    public var onOutcome: StoreOutcomeHandler?
+
     public init(auth: AuthService, appearance: AppearanceSync = AppearanceSync()) {
         self.auth = auth
         self.appearance = appearance
     }
+
+    private func forwardOutcome(_ outcome: StoreOutcome) { onOutcome?(outcome) }
 
     public var dayCalendar: DayCalendar {
         DayCalendar(timeZone: workModel?.timeZone ?? TimeZone(identifier: "Europe/Berlin") ?? .current)
@@ -138,8 +144,12 @@ public final class AppModel {
         workModel = await models?.current()
         let client = context.client
         let calendar = dayCalendar
-        today = TodayStore(client: client, calendar: calendar)
-        timeList = TimeListStore(client: client, calendar: calendar)
+        let todayStore = TodayStore(client: client, calendar: calendar)
+        let timeListStore = TimeListStore(client: client, calendar: calendar)
+        todayStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        timeListStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        today = todayStore
+        timeList = timeListStore
         makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
         phase = .signedIn
         Task { await today?.load() }
@@ -167,6 +177,8 @@ public final class AppModel {
         // Both screens show the same absences: a change in one refreshes the other.
         planning.onAbsencesChanged = { [weak calendarStore] in Task { await calendarStore?.load() } }
         calendarStore.onAbsencesChanged = { [weak planning] in Task { await planning?.load() } }
+        planning.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        calendarStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         self.planning = planning
         self.calendar = calendarStore
     }

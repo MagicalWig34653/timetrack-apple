@@ -1,5 +1,6 @@
 import SwiftUI
 import TimetrackCore
+import TimetrackDesign
 import TimetrackStores
 
 struct SettingsScreen: View {
@@ -16,7 +17,12 @@ struct SettingsScreen: View {
                 }
             }
             Section {
-                Button("watch.adopt_session") { Task { await receiver.pullNow() } }
+                Button("watch.adopt_session") {
+                    Task {
+                        await receiver.pullNow()
+                        TTHaptics.play(model.phase == .signedIn ? .success : .warning)
+                    }
+                }
                     .accessibilityIdentifier("watch.adopt")
             } footer: {
                 Text("watch.adopt_session.hint")

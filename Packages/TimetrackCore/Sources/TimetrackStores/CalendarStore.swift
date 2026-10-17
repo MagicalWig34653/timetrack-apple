@@ -27,6 +27,8 @@ public final class CalendarStore {
     public private(set) var isLoading = false
     public var selectedDay: LocalDay?
     public var error: TimetrackError?
+    /// Reports the result of absence, plan and custom-day writes (never loads or navigation).
+    public var onOutcome: StoreOutcomeHandler?
 
     /// Range mode: first tap sets `rangeStart`, second tap `rangeEnd`.
     public var isRangeMode = false
@@ -112,7 +114,7 @@ public final class CalendarStore {
             planDays = Dictionary(loadedPlan.map { ($0.date, $0) }, uniquingKeysWith: { _, last in last })
             error = nil
         } catch {
-            record(error)
+            record(error, notify: false)
         }
     }
 
@@ -207,6 +209,7 @@ public final class CalendarStore {
             }
             absences = Self.visible(absences.filter { $0.id != draft.id } + [stored])
             error = nil
+            onOutcome?(.saved)
             onAbsencesChanged?()
             await loadDetail()
             return stored
@@ -224,6 +227,7 @@ public final class CalendarStore {
         do {
             try await client.deleteAbsence(id: absence.id)
             error = nil
+            onOutcome?(.deleted)
             onAbsencesChanged?()
             await loadDetail()
             return true
@@ -260,6 +264,7 @@ public final class CalendarStore {
         do {
             planDays[day] = try await client.putPlanDay(day, input)
             error = nil
+            onOutcome?(.saved)
             return true
         } catch {
             planDays = before
@@ -275,6 +280,7 @@ public final class CalendarStore {
         do {
             try await client.deletePlanDay(day)
             error = nil
+            onOutcome?(.deleted)
             return true
         } catch {
             planDays = before
@@ -291,6 +297,7 @@ public final class CalendarStore {
             let created = try await client.createCustomDay(input)
             holidays.append(created)
             error = nil
+            onOutcome?(.saved)
             return true
         } catch {
             record(error)
@@ -306,6 +313,7 @@ public final class CalendarStore {
         do {
             try await client.deleteCustomDay(id: id)
             error = nil
+            onOutcome?(.deleted)
             return true
         } catch {
             holidays = before
@@ -314,9 +322,13 @@ public final class CalendarStore {
         }
     }
 
-    private func record(_ failure: Error) {
+    /// `notify: false` for reads (a failed load shows the error banner, not a failure haptic).
+    private func record(_ failure: Error, notify: Bool = true) {
         if let failure = failure as? TimetrackError {
-            if failure != .cancelled { error = failure }
+            if failure != .cancelled {
+                error = failure
+                if notify { onOutcome?(.failed) }
+            }
         } else {
             error = .cancelled
         }

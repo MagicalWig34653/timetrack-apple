@@ -26,6 +26,7 @@ struct DayDetail: View {
         .confirmationDialog("plan.cancel.title", isPresented: Binding(get: { cancelling != nil }, set: { if !$0 { cancelling = nil } }), titleVisibility: .visible) {
             Button("plan.cancel.confirm", role: .destructive) { if let absence = cancelling { Task { await store.cancelAbsence(absence) } } }
         } message: { Text("plan.cancel.message") }
+        .ttHaptic(.confirmDestructive, whenBecomesTrue: cancelling != nil)
     }
 
     @ViewBuilder private var evaluation: some View {

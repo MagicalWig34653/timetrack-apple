@@ -133,12 +133,14 @@ struct AbsenceEditorSheet: View {
                 Task { if await actions.delete(editing) { dismiss() } }
             }
         } message: { Text("plan.delete.message") }
+        .ttHaptic(.confirmDestructive, whenBecomesTrue: confirmDelete)
         .confirmationDialog("plan.cancel.title", isPresented: $confirmCancel, titleVisibility: .visible) {
             Button("plan.cancel.confirm", role: .destructive) {
                 guard let editing else { return }
                 Task { if await actions.cancel(editing) { dismiss() } }
             }
         } message: { Text("plan.cancel.message") }
+        .ttHaptic(.confirmDestructive, whenBecomesTrue: confirmCancel)
     }
 
     private static func mondayCalendar(_ zone: TimeZone) -> Calendar {

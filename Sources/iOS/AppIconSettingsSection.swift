@@ -103,9 +103,11 @@ struct AppIconPickerSection: View {
             DispatchQueue.main.async {
                 if let error {
                     errorMessage = String(localized: "Symbol konnte nicht gewechselt werden: \(error.localizedDescription)")
+                    TTHaptics.play(.error)
                 } else {
                     errorMessage = nil
                     current = choice.iconName
+                    TTHaptics.play(.success)
                 }
             }
         }

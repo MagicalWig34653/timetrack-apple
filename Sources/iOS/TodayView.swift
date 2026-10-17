@@ -57,12 +57,8 @@ private struct TodayContent: View {
         }
         .ttScreenBackground()
         .task { await store.load() }
-        .refreshable { await store.load() }
+        .refreshable { await store.load(); TTHaptics.play(.softTap) }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
-        .sensoryFeedback(trigger: store.running?.id) { old, new in
-            guard old != new else { return nil }
-            return new != nil ? .start : .stop
-        }
         .animation(.smooth(duration: 0.35), value: store.running?.id)
     }
 

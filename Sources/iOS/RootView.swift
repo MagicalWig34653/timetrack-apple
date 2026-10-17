@@ -50,12 +50,17 @@ struct MainView: View {
         AppSection.allCases.filter { section in section.requiredModule.map(model.isEnabled) ?? true }
     }
 
+    /// Tab or sidebar change by the user (not the module fallback below): one selection tick.
+    private func selectSection(_ section: AppSection) {
+        if section != ui.selection { TTHaptics.play(.selection) }
+        ui.selection = section
+    }
+
     var body: some View {
-        @Bindable var ui = ui
         Group {
             if sizeClass == .regular {
                 NavigationSplitView {
-                    List(selection: Binding<AppSection?>(get: { ui.selection }, set: { if let value = $0 { ui.selection = value } })) {
+                    List(selection: Binding<AppSection?>(get: { ui.selection }, set: { if let value = $0 { selectSection(value) } })) {
                         ForEach(sections) { section in
                             Label(section.titleKey, systemImage: section.symbol)
                                 .tag(section)
@@ -79,7 +84,7 @@ struct MainView: View {
                     NavigationStack { SectionView(section: ui.selection) }
                 }
             } else {
-                TabView(selection: $ui.selection) {
+                TabView(selection: Binding(get: { ui.selection }, set: { selectSection($0) })) {
                     ForEach(sections) { section in
                         Tab(section.titleKey, systemImage: section.symbol, value: section) {
                             NavigationStack { SectionView(section: section) }

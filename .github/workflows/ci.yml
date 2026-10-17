@@ -1,18 +1,16 @@
 # Apple CI: XcodeGen drift check, Swift package tests and unsigned builds of the three app schemes.
 # The project targets OS 27 (Xcode 27). Hosted GitHub macOS images may not provide Xcode 27 yet, so the runner label is
 # configurable: set the repository variable APPLE_RUNNER (Settings > Secrets and variables > Actions > Variables), for
-# example to a self-hosted label such as "self-hosted-macos-27". Assumption without the variable: macos-26 (newest hosted
-# label known when this file was written); the build jobs then fail with a clear toolchain error if Xcode 27 is missing.
+# example to a self-hosted label such as "self-hosted-macos-27". Default without the variable: the GitHub-hosted Xcode 27 image `xcode-27`
+# (generally available since 2026-10-15, macOS 27, Apple Silicon only).
 # Documentation: docs/CI.md in the backend repository.
 name: CI
 
-# Disabled until a runner with Xcode 27 exists (decision 17.10.2026): only manual runs (workflow_dispatch).
-# Re-enable by restoring the `push` and `pull_request` triggers below, then set the repository variable APPLE_RUNNER.
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
-  # push:
-  #   branches: [main]
-  # pull_request:
 
 permissions:
   contents: read
@@ -24,7 +22,7 @@ concurrency:
 jobs:
   project:
     name: XcodeGen drift check
-    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    runs-on: ${{ vars.APPLE_RUNNER || 'xcode-27' }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -41,7 +39,7 @@ jobs:
 
   packages:
     name: Swift packages (${{ matrix.package }})
-    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    runs-on: ${{ vars.APPLE_RUNNER || 'xcode-27' }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -55,7 +53,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.scheme }}
-    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    runs-on: ${{ vars.APPLE_RUNNER || 'xcode-27' }}
     timeout-minutes: 60
     strategy:
       fail-fast: false

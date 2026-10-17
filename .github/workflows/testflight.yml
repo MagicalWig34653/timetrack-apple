@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   upload:
-    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    runs-on: ${{ vars.APPLE_RUNNER || 'xcode-27' }}
     timeout-minutes: 90
     environment: testflight
     env:

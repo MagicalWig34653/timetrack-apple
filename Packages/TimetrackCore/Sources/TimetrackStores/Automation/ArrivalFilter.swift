@@ -72,8 +72,8 @@ public enum PresenceVerification: Sendable, Hashable {
 
     /// Fixes are noisy: inside means within the radius plus the accuracy (capped); outside only when clearly beyond it.
     public static func from(fix: LocationFix?, place: AutomationPlace) -> PresenceVerification {
-        guard let fix, fix.horizontalAccuracy >= 0 else { return .unavailable }
-        let distance = GeoPoint(latitude: fix.latitude, longitude: fix.longitude).distance(to: place.center)
+        guard let fix, fix.horizontalAccuracy >= 0, let center = place.center else { return .unavailable }
+        let distance = GeoPoint(latitude: fix.latitude, longitude: fix.longitude).distance(to: center)
         let radius = Double(place.monitoringRadius)
         if distance <= radius + min(fix.horizontalAccuracy, 100) { return .inside(speed: fix.speed) }
         if distance > radius + 100 + min(fix.horizontalAccuracy, 200) { return .outside }

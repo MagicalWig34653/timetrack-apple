@@ -85,3 +85,10 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 - Ergebnisse von Aktionen kommen aus den Stores (`StoreOutcome`), nicht aus den Ansichten; so gibt es Erfolg/Fehler genau einmal je Aktion.
 - Einstellung „Haptisches Feedback“ (Aus / Dezent / Normal) nur lokal (`appearance.haptics`), auf der Darstellungsseite. Nicht in der Simulation prüfbar.
 
+
+## Standortautomatik (L2, iOS/iPadOS)
+- Seite Einstellungen → „Standortautomatik“ (nur sichtbar bei Modul `automation`), Aufbau von oben: Hauptschalter (Karte), Standortzugriff (Statuschip mit Text, Aktionsknopf: erlauben, auf „Immer“ erweitern, Einstellungen öffnen, genauen Standort erlauben), Orte (je Ort Segmentwahl Aus/Vorschlag/Direkt, Hinweise für fehlende Koordinaten, zu kleinen Radius und Systemgrenze), Wartezeit und Abkühlzeit (Stepper), Kurzbefehle, Gerätetoken, Energieverbrauch, Protokoll.
+- Information nie nur über Farbe: jeder Zustand hat Text und Symbol (`StatusChip`). Warnungen im Ortsbereich sind Text mit Symbol in `TT.warning`.
+- Ort anlegen als Sheet mit Karte (Tipp setzt den Punkt, Kreis zeigt den Radius), Radiusregler 100–500 m.
+- Kurzbefehl-Anleitung: drei Schritte als Karten mit gezeichneten Mini-Abbildungen (keine Screenshots, immer aktuell und lokalisiert), Ortsname zum Kopieren, `ShortcutsLink`, `SiriTipView`.
+- Technik, Entscheidungen und Grenzen: `docs/handoffs/L2.md`; Anwendertext: `docs/guides/standortautomatik.md`.

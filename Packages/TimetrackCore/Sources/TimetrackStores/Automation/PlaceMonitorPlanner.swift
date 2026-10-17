@@ -21,17 +21,18 @@ public struct GeoPoint: Codable, Sendable, Hashable {
     }
 }
 
-/// A place with usable geofence data, as cached for background launches (no network needed to know the places).
+/// A place as cached for background launches (no network needed to know the places). Places without coordinates stay in the
+/// cache because a Shortcuts automation can still report them by id; they are never monitored.
 public struct AutomationPlace: Codable, Sendable, Hashable, Identifiable {
     public let id: UUID
     public var name: String
-    public var center: GeoPoint
+    public var center: GeoPoint?
     /// Radius as saved on the server.
     public var savedRadius: Int
     public var mode: AutomationMode
     public var confirmAfterSeconds: Int
 
-    public init(id: UUID, name: String, center: GeoPoint, savedRadius: Int, mode: AutomationMode, confirmAfterSeconds: Int = 300) {
+    public init(id: UUID, name: String, center: GeoPoint?, savedRadius: Int, mode: AutomationMode, confirmAfterSeconds: Int = 300) {
         self.id = id
         self.name = name
         self.center = center
@@ -44,11 +45,14 @@ public struct AutomationPlace: Codable, Sendable, Hashable, Identifiable {
     public var monitoringRadius: Int { max(savedRadius, PlaceMonitorPlanner.minimumRadius) }
     public var hasTooSmallRadius: Bool { savedRadius < PlaceMonitorPlanner.minimumRadius }
 
-    /// Places without coordinates are skipped. Archived places are dropped; a missing radius counts as the minimum.
+    /// Archived places are dropped; invalid coordinates count as none; a missing radius counts as the minimum.
     public init?(_ place: Place) {
-        guard !place.archived, let latitude = place.latitude, let longitude = place.longitude,
-              (-90...90).contains(latitude), (-180...180).contains(longitude) else { return nil }
-        self.init(id: place.id, name: place.name, center: GeoPoint(latitude: latitude, longitude: longitude),
+        guard !place.archived else { return nil }
+        var center: GeoPoint?
+        if let latitude = place.latitude, let longitude = place.longitude, (-90...90).contains(latitude), (-180...180).contains(longitude) {
+            center = GeoPoint(latitude: latitude, longitude: longitude)
+        }
+        self.init(id: place.id, name: place.name, center: center,
                   savedRadius: place.radiusMeters ?? PlaceMonitorPlanner.minimumRadius, mode: AutomationMode(raw: place.automationMode),
                   confirmAfterSeconds: place.confirmAfterSeconds ?? 300)
     }
@@ -70,11 +74,11 @@ public enum PlaceMonitorPlanner {
     public static let minimumRadius = 100
 
     public static func plan(places: [AutomationPlace], near location: GeoPoint?, limit: Int = regionLimit) -> MonitorPlan {
-        let active = places.filter { $0.mode != .off }
+        let active = places.filter { $0.mode != .off && $0.center != nil }
         let ordered: [AutomationPlace]
         if let location {
             ordered = active.sorted { lhs, rhs in
-                let (l, r) = (lhs.center.distance(to: location), rhs.center.distance(to: location))
+                let (l, r) = (lhs.center?.distance(to: location) ?? .infinity, rhs.center?.distance(to: location) ?? .infinity)
                 return l == r ? lhs.name < rhs.name : l < r
             }
         } else {

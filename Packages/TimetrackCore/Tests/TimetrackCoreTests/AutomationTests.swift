@@ -20,7 +20,7 @@ private func office(mode: AutomationMode = .direct, radius: Int = 150, confirm: 
 
 private func fix(at place: AutomationPlace, offsetMeters: Double = 0, accuracy: Double = 20, speed: Double? = 0) -> LocationFix {
     // 1 degree of latitude is about 111,195 m.
-    LocationFix(latitude: place.center.latitude + offsetMeters / 111_195, longitude: place.center.longitude, horizontalAccuracy: accuracy, speed: speed, timestamp: t0)
+    LocationFix(latitude: place.center!.latitude + offsetMeters / 111_195, longitude: place.center!.longitude, horizontalAccuracy: accuracy, speed: speed, timestamp: t0)
 }
 
 private func counterIDs() -> @Sendable () -> UUID {
@@ -117,11 +117,13 @@ private func makeEngine(clock: Clock, sender: FakeSender?, location: FakeLocatio
         #expect(place(3, lat: 52, radius: 300).monitoringRadius == 300)
     }
 
-    @Test func placesWithoutCoordinatesOrArchivedAreSkipped() {
+    @Test func placesWithoutCoordinatesAreCachedButNeverMonitored() {
         let id = UUID()
-        #expect(AutomationPlace(Place(id: id, name: "x")) == nil)
+        #expect(AutomationPlace(Place(id: id, name: "x", automationMode: "direct"))?.center == nil)
         #expect(AutomationPlace(Place(id: id, name: "x", archived: true, latitude: 1, longitude: 1)) == nil)
-        #expect(AutomationPlace(Place(id: id, name: "x", latitude: 95, longitude: 1)) == nil)
+        #expect(AutomationPlace(Place(id: id, name: "x", latitude: 95, longitude: 1))?.center == nil)
+        let noCoordinates = AutomationPlace(Place(id: id, name: "x", automationMode: "direct"))!
+        #expect(PlaceMonitorPlanner.plan(places: [noCoordinates], near: nil).monitored.isEmpty)
         let ok = AutomationPlace(Place(id: id, name: "x", automationMode: "direct", latitude: 52, longitude: 13, radiusMeters: 120))
         #expect(ok?.mode == .direct)
         #expect(ok?.savedRadius == 120)

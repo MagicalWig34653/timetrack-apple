@@ -39,11 +39,15 @@ struct StartTimerIntent: AppIntent {
     static let description = IntentDescription("Startet einen Arbeitszeitabschnitt in Timetrack.")
     static let openAppWhenRun = false
 
+    // L2: optional parameters for the Shortcuts app (empty = work timer without a place, as before).
+    @Parameter(title: "Art") var kind: TimerKindOption?
+    @Parameter(title: "Ort") var place: PlaceEntity?
+
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let client = try await IntentSession.client()
         do {
             let zone = await IntentSession.zone(client: client)
-            switch try await TimerCommand.start(client: client) {
+            switch try await TimerCommand.start(client: client, kind: kind?.segmentKind ?? .work, placeId: place?.id) {
             case .started(let segment):
                 return .result(dialog: "Timer gestartet um \(segment.startedAt.formatted(Date.FormatStyle(timeZone: zone).hour().minute())).")
             case .alreadyRunning(let segment):
@@ -86,5 +90,10 @@ struct TimetrackShortcuts: AppShortcutsProvider {
                     shortTitle: "Timer starten", systemImageName: "play.fill")
         AppShortcut(intent: StopTimerIntent(), phrases: ["Stoppe den Timer in \(.applicationName)", "Timer stoppen in \(.applicationName)"],
                     shortTitle: "Timer stoppen", systemImageName: "stop.fill")
+        // L2: one shortcut per place (Siri/Shortcuts expand the place parameter from `PlaceEntityQuery`).
+        AppShortcut(intent: ArriveAtPlaceIntent(), phrases: ["Ankunft in \(\.$place) erfassen mit \(.applicationName)", "Ich bin in \(\.$place) angekommen mit \(.applicationName)"],
+                    shortTitle: "Ankunft erfassen", systemImageName: "mappin.and.ellipse")
+        AppShortcut(intent: LeaveAtPlaceIntent(), phrases: ["Abfahrt von \(\.$place) erfassen mit \(.applicationName)", "Ich habe \(\.$place) verlassen mit \(.applicationName)"],
+                    shortTitle: "Abfahrt erfassen", systemImageName: "figure.walk.departure")
     }
 }

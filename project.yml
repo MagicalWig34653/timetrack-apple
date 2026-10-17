@@ -64,6 +64,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/iOS
+      - Sources/Location # L2: location automation (region monitoring, shortcuts)
       - Sources/Planning # A10
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
@@ -120,6 +121,13 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         NSSupportsLiveActivities: true # A7
+        # L2: location automation. Region monitoring needs no `location` background mode; only the app-refresh task is registered.
+        NSLocationWhenInUseUsageDescription: Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Mit „Immer“ kann iOS Timetrack beim Betreten und Verlassen deiner Orte kurz wecken, damit Ankunft und Abfahrt erkannt werden. Die App fragt den Standort nicht laufend ab; gemeldet werden nur Ort und Uhrzeit.
+        NSLocationTemporaryUsageDescriptionDictionary:
+          AutomationVerification: Für die Standortautomatik braucht Timetrack einmalig den genauen Standort, um Ankünfte zuverlässig zu erkennen.
+        UIBackgroundModes: [fetch]
+        BGTaskSchedulerPermittedIdentifiers: [de.linolaske.timetrack.automation.refresh]
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIApplicationShortcutItems:

@@ -9,6 +9,7 @@ struct TimetrackIOSApp: App {
     @UIApplicationDelegateAdaptor(QuickActionDelegate.self) private var delegate
     @State private var model: AppModel
     @State private var ui = UIState.shared
+    @Environment(\.scenePhase) private var scenePhase
     /// Hands the session to the Apple Watch app (WatchConnectivity); the watch stores it in its own Keychain.
     private let watchSender = WatchHandoffSender(channel: WCSessionChannel(), secrets: KeychainSecretStore())
 
@@ -18,6 +19,7 @@ struct TimetrackIOSApp: App {
         let model = AppModel(auth: auth)
         model.onOutcome = { TTHaptics.handle($0) } // user-initiated results only; the stores never report loads
         _model = State(initialValue: model)
+        AutomationRuntime.shared.start() // L2: restores region monitoring; also runs on background launches caused by region events
     }
 
     var body: some Scene {
@@ -29,7 +31,10 @@ struct TimetrackIOSApp: App {
                 .environment(\.watchSender, watchSender)
                 .ttAppearance()
                 .task { await watchSender.start() }
+                .onChange(of: model.isEnabled(.automation)) { AutomationRuntime.shared.moduleEnabled = model.isEnabled(.automation); Task { await AutomationRuntime.shared.replan(force: true) } }
+                .onChange(of: scenePhase) { if scenePhase == .active { AutomationRuntime.shared.foregrounded() } }
                 .onChange(of: model.phase) {
+                    if model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut() } } // L2: stop watching, forget token and queue
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).
                     switch model.phase {
                     case .signedIn: Task { await watchSender.update(isSignedIn: true) }

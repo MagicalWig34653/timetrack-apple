@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>de.linolaske.timetrack.automation.refresh</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -23,6 +27,15 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Mit „Immer“ kann iOS Timetrack beim Betreten und Verlassen deiner Orte kurz wecken, damit Ankunft und Abfahrt erkannt werden. Die App fragt den Standort nicht laufend ab; gemeldet werden nur Ort und Uhrzeit.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>AutomationVerification</key>
+		<string>Für die Standortautomatik braucht Timetrack einmalig den genauen Standort, um Ankünfte zuverlässig zu erkennen.</string>
+	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -48,6 +61,10 @@
 			<key>UIApplicationShortcutItemType</key>
 			<string>de.linolaske.timetrack.quick.stop</string>
 		</dict>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
 	</array>
 </dict>
 </plist>

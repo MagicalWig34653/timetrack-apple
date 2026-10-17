@@ -48,6 +48,8 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        # TLS/WebAuthn via system frameworks only: exempt encryption, skips the TestFlight export-compliance question.
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary # A6b
     info:
       path: Sources/Mac/Info.plist
@@ -98,6 +100,8 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         INFOPLIST_KEY_CFBundleDisplayName: Timetrack
+        # TLS/WebAuthn via system frameworks only: exempt encryption, skips the TestFlight export-compliance question.
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
       configs:

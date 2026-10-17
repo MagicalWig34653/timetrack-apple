@@ -106,3 +106,21 @@ import Testing
         #expect(model.lastError?.knownCode == .invalidCode)
     }
 }
+
+@Suite struct TimeRowsTests {
+    @Test func emptyDayYieldsOneStableEmptyRow() {
+        let day = DayEvaluation(date: "2026-10-12", segments: [])
+        #expect(day.timeRows.map(\.id) == ["empty-2026-10-12"])
+    }
+
+    @Test func rowsAreSortedUniqueAndSkipVoided() {
+        let id = UUID()
+        let a = Segment(id: id, kind: .work, startedAt: Date(timeIntervalSince1970: 2000), endedAt: Date(timeIntervalSince1970: 3000))
+        let b = Segment(id: UUID(), kind: .work, startedAt: Date(timeIntervalSince1970: 1000), endedAt: Date(timeIntervalSince1970: 1500))
+        let gone = Segment(id: UUID(), kind: .work, startedAt: Date(timeIntervalSince1970: 500), voided: true)
+        let day = DayEvaluation(date: "2026-10-12", segments: [a, gone, b, a])
+        #expect(day.timeRows.count == 2)
+        #expect(day.timeRows.map(\.id) == ["2026-10-12-\(b.id.uuidString)", "2026-10-12-\(id.uuidString)"])
+        #expect(day.removingSegment(id).timeRows.count == 1)
+    }
+}

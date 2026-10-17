@@ -16,6 +16,7 @@ Projektstatus: **Alpha**. Das Repository ist seit 17.10.2026 öffentlich (AGPL-3
 | A7 | Widgets (Home-/Sperrbildschirm, interaktiv), Live Activity, Steuerzentrale, macOS-Widgets | 72 + 11 Tests; **nur kompiliert**, nur Debug-Galerie gesichtet |
 | A8 | Akzent und Erscheinungsbild aus dem Konto (`GET/PATCH /me/preferences`, Vertrag v0.14.0, ADR-0020) mit lokalem Cache, Akzent im Widget-Snapshot | 93 Kerntests + 14 Design-Tests; „Heute“ nach Neuinstallation mit Konto-Akzent gesichtet |
 | A10 | Planung nativ: Kalender-Tab, Abwesenheiten anlegen/bearbeiten/stornieren (Urlaub, Krank mit Krankschein-Stand, Freigestellt, Sonstiges), Urlaubseinstellungen, Schnellaktionen auf Heute (`docs/handoffs/A10.md`) | 112 Kerntests + 14 Design-Tests; iOS-UI-Durchlauf auf iPhone (hell/dunkel) und iPad; macOS nur gebaut |
+| A9 | Absturz beim Stornieren in „Zeit“ (TestFlight 0.0.1 (1)) behoben: `swipeActions` mit `role: .destructive` + später geänderte Daten verletzten die UICollectionView-Stapelaktualisierung; zudem eine Zeilenliste je Tag mit stabilen IDs, Storno entfernt lokal in einem Schritt; Build 0.0.1 (2) | Reproduziert und behoben im Simulator (iPhone, iPad), Regressionstest `VoidSegmentTests`; Gerät nicht erneut geprüft, siehe `docs/handoffs/A9.md` |
 | W1 | GitHub-Actions-Workflows, Vorlagen, TestFlight-Gerüst (`docs/handoffs/W1.md`) | actionlint; Workflows laufen auf GitHub |
 
 Die Backend-Seite (A2: `/.well-known/apple-app-site-association`, WebAuthn-Origin für native Apps) ist im Backend-Repo integriert.
@@ -64,5 +65,5 @@ Wegwerf-Backend für lokale Läufe: `scripts/seed-throwaway.py` (synthetische Da
 | `AGENTS.md`, `CLAUDE.md` | Einstieg für Coding-Agents |
 | `docs/DESIGN-NATIVE.md` | Native Designsprache (Tokens, Komponenten, Akzent-System, Abweichungen von der PWA) |
 | `docs/ICONS.md` | App-Symbole und Akzent-Varianten |
-| `docs/handoffs/` | Übergaben A1, A3–A8 (A6b–A6d), W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
+| `docs/handoffs/` | Übergaben A1, A3–A9 (A6b–A6d), W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
 | `docs/screenshots/` | Simulator-Aufnahmen der Sichtprüfungen (synthetische Daten) |

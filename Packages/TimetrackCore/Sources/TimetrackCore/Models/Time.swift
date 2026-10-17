@@ -149,6 +149,30 @@ public struct DayEvaluation: Codable, Sendable, Hashable, Identifiable {
         self.note = nil
         self.breakHints = breakHints
     }
+
+    /// Copy of `other` with a different segment list (used for optimistic local changes).
+    public init(copying other: DayEvaluation, segments: [Segment]?) {
+        self = other.replacingSegments(segments)
+    }
+
+    private func replacingSegments(_ segments: [Segment]?) -> DayEvaluation {
+        DayEvaluation(date: date, modelId: modelId, mark: mark, skipFixedBreaks: skipFixedBreaks, targetSeconds: targetSeconds,
+                      rawWorkSeconds: rawWorkSeconds, breakDeductionSeconds: breakDeductionSeconds, startAdjustSeconds: startAdjustSeconds,
+                      endAdjustSeconds: endAdjustSeconds, evaluatedWorkSeconds: evaluatedWorkSeconds, creditSeconds: creditSeconds,
+                      deltaSeconds: deltaSeconds, evaluatedStart: evaluatedStart, evaluatedEnd: evaluatedEnd, provisional: provisional,
+                      segmentIds: segments?.map(\.id) ?? segmentIds, segments: segments, note: note, breakHints: breakHints)
+    }
+
+    private init(date: LocalDay, modelId: UUID?, mark: DayMarkKind?, skipFixedBreaks: Bool?, targetSeconds: Int, rawWorkSeconds: Int,
+                 breakDeductionSeconds: Int, startAdjustSeconds: Int, endAdjustSeconds: Int, evaluatedWorkSeconds: Int, creditSeconds: Int,
+                 deltaSeconds: Int, evaluatedStart: Date?, evaluatedEnd: Date?, provisional: Bool, segmentIds: [UUID], segments: [Segment]?,
+                 note: String?, breakHints: [BreakHint]) {
+        self.date = date; self.modelId = modelId; self.mark = mark; self.skipFixedBreaks = skipFixedBreaks; self.targetSeconds = targetSeconds
+        self.rawWorkSeconds = rawWorkSeconds; self.breakDeductionSeconds = breakDeductionSeconds; self.startAdjustSeconds = startAdjustSeconds
+        self.endAdjustSeconds = endAdjustSeconds; self.evaluatedWorkSeconds = evaluatedWorkSeconds; self.creditSeconds = creditSeconds
+        self.deltaSeconds = deltaSeconds; self.evaluatedStart = evaluatedStart; self.evaluatedEnd = evaluatedEnd; self.provisional = provisional
+        self.segmentIds = segmentIds; self.segments = segments; self.note = note; self.breakHints = breakHints
+    }
 }
 
 public struct TimeAccount: Codable, Sendable, Hashable {

@@ -32,6 +32,7 @@ private struct TodayContent: View {
                         VStack(spacing: TT.Space.l) {
                             TimerCard(store: store)
                             DayStats(store: store)
+                            QuickAbsenceRow()
                         }
                         .frame(width: 400)
                         VStack(alignment: .leading, spacing: TT.Space.l) {
@@ -44,6 +45,7 @@ private struct TodayContent: View {
                     VStack(alignment: .leading, spacing: TT.Space.l) {
                         TimerCard(store: store)
                         DayStats(store: store)
+                        QuickAbsenceRow()
                         hints
                         TodaySegments(store: store, zone: model.dayCalendar.timeZone)
                     }

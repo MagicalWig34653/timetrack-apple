@@ -507,6 +507,193 @@
         }
       }
     },
+    "calendar.custom": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Tag"
+          }
+        }
+      }
+    },
+    "calendar.custom_delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenen Tag löschen"
+          }
+        }
+      }
+    },
+    "calendar.document_line %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterlagen: %@"
+          }
+        }
+      }
+    },
+    "calendar.evaluation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bewertung"
+          }
+        }
+      }
+    },
+    "calendar.evaluation_text %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %1$@, bewertet %2$@"
+          }
+        }
+      }
+    },
+    "calendar.legend": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Legende"
+          }
+        }
+      }
+    },
+    "calendar.next_month": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächster Monat"
+          }
+        }
+      }
+    },
+    "calendar.no_plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht geplant"
+          }
+        }
+      }
+    },
+    "calendar.picker.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monat und Jahr wählen"
+          }
+        }
+      }
+    },
+    "calendar.plan_label %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung: %@"
+          }
+        }
+      }
+    },
+    "calendar.previous_month": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorheriger Monat"
+          }
+        }
+      }
+    },
+    "calendar.range.chosen %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum: %@"
+          }
+        }
+      }
+    },
+    "calendar.range.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum wählen: auf den ersten und dann auf den letzten Tag tippen."
+          }
+        }
+      }
+    },
+    "calendar.school_holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulferien"
+          }
+        }
+      }
+    },
+    "calendar.today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
+          }
+        }
+      }
+    },
+    "calendar.week_label %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalenderwoche %lld"
+          }
+        }
+      }
+    },
+    "calendar.week_short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KW"
+          }
+        }
+      }
+    },
     "command.new_entry": {
       "extractionState": "manual",
       "localizations": {
@@ -540,6 +727,28 @@
         }
       }
     },
+    "common.dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schließen"
+          }
+        }
+      }
+    },
+    "common.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
     "common.provisional": {
       "extractionState": "manual",
       "localizations": {
@@ -569,6 +778,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sichern"
+          }
+        }
+      }
+    },
+    "custom_day.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Beispiel ein Brückentag oder Schulferien. Eigene Feiertage verbrauchen keinen Urlaub; Schulferien sind nur Kontext."
+          }
+        }
+      }
+    },
+    "custom_day.kind_holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Feiertag oder Brückentag"
+          }
+        }
+      }
+    },
+    "custom_day.kind_school_holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulferien"
+          }
+        }
+      }
+    },
+    "custom_day.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bezeichnung"
           }
         }
       }
@@ -866,6 +1119,842 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weiteres Modul"
+          }
+        }
+      }
+    },
+    "plan.action.custom_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenen Tag anlegen"
+          }
+        }
+      }
+    },
+    "plan.action.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freistellung eintragen"
+          }
+        }
+      }
+    },
+    "plan.action.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonstiges eintragen"
+          }
+        }
+      }
+    },
+    "plan.action.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung festlegen"
+          }
+        }
+      }
+    },
+    "plan.action.range": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum wählen"
+          }
+        }
+      }
+    },
+    "plan.action.segment": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitabschnitt hinzufügen"
+          }
+        }
+      }
+    },
+    "plan.action.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krank melden"
+          }
+        }
+      }
+    },
+    "plan.action.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub eintragen"
+          }
+        }
+      }
+    },
+    "plan.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintragen"
+          }
+        }
+      }
+    },
+    "plan.cancel.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stornieren"
+          }
+        }
+      }
+    },
+    "plan.cancel.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ja, stornieren"
+          }
+        }
+      }
+    },
+    "plan.cancel.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storniert zählt die Abwesenheit nicht mehr und blockiert keine anderen."
+          }
+        }
+      }
+    },
+    "plan.cancel.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abwesenheit stornieren?"
+          }
+        }
+      }
+    },
+    "plan.counted.after_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie viele Urlaubstage das verbraucht, berechnet der Server nach dem Speichern (nur Arbeitstage, ohne Feiertage)."
+          }
+        }
+      }
+    },
+    "plan.counted.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbraucht keinen Urlaub."
+          }
+        }
+      }
+    },
+    "plan.counted.vacation %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zählt: %@ Urlaub (vom Server berechnet)."
+          }
+        }
+      }
+    },
+    "plan.delete.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "plan.delete.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endgültig löschen"
+          }
+        }
+      }
+    },
+    "plan.delete.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Eintrag wird endgültig entfernt."
+          }
+        }
+      }
+    },
+    "plan.delete.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abwesenheit löschen?"
+          }
+        }
+      }
+    },
+    "plan.document.mark_submitted": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krankschein als eingereicht markieren"
+          }
+        }
+      }
+    },
+    "plan.document.not_needed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht nötig"
+          }
+        }
+      }
+    },
+    "plan.document.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch einzureichen"
+          }
+        }
+      }
+    },
+    "plan.document.submitted": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingereicht"
+          }
+        }
+      }
+    },
+    "plan.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeiten"
+          }
+        }
+      }
+    },
+    "plan.editor.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abwesenheit bearbeiten"
+          }
+        }
+      }
+    },
+    "plan.field.document_status": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand der Bescheinigung"
+          }
+        }
+      }
+    },
+    "plan.field.documents": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krankschreibung"
+          }
+        }
+      }
+    },
+    "plan.field.documents_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur zu deiner Erinnerung. Unterlagen und Notizen werden nie mit anderen geteilt."
+          }
+        }
+      }
+    },
+    "plan.field.from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von"
+          }
+        }
+      }
+    },
+    "plan.field.half_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzter Tag nur halber Tag"
+          }
+        }
+      }
+    },
+    "plan.field.half_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bei einem einzelnen Tag zählt jede dieser Angaben als halber Tag."
+          }
+        }
+      }
+    },
+    "plan.field.half_start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erster Tag nur halber Tag"
+          }
+        }
+      }
+    },
+    "plan.field.kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art"
+          }
+        }
+      }
+    },
+    "plan.field.mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsform"
+          }
+        }
+      }
+    },
+    "plan.field.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz (optional)"
+          }
+        }
+      }
+    },
+    "plan.field.note_placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "plan.field.period": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum"
+          }
+        }
+      }
+    },
+    "plan.field.reference": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gültigkeitszeitraum angeben"
+          }
+        }
+      }
+    },
+    "plan.field.reference_from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bescheinigung gilt ab"
+          }
+        }
+      }
+    },
+    "plan.field.reference_to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bescheinigung gilt bis"
+          }
+        }
+      }
+    },
+    "plan.field.status": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        }
+      }
+    },
+    "plan.field.status_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur genehmigter und genommener Urlaub wird vom Konto abgezogen; geplant und beantragt erscheinen nur in der Vorschau."
+          }
+        }
+      }
+    },
+    "plan.field.status_hint_other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant für künftige Tage, genommen für vergangene."
+          }
+        }
+      }
+    },
+    "plan.field.submitted_on": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingereicht am"
+          }
+        }
+      }
+    },
+    "plan.field.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bis"
+          }
+        }
+      }
+    },
+    "plan.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant ist nicht gearbeitet: Die tatsächliche Zeit trägst du separat ein."
+          }
+        }
+      }
+    },
+    "plan.kind.excused.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bezahlt frei, verbraucht keinen Urlaub."
+          }
+        }
+      }
+    },
+    "plan.kind.other.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonstige Abwesenheit ohne Urlaubsverbrauch."
+          }
+        }
+      }
+    },
+    "plan.kind.sick.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbraucht keinen Urlaub. Der Stand der Krankschreibung dient nur deiner Erinnerung."
+          }
+        }
+      }
+    },
+    "plan.kind.vacation.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbraucht Urlaubstage an Arbeitstagen ohne Feiertage."
+          }
+        }
+      }
+    },
+    "plan.mode.customer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunde"
+          }
+        }
+      }
+    },
+    "plan.mode.home": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homeoffice"
+          }
+        }
+      }
+    },
+    "plan.mode.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "plan.mode.office": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Büro"
+          }
+        }
+      }
+    },
+    "plan.mode.school": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schule"
+          }
+        }
+      }
+    },
+    "plan.mode.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbekannt"
+          }
+        }
+      }
+    },
+    "plan.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung entfernen"
+          }
+        }
+      }
+    },
+    "plan.sheet.custom_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Tag"
+          }
+        }
+      }
+    },
+    "plan.sheet.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung"
+          }
+        }
+      }
+    },
+    "plan.sheet.segment": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitabschnitt"
+          }
+        }
+      }
+    },
+    "plan.short.custom_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Tag"
+          }
+        }
+      }
+    },
+    "plan.short.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigestellt"
+          }
+        }
+      }
+    },
+    "plan.short.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonstiges"
+          }
+        }
+      }
+    },
+    "plan.short.segment": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitabschnitt"
+          }
+        }
+      }
+    },
+    "plan.short.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krank"
+          }
+        }
+      }
+    },
+    "plan.short.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub"
+          }
+        }
+      }
+    },
+    "plan.status.approved": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmigt"
+          }
+        }
+      }
+    },
+    "plan.status.cancelled": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storniert"
+          }
+        }
+      }
+    },
+    "plan.status.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant"
+          }
+        }
+      }
+    },
+    "plan.status.rejected": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abgelehnt"
+          }
+        }
+      }
+    },
+    "plan.status.requested": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beantragt"
+          }
+        }
+      }
+    },
+    "plan.status.taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genommen"
+          }
+        }
+      }
+    },
+    "plan.status.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbekannt"
+          }
+        }
+      }
+    },
+    "plan.unit.day %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tag"
+          }
+        }
+      }
+    },
+    "plan.unit.days %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tage"
           }
         }
       }
@@ -1185,6 +2274,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uhr nicht erreichbar – die Übertragung wird nachgeholt"
+          }
+        }
+      }
+    },
+    "sidebar.calendar": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalender"
           }
         }
       }
@@ -1838,6 +2938,72 @@
         }
       }
     },
+    "vacation.adjustment_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datum"
+          }
+        }
+      }
+    },
+    "vacation.adjustment_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tage (+ oder −)"
+          }
+        }
+      }
+    },
+    "vacation.adjustment_reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grund"
+          }
+        }
+      }
+    },
+    "vacation.adjustment_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur speichern"
+          }
+        }
+      }
+    },
+    "vacation.adjustment_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Gutschriften oder Abzüge, die nicht aus einer Abwesenheit kommen. Der Grund bleibt gespeichert."
+          }
+        }
+      }
+    },
+    "vacation.adjustment_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur eintragen"
+          }
+        }
+      }
+    },
     "vacation.after_planned": {
       "extractionState": "manual",
       "localizations": {
@@ -1882,6 +3048,17 @@
         }
       }
     },
+    "vacation.balance_formula": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verfügbar = Anspruch + Übertrag + Korrekturen − gebuchter Urlaub. Geplanter Urlaub wird erst abgezogen, wenn er genehmigt ist."
+          }
+        }
+      }
+    },
     "vacation.booked": {
       "extractionState": "manual",
       "localizations": {
@@ -1889,6 +3066,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genehmigt oder genommen"
+          }
+        }
+      }
+    },
+    "vacation.carry_field %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übertrag für %@ (Tage)"
+          }
+        }
+      }
+    },
+    "vacation.carry_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub aus dem Vorjahr. Gilt nicht, wenn für das Jahr ein Stichtagsbestand eingetragen ist."
           }
         }
       }
@@ -1937,6 +3136,171 @@
         }
       }
     },
+    "vacation.entitlement_field": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jahresanspruch (Tage)"
+          }
+        }
+      }
+    },
+    "vacation.entitlement_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Beispiel 30 oder 28,5."
+          }
+        }
+      }
+    },
+    "vacation.entries_title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eingetragene Stichtage und Korrekturen %@"
+          }
+        }
+      }
+    },
+    "vacation.entry_adjustment %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur %1$@: %2$@ Tage (%3$@)"
+          }
+        }
+      }
+    },
+    "vacation.entry_delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag löschen"
+          }
+        }
+      }
+    },
+    "vacation.entry_snapshot %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stichtag %1$@: %2$@ Tage Resturlaub"
+          }
+        }
+      }
+    },
+    "vacation.error_adjust_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib eine Zahl ungleich 0 in ganzen oder halben Tagen an, zum Beispiel 1 oder -0,5."
+          }
+        }
+      }
+    },
+    "vacation.error_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib Tage als ganze oder halbe Zahl an, zum Beispiel 12 oder 12,5."
+          }
+        }
+      }
+    },
+    "vacation.error_expiry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib Tag und Monat an, zum Beispiel 31.03."
+          }
+        }
+      }
+    },
+    "vacation.error_reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib einen Grund an."
+          }
+        }
+      }
+    },
+    "vacation.expiry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verfall des Übertrags (optional)"
+          }
+        }
+      }
+    },
+    "vacation.expiry_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag und Monat, zum Beispiel 31.03. Leer lassen, wenn der Übertrag nicht verfällt."
+          }
+        }
+      }
+    },
+    "vacation.expiry_placeholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "31.03."
+          }
+        }
+      }
+    },
+    "vacation.group.booked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmigt, genommen und weitere"
+          }
+        }
+      }
+    },
+    "vacation.group.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant und beantragt"
+          }
+        }
+      }
+    },
     "vacation.next_year": {
       "extractionState": "manual",
       "localizations": {
@@ -1959,6 +3323,28 @@
         }
       }
     },
+    "vacation.none_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe auf Eintragen, um Urlaub zu planen oder eine Krankheit zu melden."
+          }
+        }
+      }
+    },
+    "vacation.not_configured": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Urlaubseinstellungen sind noch nicht gespeichert. Angezeigt werden Standardwerte; sie gelten erst nach dem Speichern."
+          }
+        }
+      }
+    },
     "vacation.planned": {
       "extractionState": "manual",
       "localizations": {
@@ -1977,6 +3363,138 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vorheriges Jahr"
+          }
+        }
+      }
+    },
+    "vacation.region": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Region (Feiertage)"
+          }
+        }
+      }
+    },
+    "vacation.region_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestimmt die gesetzlichen Feiertage, an denen kein Urlaub verbraucht wird."
+          }
+        }
+      }
+    },
+    "vacation.settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen"
+          }
+        }
+      }
+    },
+    "vacation.settings_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen speichern"
+          }
+        }
+      }
+    },
+    "vacation.settings_suggestion": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschlag laut Projektvorgabe: 30 Tage Jahresanspruch, Region Sachsen-Anhalt. Die Werte sind nur vorbelegt und erst nach dem Speichern wirksam."
+          }
+        }
+      }
+    },
+    "vacation.settings_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Region für die Feiertage, Jahresanspruch in Tagen und Übertrag. Halbe Tage sind möglich (zum Beispiel 12,5)."
+          }
+        }
+      }
+    },
+    "vacation.snapshot_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stichtag"
+          }
+        }
+      }
+    },
+    "vacation.snapshot_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub (Tage)"
+          }
+        }
+      }
+    },
+    "vacation.snapshot_row %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub zum Stichtag %@"
+          }
+        }
+      }
+    },
+    "vacation.snapshot_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stichtagsbestand speichern"
+          }
+        }
+      }
+    },
+    "vacation.snapshot_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trage ein, wie viel Urlaub dir an einem Tag noch zustand. Ab diesem Tag rechnet das Konto damit; Anspruch und Übertrag des Jahres werden nicht zusätzlich addiert."
+          }
+        }
+      }
+    },
+    "vacation.snapshot_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub zum Stichtag"
           }
         }
       }

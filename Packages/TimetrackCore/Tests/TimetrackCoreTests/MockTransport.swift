@@ -19,6 +19,11 @@ final class MockTransport: HTTPTransport, SessionCookieJar, @unchecked Sendable 
         lock.withLock { replies[key, default: []].append(Reply(status: status, body: body, error: error)) }
     }
 
+    /// Replaces any queued or repeating answers of `key` (used when a test changes the server's answer midway).
+    func set(_ key: String, status: Int = 200, body: String = "") {
+        lock.withLock { replies[key] = [Reply(status: status, body: body)] }
+    }
+
     func requests(matching key: String) -> [URLRequest] {
         lock.withLock { requests.filter { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" == key } }
     }

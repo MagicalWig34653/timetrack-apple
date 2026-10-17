@@ -41,18 +41,20 @@ private struct TimeContent: View {
                         DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
                             editor = EditorRequest(segment: nil, day: day.date)
                         }
-                        let segments = (day.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
-                        if segments.isEmpty {
+                        let rows = day.timeRows
+                        if case .empty = rows.first {
                             Card(padding: 0) { EmptyDayRow(day: day) }
                         } else {
                             ListCard {
-                                ForEach(segments) { segment in
+                                ForEach(rows) { row in
+                                    if case .segment(let segment, _) = row {
                                     SegmentRow(segment: segment, zone: store.calendar.timeZone)
                                         .onTapGesture(count: 2) { editor = EditorRequest(segment: segment, day: day.date) }
                                         .contextMenu {
                                             Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }
                                             Button("time.void", role: .destructive) { voiding = segment }
                                         }
+                                    }
                                 }
                             }
                         }

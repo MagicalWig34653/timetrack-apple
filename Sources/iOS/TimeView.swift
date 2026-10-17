@@ -83,21 +83,23 @@ private struct TimeContent: View {
             }
             ForEach(store.days) { day in
                 Section {
-                    let segments = (day.segments ?? []).filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
-                    if segments.isEmpty {
-                        EmptyDayRow(day: day)
-                            .listRowInsets(.init()).listRowBackground(TT.surface)
-                    }
-                    ForEach(segments) { segment in
-                        SegmentRow(segment: segment, zone: store.calendar.timeZone)
-                            .onTapGesture { editor = EditorRequest(segment: segment, day: day.date) }
-                            .listRowInsets(.init()).listRowBackground(TT.surface)
-                            .swipeActions(edge: .trailing) {
-                                Button("time.void", role: .destructive) { voiding = segment }
-                                Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }.tint(.accentColor)
-                            }
-                            .accessibilityAction(named: Text("time.edit")) { editor = EditorRequest(segment: segment, day: day.date) }
-                            .accessibilityAction(named: Text("time.void")) { voiding = segment }
+                    // One ForEach with stable unique ids per section (no static row next to it): keeps the List diff consistent.
+                    ForEach(day.timeRows) { row in
+                        switch row {
+                        case .empty:
+                            EmptyDayRow(day: day)
+                                .listRowInsets(.init()).listRowBackground(TT.surface)
+                        case .segment(let segment, _):
+                            SegmentRow(segment: segment, zone: store.calendar.timeZone)
+                                .onTapGesture { editor = EditorRequest(segment: segment, day: day.date) }
+                                .listRowInsets(.init()).listRowBackground(TT.surface)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button("time.void") { voiding = segment }.tint(.red)
+                                    Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }.tint(.accentColor)
+                                }
+                                .accessibilityAction(named: Text("time.edit")) { editor = EditorRequest(segment: segment, day: day.date) }
+                                .accessibilityAction(named: Text("time.void")) { voiding = segment }
+                        }
                     }
                 } header: {
                     DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
@@ -109,6 +111,8 @@ private struct TimeContent: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .listSectionSpacing(TT.Space.s)
+        // Data refreshes must not compete with row animations (A9: crash in the collection view's batch update).
+        .transaction(value: store.days) { $0.animation = nil }
         .task { await store.load() }
         .refreshable { await store.load() }
     }
@@ -339,6 +343,7 @@ private struct VoidSheet: View {
     let segment: Segment
     @Environment(\.dismiss) private var dismiss
     @State private var reason = ""
+    @State private var busy = false
 
     var body: some View {
         NavigationStack {
@@ -358,9 +363,15 @@ private struct VoidSheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("common.cancel") { dismiss() } }
                 ToolbarItem(placement: .destructiveAction) {
                     Button("time.void", role: .destructive) {
-                        Task { if await store.void(segment, reason: reason.trimmingCharacters(in: .whitespaces)) { dismiss() } }
+                        guard !busy else { return }
+                        busy = true
+                        Task {
+                            // The store removes the segment in one state change before returning; the sheet closes right after.
+                            if await store.void(segment, reason: reason.trimmingCharacters(in: .whitespaces)) { dismiss() }
+                            busy = false
+                        }
                     }
-                    .disabled(reason.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(busy || reason.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         }

@@ -52,7 +52,7 @@ struct TimetrackIOSApp: App {
     private static func keyWindow() -> UIWindow {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         if let window = scenes.flatMap(\.windows).first(where: \.isKeyWindow) { return window }
-        guard let scene = scenes.first else { preconditionFailure("passkey prompt without a window scene") }
+        guard let scene = scenes.first else { return UIWindow(frame: .zero) } // no scene: the system sheet fails instead of crashing
         return UIWindow(windowScene: scene)
     }
 }

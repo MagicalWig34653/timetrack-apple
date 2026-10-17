@@ -71,3 +71,10 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 - ID-Zuordnung: `AccentChoice` = `AccentPreset` (Test). Native Farbtöne weichen bewusst von der PWA ab: Türkis `#0EA5A4` (PWA `#0D9488`), Orange `#F97316` (`#D97706`), Rosa `#EC4899` (`#DB2777`); Blau, Violett, Grün, Graphit gleich. Nur die IDs sind vertraglich.
 - Darstellungsseite: eine Statuszeile (`SyncStatusLine`): synchronisiert / wird synchronisiert / nur auf diesem Gerät, wird gesendet sobald online / Fehlertext.
 - Widgets/Komplikation: `WidgetSnapshot.accentHex` und `colorScheme` (additiv, optional, validiert). Widgets folgen dem Systemerscheinungsbild; `colorScheme` wird nur mitgeschrieben. Intents behalten den zuletzt geschriebenen Akzent.
+
+## Kalender und Abwesenheiten (A10)
+
+- Kalender ist ein eigener Tab/Seitenleisteneintrag (Modul `planning`). Monatsraster Montag zuerst mit KW-Spalte; Zellen: Tageszahl (heute = Akzentkreis), Tönung nach Abwesenheitsart (Artenfarben wie PWA), Punkte für Abwesenheit, Feiertag, Planung; Information nie nur über Farbe (Legende, VoiceOver-Label „Montag, 20. Oktober, Urlaub, geplant“).
+- iPhone: Tipp öffnet ein Tagesblatt (Detents mittel/groß); iPad/Mac: Raster links, Tagesdetail rechts (max. 1200 pt Breite). Bereichsauswahl per Langdruck oder „+ > Zeitraum wählen“, Aktionsleiste oben mit Urlaub/Krank/Abbrechen.
+- Editor als Sheet im Formularstil (`FormSection`, `EditorRow`); Hinweisbänder (`HintBanner`) für Verbrauch („berechnet der Server nach dem Speichern“). Destruktives (Stornieren/Löschen) als leise Zweitaktion mit Bestätigungsdialog, Bestätigungsknöpfe tragen eindeutige Texte.
+- Änderungen erscheinen sofort im Raster (optimistisch) und werden mit der Serverantwort abgeglichen; bei Fehler Rückabwicklung plus `ErrorBanner` in Klartext.

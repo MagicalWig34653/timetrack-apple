@@ -24,6 +24,7 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case staleVersion = "stale_version"
     case modelOverlap = "model_overlap"
     case rangeTooLarge = "range_too_large"
+    case absenceOverlap = "absence_overlap"
     case insufficientScope = "insufficient_scope"
 }
 

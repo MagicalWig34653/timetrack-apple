@@ -25,6 +25,7 @@ public final class AppModel {
     public private(set) var timeList: TimeListStore?
     /// Created only while the `planning` module is on.
     public private(set) var planning: PlanningStore?
+    public private(set) var calendar: CalendarStore?
     public private(set) var isBusy = false
     public var lastError: TimetrackError?
 
@@ -139,7 +140,7 @@ public final class AppModel {
         let calendar = dayCalendar
         today = TodayStore(client: client, calendar: calendar)
         timeList = TimeListStore(client: client, calendar: calendar)
-        planning = modules.isEnabled(.planning) ? PlanningStore(client: client, calendar: calendar) : nil
+        makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
         phase = .signedIn
         Task { await today?.load() }
     }
@@ -149,9 +150,25 @@ public final class AppModel {
         modules = ModuleSwitches(statuses)
         if !modules.isEnabled(.planning) {
             planning = nil
+            calendar = nil
         } else if planning == nil {
-            planning = PlanningStore(client: context.client, calendar: dayCalendar)
+            makePlanningStores(client: context.client, enabled: true)
         }
+    }
+
+    private func makePlanningStores(client: APIClient, enabled: Bool) {
+        guard enabled else {
+            planning = nil
+            calendar = nil
+            return
+        }
+        let planning = PlanningStore(client: client, calendar: dayCalendar)
+        let calendarStore = CalendarStore(client: client, calendar: dayCalendar)
+        // Both screens show the same absences: a change in one refreshes the other.
+        planning.onAbsencesChanged = { [weak calendarStore] in Task { await calendarStore?.load() } }
+        calendarStore.onAbsencesChanged = { [weak planning] in Task { await planning?.load() } }
+        self.planning = planning
+        self.calendar = calendarStore
     }
 
     private func reset(to phase: Phase) {
@@ -161,6 +178,7 @@ public final class AppModel {
         today = nil
         timeList = nil
         planning = nil
+        calendar = nil
         workModel = nil
         modules = ModuleSwitches()
         self.phase = phase

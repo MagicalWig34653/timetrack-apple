@@ -23,6 +23,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/Mac
+      - Sources/Planning # A10: absences, calendar, vacation settings (shared with iOS)
       - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
@@ -63,6 +64,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/iOS
+      - Sources/Planning # A10
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon

@@ -46,6 +46,15 @@ public enum LocalDays {
         return weekday == 1 ? 7 : weekday - 1
     }
 
+    /// ISO 8601 calendar week (1...53) of a day (Monday start, week 1 contains the first Thursday).
+    public static func isoWeek(of day: LocalDay) -> Int? {
+        guard let p = parse(day) else { return nil }
+        var calendar = Calendar(identifier: .iso8601)
+        calendar.timeZone = TimeZone(identifier: "UTC") ?? .gmt
+        guard let date = calendar.date(from: DateComponents(year: p.year, month: p.month, day: p.day)) else { return nil }
+        return calendar.component(.weekOfYear, from: date)
+    }
+
     public static func mondayOfWeek(containing day: LocalDay) -> LocalDay? {
         guard let weekday = isoWeekday(day) else { return nil }
         return adding(-(weekday - 1), to: day)

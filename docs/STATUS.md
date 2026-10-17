@@ -15,6 +15,7 @@ Projektstatus: **Alpha**. Das Repository ist seit 17.10.2026 öffentlich (AGPL-3
 | A6d | Darstellungsseite: App-Akzent und App-Symbol getrennt wählbar, Erscheinungsbild System/Hell/Dunkel | 69 + 11 Tests (Kontrast ≥ 4,5:1) |
 | A7 | Widgets (Home-/Sperrbildschirm, interaktiv), Live Activity, Steuerzentrale, macOS-Widgets | 72 + 11 Tests; **nur kompiliert**, nur Debug-Galerie gesichtet |
 | A8 | Akzent und Erscheinungsbild aus dem Konto (`GET/PATCH /me/preferences`, Vertrag v0.14.0, ADR-0020) mit lokalem Cache, Akzent im Widget-Snapshot | 93 Kerntests + 14 Design-Tests; „Heute“ nach Neuinstallation mit Konto-Akzent gesichtet |
+| A10 | Planung nativ: Kalender-Tab, Abwesenheiten anlegen/bearbeiten/stornieren (Urlaub, Krank mit Krankschein-Stand, Freigestellt, Sonstiges), Urlaubseinstellungen, Schnellaktionen auf Heute (`docs/handoffs/A10.md`) | 112 Kerntests + 14 Design-Tests; iOS-UI-Durchlauf auf iPhone (hell/dunkel) und iPad; macOS nur gebaut |
 | W1 | GitHub-Actions-Workflows, Vorlagen, TestFlight-Gerüst (`docs/handoffs/W1.md`) | actionlint; Workflows laufen auf GitHub |
 
 Die Backend-Seite (A2: `/.well-known/apple-app-site-association`, WebAuthn-Origin für native Apps) ist im Backend-Repo integriert.
@@ -24,7 +25,7 @@ Ziele: macOS 27, iOS/iPadOS 27, watchOS 27 (Deployment Target 27.0). Targets: `T
 
 ```sh
 xcodegen generate                              # Timetrack.xcodeproj aus project.yml (XcodeGen 2.46.0)
-(cd Packages/TimetrackCore && swift test --build-system native)    # 93 Tests (1 Integrationstest nur mit TT_INTEGRATION_URL)
+(cd Packages/TimetrackCore && swift test --build-system native)    # 112 Tests (1 Integrationstest nur mit TT_INTEGRATION_URL)
 (cd Packages/TimetrackDesign && swift test --build-system native)  # 14 Tests
 xcodebuild -project Timetrack.xcodeproj -scheme TimetrackMac -configuration Debug CODE_SIGNING_ALLOWED=NO build   # analog TimetrackIOS (-destination 'generic/platform=iOS Simulator') und TimetrackWatch
 ```

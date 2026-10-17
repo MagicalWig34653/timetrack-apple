@@ -193,7 +193,7 @@ public actor APIClient: PreferencesService {
         return try await send(.post, "/time/timer/stop", body: Body(clientEventId: clientEventId))
     }
 
-    // MARK: - Planning (module `planning`, read-only here)
+    // MARK: - Planning (module `planning`)
 
     public func listAbsences(from: LocalDay, to: LocalDay) async throws -> [Absence] {
         try await get("/absences", query: [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)])
@@ -202,6 +202,50 @@ public actor APIClient: PreferencesService {
     public func getVacationBalance(year: Int) async throws -> VacationBalance {
         try await get("/vacation/balance", query: [URLQueryItem(name: "year", value: String(year))])
     }
+
+    public func createAbsence(_ input: AbsenceInput) async throws -> Absence { try await send(.post, "/absences", body: input) }
+
+    public func updateAbsence(id: UUID, _ input: AbsenceInput, ifMatchVersion: Int) async throws -> Absence {
+        try await send(.put, "/absences/\(id.uuidString.lowercased())", body: input, headers: ["If-Match": String(ifMatchVersion)])
+    }
+
+    public func deleteAbsence(id: UUID) async throws { try await sendVoid(.delete, "/absences/\(id.uuidString.lowercased())") }
+
+    public func getVacationSettings() async throws -> VacationSettings { try await get("/vacation/settings") }
+    public func putVacationSettings(_ settings: VacationSettings) async throws -> VacationSettings { try await send(.put, "/vacation/settings", body: settings) }
+
+    public func createVacationSnapshot(date: LocalDay, remainingHalfDays: Int) async throws -> VacationBalance {
+        struct Body: Encodable { let date: LocalDay; let remainingHalfDays: Int }
+        return try await send(.post, "/vacation/snapshots", body: Body(date: date, remainingHalfDays: remainingHalfDays))
+    }
+
+    public func createVacationAdjustment(date: LocalDay, halfDays: Int, reason: String) async throws -> VacationBalance {
+        struct Body: Encodable { let date: LocalDay; let halfDays: Int; let reason: String }
+        return try await send(.post, "/vacation/adjustments", body: Body(date: date, halfDays: halfDays, reason: reason))
+    }
+
+    public func listVacationEntries(year: Int) async throws -> VacationEntries {
+        try await get("/vacation/entries", query: [URLQueryItem(name: "year", value: String(year))])
+    }
+
+    public func deleteVacationEntry(id: UUID) async throws { try await sendVoid(.delete, "/vacation/entries/\(id.uuidString.lowercased())") }
+
+    /// Statutory holidays of the configured region (or `region`) plus the user's custom days for one year.
+    public func listHolidays(year: Int, region: String? = nil) async throws -> [CalendarDay] {
+        var query = [URLQueryItem(name: "year", value: String(year))]
+        if let region { query.append(URLQueryItem(name: "region", value: region)) }
+        return try await get("/calendar/holidays", query: query)
+    }
+
+    public func createCustomDay(_ input: CustomDayInput) async throws -> CalendarDay { try await send(.post, "/calendar/custom-days", body: input) }
+    public func deleteCustomDay(id: UUID) async throws { try await sendVoid(.delete, "/calendar/custom-days/\(id.uuidString.lowercased())") }
+
+    public func listPlanDays(from: LocalDay, to: LocalDay) async throws -> [PlanDay] {
+        try await get("/plan/days", query: [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)])
+    }
+
+    public func putPlanDay(_ date: LocalDay, _ input: PlanDayInput) async throws -> PlanDay { try await send(.put, "/plan/days/\(date)", body: input) }
+    public func deletePlanDay(_ date: LocalDay) async throws { try await sendVoid(.delete, "/plan/days/\(date)") }
 
     // MARK: - Evaluation and account
 

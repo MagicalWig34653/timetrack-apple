@@ -75,16 +75,17 @@ enum QuickAction: String {
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case today, time, vacation, settings
+    case today, time, calendar, vacation, settings
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
-    var requiredModule: ModuleKey? { self == .vacation ? .planning : nil }
+    var requiredModule: ModuleKey? { self == .vacation || self == .calendar ? .planning : nil }
 
     var titleKey: LocalizedStringKey {
         switch self {
         case .today: "sidebar.today"
         case .time: "sidebar.time"
+        case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
         case .settings: "sidebar.settings"
         }
@@ -94,6 +95,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         switch self {
         case .today: "sun.max"
         case .time: "calendar.day.timeline.left"
+        case .calendar: "calendar"
         case .vacation: "beach.umbrella"
         case .settings: "gearshape"
         }

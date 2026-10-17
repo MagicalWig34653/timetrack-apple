@@ -85,3 +85,7 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 - Ergebnisse von Aktionen kommen aus den Stores (`StoreOutcome`), nicht aus den Ansichten; so gibt es Erfolg/Fehler genau einmal je Aktion.
 - Einstellung „Haptisches Feedback“ (Aus / Dezent / Normal) nur lokal (`appearance.haptics`), auf der Darstellungsseite. Nicht in der Simulation prüfbar.
 
+
+## Fokus-Filter (F2)
+
+Der Fokus-Filter ist eine System-Oberfläche (Einstellungen › Fokus), keine eigene Ansicht: Titel, Parameter und Aufzählungsfälle der Absicht sind kurze deutsche Sätze ohne Fachbegriffe („Was soll Timetrack tun?“ – Nachfragen / Automatisch starten und stoppen / Nichts tun; „Art des Zeitabschnitts“; „Ort (optional)“). Die Erklärseite (Einstellungen › Fokus-Filter) nutzt `FormSection`/`Card`/`StatusChip` der Designschicht: drei nummerierte Schritte mit dem Pfad in Festbreitenschrift, Status-Chips (Fokus-Filter aktiv/nicht aktiv, Mitteilungen), die drei Modi mit Beispiel, Sicherheitsregeln, „Ausprobieren“ (standardmäßig nur Vorschau) und die letzten fünf Aktionen. Rückfragen sind lokale Mitteilungen mit den Aktionen Start/Nicht jetzt bzw. Stopp/Weiterlaufen lassen (Stopp als destruktiv markiert).

@@ -64,6 +64,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/iOS
+      - Sources/Focus # F2: Focus filter, notifications, explainer page
       - Sources/Planning # A10
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.

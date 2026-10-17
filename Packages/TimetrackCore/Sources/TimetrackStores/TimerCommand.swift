@@ -11,9 +11,9 @@ public enum TimerCommand {
         case notRunning
     }
 
-    public static func start(client: APIClient, kind: SegmentKind = .work, eventId: UUID = UUID()) async throws -> Outcome {
+    public static func start(client: APIClient, kind: SegmentKind = .work, placeId: UUID? = nil, eventId: UUID = UUID()) async throws -> Outcome {
         if let running = try await client.currentTimer() { return .alreadyRunning(running) }
-        let segment = try await retryOnNetworkError { try await client.startTimer(clientEventId: eventId, kind: kind) }
+        let segment = try await retryOnNetworkError { try await client.startTimer(clientEventId: eventId, kind: kind, placeId: placeId) }
         return .started(segment)
     }
 

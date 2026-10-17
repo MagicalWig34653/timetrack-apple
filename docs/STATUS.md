@@ -1,42 +1,67 @@
-# Lokaler Stand – 13.10.2026
+# Stand der Apple-Apps – 17.10.2026
 
-Auf main: project.yml und generiertes Timetrack.xcodeproj; SwiftUI-Grundansicht.
-macOS 27 und iOS/iPadOS 27 als Targets. Noch keine App-Fachfunktionen oder API-Anbindung.
-xcodegen generate sowie xcodebuild -project Timetrack.xcodeproj -scheme TimetrackMac
--configuration Debug -derivedDataPath /tmp/timetrack-derived-data CODE_SIGNING_ALLOWED=NO build erfolgreich.
-Kein iOS-Build, Geräte-/Signing-Test oder watchOS-Target. Keine laufenden Jobs.
-Priorität bleibt PWA; native Funktionalität später zuerst macOS. Globaler Einstieg: ../AGENTS.md.
+Projektstatus: **Alpha**. Das Repository ist seit 17.10.2026 öffentlich (AGPL-3.0-only). Kanonisches Projektgedächtnis (Konzept, ADRs, Arbeitsplan, API-Verträge) liegt im Backend-Repo (`<workspace>/timetrack-backend`, `docs/STATUS.md`, `docs/ARBEITSPLAN.md`, ADR-0015 für die nativen Clients). Dieses Dokument beschreibt den tatsächlichen Stand der Apps; Details je Paket in `docs/handoffs/`.
 
-Nachtrag 14.10.2026: Sprachregel in AGENTS.md verbindlich ergänzt (Details im Backend).
-Nur Dokumentation geändert; Diff geprüft, keine Builds erneut ausgeführt.
-Lokalisierungsressourcen für die bisherigen direkt eingebetteten deutschen UI-Texte noch offen.
+## Pakete und Stand (alle integriert in `main`)
 
-Nachtrag 16.10.2026 (Paket A1, Branch a1-core-mac, nicht gemergt): Swift-Paket Packages/TimetrackCore (Modelle, APIClient, AuthService, Stores),
-macOS-App mit Heute, Zeit, Einstellungen und Menüleiste; Team J2DU2P47XW, Bundle-ID de.linolaske.timetrack. Tests: 42 Unit-Tests plus 1 Integrationstest
-gegen einen Wegwerf-Backend (Port 18091) bestanden; macOS- und iOS-Simulator-Build erfolgreich (CODE_SIGNING_ALLOWED=NO), watchOS-Simulator-Build des Kerns erfolgreich.
-Passkey-Anmeldung noch nicht testbar (Domain, Associated Domains, AASA im Backend fehlen). Oberfläche nicht visuell geprüft. Details: docs/handoffs/A1.md.
+| Paket | Inhalt | Zahlen/Belege laut Handoff |
+| --- | --- | --- |
+| A1 | Swift-Paket `TimetrackCore` (Modelle, API-Client, Auth, Stores) und macOS-App (Heute, Zeit, Einstellungen, Menüleiste) | 43 Tests inkl. Integrationstest gegen Wegwerf-Backend |
+| A3 | iOS/iPadOS-App (Heute, Zeit, Urlaub lesend, Einstellungen, Quick Actions, App Intents) | 50 Tests; UI-Smoke auf iPhone- und iPad-Simulator |
+| A4 | watchOS-App (direkt zum Server, Sitzung per WatchConnectivity vom iPhone) | 59 Tests; Simulator-Lauf; WatchConnectivity nur gegen Mock |
+| A5 | Watch: Art-Auswahl, Komplikation (WidgetKit, App Group, nicht geheimer Snapshot), iPhone-Knopf „Sitzung an Uhr senden“ | 69 Tests; Komplikation nur in der Galerie |
+| A6 | Designschicht `TimetrackDesign` und neu gestaltete Oberflächen, App-Symbol | 69 + 3 Tests |
+| A6b/A6c | Symbol im Icon-Composer-Format, Akzent-Varianten, Auswahlansicht (`docs/ICONS.md`) | Primärvorschau gesichtet, Dark/Tinted-Spezialisierungen von den Werkzeugen ignoriert |
+| A6d | Darstellungsseite: App-Akzent und App-Symbol getrennt wählbar, Erscheinungsbild System/Hell/Dunkel | 69 + 11 Tests (Kontrast ≥ 4,5:1) |
+| A7 | Widgets (Home-/Sperrbildschirm, interaktiv), Live Activity, Steuerzentrale, macOS-Widgets | 72 + 11 Tests; **nur kompiliert**, nur Debug-Galerie gesichtet |
+| A8 | Akzent und Erscheinungsbild aus dem Konto (`GET/PATCH /me/preferences`, Vertrag v0.14.0, ADR-0020) mit lokalem Cache, Akzent im Widget-Snapshot | 93 Kerntests + 14 Design-Tests; „Heute“ nach Neuinstallation mit Konto-Akzent gesichtet |
+| W1 | GitHub-Actions-Workflows, Vorlagen, TestFlight-Gerüst (`docs/handoffs/W1.md`) | actionlint; Workflows laufen auf GitHub |
 
-Nachtrag 16.10.2026 (Paket A3, Branch a3-ios, nicht gemergt): iOS/iPadOS-App (Heute, Zeit, Urlaub lesend, Einstellungen, Quick Actions, App Intents), PlanningStore/TimerCommand im Kern.
-50 Unit-Tests bestanden; iOS-Simulator- und macOS-Build erfolgreich; XCUITest-Smoke auf iPhone- und iPad-Simulator gegen Wegwerf-Backend bestanden. Signierter Build scheitert:
-persönliches Team unterstützt Associated Domains nicht (Passkeys brauchen bezahltes Developer Program). Details: docs/handoffs/A3.md.
+Die Backend-Seite (A2: `/.well-known/apple-app-site-association`, WebAuthn-Origin für native Apps) ist im Backend-Repo integriert.
+Ziele: macOS 27, iOS/iPadOS 27, watchOS 27 (Deployment Target 27.0). Targets: `TimetrackMac`, `TimetrackIOS`, `TimetrackWatch`, `TimetrackWidget`, `TimetrackWidgetIOS`, `TimetrackWidgetMac`, `TimetrackIOSUITests`.
 
-Nachtrag 16.10.2026 (Paket A4, Branch a4-watch, nicht gemergt): watchOS-App `TimetrackWatch` (eingebettet in TimetrackIOS) mit Heute, Start/Stopp, Abschnitten, Einstellungen und
-Sitzungsübergabe vom iPhone per WatchConnectivity (Kern: `Sync/`). Zahlen und Grenzen: docs/handoffs/A4.md.
+## Befehle
 
-Nachtrag 16.10.2026 (Paket A5, Branch a5-watch-extras, nicht gemergt): Typauswahl auf der Uhr, WidgetKit-Komplikation (App Group group.de.linolaske.timetrack, nur nicht geheimer Snapshot),
-iPhone-Knopf "Sitzung an Uhr senden", Dynamic-Type-Korrektur auf Heute. 69 Kerntests bestanden; Watch-, iOS- (mit Widget) und macOS-Build erfolgreich (CODE_SIGNING_ALLOWED=NO).
-Signierung mit App Group und echte Komplikation auf dem Zifferblatt nicht geprüft. Details: docs/handoffs/A5.md.
+```sh
+xcodegen generate                              # Timetrack.xcodeproj aus project.yml (XcodeGen 2.46.0)
+(cd Packages/TimetrackCore && swift test --build-system native)    # 93 Tests (1 Integrationstest nur mit TT_INTEGRATION_URL)
+(cd Packages/TimetrackDesign && swift test --build-system native)  # 14 Tests
+xcodebuild -project Timetrack.xcodeproj -scheme TimetrackMac -configuration Debug CODE_SIGNING_ALLOWED=NO build   # analog TimetrackIOS (-destination 'generic/platform=iOS Simulator') und TimetrackWatch
+```
 
-## A6b (icon), branch a6b-icon
-Icon Composer icons (primary + 4 alternates) generated by scripts/icons/build_icons.py, wired in project.yml; picker view ready but not yet wired into SettingsView. See docs/ICONS.md and docs/handoffs/A6b.md.
-Nachtrag 16.10.2026 (Paket A6, Branch a6-design, nicht gemergt): Designpass mit neuem Paket `Packages/TimetrackDesign` (Tokens, Komponenten), neu gestaltete iOS/iPadOS-, macOS- und Watch-Heute-Oberflächen, App-Icon (iOS/macOS/watchOS) und Startfarbe.
-69 Kerntests + 3 Design-Tests bestanden; iOS-, Watch- und macOS-Build erfolgreich (CODE_SIGNING_ALLOWED=NO). Screenshots unter docs/screenshots/; macOS nur als Fensterabbild gesehen, Watch nur Leerlauf. Details und Schwächen: docs/handoffs/A6.md, docs/DESIGN-NATIVE.md.
+Zuletzt vom Lead gemessen (Paket A8): Tests und Builds für iOS, macOS und watchOS erfolgreich (unsigniert). Beim Dokumentationsabgleich (D3) wurden keine Tests oder Builds neu ausgeführt.
+Wegwerf-Backend für lokale Läufe: `scripts/seed-throwaway.py` (synthetische Daten). Symbole: `scripts/make-app-icon.swift`, `scripts/icons/` (siehe `docs/ICONS.md`). Texte: `scripts/add-strings.py`.
 
-## A6c (icon redesign), branch a6c-icon-accents
-New icon (navy surface, closed blue gradient ring, white L hands), accents Blau/Türkis/Violett/Grün/Orange/Rosa + Hell, picker with preview thumbnails; still not wired into SettingsView. See docs/ICONS.md and docs/handoffs/A6c.md.
+## Signierung und Kennungen (funktional, bleiben unverändert)
 
-## A7 (widgets), branch a7-widgets
-Home/Lock Screen widgets, Live Activity, Control Center toggle and macOS widgets (display only) via the shared non-secret `WidgetSnapshot` (extended additively). 72 core tests + 3 design tests pass; iOS, macOS, watchOS builds succeed (unsigned) and signed iOS/macOS builds embed App Group (+ keychain group on iOS) with the personal team. Real widget placement, Live Activity, Dynamic Island, Control Center and intents were not run; see docs/handoffs/A7.md.
+- Bezahltes Apple Developer Program: Team-ID und Bundle-ID stehen in `project.yml` (Bundle-Präfix `de.linolaske`, App-Gruppe `group.de.linolaske.timetrack`). Mit dem bezahlten Team wurde bestätigt, dass **Associated Domains** funktionieren (mit dem früheren persönlichen Team nicht; Debug-Konfiguration ohne Associated Domains bleibt vorhanden) und dass signierte Builds mit App Group (und gemeinsamer Keychain-Gruppe auf iOS) möglich sind.
+- Für die Passkey-Anmeldung braucht das Backend `APPLE_APP_IDS` und die AASA-Datei muss unter der Produktionsdomain unverändert ausgeliefert werden (Backend `docs/DEPLOYMENT.md`). Auf der privaten Live-Testinstanz ist die AASA aus.
+- Namensentscheidung (17.10.2026): Projekt und Anzeigename bleiben Timetrack; **Chronolog** ist nur der Name des App-Store-Connect-Eintrags („Chronolog – Arbeitszeit“). Die Bundle-ID bleibt, weil sie nach dem Anlegen nicht mehr änderbar ist.
+- Ausfuhr: `ITSAppUsesNonExemptEncryption` ist als ausgenommen deklariert (Commit „Declare exempt encryption for TestFlight“).
 
-## A8 (account accent), branch a8-account-accent
-Accent and colour scheme are account settings now (GET/PATCH /me/preferences, v0.14.0): Core models/API/`AppearanceSync`, reconcile as in the P2 handoff, status line on Darstellung (iOS, macOS), accent in the widget snapshot (widgets, complication). 93 core tests + 14 design tests pass; iOS, macOS, watchOS builds succeed (unsigned). Verified against a throwaway backend incl. iPhone simulator (change via UI, fresh install picks the account accent). Not seen: macOS UI, real widgets/complication. See docs/handoffs/A8.md.
+## TestFlight
+
+`scripts/testflight.sh <ios|mac> <archive|export|upload>` (lokal, Apple-ID aus Xcode, Team über `APPLE_TEAM_ID` überschreibbar, Ausgabe unter `~/.cache/timetrack-testflight`). **Archiv und Export wurden lokal bestätigt; der Upload ist noch nicht ausgeführt** und wartet auf die erreichbare AASA der Produktionsdomain. Die Build-Nummer (`CURRENT_PROJECT_VERSION` in `project.yml`, derzeit 1) muss bei jedem Upload steigen. `.github/workflows/testflight.yml` ist ein ungetestetes Gerüst (Secrets nur als Namen dokumentiert, in `docs/handoffs/W1.md` und Backend `docs/CI.md`).
+
+## CI auf GitHub
+
+`ci.yml` (XcodeGen-Drift, Paket-Tests, unsignierte Builds). Stand 17.10. auf `main`: **rot** – der gehostete Runner hat Swift 6.3.3, die Pakete verlangen Swift Tools 6.4 (Xcode 27); nur die XcodeGen-Drift-Prüfung ist grün. Lösung: Runner mit Xcode 27 (z. B. selbst gehostet, Repository-Variable `APPLE_RUNNER`) oder CI vorerst nicht als Pflichtprüfung führen. Auch der Dependabot-Lauf für die Swift-Pakete schlug fehl (Ursache nicht untersucht). Ein Pull-Request ist offen.
+
+## Nicht geprüft / bekannte Lücken
+
+- **Echtgeräte**: Passkey-Anmeldung (braucht Produktions-AASA), WatchConnectivity auf gekoppeltem Gerätepaar, Komplikation auf dem Zifferblatt, Widgets, Live Activity/Dynamic Island, Control Center, App Intents/Kurzbefehle, Keychain-Lesen aus Erweiterungen, VoiceOver, Dynamic Type auf allen Bildschirmen.
+- **macOS-Client**: nur gebaut und teilweise als Fensterabbild gesichtet; keine vollständige visuelle Prüfung der Mac-Oberfläche; macOS-Widgets ungesehen.
+- **Konto-Akzent (A8)**: Offline-/Fehlerzustände der Statuszeile, „Eigene Farbe“ per UI, Zwei-Geräte-Konflikt, Wechsel zwischen Konten mit ungesendeter Änderung (nur eine Cache-Marke). Native Farbtöne weichen bei Türkis/Orange/Rosa von der PWA ab (`docs/DESIGN-NATIVE.md`); die Watch-App selbst nutzt Standardblau, nur die Komplikation folgt dem Akzent.
+- **Funktional nicht begonnen**: Kalenderbrücke (EventKit), lokale KI/KI-Worker, Standortautomatik (Region Monitoring) auf iOS, Offline-Schreiben.
+- **Nutzerseitig/organisatorisch**: TestFlight-Upload, Betatester, App-Store-Metadaten, Datenschutzangaben und Lizenzprüfung im App-Store-Kontext.
+
+## Dokumente in diesem Repo
+
+| Datei | Inhalt |
+| --- | --- |
+| `README.md` | Überblick, Befehle |
+| `AGENTS.md`, `CLAUDE.md` | Einstieg für Coding-Agents |
+| `docs/DESIGN-NATIVE.md` | Native Designsprache (Tokens, Komponenten, Akzent-System, Abweichungen von der PWA) |
+| `docs/ICONS.md` | App-Symbole und Akzent-Varianten |
+| `docs/handoffs/` | Übergaben A1, A3–A8 (A6b–A6d), W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
+| `docs/screenshots/` | Simulator-Aufnahmen der Sichtprüfungen (synthetische Daten) |

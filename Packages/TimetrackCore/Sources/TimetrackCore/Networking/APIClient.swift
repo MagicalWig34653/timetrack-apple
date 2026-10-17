@@ -163,6 +163,24 @@ public actor APIClient: PreferencesService {
     public func listWorkModels() async throws -> [WorkModel] { try await get("/work-models") }
     public func listPlaces() async throws -> [Place] { try await get("/places") }
 
+    // MARK: - Places and device tokens (module `automation`, L2)
+
+    public func createPlace(_ input: PlaceInput) async throws -> Place { try await send(.post, "/places", body: input) }
+
+    public func updatePlace(id: UUID, _ input: PlaceInput) async throws -> Place {
+        try await send(.put, "/places/\(id.uuidString.lowercased())", body: input)
+    }
+
+    public func listDeviceTokens() async throws -> [DeviceToken] { try await get("/me/device-tokens") }
+
+    /// The clear text token is in the answer only once; the caller must store it immediately.
+    public func createDeviceToken(name: String, expiresInDays: Int? = nil) async throws -> DeviceToken {
+        struct Body: Encodable { let name: String; let expiresInDays: Int? }
+        return try await send(.post, "/me/device-tokens", body: Body(name: name, expiresInDays: expiresInDays))
+    }
+
+    public func revokeDeviceToken(id: UUID) async throws { try await sendVoid(.delete, "/me/device-tokens/\(id.uuidString.lowercased())") }
+
     // MARK: - Segments and timer
 
     public func listSegments(from: Date, to: Date, includeVoided: Bool = false) async throws -> [Segment] {

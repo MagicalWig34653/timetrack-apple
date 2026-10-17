@@ -52,6 +52,9 @@ public final class AppModel {
 
     public func isEnabled(_ module: ModuleKey) -> Bool { modules.isEnabled(module) }
 
+    /// The signed-in API client (nil while signed out); used by feature stores that live outside the model (L2: location automation).
+    public var apiClient: APIClient? { context?.client }
+
     // MARK: - Lifecycle
 
     public func restore() async {

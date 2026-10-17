@@ -200,4 +200,24 @@ public struct Place: Codable, Sendable, Hashable, Identifiable {
     public let automationMode: String
     public let archived: Bool
     public let defaultSegmentKind: SegmentKind?
+    /// L2: geofence data (all optional; a place without coordinates cannot be monitored).
+    public let latitude: Double?
+    public let longitude: Double?
+    public let radiusMeters: Int?
+    public let confirmAfterSeconds: Int?
+
+    public init(id: UUID, name: String, kind: String = "other", automationMode: String = "off", archived: Bool = false,
+                defaultSegmentKind: SegmentKind? = nil, latitude: Double? = nil, longitude: Double? = nil,
+                radiusMeters: Int? = nil, confirmAfterSeconds: Int? = nil) {
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.automationMode = automationMode
+        self.archived = archived
+        self.defaultSegmentKind = defaultSegmentKind
+        self.latitude = latitude
+        self.longitude = longitude
+        self.radiusMeters = radiusMeters
+        self.confirmAfterSeconds = confirmAfterSeconds
+    }
 }

@@ -25,64 +25,93 @@ struct MainView: View {
     }
 }
 
+/// Small, non-intrusive status line under the timer.
+enum TodayStatus: Equatable {
+    case none
+    /// Cached content is shown, the refresh is on its way.
+    case refreshing
+    case offline
+    case sending(Int)
+    case refreshFailed
+}
+
 private struct TodayScreen: View {
     let store: TodayStore
     @Environment(AppModel.self) private var model
-    @Environment(\.scenePhase) private var scenePhase
+
+    private var status: TodayStatus {
+        let display = store.display
+        if display.pendingActions > 0 { return .sending(display.pendingActions) }
+        if case .active(.offline) = model.lifecycle.state { return .offline }
+        if !store.hasLoadedLive, store.error == nil { return .refreshing }
+        if let error = store.error, !error.isUnauthorized { return error.isNetworkError ? .offline : .refreshFailed }
+        return .none
+    }
 
     var body: some View {
+        TodayContent(display: store.display, status: status, actions: TimerActions(
+            start: { kind in Task { await store.start(kind: kind) } },
+            stop: { Task { await store.stop() } }
+        ), zone: model.dayCalendar.timeZone)
+        // The accent is part of the complication's snapshot.
+        .onChange(of: model.appearance.local) { TimetrackWatchApp.publish(model) }
+        // 401 while in use: the session ended; ask for a new hand-over instead of showing a raw error.
+        .onChange(of: store.error) {
+            if store.error?.isUnauthorized == true { Task { await model.discardSessionLocally(expired: true) } }
+        }
+    }
+}
+
+struct TimerActions {
+    let start: (SegmentKind) -> Void
+    let stop: () -> Void
+}
+
+/// The whole screen as a function of `TodayDisplay`: the same view draws cached, queued and live state.
+struct TodayContent: View {
+    let display: TodayDisplay
+    let status: TodayStatus
+    let actions: TimerActions?
+    var zone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? .current
+
+    var body: some View {
+        let _ = LaunchTrace.mark(display.source == .live ? "content.live" : "content.first")
         ScrollView {
             VStack(spacing: 10) {
-                if let error = store.error, !error.isUnauthorized {
-                    Text(verbatim: error.germanDescription).font(.footnote).foregroundStyle(TT.danger)
-                }
-                TimerSection(store: store)
-                SummarySection(store: store)
-                SegmentsSection(store: store, zone: model.dayCalendar.timeZone)
+                TimerSection(display: display, actions: actions)
+                StatusLine(status: status, updatedAt: display.updatedAt, zone: zone)
+                SummarySection(display: display)
+                SegmentsSection(segments: display.segments, zone: zone)
             }
         }
         .navigationTitle("sidebar.today")
-        .task { await store.load() }
-        .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
-        // Keep the complication's non-secret snapshot in step with what this screen shows.
-        .onChange(of: ComplicationState(store: store, appearance: model.appearance.local)) { publishSnapshot() }
-        .task { publishSnapshot() }
-        // 401 while in use: the session ended; ask for a new hand-over instead of showing a raw error.
-        .onChange(of: store.error) {
-            if store.error?.isUnauthorized == true { Task { await model.discardSessionLocally() } }
+    }
+}
+
+private struct StatusLine: View {
+    let status: TodayStatus
+    let updatedAt: Date?
+    let zone: TimeZone
+
+    var body: some View {
+        switch status {
+        case .none: EmptyView()
+        case .refreshing:
+            Label("today.status.refreshing", systemImage: "arrow.triangle.2.circlepath").font(.caption2).foregroundStyle(TT.textSecondary)
+        case .offline:
+            Label("today.status.offline", systemImage: "wifi.slash").font(.caption2).foregroundStyle(TT.textSecondary)
+        case .sending(let count):
+            Label("today.status.sending \(count)", systemImage: "paperplane").font(.caption2).foregroundStyle(TT.textSecondary)
+                .accessibilityIdentifier("watch.sending")
+        case .refreshFailed:
+            Label("today.status.failed", systemImage: "exclamationmark.circle").font(.caption2).foregroundStyle(TT.textSecondary)
         }
-    }
-}
-
-private extension TodayScreen {
-    @MainActor func publishSnapshot() {
-        let zone = model.dayCalendar
-        let day = store.day
-        WidgetBridge.publish(
-            running: store.running,
-            todaySeconds: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
-            day: zone.day(for: .now), timeZone: zone.timeZone.identifier,
-            accentHex: AppearanceKeys.effectiveHex(model.appearance.local), colorScheme: model.appearance.local.scheme
-        )
-    }
-}
-
-/// Equatable digest of the store values the complication shows, so `onChange` fires only when they change.
-private struct ComplicationState: Equatable {
-    let runningID: UUID?
-    let kind: SegmentKind?
-    let todaySeconds: Int
-    let appearance: LocalAppearance
-    @MainActor init(store: TodayStore, appearance: LocalAppearance) {
-        self.appearance = appearance
-        runningID = store.running?.id
-        kind = store.running?.kind
-        todaySeconds = (store.day?.evaluatedWorkSeconds ?? 0) + (store.day?.creditSeconds ?? 0)
     }
 }
 
 private struct TimerSection: View {
-    let store: TodayStore
+    let display: TodayDisplay
+    let actions: TimerActions?
     /// Last chosen kind survives restarts (a non-secret preference).
     @AppStorage("watch.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
 
@@ -95,9 +124,9 @@ private struct TimerSection: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            if let running = store.running {
+            if display.isRunning, let startedAt = display.startedAt {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
-                    let clock = RunningTimerDisplay(startedAt: running.startedAt).clock(at: context.date)
+                    let clock = RunningTimerDisplay(startedAt: startedAt).clock(at: context.date)
                     Text(clock)
                         .font(.system(size: 36, weight: .semibold, design: .rounded))
                         .monospacedDigit()
@@ -106,14 +135,15 @@ private struct TimerSection: View {
                         .accessibilityLabel(Text("today.timer.accessibility \(clock)"))
                 }
                 HStack(spacing: 6) {
-                    LiveDot(color: running.kind.ttTint)
-                    KindBadge(running.kind)
+                    LiveDot(color: display.kind.ttTint)
+                    KindBadge(display.kind)
                 }
-                Button { Task { await store.stop() } } label: {
+                Button { actions?.stop() } label: {
                     Label("today.stop", systemImage: "stop.fill").frame(maxWidth: .infinity)
                 }
                 .tint(TT.danger)
                 .buttonStyle(.borderedProminent)
+                .disabled(actions == nil)
                 .accessibilityIdentifier("watch.stop")
             } else {
                 Text("today.not_running").font(.footnote).foregroundStyle(TT.textSecondary)
@@ -123,11 +153,12 @@ private struct TimerSection: View {
                 }
                 .pickerStyle(.navigationLink)
                 .accessibilityIdentifier("watch.kind")
-                Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
+                Button { actions?.start(kind.wrappedValue) } label: {
                     Label("today.start", systemImage: "play.fill").frame(maxWidth: .infinity)
                 }
                 .tint(Color(hex: TT.defaultAccentHex))
                 .buttonStyle(.borderedProminent)
+                .disabled(actions == nil)
                 .accessibilityIdentifier("watch.start")
             }
         }
@@ -135,16 +166,15 @@ private struct TimerSection: View {
 }
 
 private struct SummarySection: View {
-    let store: TodayStore
+    let display: TodayDisplay
 
     var body: some View {
-        let day = store.day
-        let done = (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0)
-        let target = day?.targetSeconds ?? 0
+        let done = display.doneSeconds
+        let target = display.targetSeconds
         VStack(spacing: 6) {
-            row("today.done", DurationFormat.hoursMinutes(done), provisional: day?.provisional == true)
+            row("today.done", DurationFormat.hoursMinutes(done), provisional: display.provisional)
             if target > 0 { ProgressBar(progress: Double(done) / Double(target), height: 5) }
-            row("today.balance", DurationFormat.signed(store.account?.balanceSeconds ?? 0), provisional: store.account?.provisional == true)
+            if let balance = display.balanceSeconds { row("today.balance", DurationFormat.signed(balance), provisional: false) }
         }
         .padding(10)
         .background(TT.surface, in: .rect(cornerRadius: 14, style: .continuous))
@@ -161,17 +191,18 @@ private struct SummarySection: View {
     }
 }
 
+/// Below the fold, so rows are created lazily while scrolling.
 private struct SegmentsSection: View {
-    let store: TodayStore
+    let segments: [WidgetSegment]
     let zone: TimeZone
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        LazyVStack(alignment: .leading, spacing: 6) {
             Text("today.segments").font(.footnote.weight(.semibold)).foregroundStyle(TT.textSecondary)
-            if store.segments.isEmpty {
+            if segments.isEmpty {
                 Text("today.no_segments").font(.footnote).foregroundStyle(TT.textSecondary)
             } else {
-                ForEach(store.segments) { segment in
+                ForEach(segments, id: \.startedAt) { segment in
                     HStack(spacing: 8) {
                         KindGlyph(symbol: segment.kind.ttSymbol, tint: segment.kind.ttTint, size: 28)
                         VStack(alignment: .leading, spacing: 0) {

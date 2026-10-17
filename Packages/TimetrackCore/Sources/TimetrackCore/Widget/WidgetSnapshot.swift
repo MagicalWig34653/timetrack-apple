@@ -64,6 +64,23 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         )
     }
 
+    /// Snapshot of what a compact screen shows (live data plus queued actions), for the complication and the next launch.
+    public static func make(display: TodayDisplay, zone: TimeZone, now: Date = .now, accentHex: String? = nil, colorScheme: String? = nil) -> WidgetSnapshot {
+        WidgetSnapshot(
+            isRunning: display.isRunning, kind: display.kind, startedAt: display.startedAt, todaySeconds: display.doneSeconds,
+            day: DayCalendar(timeZone: zone).day(for: now), timeZone: zone.identifier, updatedAt: now,
+            targetSeconds: display.targetSeconds, balanceSeconds: display.balanceSeconds, segments: display.segments,
+            accentHex: accentHex, colorScheme: colorScheme
+        )
+    }
+
+    /// Equal apart from the update time (used to skip needless writes and complication reloads).
+    public func sameContent(as other: WidgetSnapshot) -> Bool {
+        var copy = other
+        copy.updatedAt = updatedAt
+        return self == copy
+    }
+
     /// True when the snapshot is older than `maxAge` seconds at `date` (the widget then shows "Aktualisiert um ...").
     public func isStale(at date: Date, maxAge: TimeInterval = 30 * 60) -> Bool { date.timeIntervalSince(updatedAt) > maxAge }
 

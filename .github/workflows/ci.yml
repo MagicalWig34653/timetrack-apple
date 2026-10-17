@@ -1,0 +1,76 @@
+# Apple CI: XcodeGen drift check, Swift package tests and unsigned builds of the three app schemes.
+# The project targets OS 27 (Xcode 27). Hosted GitHub macOS images may not provide Xcode 27 yet, so the runner label is
+# configurable: set the repository variable APPLE_RUNNER (Settings > Secrets and variables > Actions > Variables), for
+# example to a self-hosted label such as "self-hosted-macos-27". Assumption without the variable: macos-26 (newest hosted
+# label known when this file was written); the build jobs then fail with a clear toolchain error if Xcode 27 is missing.
+# Documentation: docs/CI.md in the backend repository.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  project:
+    name: XcodeGen drift check
+    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate the project and fail if the tracked project differs
+        run: |
+          xcodegen --version
+          xcodegen generate
+          git diff --exit-code -- Timetrack.xcodeproj || {
+            echo "::error::Timetrack.xcodeproj is out of date. Run 'xcodegen generate' and commit (XcodeGen version differences can also cause this)."
+            exit 1
+          }
+
+  packages:
+    name: Swift packages (${{ matrix.package }})
+    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [TimetrackCore, TimetrackDesign]
+    steps:
+      - uses: actions/checkout@v4
+      - name: swift test
+        working-directory: Packages/${{ matrix.package }}
+        run: swift test --build-system native
+
+  build:
+    name: Build ${{ matrix.scheme }}
+    runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scheme: TimetrackIOS
+            destination: generic/platform=iOS Simulator
+          - scheme: TimetrackMac
+            destination: platform=macOS
+          - scheme: TimetrackWatch
+            destination: generic/platform=watchOS Simulator
+    steps:
+      - uses: actions/checkout@v4
+      - name: Xcode version
+        run: xcodebuild -version
+      - name: xcodebuild (unsigned)
+        run: |
+          xcodebuild -project Timetrack.xcodeproj -scheme "${{ matrix.scheme }}" -configuration Debug \
+            -destination "${{ matrix.destination }}" -derivedDataPath "$RUNNER_TEMP/derived" \
+            CODE_SIGNING_ALLOWED=NO build

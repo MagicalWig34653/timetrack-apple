@@ -63,9 +63,15 @@ struct TimetrackWatchApp: App {
                        let url = try? AuthService.normalizeServerURL(server) {
                         await model.adoptHandedOverSession(server: url, cookie: cookie)
                     }
+                    // Simulator convenience: TT_DEV_ACTION=start|stop presses the button once (no touch input via simctl).
+                    if let action = env["TT_DEV_ACTION"] {
+                        try? await Task.sleep(for: .seconds(2.5))
+                        if action == "start" { await model.today?.start(kind: .travel) } else if action == "stop" { await model.today?.stop() }
+                    }
                     #endif
                 }
                 .task { await watchConnectivityBack() }
+                .task { await retryWhileWaiting() }
         }
         .onChange(of: scenePhase) {
             if scenePhase == .active { Task { await model.revalidate() } }
@@ -76,6 +82,16 @@ struct TimetrackWatchApp: App {
             await model.restore()
             await MainActor.run { Self.publish(model); BackgroundRefresh.schedule() }
             LaunchTrace.event("refresh.end")
+        }
+    }
+
+    /// While actions wait or the server was unreachable, try again every 30 seconds in the foreground (the connection monitor
+    /// only reports changes; a server that was down while the radio was up produces none).
+    private func retryWhileWaiting() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(30))
+            let offline = model.lifecycle.state == .active(.offline)
+            if offline || !(model.today?.pending.isEmpty ?? true) { await model.revalidate() }
         }
     }
 

@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ vars.APPLE_RUNNER || 'macos-26' }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate the project and fail if the tracked project differs
@@ -46,7 +46,7 @@ jobs:
       matrix:
         package: [TimetrackCore, TimetrackDesign]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: swift test
         working-directory: Packages/${{ matrix.package }}
         run: swift test --build-system native
@@ -66,7 +66,7 @@ jobs:
           - scheme: TimetrackWatch
             destination: generic/platform=watchOS Simulator
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Xcode version
         run: xcodebuild -version
       - name: xcodebuild (unsigned)

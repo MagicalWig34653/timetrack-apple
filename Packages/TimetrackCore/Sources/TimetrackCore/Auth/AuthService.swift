@@ -24,14 +24,25 @@ public actor AuthService {
     private var client: APIClient?
     /// A handed-over cookie kept in memory until the first validated `restore()`, so a Keychain write failure (unsigned simulator builds) does not lose it.
     private var handedOverCookie: String?
-    private(set) public var serverURL: URL?
+    private var storedServerURL: URL?
+    private var storedServerLoaded = false
+    /// The Keychain is read on first use (not in `init`), so creating the service on the main thread at launch costs nothing.
+    public private(set) var serverURL: URL? {
+        get { loadStoredServer(); return storedServerURL }
+        set { storedServerLoaded = true; storedServerURL = newValue }
+    }
+
+    private func loadStoredServer() {
+        guard !storedServerLoaded else { return }
+        storedServerLoaded = true
+        storedServerURL = secrets.read(SecretKey.serverURL).flatMap { URL(string: $0) }
+    }
 
     public init(secrets: SecretStore, transport: some HTTPTransport & SessionCookieJar, passkeys: PasskeyAuthenticator = UnavailablePasskeyAuthenticator()) {
         self.secrets = secrets
         self.transport = transport
         self.cookieJar = transport
         self.passkeys = passkeys
-        self.serverURL = secrets.read(SecretKey.serverURL).flatMap { URL(string: $0) }
     }
 
     /// Accepts "example.org", "https://example.org/" or "http://localhost:18090". Plain http is allowed for local development;
@@ -76,6 +87,30 @@ public actor AuthService {
             return .signedIn(AuthContext(client: client, session: session))
         } catch let error as TimetrackError where error.isNetworkError {
             return .offline(serverURL: url)
+        } catch let error as TimetrackError where error.isUnauthorized {
+            await clearSession(for: url)
+            return .signedOut
+        } catch {
+            return .offline(serverURL: url)
+        }
+    }
+
+    /// Client for the stored credentials WITHOUT asking the server (compact clients show content first and validate afterwards).
+    /// Nil when no server or session cookie is stored. Non-GET calls refresh the CSRF token on their own (see `APIClient`).
+    public func optimisticClient() -> APIClient? {
+        guard let url = serverURL, let cookie = secrets.read(SecretKey.sessionCookie) ?? handedOverCookie else { return nil }
+        let client = useServer(url)
+        cookieJar.setSessionCookie(cookie, for: url)
+        return client
+    }
+
+    /// Validates the stored session against the server; classification as in `restore()`.
+    public func validate() async -> RestoreResult {
+        guard let url = serverURL, let client = optimisticClient() else { return .signedOut }
+        do {
+            let session = try await client.refreshSession()
+            persistCookie(for: url)
+            return .signedIn(AuthContext(client: client, session: session))
         } catch let error as TimetrackError where error.isUnauthorized {
             await clearSession(for: url)
             return .signedOut

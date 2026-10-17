@@ -914,6 +914,545 @@
         }
       }
     },
+    "focus.intro.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schaltest du in iOS einen Fokus ein (zum Beispiel „Arbeit“), kann Timetrack den Timer für dich starten oder vorher nachfragen. Endet der Fokus, stoppt Timetrack den Timer wieder."
+          }
+        }
+      }
+    },
+    "focus.intro.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer mit deinem Fokus verbinden"
+          }
+        }
+      }
+    },
+    "focus.log.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nichts passiert."
+          }
+        }
+      }
+    },
+    "focus.log.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzten fünf Aktionen des Filters, mit Uhrzeit und Ergebnis."
+          }
+        }
+      }
+    },
+    "focus.log.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuletzt passiert"
+          }
+        }
+      }
+    },
+    "focus.mode.direct.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack startet den Timer beim Einschalten und stoppt ihn beim Ausschalten, ohne zu fragen. Läuft schon ein Timer, bleibt er unberührt. Beispiel: Fokus „Arbeit“ startet morgens die Arbeitszeit."
+          }
+        }
+      }
+    },
+    "focus.mode.direct.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch"
+          }
+        }
+      }
+    },
+    "focus.mode.direct.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch starten und stoppen"
+          }
+        }
+      }
+    },
+    "focus.mode.off.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack merkt sich nur, dass der Fokus an ist, und bucht nichts. Praktisch, um den Filter kurz stillzulegen."
+          }
+        }
+      }
+    },
+    "focus.mode.off.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts tun"
+          }
+        }
+      }
+    },
+    "focus.mode.off.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts tun"
+          }
+        }
+      }
+    },
+    "focus.mode.suggest.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du bekommst eine Mitteilung „Timer starten?“ mit den Knöpfen Start und Nicht jetzt. Beim Ende des Fokus fragt Timetrack „Timer stoppen?“. Du entscheidest jedes Mal. Gut zum Ausprobieren."
+          }
+        }
+      }
+    },
+    "focus.mode.suggest.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachfragen"
+          }
+        }
+      }
+    },
+    "focus.mode.suggest.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nachfragen"
+          }
+        }
+      }
+    },
+    "focus.modes.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tipp: Erlaube Timetrack in deinem Fokus unter „Erlaubte Apps“. Sonst hält iOS die Rückfrage zurück, bis der Fokus vorbei ist."
+          }
+        }
+      }
+    },
+    "focus.modes.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die drei Möglichkeiten"
+          }
+        }
+      }
+    },
+    "focus.notify.ask": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen erlauben"
+          }
+        }
+      }
+    },
+    "focus.notify.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen nicht erlaubt"
+          }
+        }
+      }
+    },
+    "focus.notify.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mitteilungen erlaubt"
+          }
+        }
+      }
+    },
+    "focus.notify.settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack-Einstellungen öffnen"
+          }
+        }
+      }
+    },
+    "focus.path": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen › Fokus › [dein Fokus] › Fokusfilter › Timetrack"
+          }
+        }
+      }
+    },
+    "focus.privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeichert werden nur Modus, Art und Ort des Filters auf diesem Gerät, keine Zugangsdaten."
+          }
+        }
+      }
+    },
+    "focus.rules.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus (empfohlen): Timetrack stoppt nur Timer, die der Fokus selbst gestartet hat. Ein Timer anderer Art, zum Beispiel Fahrt, wird nie gestoppt. Pausen oder Lücken erfindet Timetrack nicht."
+          }
+        }
+      }
+    },
+    "focus.rules.manual": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auch von Hand gestartete Timer beenden"
+          }
+        }
+      }
+    },
+    "focus.rules.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sicherheitsregeln"
+          }
+        }
+      }
+    },
+    "focus.status.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timetrack erfährt vom Fokus nur, wenn er mit Filter ein- oder ausgeschaltet wird. Bis dahin steht hier „Kein Fokus-Filter aktiv“."
+          }
+        }
+      }
+    },
+    "focus.status.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Fokus-Filter aktiv"
+          }
+        }
+      }
+    },
+    "focus.status.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktueller Stand"
+          }
+        }
+      }
+    },
+    "focus.step1": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffne die iOS-Einstellungen und tippe auf „Fokus“. Wähle deinen Fokus, zum Beispiel „Arbeit“."
+          }
+        }
+      }
+    },
+    "focus.step2": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe unter „Fokusfilter“ auf „Filter hinzufügen“ und wähle „Timetrack“."
+          }
+        }
+      }
+    },
+    "focus.step3": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle, was Timetrack tun soll (Nachfragen, Automatisch oder Nichts tun) und die Art (Arbeit, Fahrt oder Schule). Tippe auf „Hinzufügen“."
+          }
+        }
+      }
+    },
+    "focus.steps.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Auswahl findest du nur in den iOS-Einstellungen, nicht in dieser App. Dort bestimmst du auch, bei welchem Fokus der Filter gilt."
+          }
+        }
+      }
+    },
+    "focus.steps.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So richtest du es ein"
+          }
+        }
+      }
+    },
+    "focus.test.footer.dry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du siehst nur, was passieren würde. Es wird nichts gestartet, gestoppt oder gesendet."
+          }
+        }
+      }
+    },
+    "focus.test.footer.real": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achtung: Der Timer wird wirklich gestartet oder gestoppt, und Rückfragen werden als Mitteilung gesendet."
+          }
+        }
+      }
+    },
+    "focus.test.kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art"
+          }
+        }
+      }
+    },
+    "focus.test.mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modus"
+          }
+        }
+      }
+    },
+    "focus.test.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test"
+          }
+        }
+      }
+    },
+    "focus.test.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts zu tun."
+          }
+        }
+      }
+    },
+    "focus.test.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus aus"
+          }
+        }
+      }
+    },
+    "focus.test.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus an"
+          }
+        }
+      }
+    },
+    "focus.test.prefix.dry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur Vorschau: "
+          }
+        }
+      }
+    },
+    "focus.test.real": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wirklich ausführen"
+          }
+        }
+      }
+    },
+    "focus.test.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausprobieren"
+          }
+        }
+      }
+    },
+    "focus.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus-Filter"
+          }
+        }
+      }
+    },
+    "focus.trigger.notification": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwort auf Mitteilung"
+          }
+        }
+      }
+    },
+    "focus.trigger.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus beendet"
+          }
+        }
+      }
+    },
+    "focus.trigger.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus eingeschaltet"
+          }
+        }
+      }
+    },
+    "focus.trigger.test": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test"
+          }
+        }
+      }
+    },
     "haptics.footer": {
       "extractionState": "manual",
       "localizations": {
@@ -2142,6 +2681,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Beim Serverwechsel wirst du abgemeldet."
+          }
+        }
+      }
+    },
+    "settings.focus": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus-Filter"
+          }
+        }
+      }
+    },
+    "settings.focus.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer automatisch mit einem iOS-Fokus starten und stoppen"
           }
         }
       }

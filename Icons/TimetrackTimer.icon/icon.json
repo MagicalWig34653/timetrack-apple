@@ -1,0 +1,66 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.04314,0.07059,0.14902,1.00000",
+      "srgb:0.01961,0.03137,0.07843,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Centre",
+          "image-name": "centre.svg",
+          "glass": false
+        },
+        {
+          "name": "Progress",
+          "image-name": "progress.svg",
+          "glass": false
+        },
+        {
+          "name": "Track",
+          "image-name": "track.svg",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "lighting": "combined"
+    },
+    {
+      "layers": [
+        {
+          "name": "Backdrop",
+          "image-name": "backdrop.svg",
+          "glass": false
+        }
+      ],
+      "specular": false,
+      "lighting": "individual"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

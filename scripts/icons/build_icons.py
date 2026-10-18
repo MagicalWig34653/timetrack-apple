@@ -9,8 +9,10 @@ Design: dark navy surface (document gradient fill), a closed ring with a vertica
 (lighter at the top, stronger at the bottom) and two white rounded hands (an "L": 12 and 3 o'clock).
 The accent list below is the single source of truth (also documented in docs/ICONS.md).
 """
-import json, math, shutil, subprocess
+import json, math, shutil, subprocess, sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "Icons" / "source"
@@ -142,6 +144,15 @@ def render(bundle, out, rendition="Default", size=1024):
                     "--rendition", rendition, "--width", str(size), "--height", str(size), "--scale", "1"],
                    check=True, capture_output=True)
 
+def check_project_yml(bundles):
+    """Every alternate icon must be a resource and listed in ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES."""
+    text = (ROOT / "project.yml").read_text()
+    for b in bundles:
+        if b == "TimetrackPrimary":
+            continue
+        if f"Icons/{b}.icon" not in text or b not in text.split("ALTERNATE_APPICON_NAMES:")[1].split("\n")[0]:
+            print(f"WARNING: project.yml is missing {b}")
+
 def main():
     SRC.mkdir(parents=True, exist_ok=True)
     variants = [(slug, name, label, strong, False) for slug, name, label, strong in ACCENTS]
@@ -159,6 +170,11 @@ def main():
     tones = {}
     for slug, name, label, strong, light in variants:
         tones[slug] = build(name, strong, light)
+    # IC1: motif x background variants (defined in motif_icons.py) share previews and contact sheet.
+    import motif_icons
+    motif_icons.main()
+    variants += [(v["slug"], v["bundle"], v["title"], v["tint"], False) for v in motif_icons.VARIANTS]
+    check_project_yml([name for _s, name, *_r in variants])
     if not ICTOOL.exists():
         print("ictool not found: skipped previews")
         return
@@ -179,7 +195,7 @@ def main():
         print("Pillow missing: skipped contact sheet")
         return
     renditions = ["Default", "Dark", "TintedDark", "TintedLight"]
-    cell, pad = 150, 10
+    cell, pad = 120, 8
     sheet = Image.new("RGBA", (pad + len(renditions) * (cell + pad), pad + len(variants) * (cell + pad)), "#808080")
     tmp = ROOT / "Icons" / ".tmp.png"
     for r, (slug, name, *_rest) in enumerate(variants):

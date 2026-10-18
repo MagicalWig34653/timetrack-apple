@@ -1,0 +1,50 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.99216,0.72941,0.45490,1.00000",
+      "srgb:0.60392,0.20392,0.07059,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Sand",
+          "image-name": "sand.svg",
+          "glass": false
+        },
+        {
+          "name": "Glass",
+          "image-name": "glass.svg",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "lighting": "combined"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

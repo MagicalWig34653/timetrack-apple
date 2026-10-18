@@ -1,0 +1,55 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.15294,0.15294,0.16471,1.00000",
+      "srgb:0.01961,0.01961,0.02353,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Second hand",
+          "image-name": "second-hand.svg",
+          "glass": false
+        },
+        {
+          "name": "Hands",
+          "image-name": "hands.svg",
+          "glass": false
+        },
+        {
+          "name": "Ticks",
+          "image-name": "ticks.svg",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "lighting": "combined"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

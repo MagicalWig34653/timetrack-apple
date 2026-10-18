@@ -4,26 +4,26 @@ import TimetrackStores
 import UserNotifications
 
 /// Local questions ("Timer starten?") with action buttons. Posting never prompts for permission (callbacks run in the background);
-/// the explainer page asks for it. Interruption level stays "active": a time-sensitive level needs an entitlement and is not used.
+/// the explainer page asks for it. Every question carries the stamp of the Focus transition that asked it (F3).
 struct LocalFocusNotifier: FocusNotifier {
-    func postStart(_ configuration: FocusConfiguration, eventId: UUID) async -> Bool {
+    func postStart(_ configuration: FocusConfiguration, eventId: UUID, sequence: Int64) async -> Bool {
         let text = FocusText.startNotification(configuration)
         return await post(id: FocusNotificationID.start, category: FocusNotificationID.startCategory, title: text.title, body: text.body,
-                          configuration: configuration, eventId: eventId, clearing: FocusNotificationID.stop)
+                          configuration: configuration, eventId: eventId, sequence: sequence, clearing: FocusNotificationID.stop)
     }
 
-    func postStop(_ configuration: FocusConfiguration) async -> Bool {
+    func postStop(_ configuration: FocusConfiguration, eventId: UUID, sequence: Int64) async -> Bool {
         let text = FocusText.stopNotification(configuration)
         return await post(id: FocusNotificationID.stop, category: FocusNotificationID.stopCategory, title: text.title, body: text.body,
-                          configuration: configuration, eventId: UUID(), clearing: FocusNotificationID.start)
+                          configuration: configuration, eventId: eventId, sequence: sequence, clearing: FocusNotificationID.start)
     }
 
     func postSignIn() async -> Bool {
         await post(id: FocusNotificationID.signIn, category: nil, title: FocusText.signInNotification.title, body: FocusText.signInNotification.body,
-                   configuration: nil, eventId: nil, clearing: nil)
+                   configuration: nil, eventId: nil, sequence: nil, clearing: nil)
     }
 
-    private func post(id: String, category: String?, title: String, body: String, configuration: FocusConfiguration?, eventId: UUID?, clearing: String?) async -> Bool {
+    private func post(id: String, category: String?, title: String, body: String, configuration: FocusConfiguration?, eventId: UUID?, sequence: Int64?, clearing: String?) async -> Bool {
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         guard [.authorized, .provisional, .ephemeral].contains(settings.authorizationStatus) else { return false }
@@ -33,10 +33,15 @@ struct LocalFocusNotifier: FocusNotifier {
         content.title = title
         content.body = body
         content.threadIdentifier = "de.linolaske.timetrack.focus"
+        // The question is posted while the Focus is already on, so it is silenced unless Timetrack is an allowed app.
+        // `.timeSensitive` could break through but needs the "Time Sensitive Notifications" entitlement; setting it without
+        // one stalled the simulator's notification center in F3 testing, so it stays `.active` (see docs/handoffs/F3.md).
         content.interruptionLevel = .active
         if let category { content.categoryIdentifier = category }
         if let configuration, let data = try? JSONEncoder().encode(configuration) {
-            content.userInfo = ["configuration": data.base64EncodedString(), "eventId": eventId?.uuidString ?? ""]
+            var info: [String: Any] = ["configuration": data.base64EncodedString(), "eventId": eventId?.uuidString ?? ""]
+            if let sequence { info["sequence"] = NSNumber(value: sequence) }
+            content.userInfo = info
         }
         do {
             try await center.add(UNNotificationRequest(identifier: id, content: content, trigger: nil))
@@ -94,16 +99,20 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
         let info = response.notification.request.content.userInfo
         guard let text = info["configuration"] as? String, let data = Data(base64Encoded: text),
               let configuration = try? JSONDecoder().decode(FocusConfiguration.self, from: data) else { return }
-        let runner = FocusEnvironment.makeRunner()
-        let report: FocusRunReport
-        switch response.actionIdentifier {
-        case FocusNotificationID.startAction:
-            report = await runner.confirmStart(configuration, eventId: (info["eventId"] as? String).flatMap(UUID.init(uuidString:)) ?? UUID())
-        case FocusNotificationID.stopAction:
-            report = await runner.confirmStop(configuration)
-        default:
+        // The stamp of the question makes repeated taps and answers to a superseded question harmless (see `FocusRunner.confirm*`).
+        let sequence = (info["sequence"] as? NSNumber)?.int64Value
+        let eventId = (info["eventId"] as? String).flatMap(UUID.init(uuidString:)) ?? UUID()
+        let action = response.actionIdentifier
+        guard action == FocusNotificationID.startAction || action == FocusNotificationID.stopAction else {
             return // "Nicht jetzt" / "Weiterlaufen lassen" / tapping the banner: nothing to do
         }
+        let report = await FocusEnvironment.withBackgroundTime("focus.answer") { () -> FocusRunReport in
+            let runner = FocusEnvironment.makeRunner()
+            return action == FocusNotificationID.startAction
+                ? await runner.confirmStart(configuration, eventId: eventId, sequence: sequence)
+                : await runner.confirmStop(configuration, eventId: eventId, sequence: sequence)
+        }
         await FocusEnvironment.publishIfChanged([report])
+        NotificationCenter.default.post(name: FocusEnvironment.changed, object: nil)
     }
 }

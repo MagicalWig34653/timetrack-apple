@@ -914,6 +914,83 @@
         }
       }
     },
+    "focus.delivery.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "So siehst du, ob iOS Timetrack überhaupt aufgerufen hat. „Keine Angaben“ heißt: iOS meldet das Ende eines Fokus (oder der Filter ist noch nicht eingerichtet)."
+          }
+        }
+      }
+    },
+    "focus.delivery.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Meldung von iOS empfangen. Schalte einen Fokus mit diesem Filter ein."
+          }
+        }
+      }
+    },
+    "focus.delivery.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeicherten Fokus-Zustand zurücksetzen"
+          }
+        }
+      }
+    },
+    "focus.delivery.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wartende Aktionen jetzt senden"
+          }
+        }
+      }
+    },
+    "focus.delivery.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnose teilen"
+          }
+        }
+      }
+    },
+    "focus.delivery.stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Fokus steht seit über 12 Stunden als aktiv. Falls er längst aus ist, hat iOS das Ende nicht gemeldet: Setze den Zustand zurück."
+          }
+        }
+      }
+    },
+    "focus.delivery.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Meldung von iOS"
+          }
+        }
+      }
+    },
     "focus.intro.body": {
       "extractionState": "manual",
       "localizations": {
@@ -953,7 +1030,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Die letzten fünf Aktionen des Filters, mit Uhrzeit und Ergebnis."
+            "value": "Die letzten zehn Aktionen des Filters, mit Uhrzeit, empfangenen Angaben und Ergebnis."
           }
         }
       }
@@ -1185,6 +1262,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sicherheitsregeln"
+          }
+        }
+      }
+    },
+    "focus.sim.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simulation (nur Debug)"
           }
         }
       }
@@ -1438,6 +1526,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fokus eingeschaltet"
+          }
+        }
+      }
+    },
+    "focus.trigger.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneuter Versuch"
+          }
+        }
+      }
+    },
+    "focus.trigger.simulated": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Simuliert"
           }
         }
       }

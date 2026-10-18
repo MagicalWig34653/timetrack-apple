@@ -72,6 +72,12 @@ public struct FocusSettings: Codable, Sendable, Hashable {
 
 public enum FocusSkipReason: String, Codable, Sendable, Hashable {
     case modeOff, automationOff, alreadyRunning, otherTimerRunning, notRunning, otherKind, startedManually
+    /// F3: the same activation arrived twice within a few seconds.
+    case duplicate
+    /// F3: "Focus ended" arrived but no active Focus was stored (already ended, or the start was never delivered).
+    case notActive
+    /// F3: a notification answer for an activation that has been superseded (the Focus changed since the question).
+    case stale
 }
 
 /// What to do. Pure result of `FocusDecision.decide`; executing it is the runner's job.
@@ -164,6 +170,9 @@ public enum FocusText {
         case .notRunning: "Es läuft kein Timer."
         case .otherKind: "Der laufende Timer hat eine andere Art (nicht \(kindName(kind))); er läuft weiter."
         case .startedManually: "Der Timer wurde von Hand gestartet und läuft weiter."
+        case .duplicate: "Doppelte Meldung des Systems ignoriert."
+        case .notActive: "Fokus-Ende gemeldet, aber es war kein Fokus gespeichert; nichts getan."
+        case .stale: "Veraltete Antwort ignoriert: Der Fokus hat sich seit der Frage geändert."
         }
     }
 }

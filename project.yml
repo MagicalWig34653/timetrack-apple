@@ -128,7 +128,7 @@ targets:
         NSLocationTemporaryUsageDescriptionDictionary:
           AutomationVerification: Für die Standortautomatik braucht Timetrack einmalig den genauen Standort, um Ankünfte zuverlässig zu erkennen.
         UIBackgroundModes: [fetch]
-        BGTaskSchedulerPermittedIdentifiers: [de.linolaske.timetrack.automation.refresh]
+        BGTaskSchedulerPermittedIdentifiers: [de.linolaske.timetrack.automation.refresh, de.linolaske.timetrack.focus.retry]
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIApplicationShortcutItems:

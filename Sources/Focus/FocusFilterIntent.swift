@@ -111,14 +111,12 @@ struct TimetrackFocusFilter: SetFocusFilterIntent {
     }
 
     /// The system calls this when a Focus with the filter turns on and again when it turns off (then without a usable mode).
-    /// No mode = "the Focus ended"; the stored state decides what that means. Kept small: no store loads.
+    /// No mode = "the Focus ended"; the stored state decides what that means. Everything goes through
+    /// `FocusEnvironment.deliver`: the received parameters are recorded first, local state is durable before any network call,
+    /// and network work is bounded and queued for retry (F3). Never throws, so the system does not mark the filter as failed.
     func perform() async throws -> some IntentResult {
-        let configuration = mode.map {
-            FocusConfiguration(mode: $0.mode, kind: kind.kind, placeId: place?.id, placeName: place?.name, focusName: focusName)
-        }
-        let runner = FocusEnvironment.makeRunner()
-        let reports = await runner.handle(incoming: configuration, trigger: configuration == nil ? .focusOff : .focusOn)
-        await FocusEnvironment.publishIfChanged(reports)
+        let parameters = FocusParameters(mode: mode?.mode, kind: kind.kind, placeId: place?.id, placeName: place?.name, focusName: focusName)
+        await FocusEnvironment.deliver(parameters, trigger: parameters.mode == nil ? .focusOff : .focusOn)
         return .result()
     }
 }

@@ -18,6 +18,11 @@ struct TimetrackIOSApp: App {
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
         let model = AppModel(auth: auth)
         FocusNotifications.install() // F2: action buttons of the Focus filter's questions
+        FocusEnvironment.registerBackgroundRetry() // F3: retries of Focus actions that could not reach the server (must be registered before launch ends)
+        Task { await FocusEnvironment.retryPending() } // F3: also runs on background launches caused by a Focus callback
+        #if DEBUG
+        FocusSimulation.runFromEnvironment() // F3: TT_DEV_FOCUS_SIMULATE for UI tests
+        #endif
         model.onOutcome = { TTHaptics.handle($0) } // user-initiated results only; the stores never report loads
         _model = State(initialValue: model)
         AutomationRuntime.shared.start() // L2: restores region monitoring; also runs on background launches caused by region events
@@ -37,10 +42,11 @@ struct TimetrackIOSApp: App {
                 .onChange(of: scenePhase) {
                     guard scenePhase == .active else { return }
                     AutomationRuntime.shared.foregrounded()
+                    Task { await FocusEnvironment.retryPending() } // F3
                     if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                 }
                 .onChange(of: model.phase) { old, _ in
-                    if old == .signedIn, model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut() } } // L2: stop watching, forget token and queue
+                    if old == .signedIn, model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut(); await FocusEnvironment.signedOut() } } // L2: stop watching, forget token and queue
                     if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).
                     switch model.phase {

@@ -26,7 +26,10 @@ Damit Rückfragen ankommen, erlaube Mitteilungen für Timetrack (Einstellungen �
 - Ohne Anmeldung bucht der Filter nichts; es kommt ein Hinweis, dich anzumelden.
 
 ## Ausprobieren, ohne den Fokus zu wechseln
-Auf der Seite „Fokus-Filter“ gibt es den Bereich „Ausprobieren“: Modus und Art wählen, **Fokus an** oder **Fokus aus** tippen. Standardmäßig siehst du nur, was passieren würde. Mit „Wirklich ausführen“ wird tatsächlich gestartet, gestoppt oder eine Mitteilung gesendet. Darunter stehen die letzten fünf Aktionen mit Uhrzeit und Ergebnis.
+Auf der Seite „Fokus-Filter“ gibt es den Bereich „Ausprobieren“: Modus und Art wählen, **Fokus an** oder **Fokus aus** tippen. Standardmäßig siehst du nur, was passieren würde. Mit „Wirklich ausführen“ wird tatsächlich gestartet, gestoppt oder eine Mitteilung gesendet. Darunter stehen die letzten zehn Aktionen mit Uhrzeit, den von iOS erhaltenen Angaben und dem Ergebnis.
+
+## Prüfen, was iOS gemeldet hat
+Der Bereich „Letzte Meldung von iOS“ zeigt, wann iOS Timetrack zuletzt aufgerufen hat, mit welchen Angaben und was daraus wurde. „Keine Angaben“ heißt: iOS meldet das Ende eines Fokus. Kann der Server gerade nicht erreicht werden, wartet die Aktion (Start oder Stopp) und wird automatisch erneut gesendet (beim Öffnen der App, im Hintergrund oder mit „Wartende Aktionen jetzt senden“). „Diagnose teilen“ erzeugt einen Text ohne Zugangsdaten, den du weitergeben kannst. Steht der Fokus als aktiv, obwohl er aus ist, hilft „Gespeicherten Fokus-Zustand zurücksetzen“.
 
 ## Datenschutz
 Der Filter speichert nur Modus, Art, Ort und den Zustand „Fokus an/aus“ auf diesem Gerät (App-Gruppe). Zugangsdaten bleiben im Schlüsselbund; der Fokus selbst (Name, Status) wird von iOS nicht an Timetrack verraten, nur dass ein Fokus mit Filter ein- oder ausgeht.
@@ -34,5 +37,6 @@ Der Filter speichert nur Modus, Art, Ort und den Zustand „Fokus an/aus“ auf 
 ## Fehlersuche
 - **Nichts passiert**: Ist der Filter im Fokus hinzugefügt und der Modus nicht leer? Steht auf der Seite „Kein Fokus-Filter aktiv“, obwohl der Fokus an ist, den Filter im Fokus einmal öffnen und mit „Fertig“ bestätigen.
 - **Keine Rückfrage**: Mitteilungen für Timetrack erlaubt? Timetrack in den „Erlaubten Apps“ des Fokus?
-- **„Bitte in Timetrack anmelden“**: App öffnen und anmelden.
+- **„Bitte in Timetrack anmelden“**: App öffnen und anmelden. (Ist nur der Server nicht erreichbar, erscheint stattdessen „wartet und wird erneut versucht“.)
+- **Seite zeigt „Noch keine Meldung von iOS“**: iOS hat Timetrack gar nicht aufgerufen. Filter im Fokus prüfen, Modus wählen, „Fertig“ tippen; Fokus einmal aus- und einschalten.
 - **Timer wurde nicht gestoppt**: Er wurde von Hand oder mit anderer Art gestartet (siehe Sicherheitsregeln).

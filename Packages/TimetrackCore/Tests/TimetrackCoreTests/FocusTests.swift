@@ -90,7 +90,10 @@ struct FocusRunnerTests {
         var starts: [(SegmentKind, UUID?, UUID)] = []
         var stops: [UUID] = []
         var failing = false
-        func currentTimer() async throws -> Segment? { timer }
+        func currentTimer() async throws -> Segment? {
+            if failing { throw TimetrackError.network(.notConnectedToInternet) }
+            return timer
+        }
         func start(kind: SegmentKind, placeId: UUID?, eventId: UUID) async throws -> TimerCommand.Outcome {
             if failing { throw TimetrackError.network(.notConnectedToInternet) }
             if let timer { return .alreadyRunning(timer) }
@@ -100,6 +103,7 @@ struct FocusRunnerTests {
             return .started(seg)
         }
         func stop(eventId: UUID) async throws -> TimerCommand.Outcome {
+            if failing { throw TimetrackError.network(.notConnectedToInternet) }
             guard let timer else { return .notRunning }
             stops.append(eventId)
             self.timer = nil
@@ -110,8 +114,10 @@ struct FocusRunnerTests {
     final class Notifier: FocusNotifier, @unchecked Sendable {
         var allowed = true
         var posted: [String] = []
-        func postStart(_ configuration: FocusConfiguration, eventId: UUID) async -> Bool { if allowed { posted.append("start") }; return allowed }
-        func postStop(_ configuration: FocusConfiguration) async -> Bool { if allowed { posted.append("stop") }; return allowed }
+        var sequences: [Int64] = []
+        var eventIds: [UUID] = []
+        func postStart(_ configuration: FocusConfiguration, eventId: UUID, sequence: Int64) async -> Bool { if allowed { posted.append("start"); sequences.append(sequence); eventIds.append(eventId) }; return allowed }
+        func postStop(_ configuration: FocusConfiguration, eventId: UUID, sequence: Int64) async -> Bool { if allowed { posted.append("stop"); sequences.append(sequence); eventIds.append(eventId) }; return allowed }
         func postSignIn() async -> Bool { posted.append("signin"); return true }
     }
 

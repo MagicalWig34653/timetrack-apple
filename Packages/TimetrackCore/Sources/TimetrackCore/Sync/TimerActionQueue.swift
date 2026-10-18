@@ -12,11 +12,14 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     public let command: Command
     /// When the user pressed the button; the server records the time of delivery, so a late delivery is corrected back to this.
     public let queuedAt: Date
+    /// Optional place for a start (F3: the Focus filter can book a start with a place). Absent in entries written before F3.
+    public let placeId: UUID?
 
-    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now) {
+    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil) {
         self.id = id
         self.command = command
         self.queuedAt = queuedAt
+        self.placeId = placeId
     }
 }
 
@@ -120,7 +123,7 @@ public actor TimerActionQueue {
         let late = now.timeIntervalSince(action.queuedAt) > Self.backdateThreshold
         switch action.command {
         case .start(let kind):
-            let segment = try await client.startTimer(clientEventId: action.id, kind: kind)
+            let segment = try await client.startTimer(clientEventId: action.id, kind: kind, placeId: action.placeId)
             if late, segment.startedAt > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
                 _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(startedAt: action.queuedAt, reason: "Offline gestartet"), ifMatchVersion: segment.version)
             }

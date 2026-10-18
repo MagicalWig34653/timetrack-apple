@@ -11,6 +11,7 @@ final class FocusFilterTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_FOCUS_PAGE"] = "1"
         app.launchEnvironment["TT_DEV_FOCUS_FAKE"] = "1"
+        app.launchEnvironment["TT_DEV_FOCUS_RESET"] = "1"
         addUIInterruptionMonitor(withDescription: "notifications") { alert in
             for label in ["Erlauben", "Allow"] where alert.buttons[label].exists {
                 alert.buttons[label].tap()
@@ -54,7 +55,9 @@ final class FocusFilterTests: XCTestCase {
         scrollTo(real)
         real.tap()
         app.buttons["focus.test.on"].tap()
-        XCTAssertTrue(app.staticTexts["focus.test.result"].waitForExistence(timeout: 5))
+        let appeared = app.staticTexts["focus.test.result"].waitForExistence(timeout: 15)
+        if !appeared { shot("focus-realrun-failure") }
+        XCTAssertTrue(appeared)
         sleep(1)
         shot("focus-banner")
         XCTAssertTrue(app.staticTexts["focus.log.list"].exists || app.otherElements["focus.log.list"].waitForExistence(timeout: 3))
@@ -71,6 +74,73 @@ final class FocusFilterTests: XCTestCase {
         app.buttons["focus.test.off"].tap()
         sleep(1)
         XCTAssertTrue(app.staticTexts["focus.test.result"].label.contains("gestoppt"), app.staticTexts["focus.test.result"].label)
+    }
+
+    // MARK: F3: delivery pipeline and diagnostics
+
+    /// An empty delivery (what iOS sends when a Focus ends) without an active Focus is shown, not swallowed.
+    func testSimulatedEndWithoutActiveFocusIsVisible() throws {
+        app.launchEnvironment["TT_DEV_FOCUS_RESET"] = "1"
+        app.launchEnvironment["TT_DEV_FOCUS_SIMULATE"] = "on:off:work:Arbeit,off,off"
+        app.launch()
+        let kind = app.staticTexts["focus.delivery.kind"]
+        XCTAssertTrue(kind.waitForExistence(timeout: 15))
+        // on(mode off) -> off -> off: the last delivery is an end without an active Focus.
+        XCTAssertTrue(waitForLabel(kind, containing: "ohne aktiven Fokus"), kind.label)
+        XCTAssertTrue(app.staticTexts["focus.delivery.parameters"].label.contains("keine Angaben"))
+        XCTAssertTrue(app.staticTexts["focus.delivery.result"].exists)
+        shot("focus-delivery-end")
+    }
+
+    /// Offline direct start: the action is queued and shown as waiting; going online and "Jetzt senden" delivers it.
+    func testOfflineStartIsQueuedAndRetried() throws {
+        app.launchEnvironment["TT_DEV_FOCUS_RESET"] = "1"
+        app.launchEnvironment["TT_DEV_FOCUS_SIMULATE"] = "offline,on:direct:work:Arbeit"
+        app.launch()
+        let pending = app.staticTexts["focus.delivery.pending"]
+        XCTAssertTrue(pending.waitForExistence(timeout: 15))
+        XCTAssertTrue(pending.label.contains("wartet"), pending.label)
+        XCTAssertTrue(app.staticTexts["focus.delivery.result"].label.contains("erneut versucht"), app.staticTexts["focus.delivery.result"].label)
+        shot("focus-delivery-queued")
+
+        let offline = app.switches["focus.sim.offline"]
+        scrollTo(offline)
+        offline.tap() // back online
+        let retry = app.buttons["focus.delivery.retry"]
+        app.swipeDown(); app.swipeDown(); app.swipeDown()
+        scrollTo(retry)
+        retry.tap()
+        XCTAssertTrue(waitForGone(app.staticTexts["focus.delivery.pending"]))
+        shot("focus-delivery-retried")
+    }
+
+    /// The same activation twice in a row is one delivery.
+    func testDuplicateDeliveryIsIgnored() throws {
+        app.launchEnvironment["TT_DEV_FOCUS_RESET"] = "1"
+        app.launchEnvironment["TT_DEV_FOCUS_SIMULATE"] = "on:direct:work:Arbeit,on:direct:work:Arbeit"
+        app.launch()
+        let kind = app.staticTexts["focus.delivery.kind"]
+        XCTAssertTrue(kind.waitForExistence(timeout: 15))
+        XCTAssertTrue(waitForLabel(kind, containing: "Doppelte Meldung"), kind.label)
+        shot("focus-delivery-duplicate")
+    }
+
+    private func waitForLabel(_ element: XCUIElement, containing text: String, timeout: TimeInterval = 10) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if element.exists, element.label.contains(text) { return true }
+            usleep(300_000)
+        }
+        return false
+    }
+
+    private func waitForGone(_ element: XCUIElement, timeout: TimeInterval = 10) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if !element.exists { return true }
+            usleep(300_000)
+        }
+        return false
     }
 
     /// Best effort: looks for the filter in the simulator's own Settings app (Focus > Work > Focus filters > add). Skips when the

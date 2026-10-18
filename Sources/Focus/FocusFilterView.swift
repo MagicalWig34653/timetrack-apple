@@ -17,6 +17,7 @@ struct FocusFilterView: View {
     @State private var executeForReal = false
     @State private var testResult: String?
     @State private var busy = false
+    @State private var pending = 0
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -25,9 +26,13 @@ struct FocusFilterView: View {
                 introCard
                 stepsSection
                 statusSection
+                deliverySection
                 modesSection
                 rulesSection
                 testSection
+                #if DEBUG
+                simulationSection
+                #endif
                 logSection
                 Text("focus.privacy").font(TTFont.meta).foregroundStyle(TT.textSecondary).padding(.horizontal, TT.Space.s)
             }
@@ -39,9 +44,97 @@ struct FocusFilterView: View {
         .ttScreenBackground()
         .navigationTitle("focus.title")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await reload() }
+        .task { await reload() } // the filter runs inside this process, so every delivery announces itself via `FocusEnvironment.changed`
+        .onReceive(NotificationCenter.default.publisher(for: FocusEnvironment.changed).receive(on: DispatchQueue.main)) { _ in Task { @MainActor in await reload() } }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await reload() } } }
     }
+
+    // MARK: Delivery diagnostics (F3)
+
+    private var deliverySection: some View {
+        FormSection("focus.delivery.title", footer: "focus.delivery.footer") {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                if let last = state.lastDelivery {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(last.receivedAt, format: .dateTime.day().month().hour().minute().second())
+                            .font(TTFont.numeralSmall).foregroundStyle(TT.textTertiary)
+                            .accessibilityIdentifier("focus.delivery.time")
+                        Text(verbatim: Self.classificationText(last.classification)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+                            .accessibilityIdentifier("focus.delivery.kind")
+                        Text(verbatim: last.parameters).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            .accessibilityIdentifier("focus.delivery.parameters")
+                        if let result = last.result {
+                            Text(verbatim: result).font(TTFont.body).foregroundStyle(last.failed ? TT.danger : TT.textPrimary)
+                                .accessibilityIdentifier("focus.delivery.result")
+                        }
+                    }
+                    .accessibilityElement(children: .contain)
+                } else {
+                    Text("focus.delivery.none").font(TTFont.body).foregroundStyle(TT.textSecondary).accessibilityIdentifier("focus.delivery.none")
+                }
+                if pending > 0 {
+                    StatusChip(verbatim: pending == 1 ? "1 Aktion wartet auf den Server" : "\(pending) Aktionen warten auf den Server", tone: .warning, symbol: "clock.arrow.circlepath")
+                        .accessibilityIdentifier("focus.delivery.pending")
+                    Button { Task { await retryNow() } } label: { Label("focus.delivery.retry", systemImage: "arrow.clockwise") }
+                        .buttonStyle(.ttSecondary).disabled(busy).accessibilityIdentifier("focus.delivery.retry")
+                }
+                if isStale {
+                    Text("focus.delivery.stale").font(TTFont.meta).foregroundStyle(TT.warning).accessibilityIdentifier("focus.delivery.stale")
+                }
+                if state.active != nil {
+                    Button { Task { await FocusEnvironment.makeRunner().resetState(); await reload() } } label: { Label("focus.delivery.reset", systemImage: "arrow.uturn.backward") }
+                        .buttonStyle(.ttSecondary).accessibilityIdentifier("focus.delivery.reset")
+                }
+                ShareLink(item: diagnosticsText) { Label("focus.delivery.share", systemImage: "square.and.arrow.up") }
+                    .buttonStyle(.ttSecondary).accessibilityIdentifier("focus.delivery.share")
+            }
+            .padding(TT.Space.l)
+        }
+    }
+
+    /// An active Focus for more than 12 hours usually means the end was never delivered.
+    private var isStale: Bool {
+        guard state.active != nil, let since = state.activatedAt else { return false }
+        return Date.now.timeIntervalSince(since) > 12 * 3600
+    }
+
+    private var diagnosticsText: String {
+        FocusDiagnostics.text(state: state, entries: entries, pending: pending, notifications: notificationStatus.isAllowed ? "erlaubt" : "nicht erlaubt")
+    }
+
+    private static func classificationText(_ classification: FocusClassification) -> String {
+        switch classification {
+        case .activated: "Fokus eingeschaltet"
+        case .deactivated: "Fokus ausgeschaltet"
+        case .handover: "Wechsel zu einem anderen Fokus"
+        case .duplicate: "Doppelte Meldung (ignoriert)"
+        case .notActive: "Fokus-Ende ohne aktiven Fokus (ignoriert)"
+        case .answer: "Antwort auf Mitteilung"
+        }
+    }
+
+    #if DEBUG
+    /// Debug builds only: feeds the REAL delivery pipeline the way the system does (for UI tests and the simulator, which cannot toggle a Focus).
+    private var simulationSection: some View {
+        FormSection("focus.sim.title") {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                HStack(spacing: TT.Space.m) {
+                    Button("Ein (Direkt)") { simulate("on:direct:work:Arbeit") }.accessibilityIdentifier("focus.sim.on.direct")
+                    Button("Ein (Fragen)") { simulate("on:suggest:work:Arbeit") }.accessibilityIdentifier("focus.sim.on.suggest")
+                    Button("Aus") { simulate("off") }.accessibilityIdentifier("focus.sim.off")
+                }
+                .buttonStyle(.ttSecondary)
+                Toggle("Server offline (nur Fake)", isOn: Binding(get: { DebugFocusBackend.shared.offline }, set: { DebugFocusBackend.shared.offline = $0 }))
+                    .accessibilityIdentifier("focus.sim.offline")
+            }
+            .padding(TT.Space.l)
+        }
+    }
+
+    private func simulate(_ script: String) {
+        Task { await FocusSimulation.run(script); await reload() }
+    }
+    #endif
 
     // MARK: Sections
 
@@ -188,7 +281,7 @@ struct FocusFilterView: View {
                     .accessibilityIdentifier("focus.log.empty")
             } else {
                 VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(entries.prefix(5).enumerated()), id: \.element.id) { index, entry in
+                    ForEach(Array(entries.prefix(10).enumerated()), id: \.element.id) { index, entry in
                         if index > 0 { Divider() }
                         logRow(entry)
                     }
@@ -206,6 +299,12 @@ struct FocusFilterView: View {
                 Text(entry.date, format: .dateTime.hour().minute().second()).font(TTFont.numeralSmall).foregroundStyle(TT.textTertiary)
             }
             Text(verbatim: entry.summary).font(TTFont.body).foregroundStyle(entry.isFailure ? TT.danger : TT.textPrimary)
+            if let received = entry.received {
+                Text(verbatim: "Erhalten: \(received)").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+            }
+            if let detail = entry.detail {
+                Text(verbatim: detail).font(TTFont.meta).foregroundStyle(TT.textTertiary)
+            }
         }
         .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
         .accessibilityElement(children: .combine)
@@ -217,6 +316,8 @@ struct FocusFilterView: View {
         case .focusOff: "focus.trigger.off"
         case .test: "focus.trigger.test"
         case .notificationAction: "focus.trigger.notification"
+        case .retry: "focus.trigger.retry"
+        case .simulated: "focus.trigger.simulated"
         }
     }
 
@@ -225,21 +326,31 @@ struct FocusFilterView: View {
     private func reload() async {
         state = store.load()
         entries = log.entries()
+        pending = await FocusEnvironment.queue.count
         notificationStatus = await FocusNotifications.authorizationStatus()
+    }
+
+    private func retryNow() async {
+        busy = true
+        defer { busy = false }
+        await FocusEnvironment.retryPending(verbose: true)
+        await reload()
     }
 
     private func runTest(activate: Bool) async {
         busy = true
         defer { busy = false }
         let configuration = FocusConfiguration(mode: testMode, kind: testKind, focusName: String(localized: "focus.test.name"))
-        let runner = FocusEnvironment.makeRunner()
         let reports: [FocusRunReport]
-        if activate {
-            reports = await runner.handle(incoming: configuration, trigger: .test, dryRun: !executeForReal)
+        if executeForReal {
+            // Same pipeline as the system callback (state, log, queue, widgets), only labelled as a test.
+            reports = await FocusEnvironment.deliver(activate ? FocusParameters(configuration) : FocusParameters(mode: nil), trigger: .test)
         } else {
-            reports = await runner.handle(incoming: nil, trigger: .test, dryRun: !executeForReal, assumingActive: executeForReal ? nil : configuration)
+            let runner = FocusEnvironment.makeRunner()
+            reports = activate
+                ? await runner.handle(incoming: configuration, trigger: .test, dryRun: true)
+                : await runner.handle(incoming: nil, trigger: .test, dryRun: true, assumingActive: configuration)
         }
-        if executeForReal { await FocusEnvironment.publishIfChanged(reports) }
         let prefix = executeForReal ? "" : String(localized: "focus.test.prefix.dry")
         testResult = prefix + (reports.first?.entry.summary ?? String(localized: "focus.test.nothing"))
         await reload()
@@ -248,13 +359,6 @@ struct FocusFilterView: View {
 
 private extension UNAuthorizationStatus {
     var isAllowed: Bool { self == .authorized || self == .provisional || self == .ephemeral }
-}
-
-private extension FocusLogEntry {
-    var isFailure: Bool {
-        if case .failed = result { return true }
-        return false
-    }
 }
 
 /// Keeps the Focus filter's copy of "is the automation module on" current (the filter runs without the app's stores).

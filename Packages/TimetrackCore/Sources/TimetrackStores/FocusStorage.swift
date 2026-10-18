@@ -21,6 +21,17 @@ public struct FocusState: Codable, Sendable, Hashable {
     /// Last known state of the "automation" module (nil = unknown, treated as on).
     public var automationEnabled: Bool?
     public var settings: FocusSettings
+    /// F3: monotonic stamp (milliseconds) of the last applied transition. Every callback gets `max(now, previous + 1)`, so
+    /// transitions are totally ordered even when the clock steps back; notification answers carry the stamp of their question.
+    public var sequence: Int64?
+    /// F3: stable id of the last deactivation; becomes the clientEventId of the stop (a repeated answer cannot stop twice).
+    public var deactivationId: UUID?
+    /// F3: event id of a Focus start that is waiting in the retry queue (the timer it creates belongs to the Focus).
+    public var queuedStartEventId: UUID?
+    /// F3: what the system delivered last, for the diagnostics section.
+    public var lastDelivery: FocusDeliverySummary?
+    /// F3: keys ("start-<sequence>") of notification answers that were already executed (duplicate taps).
+    public var handledActions: [String]?
     /// Places the filter can offer (cached by the app so the system's filter editor does not wait for the network).
     public var places: [FocusPlace]
 
@@ -72,10 +83,16 @@ public struct FocusStateStore: Sendable {
 
 public enum FocusTrigger: String, Codable, Sendable, Hashable {
     case focusOn, focusOff, test, notificationAction
+    /// F3: queued actions delivered later (app start, foreground, background refresh, "Jetzt senden").
+    case retry
+    /// F3: the debug hook that feeds the real delivery pipeline.
+    case simulated
 }
 
 public enum FocusLogResult: Codable, Sendable, Hashable {
     case done, skipped(FocusSkipReason), notified, notificationsDenied, askedSignIn, wouldDo, failed(String)
+    /// F3: the server was not reachable; the action waits in the persistent queue and is retried.
+    case queued
 }
 
 public struct FocusLogEntry: Codable, Sendable, Hashable, Identifiable {
@@ -87,8 +104,18 @@ public struct FocusLogEntry: Codable, Sendable, Hashable, Identifiable {
     /// Short German description of what happened ("Timer gestartet", "Nachfrage gesendet", ...).
     public var summary: String
     public var result: FocusLogResult
+    /// F3: what the system handed over ("Modus Nachfragen, Art Arbeit" or "keine Angaben (Fokus beendet)"). Absent in old entries.
+    public var received: String?
+    /// F3: technical detail (error text), shown in the diagnostics.
+    public var detail: String?
+    /// F3: stamp of the transition this entry belongs to.
+    public var sequence: Int64?
 
-    public init(id: UUID = UUID(), date: Date = .now, trigger: FocusTrigger, mode: FocusMode, kind: SegmentKind, summary: String, result: FocusLogResult) {
+    public init(id: UUID = UUID(), date: Date = .now, trigger: FocusTrigger, mode: FocusMode, kind: SegmentKind, summary: String, result: FocusLogResult,
+                received: String? = nil, detail: String? = nil, sequence: Int64? = nil) {
+        self.received = received
+        self.detail = detail
+        self.sequence = sequence
         self.id = id
         self.date = date
         self.trigger = trigger
@@ -102,7 +129,7 @@ public struct FocusLogEntry: Codable, Sendable, Hashable, Identifiable {
 /// Ring buffer of the last filter actions (newest first), persisted in the App Group.
 public struct FocusActionLog: Sendable {
     public static let key = "focus.log.v1"
-    public static let capacity = 20
+    public static let capacity = 40
     private let suiteName: String?
     private var defaults: UserDefaults? { suiteName.flatMap { UserDefaults(suiteName: $0) } }
 

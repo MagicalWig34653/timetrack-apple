@@ -242,7 +242,8 @@ public struct ErrorBanner: View {
                 Text(verbatim: message).font(TTFont.meta).foregroundStyle(TT.textPrimary)
             }
             if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
-            Button(retryTitle, action: retry).font(TTFont.label).buttonStyle(.bordered).buttonBorderShape(.capsule).controlSize(.small)
+            Button(retryTitle, action: retry).font(TTFont.label).lineLimit(1).buttonStyle(.bordered).buttonBorderShape(.capsule).controlSize(.small)
+                .frame(minHeight: 44).contentShape(.rect)
         }
         .padding(TT.Space.m)
         .frame(maxWidth: .infinity, alignment: .leading)

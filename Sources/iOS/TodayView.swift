@@ -23,13 +23,16 @@ private struct TodayContent: View {
     @Environment(AppModel.self) private var model
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) private var sizeClass
+    /// Width of the content area; the two-column layout needs room beyond the size class (iPad portrait with an open sidebar is narrow).
+    @State private var contentWidth: CGFloat = 0
+    private var twoColumns: Bool { sizeClass == .regular && contentWidth >= 760 }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
                 Eyebrow(verbatim: dateLine).padding(.horizontal, TT.Space.xs)
                 if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
-                if sizeClass == .regular {
+                if twoColumns {
                     HStack(alignment: .top, spacing: TT.Space.xl) {
                         VStack(spacing: TT.Space.l) {
                             TimerCard(store: store)
@@ -52,9 +55,10 @@ private struct TodayContent: View {
             }
             .padding(.horizontal, TT.Space.l)
             .padding(.vertical, TT.Space.s)
-            .frame(maxWidth: sizeClass == .regular ? 1100 : TT.contentWidth, alignment: .leading)
+            .frame(maxWidth: twoColumns ? 1100 : TT.contentWidth, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { contentWidth = $0 }
         .ttScreenBackground()
         .task { await store.load() }
         .refreshable { await store.load(); TTHaptics.play(.softTap) }
@@ -129,6 +133,7 @@ private struct DayStats: View {
                         Text("today.done").font(TTFont.label).foregroundStyle(TT.textSecondary)
                         Text(verbatim: DurationFormat.hoursMinutes(done))
                             .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
+                            .lineLimit(1).minimumScaleFactor(0.6)
                         Text("today.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
                         // One "vorläufig" indicator for the whole screen (day or balance); the tiles below stay quiet.
                         if day?.provisional == true || store.account?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }

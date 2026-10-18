@@ -6,6 +6,7 @@ public struct TTPrimaryButtonStyle: ButtonStyle {
     @Environment(\.ttTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.controlSize) private var controlSize
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     public init(danger: Bool = false) { self.danger = danger }
 
@@ -13,9 +14,11 @@ public struct TTPrimaryButtonStyle: ButtonStyle {
         let fill = danger ? TT.dangerFill : theme.accent
         configuration.label
             .font(.system(.body, weight: .semibold))
+            .ttButtonLabelFit(typeSize)
             .foregroundStyle(danger ? Color.white : theme.onAccent)
+            .padding(.horizontal, TT.Space.m)
+            .padding(.vertical, TT.Space.s)
             .frame(maxWidth: .infinity, minHeight: controlSize == .large ? 54 : 44)
-            .padding(.horizontal, TT.Space.l)
             .background(fill.gradient, in: .rect(cornerRadius: TT.Radius.control + 2, style: .continuous))
             .shadow(color: fill.opacity(isEnabled ? 0.28 : 0), radius: 10, y: 4)
             .opacity(isEnabled ? 1 : 0.45)
@@ -30,20 +33,32 @@ public struct TTSecondaryButtonStyle: ButtonStyle {
     @Environment(\.ttTheme) private var theme
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.controlSize) private var controlSize
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(.body, weight: .medium))
+            .ttButtonLabelFit(typeSize)
             .foregroundStyle(theme.ink)
+            .padding(.horizontal, TT.Space.m)
+            .padding(.vertical, TT.Space.s)
             .frame(maxWidth: .infinity, minHeight: controlSize == .large ? 54 : 44)
-            .padding(.horizontal, TT.Space.l)
             .background(theme.accent.opacity(configuration.isPressed ? 0.16 : 0.09), in: .rect(cornerRadius: TT.Radius.control + 2, style: .continuous))
             .opacity(isEnabled ? 1 : 0.45)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
             .contentShape(.rect)
+    }
+}
+
+extension View {
+    /// Button labels stay on one line (scaling down a little before they would break); at accessibility sizes they wrap instead of truncating.
+    func ttButtonLabelFit(_ typeSize: DynamicTypeSize) -> some View {
+        self.lineLimit(typeSize.isAccessibilitySize ? 4 : 1)
+            .minimumScaleFactor(typeSize.isAccessibilitySize ? 1 : 0.75)
+            .multilineTextAlignment(.center)
     }
 }
 

@@ -49,7 +49,7 @@ Seite "Darstellung" (`AppearanceSettingsPage` im Design-Paket; iOS: Einstellunge
 `scripts/make-app-icon.swift` (CoreGraphics, ohne Abhängigkeiten) erzeugt `Sources/{iOS,Mac,Watch}/Assets.xcassets` (AppIcon, AccentColor, iOS LaunchBackground).
 Motiv: offener Zeitbogen in Akzentblau mit Zeigern auf ruhigem dunklem Grund; macOS mit eingebauter Kachel und Schatten. Startbild: `UILaunchScreen` mit Hintergrundfarbe `LaunchBackground` (hell/dunkel). `BrandMark` zeichnet dasselbe Motiv in SwiftUI.
 Nur ein Icon (kein dunkles/getöntes iOS-Icon), siehe Handoff.
-**Überholt (17.10.2026):** Dieser Abschnitt beschreibt den Stand von A6. Das aktuelle Symbol (geschlossener Akzentring, weiße Zeiger, Icon-Composer-Format, wählbare Akzent-Varianten in den iOS-Einstellungen) steht in `docs/ICONS.md` (A6b/A6c/A6d).
+**Überholt (17.10.2026):** Dieser Abschnitt beschreibt den Stand von A6. Das aktuelle Symbol (geschlossener Akzentring, weiße Zeiger, Icon-Composer-Format, wählbare Akzent-Varianten in den iOS-Einstellungen) steht in `docs/ICONS.md` (A6b/A6c/A6d). IC1 ergänzt zehn Motiv-/Hintergrundvarianten (Zifferblatt, Stoppuhr, Timer-Ring, Sanduhr, Balken, Haken, Monogramm T/C, Feierabend); die Auswahl in Darstellung ist nach Motiv gruppiert und bleibt vom App-Akzent getrennt.
 
 ## Prüfung
 

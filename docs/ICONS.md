@@ -36,3 +36,23 @@ The in-app accent is NOT wired to these yet; `IconAccent.accents` (Sources/iOS/A
 
 ## Build integration
 project.yml (`# A6b`/`# A6c`): `.icon` files are resources; `ASSETCATALOG_COMPILER_APPICON_NAME: TimetrackPrimary` on all targets; iOS also lists the alternates. Picker: `AppIconPickerSection` in `Sources/iOS/AppIconSettingsSection.swift` (uses preview image sets because UIKit cannot load alternate icon images).
+
+## IC1: Motiv- und Hintergrundvarianten
+Zehn zusätzliche Alternativ-Symbole, gruppiert nach Motiv; Quelle `scripts/icons/motif_icons.py` (`VARIANTS`; `build_icons.py` ruft es mit auf; erzeugt auch `Sources/iOS/IconCatalog.generated.swift`). Alles ist programmatisch gezeichnet (SVG-Ebenen, keine fremden Vorlagen). Jede Variante ist ein Icon-Composer-Dokument: Dokument-`fill` (Verlauf) als Hintergrund, getrennte SVG-Vordergrundebenen, bei Mesh zusätzlich eine randlose Hintergrundebene (radiale Verläufe) in einer eigenen Gruppe.
+
+| Gruppe (Motiv) | Hintergrund | Bundle |
+|---|---|---|
+| Zifferblatt | Hell | TimetrackClockLight |
+| Zifferblatt | Dunkel (orange Sekundenzeiger) | TimetrackClockDark |
+| Stoppuhr | Verlauf (Cyan zu Indigo) | TimetrackStopwatch |
+| Timer-Ring | Mesh (Türkis/Indigo/Magenta) | TimetrackTimer |
+| Sanduhr | Warm (Bernstein zu Braun) | TimetrackHourglass |
+| Balken | Monochrom | TimetrackBars |
+| Haken | Grün (Verlauf) | TimetrackCheck |
+| Monogramm T | Getönt (helles Lavendel) | TimetrackMonogramT |
+| Monogramm C (Chronolog) | Mesh (Violett/Cyan/Magenta) | TimetrackMonogramC |
+| Feierabend | Abendrot (Sonne über Horizont) | TimetrackSunset |
+
+Regeln: Motive bleiben im mittleren Bereich, Strichstärken mindestens 28 px (bei 1024), damit sie bei 60 pt lesbar sind (gesichtet bei 220, 60 und 40 px). Helle Hintergründe nutzen mittlere Tinte (Schiefer, Indigo), weil die Systemableitung für Dunkel die Ebenen nicht umfärbt (Spezialisierungen werden ignoriert, siehe oben); im Getönt-Dunkel-Rendering sind Hell-Varianten blass, aber erkennbar. `build_icons.py` warnt, wenn `project.yml` ein Bundle nicht als Ressource und in `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` führt. Vorschauen im Raster stammen aus denselben `.icon`-Dokumenten (ictool, 180 px) in `IconPreviews.xcassets`.
+
+Auswahl: `AppIconPickerSection` zeigt Gruppen (Klassik = Akzentfarben, dann je Motiv) als Raster; die Zeile unter der Kachel nennt den Hintergrund. Das Symbol bleibt unabhängig vom App-Akzent. UI-Test: `AppIconSwitchTests`.

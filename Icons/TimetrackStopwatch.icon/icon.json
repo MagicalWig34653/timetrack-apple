@@ -1,0 +1,50 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.13333,0.82745,0.93333,1.00000",
+      "srgb:0.26275,0.21961,0.79216,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.15,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.85,
+        "y": 1
+      }
+    }
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "name": "Hand",
+          "image-name": "hand.svg",
+          "glass": false
+        },
+        {
+          "name": "Case",
+          "image-name": "case.svg",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true,
+      "translucency": {
+        "enabled": false,
+        "value": 0.5
+      },
+      "lighting": "combined"
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

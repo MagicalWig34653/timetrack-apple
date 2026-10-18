@@ -282,7 +282,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das App-Symbol gilt nur für dieses Gerät und wird getrennt von der Akzentfarbe gewählt; das eine ändert nie das andere."
+            "value": "Das App-Symbol gilt nur für dieses Gerät und wird getrennt von der Akzentfarbe gewählt; das eine ändert nie das andere. Die Symbole sind nach Motiv gruppiert (Zifferblatt, Stoppuhr, Sanduhr ...), die Zeile unter dem Symbol nennt den Hintergrund."
           }
         }
       }

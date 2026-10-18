@@ -41,7 +41,7 @@ struct ShortcutGuideView: View {
 
                 if let place {
                     step(1, title: leaving ? "Automation „Verlassen“ anlegen" : "Automation „Ankunft“ anlegen",
-                         text: "Öffne Kurzbefehle, wechsle zu „Automation“, tippe auf „+“ und wähle „\(leaving ? "Verlassen" : "Ankunft")“. Wähle als Ort „\(place.name)\" und lasse „Jederzeit“ stehen.") {
+                         text: "Öffne Kurzbefehle, wechsle zu „Automation“, tippe auf „+“ und wähle „\(leaving ? "Verlassen" : "Ankunft")“. Wähle als Ort „\(place.name)“ und lasse „Jederzeit“ stehen.") {
                         IllustrationAutomationTab(trigger: leaving ? "Verlassen" : "Ankunft")
                     }
                     step(2, title: "Aktion „Timetrack“ wählen",

@@ -13,6 +13,7 @@
 		06D674907DEC9A1604862D3C /* TimerIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */; };
 		088D157283A97F53FE808FE1 /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
 		0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24BBA312CA476B29515F081 /* ScreenshotTests.swift */; };
+		0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */; };
 		0EDA5EACE903627A685D6360 /* PlanSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829AB0BC0EA6FA97BA015CB8 /* PlanSheets.swift */; };
 		0F35DA54C17F9E8A16FEC525 /* WidgetPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E08357964E18B82C99CDE5 /* WidgetPublisher.swift */; };
 		149F469262A0F5F1B16B8090 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E8B431C2FDA0A08C46D88C9 /* LocationService.swift */; };
@@ -303,6 +304,7 @@
 		BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackWidgetMac.swift; sourceTree = "<group>"; };
 		C4650AA0727E578260AF0D33 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
 		C8CD0513317393D3CB5C87EE /* LocationIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationIntents.swift; sourceTree = "<group>"; };
+		CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationFlowTests.swift; sourceTree = "<group>"; };
 		D46440267C56A837E5719850 /* PlanningShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningShared.swift; sourceTree = "<group>"; };
 		D728A14521078775540E5870 /* ComplicationGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationGallery.swift; sourceTree = "<group>"; };
 		D753667477D8FD54ABCCDBF6 /* AutomationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationSettingsView.swift; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 			children = (
 				7FD24C654F67761698F18312 /* AccountAccentTests.swift */,
 				5DB87D8AB149537B70B2527E /* AppearanceShotTests.swift */,
+				CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
 				E24BBA312CA476B29515F081 /* ScreenshotTests.swift */,
 				703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */,
@@ -1007,6 +1010,7 @@
 			files = (
 				837B835737740160340479A1 /* AccountAccentTests.swift in Sources */,
 				32E5D9A4FB08865626415A86 /* AppearanceShotTests.swift in Sources */,
+				0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
 				0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */,
 				A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */,

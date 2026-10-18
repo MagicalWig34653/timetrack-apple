@@ -1,11 +1,12 @@
 import CoreLocation
 import Foundation
+import os
 import TimetrackCore
 import TimetrackStores
 
 /// Thin CoreLocation layer. It owns the only `CLLocationManager` and never asks for continuous updates:
 ///
-/// - region monitoring (the system watches the geofences and wakes the app on enter/exit, also after termination),
+/// - region monitoring via `CLMonitor` (the system watches the geofences and wakes the app on enter/exit, also after termination),
 /// - significant location changes and visits as low-power wake-ups (re-plan the nearest 20 regions, check a pending arrival),
 /// - `requestLocation()` as a single, 100 m accurate fix when a pending arrival is checked.
 ///
@@ -15,11 +16,11 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
     /// Region identifier prefix, so foreign regions of this app (none today) are never touched.
     private nonisolated static let prefix = "tt.place."
 
+    /// Counts and states only, never coordinates or place names (readable in Console.app during the on-device test).
+    private nonisolated static let logger = Logger(subsystem: "de.linolaske.timetrack", category: "location")
     private let manager = CLLocationManager()
     private var oneShotWaiters: [CheckedContinuation<LocationFix?, Never>] = []
     private var oneShotTimeout: Task<Void, Never>?
-    private var stateReports: [UUID: Bool] = [:]
-    private var reconcileTask: Task<Void, Never>?
 
     /// Authorization or accuracy changed.
     var onStatusChange: ((LocationStatus) -> Void)?
@@ -73,39 +74,94 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
 
     // MARK: - Monitoring
 
-    /// Applies a plan: exactly the planned places are monitored, everything else stops. Without "Always" nothing is monitored.
+    /// Applies a plan: exactly the planned places are monitored (`CLMonitor` circular conditions, iOS 17+), everything else stops.
+    /// Without "Always" nothing is monitored. Call at every launch: the monitor must exist again to receive events after a relaunch.
     func apply(plan: MonitorPlan, enabled: Bool) {
-        let allowed = enabled && manager.authorizationStatus == .authorizedAlways && CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self)
+        let allowed = enabled && manager.authorizationStatus == .authorizedAlways
         let wanted: [String: AutomationPlace] = allowed ? Dictionary(plan.monitored.map { (Self.prefix + $0.id.uuidString, $0) }, uniquingKeysWith: { first, _ in first }) : [:]
-        for region in manager.monitoredRegions where region.identifier.hasPrefix(Self.prefix) && wanted[region.identifier] == nil {
-            manager.stopMonitoring(for: region)
-        }
-        let current = Dictionary(manager.monitoredRegions.map { ($0.identifier, $0) }, uniquingKeysWith: { first, _ in first })
-        for (identifier, place) in wanted {
-            guard let point = place.center else { continue }
-            let center = CLLocationCoordinate2D(latitude: point.latitude, longitude: point.longitude)
-            if let existing = current[identifier] as? CLCircularRegion,
-               existing.radius == CLLocationDistance(place.monitoringRadius), existing.center.latitude == center.latitude, existing.center.longitude == center.longitude {
-                continue
-            }
-            let region = CLCircularRegion(center: center, radius: min(CLLocationDistance(place.monitoringRadius), manager.maximumRegionMonitoringDistance), identifier: identifier)
-            region.notifyOnEntry = true
-            region.notifyOnExit = true
-            manager.startMonitoring(for: region)
-        }
+        Self.logger.info("apply: enabled=\(enabled) allowed=\(allowed) auth=\(self.manager.authorizationStatus.rawValue) planned=\(wanted.count)")
+        pendingPlan = wanted
         if allowed {
             manager.startMonitoringSignificantLocationChanges()
             manager.startMonitoringVisits()
-            // Initial state of every region (also tells which ones contain the device after a restart).
-            stateReports = [:]
-            for region in manager.monitoredRegions where region.identifier.hasPrefix(Self.prefix) { manager.requestState(for: region) }
         } else {
             manager.stopMonitoringSignificantLocationChanges()
             manager.stopMonitoringVisits()
         }
+        if applyTask == nil {
+            // Serialised: a second apply while one runs is picked up by the loop below.
+            applyTask = Task { [weak self] in
+                while let self, let target = self.takePendingPlan() { await self.sync(to: target) }
+                self?.applyTask = nil
+            }
+        }
     }
 
-    var monitoredCount: Int { manager.monitoredRegions.filter { $0.identifier.hasPrefix(Self.prefix) }.count }
+    private var pendingPlan: [String: AutomationPlace]?
+    private var applyTask: Task<Void, Never>?
+    private var monitor: CLMonitor?
+    private var eventTask: Task<Void, Never>?
+    private var applied: [String: String] = [:]
+
+    private func takePendingPlan() -> [String: AutomationPlace]? {
+        defer { pendingPlan = nil }
+        return pendingPlan
+    }
+
+    private func sync(to wanted: [String: AutomationPlace]) async {
+        if monitor == nil {
+            guard !wanted.isEmpty else { return }
+            let created = await CLMonitor("TimetrackPlaces") // names must be alphanumeric: a dot crashes with "Monitor name is not valid"
+            monitor = created
+            eventTask = Task { [weak self] in
+                do {
+                    for try await event in await created.events { self?.handle(event) }
+                } catch {
+                    Self.logger.error("monitor events ended")
+                }
+            }
+        }
+        guard let monitor else { return }
+        for identifier in await monitor.identifiers where identifier.hasPrefix(Self.prefix) {
+            if let place = wanted[identifier], applied[identifier] == Self.geometryKey(place) { continue }
+            await monitor.remove(identifier)
+            applied[identifier] = nil
+        }
+        for (identifier, place) in wanted where applied[identifier] == nil {
+            guard let point = place.center else { continue }
+            let center = CLLocationCoordinate2D(latitude: point.latitude, longitude: point.longitude)
+            let radius = min(CLLocationDistance(place.monitoringRadius), 5000)
+            await monitor.add(CLMonitor.CircularGeographicCondition(center: center, radius: radius), identifier: identifier, assuming: .unsatisfied)
+            applied[identifier] = Self.geometryKey(place)
+        }
+        // Which regions contain the device now (used to end visits whose exit event was missed).
+        var inside = Set<UUID>()
+        var known = 0
+        for identifier in wanted.keys {
+            guard let record = await monitor.record(for: identifier), let id = Self.placeID(identifier) else { continue }
+            known += 1
+            if record.lastEvent.state == .satisfied { inside.insert(id) }
+        }
+        if known == wanted.count, known > 0 { onWake?(.inside(inside)) }
+    }
+
+    private static func geometryKey(_ place: AutomationPlace) -> String {
+        "\(place.center?.latitude ?? 0),\(place.center?.longitude ?? 0),\(place.monitoringRadius)"
+    }
+
+    private func handle(_ event: CLMonitor.Event) {
+        guard let id = Self.placeID(event.identifier) else { return }
+        switch event.state {
+        case .satisfied:
+            Self.logger.info("region enter")
+            onWake?(.enter(id, event.date))
+        case .unsatisfied:
+            Self.logger.info("region exit")
+            onWake?(.exit(id, event.date))
+        default: break
+        }
+        if event.conditionLimitExceeded { Self.logger.error("condition limit exceeded") }
+    }
 
     // MARK: - One-shot fix
 
@@ -138,38 +194,12 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         Task { @MainActor in self.onStatusChange?(self.status) }
     }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        guard let id = Self.placeID(region) else { return }
-        let now = Date()
-        Task { @MainActor in self.onWake?(.enter(id, now)) }
-    }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        guard let id = Self.placeID(region) else { return }
-        let now = Date()
-        Task { @MainActor in self.onWake?(.exit(id, now)) }
-    }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-        guard let id = Self.placeID(region) else { return }
-        Task { @MainActor in self.collect(id, inside: state == .inside) }
-    }
-
-    /// Waits briefly for all `requestState` answers, then reports which places contain the device.
-    private func collect(_ id: UUID, inside: Bool) {
-        stateReports[id] = inside
-        reconcileTask?.cancel()
-        reconcileTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled, let self else { return }
-            let insideIDs = Set(self.stateReports.filter(\.value).keys)
-            // Only report once every monitored region answered; a partial answer would end visits wrongly.
-            if self.stateReports.count >= self.monitoredCount { self.onWake?(.inside(insideIDs)) }
-        }
-    }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }
+        Self.logger.info("didUpdateLocations accuracy=\(last.horizontalAccuracy)")
         let fix = LocationFix(latitude: last.coordinate.latitude, longitude: last.coordinate.longitude, horizontalAccuracy: last.horizontalAccuracy,
                               speed: last.speed >= 0 ? last.speed : nil, timestamp: last.timestamp)
         Task { @MainActor in
@@ -188,12 +218,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         Task { @MainActor in self.onWake?(.visit) }
     }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
-        // Typically the 20-region limit or missing authorization; the settings page shows the plan and the permission state.
-    }
 
-    private nonisolated static func placeID(_ region: CLRegion) -> UUID? {
-        guard region.identifier.hasPrefix(prefix) else { return nil }
-        return UUID(uuidString: String(region.identifier.dropFirst(prefix.count)))
+    private nonisolated static func placeID(_ identifier: String) -> UUID? {
+        guard identifier.hasPrefix(prefix) else { return nil }
+        return UUID(uuidString: String(identifier.dropFirst(prefix.count)))
     }
 }

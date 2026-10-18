@@ -3,6 +3,7 @@ import Foundation
 import SwiftUI
 import TimetrackCore
 import TimetrackStores
+import TimetrackDesign
 import UIKit
 
 /// Process-wide wiring of the location automation: the engine, the CoreLocation layer and background wake-ups.
@@ -23,7 +24,12 @@ final class AutomationRuntime {
     private var storeChangedHandler: (() -> Void)?
 
     private init() {
-        let secrets = KeychainSecretStore()
+        #if targetEnvironment(simulator)
+        // Unsigned simulator builds have no Keychain access; UserDefaults stand in (never used on a device).
+        let secrets: SecretStore = SimulatorSecretStore()
+        #else
+        let secrets: SecretStore = KeychainSecretStore()
+        #endif
         let service = LocationService()
         self.secrets = secrets
         self.service = service
@@ -78,7 +84,31 @@ final class AutomationRuntime {
             await engine.evaluate()
             await scheduleChecks()
         }
+        #if DEBUG
+        runSimulatedRegionScript()
+        #endif
     }
+
+    #if DEBUG
+    /// Simulator only: the iOS 27 simulator does not deliver region events, so a script injects them into the real pipeline
+    /// (filter, queue, sender, one-shot fix from `simctl location`). Format: `TT_SIM_REGION=enter:<placeId>@0,exit:<placeId>@45`
+    /// (seconds after launch). Not compiled into release builds.
+    private func runSimulatedRegionScript() {
+        guard let script = ProcessInfo.processInfo.environment["TT_SIM_REGION"] else { return }
+        NSLog("TT sim script: %@", script)
+        for item in script.split(separator: ",") {
+            let parts = item.split(separator: "@")
+            let action = parts[0].split(separator: ":")
+            guard parts.count == 2, action.count == 2, let id = UUID(uuidString: String(action[1])), let delay = Double(parts[1]) else { continue }
+            let entering = action[0] == "enter"
+            Task {
+                try? await Task.sleep(for: .seconds(delay))
+                NSLog("TT sim event %@", entering ? "enter" : "exit")
+                await handle(entering ? .enter(id, Date()) : .exit(id, Date()))
+            }
+        }
+    }
+    #endif
 
     func attach(_ store: AutomationStore) {
         self.store = store
@@ -87,6 +117,29 @@ final class AutomationRuntime {
             TimetrackShortcuts.updateAppShortcutParameters() // one App Shortcut per place
             Task { await self?.replan(force: true); await self?.scheduleChecks() }
         }
+    }
+
+    /// One store per signed-in client (the settings page and the background refresh share it).
+    func store(for client: APIClient) -> AutomationStore {
+        if let store, storeClient === client { return store }
+        #if targetEnvironment(simulator)
+        secrets.write(client.baseURL.absoluteString, for: SecretKey.serverURL)
+        #endif
+        let created = AutomationStore(client: client, engine: engine, secrets: secrets, deviceName: deviceId)
+        created.onOutcome = { TTHaptics.handle($0) }
+        storeClient = client
+        attach(created)
+        return created
+    }
+
+    private var storeClient: APIClient?
+
+    /// Keeps the on-device place cache current (sign-in, foreground), so a background launch knows the places without a network.
+    /// Also creates the device token when places have automation on but this device has none yet (e.g. modes set in the web app).
+    func refreshPlaces(using client: APIClient?) async {
+        guard moduleEnabled, let client else { return }
+        await store(for: client).load()
+        await replan(force: false)
     }
 
     /// The account is gone (sign-out): stop watching, forget cached places and queued events, delete the local token.
@@ -144,7 +197,7 @@ final class AutomationRuntime {
             return
         }
         // An arrival that is overdue but still unresolved (fast device, no fix) is retried with a back-off, never in a tight loop.
-        let target = max(due, Date().addingTimeInterval(5 * 60))
+        let target = due > Date() ? due : Date().addingTimeInterval(5 * 60)
         let request = BGAppRefreshTaskRequest(identifier: Self.refreshTaskIdentifier)
         request.earliestBeginDate = target
         try? BGTaskScheduler.shared.submit(request)
@@ -167,3 +220,13 @@ final class AutomationRuntime {
         task.expirationHandler = { work.cancel() }
     }
 }
+
+#if targetEnvironment(simulator)
+/// Simulator-only secret store (see `AutomationRuntime.init`).
+struct SimulatorSecretStore: SecretStore {
+    private var defaults: UserDefaults { .standard }
+    func read(_ key: String) -> String? { defaults.string(forKey: "sim.secret." + key) }
+    func write(_ value: String, for key: String) { defaults.set(value, forKey: "sim.secret." + key) }
+    func delete(_ key: String) { defaults.removeObject(forKey: "sim.secret." + key) }
+}
+#endif

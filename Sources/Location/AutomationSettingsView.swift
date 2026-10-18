@@ -31,10 +31,7 @@ struct AutomationSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             guard store == nil, let client = model.apiClient else { return }
-            let runtime = AutomationRuntime.shared
-            let created = AutomationStore(client: client, engine: runtime.engine, secrets: runtime.secrets, deviceName: runtime.deviceId)
-            created.onOutcome = { TTHaptics.handle($0) }
-            runtime.attach(created)
+            let created = AutomationRuntime.shared.store(for: client)
             store = created
             await created.load()
         }

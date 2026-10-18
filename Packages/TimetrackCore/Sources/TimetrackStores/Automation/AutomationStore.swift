@@ -83,6 +83,7 @@ public final class AutomationStore {
             places = try await client.listPlaces().filter { !$0.archived }
             await engine.setPlaces(places)
             tokenInfo = await currentTokenInfo()
+            if activePlaceCount > 0, !hasLocalToken, await engine.snapshot.config.enabled { await ensureDeviceToken() }
             await refreshFromEngine()
             onConfigurationChanged?()
             error = nil

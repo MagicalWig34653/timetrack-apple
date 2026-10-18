@@ -32,9 +32,14 @@ struct TimetrackIOSApp: App {
                 .ttAppearance()
                 .task { await watchSender.start() }
                 .onChange(of: model.isEnabled(.automation)) { AutomationRuntime.shared.moduleEnabled = model.isEnabled(.automation); Task { await AutomationRuntime.shared.replan(force: true) } }
-                .onChange(of: scenePhase) { if scenePhase == .active { AutomationRuntime.shared.foregrounded() } }
-                .onChange(of: model.phase) {
-                    if model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut() } } // L2: stop watching, forget token and queue
+                .onChange(of: scenePhase) {
+                    guard scenePhase == .active else { return }
+                    AutomationRuntime.shared.foregrounded()
+                    if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
+                }
+                .onChange(of: model.phase) { old, _ in
+                    if old == .signedIn, model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut() } } // L2: stop watching, forget token and queue
+                    if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).
                     switch model.phase {
                     case .signedIn: Task { await watchSender.update(isSignedIn: true) }

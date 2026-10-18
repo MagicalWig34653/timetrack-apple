@@ -12,7 +12,7 @@ import ActivityKit
 /// Called by the apps after every refresh and by the user-triggered intents; the widget extensions only read.
 enum WidgetPublisher {
     /// Writes `snapshot` and reloads. Unchanged content still gets a fresh `updatedAt` so the "Aktualisiert um" note stays truthful.
-    static func publish(_ snapshot: WidgetSnapshot, store: WidgetSnapshotStore = WidgetSnapshotStore()) async {
+    static func publish(_ snapshot: WidgetSnapshot, source: String = "model", store: WidgetSnapshotStore = WidgetSnapshotStore()) async {
         var snapshot = snapshot
         // Intents refresh without the app's appearance state: keep the accent the app wrote last.
         if snapshot.accentHex == nil, let previous = store.read() {
@@ -22,7 +22,7 @@ enum WidgetPublisher {
         store.write(snapshot)
         reloadAll()
         #if os(iOS)
-        await TimerLiveActivity.sync(running: snapshot.isRunning ? snapshot.startedAt.map { ($0, snapshot.kind) } : nil)
+        await TimerLiveActivity.sync(running: snapshot.isRunning ? snapshot.startedAt.map { ($0, snapshot.kind) } : nil, source: source)
         #endif
     }
 
@@ -31,7 +31,7 @@ enum WidgetPublisher {
         store.clear()
         reloadAll()
         #if os(iOS)
-        await TimerLiveActivity.sync(running: nil)
+        await TimerLiveActivity.sync(running: nil, source: "signedOut")
         #endif
     }
 
@@ -42,16 +42,23 @@ enum WidgetPublisher {
         #endif
     }
 
+    /// `.failure` (not "no timer") when the request fails.
+    private static func readTimer(_ client: APIClient) async -> Result<Segment?, Error> {
+        do { return .success(try await client.currentTimer()) } catch { return .failure(error) }
+    }
+
     /// Fetches the current state from the API and publishes it. Used by intents, which run without the app's stores.
-    static func refresh(client: APIClient) async {
+    static func refresh(client: APIClient, source: String = "refresh") async {
         let zone = (try? await client.listWorkModels())?.current()?.timeZone ?? TimeZone(identifier: "Europe/Berlin") ?? .current
         let today = DayCalendar(timeZone: zone).day(for: .now)
-        async let timer = try? await client.currentTimer()
+        // A failed read must never look like "no timer" (that would end the Live Activity).
+        async let timer = Self.readTimer(client)
         async let evaluation = try? await client.getDay(today)
         async let balance = try? await client.getTimeAccount(asOf: today)
-        let (running, day, account) = await (timer ?? nil, evaluation, balance)
+        let (answer, day, account) = await (timer, evaluation, balance)
+        guard case .success(let running) = answer else { return }
         let segments = (day?.segments ?? []).filter { !$0.voided }
-        await publish(.make(running: running, day: day, account: account, segments: segments, zone: zone))
+        await publish(.make(running: running, day: day, account: account, segments: segments, zone: zone), source: source)
     }
 }
 

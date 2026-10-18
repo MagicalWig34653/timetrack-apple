@@ -18,6 +18,7 @@ struct FocusFilterView: View {
     @State private var testResult: String?
     @State private var busy = false
     @State private var pending = 0
+    @State private var liveActivity: LiveActivityOutcome?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -72,6 +73,11 @@ struct FocusFilterView: View {
                 } else {
                     Text("focus.delivery.none").font(TTFont.body).foregroundStyle(TT.textSecondary).accessibilityIdentifier("focus.delivery.none")
                 }
+                if let activity = liveActivity {
+                    Text(verbatim: "Live Activity: " + activity.germanSummary).font(TTFont.meta)
+                        .foregroundStyle(activity.result == .startFailed ? TT.danger : TT.textSecondary)
+                        .accessibilityIdentifier("focus.delivery.liveactivity")
+                }
                 if pending > 0 {
                     StatusChip(verbatim: pending == 1 ? "1 Aktion wartet auf den Server" : "\(pending) Aktionen warten auf den Server", tone: .warning, symbol: "clock.arrow.circlepath")
                         .accessibilityIdentifier("focus.delivery.pending")
@@ -100,6 +106,7 @@ struct FocusFilterView: View {
 
     private var diagnosticsText: String {
         FocusDiagnostics.text(state: state, entries: entries, pending: pending, notifications: notificationStatus.isAllowed ? "erlaubt" : "nicht erlaubt")
+            + (liveActivity.map { "\nLive Activity: \($0.germanSummary), \($0.date.formatted(.iso8601))" } ?? "")
     }
 
     private static func classificationText(_ classification: FocusClassification) -> String {
@@ -327,6 +334,7 @@ struct FocusFilterView: View {
         state = store.load()
         entries = log.entries()
         pending = await FocusEnvironment.queue.count
+        liveActivity = LiveActivityOutcomeStore().read()
         notificationStatus = await FocusNotifications.authorizationStatus()
     }
 

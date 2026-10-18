@@ -62,7 +62,14 @@ enum FocusEnvironment {
     /// Delivers queued actions; used at launch, on foreground, by the background task and by "Jetzt senden".
     @discardableResult
     static func retryPending(verbose: Bool = false) async -> TimerActionQueue.DrainResult? {
-        let result = await withBackgroundTime("focus.retry") { await makeRunner().retryPending(verbose: verbose) }
+        let result = await withBackgroundTime("focus.retry") { () -> TimerActionQueue.DrainResult? in
+            let result = await makeRunner().retryPending(verbose: verbose)
+            // A queued start/stop that arrived changes the timer: update or end the Live Activity (a start is completed on foreground).
+            if let result, result.delivered > 0, let client = await storedClient() {
+                _ = try? await withFocusDeadline(4) { await WidgetPublisher.refresh(client: client, source: "focus.retry") }
+            }
+            return result
+        }
         NotificationCenter.default.post(name: changed, object: nil)
         return result
     }
@@ -70,7 +77,7 @@ enum FocusEnvironment {
     /// After a real start/stop: refresh the widgets and Live Activity (best effort, bounded; the action is already logged).
     static func publishIfChanged(_ reports: [FocusRunReport]) async {
         guard reports.contains(where: { $0.entry.result == .done }), let client = await storedClient() else { return }
-        _ = try? await withFocusDeadline(4) { await WidgetPublisher.refresh(client: client) }
+        _ = try? await withFocusDeadline(4) { await WidgetPublisher.refresh(client: client, source: "focus") }
     }
 
     /// Sign-out: waiting actions belong to the old account and must never be sent with another one.

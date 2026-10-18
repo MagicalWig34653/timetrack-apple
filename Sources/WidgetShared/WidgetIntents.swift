@@ -46,7 +46,7 @@ enum WidgetTimerAction {
         } catch let error as TimetrackError {
             throw WidgetIntentError.failed(error.germanDescription)
         }
-        await WidgetPublisher.refresh(client: client)
+        await WidgetPublisher.refresh(client: client, source: "intent")
     }
 }
 

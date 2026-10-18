@@ -42,6 +42,7 @@ struct TimetrackIOSApp: App {
                 .onChange(of: scenePhase) {
                     guard scenePhase == .active else { return }
                     AutomationRuntime.shared.foregrounded()
+                    Task { await TimerLiveActivity.reconcileFromSnapshot() } // F4: a Live Activity that could not be requested in the background starts now
                     Task { await FocusEnvironment.retryPending() } // F3
                     if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                 }

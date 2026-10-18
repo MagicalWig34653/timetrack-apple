@@ -51,6 +51,22 @@ struct SettingsView: View {
                         .accessibilityIdentifier("settings.automation")
                     }
                 }
+                if model.isEnabled(.automation) { // F2: hidden when the automation module is off (account or server-wide)
+                    FormSection(footer: "settings.focus.hint") {
+                        NavigationLink {
+                            FocusFilterView()
+                        } label: {
+                            HStack {
+                                Label("settings.focus", systemImage: "moon.circle").foregroundStyle(TT.textPrimary)
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                            }
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("settings.focus")
+                    }
+                }
                 FormSection("settings.server") {
                     FormRow("settings.server_url", stacked: true) { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled) }
                     if let workModel = model.workModel {

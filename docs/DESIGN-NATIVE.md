@@ -92,3 +92,7 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 - Ort anlegen als Sheet mit Karte (Tipp setzt den Punkt, Kreis zeigt den Radius), Radiusregler 100–500 m.
 - Kurzbefehl-Anleitung: drei Schritte als Karten mit gezeichneten Mini-Abbildungen (keine Screenshots, immer aktuell und lokalisiert), Ortsname zum Kopieren, `ShortcutsLink`, `SiriTipView`.
 - Technik, Entscheidungen und Grenzen: `docs/handoffs/L2.md`; Anwendertext: `docs/guides/standortautomatik.md`.
+
+## Fokus-Filter (F2)
+
+Der Fokus-Filter ist eine System-Oberfläche (Einstellungen › Fokus), keine eigene Ansicht: Titel, Parameter und Aufzählungsfälle der Absicht sind kurze deutsche Sätze ohne Fachbegriffe („Was soll Timetrack tun?“ – Nachfragen / Automatisch starten und stoppen / Nichts tun; „Art des Zeitabschnitts“; „Ort (optional)“). Die Erklärseite (Einstellungen › Fokus-Filter) nutzt `FormSection`/`Card`/`StatusChip` der Designschicht: drei nummerierte Schritte mit dem Pfad in Festbreitenschrift, Status-Chips (Fokus-Filter aktiv/nicht aktiv, Mitteilungen), die drei Modi mit Beispiel, Sicherheitsregeln, „Ausprobieren“ (standardmäßig nur Vorschau) und die letzten fünf Aktionen. Rückfragen sind lokale Mitteilungen mit den Aktionen Start/Nicht jetzt bzw. Stopp/Weiterlaufen lassen (Stopp als destruktiv markiert).

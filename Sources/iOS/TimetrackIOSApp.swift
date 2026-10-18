@@ -17,6 +17,7 @@ struct TimetrackIOSApp: App {
         let passkeys = PlatformPasskeyAuthenticator { Self.keyWindow() }
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
         let model = AppModel(auth: auth)
+        FocusNotifications.install() // F2: action buttons of the Focus filter's questions
         model.onOutcome = { TTHaptics.handle($0) } // user-initiated results only; the stores never report loads
         _model = State(initialValue: model)
         AutomationRuntime.shared.start() // L2: restores region monitoring; also runs on background launches caused by region events
@@ -24,10 +25,11 @@ struct TimetrackIOSApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            Self.rootContent
                 .environment(model)
                 .environment(ui)
                 .widgetSync(model) // A7: widget snapshot, Live Activity
+                .focusSync(model) // F2: automation module flag for the Focus filter
                 .environment(\.watchSender, watchSender)
                 .ttAppearance()
                 .task { await watchSender.start() }
@@ -58,6 +60,19 @@ struct TimetrackIOSApp: App {
                     #endif
                 }
         }
+    }
+
+    @ViewBuilder private static var rootContent: some View {
+        #if DEBUG
+        // Simulator/UI-test convenience: show the Focus filter page without signing in.
+        if ProcessInfo.processInfo.environment["TT_DEV_FOCUS_PAGE"] == "1" {
+            NavigationStack { FocusFilterView() }
+        } else {
+            RootView()
+        }
+        #else
+        RootView()
+        #endif
     }
 
     @MainActor

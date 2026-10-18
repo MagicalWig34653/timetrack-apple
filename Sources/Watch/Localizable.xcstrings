@@ -210,6 +210,50 @@
         }
       }
     },
+    "today.status.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisierung fehlgeschlagen"
+          }
+        }
+      }
+    },
+    "today.status.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline"
+          }
+        }
+      }
+    },
+    "today.status.refreshing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird aktualisiert …"
+          }
+        }
+      }
+    },
+    "today.status.sending %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gesendet … (%lld)"
+          }
+        }
+      }
+    },
     "today.stop": {
       "extractionState": "manual",
       "localizations": {
@@ -283,6 +327,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Angemeldet"
+          }
+        }
+      }
+    },
+    "watch.signin.ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf dem iPhone abgemeldet"
+          }
+        }
+      }
+    },
+    "watch.signin.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sitzung abgelaufen"
           }
         }
       }

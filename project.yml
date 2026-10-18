@@ -65,6 +65,7 @@ targets:
     sources:
       - Sources/iOS
       - Sources/Location # L2: location automation (region monitoring, shortcuts)
+      - Sources/Focus # F2: Focus filter, notifications, explainer page
       - Sources/Planning # A10
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.

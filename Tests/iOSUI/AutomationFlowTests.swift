@@ -54,9 +54,12 @@ final class AutomationFlowTests: XCTestCase {
         // Wartezeit: a stepper step is applied and shown.
         let dwell = el("automation.dwell")
         scrollTo(dwell)
-        dwell.buttons["Increment"].tap()
+        let before = dwell.label
+        dwell.buttons.element(boundBy: 1).tap() // increment (the button names are localised)
         sleep(1)
+        XCTAssertNotEqual(dwell.label, before, "the stepper should change the shown minutes")
         shot("page-timing")
+        dwell.buttons.element(boundBy: 0).tap() // back to the previous value
         app.swipeUp(); app.swipeUp()
         shot("page-bottom")
         // The log page opens.

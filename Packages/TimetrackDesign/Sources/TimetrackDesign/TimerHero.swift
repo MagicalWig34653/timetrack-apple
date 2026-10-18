@@ -4,26 +4,32 @@ import TimetrackCore
 /// Kind selector (three capsule options) used before starting a timer. Wraps vertically at accessibility sizes.
 public struct KindSelector: View {
     @Binding private var selection: SegmentKind
-    @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.colorScheme) private var scheme
     @ScaledMetric(relativeTo: .subheadline) private var iconWidth: CGFloat = 20
 
     public init(selection: Binding<SegmentKind>) { _selection = selection }
 
     public var body: some View {
-        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: TT.Space.s)) : AnyLayout(HStackLayout(spacing: TT.Space.s))
-        layout {
+        // One row while every option fits at its natural width, otherwise one option per row (no clipped labels).
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: TT.Space.s) { options(measured: true) }
+            VStack(spacing: TT.Space.s) { options(measured: false) }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func options(measured: Bool) -> some View {
             ForEach(SegmentKind.selectable, id: \.self) { kind in
                 let selected = selection == kind
                 Button { if selection != kind { TTHaptics.play(.selection) }; selection = kind } label: {
                     HStack(spacing: 8) {
                         Image(systemName: kind.ttSymbol).frame(minWidth: iconWidth)
-                        Text(kind.ttTitle)
+                        Text(kind.ttTitle).fixedSize(horizontal: measured, vertical: false)
                     }
                         .font(TTFont.label)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .frame(maxWidth: .infinity, minHeight: 40)
+                        .padding(.horizontal, TT.Space.m)
+                        .frame(maxWidth: .infinity, minHeight: 44)
                         .foregroundStyle(selected ? kind.ttTint : TT.textSecondary)
                         .background(selected ? kind.ttTint.opacity(scheme == .dark ? 0.22 : 0.13) : Color.clear, in: .capsule)
                         .overlay { Capsule().strokeBorder(selected ? kind.ttTint.opacity(0.5) : TT.separator, lineWidth: 1) }
@@ -31,8 +37,6 @@ public struct KindSelector: View {
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(selected ? .isSelected : [])
             }
-        }
-        .accessibilityElement(children: .contain)
     }
 }
 
@@ -83,9 +87,9 @@ public struct TimerHero<Actions: View>: View {
                         .foregroundStyle(TT.textTertiary)
                         .accessibilityHidden(true)
                     VStack(spacing: 4) {
-                        Text(idleTitle).font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center)
+                        Text(idleTitle).font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                         if let idleSubtitle {
-                            Text(idleSubtitle).font(TTFont.meta).foregroundStyle(TT.textSecondary).multilineTextAlignment(.center)
+                            Text(idleSubtitle).font(TTFont.meta).foregroundStyle(TT.textSecondary).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }

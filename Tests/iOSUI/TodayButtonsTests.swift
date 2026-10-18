@@ -33,9 +33,9 @@ final class TodayButtonsTests: XCTestCase {
             let button = app.buttons[id]
             XCTAssertTrue(button.exists, id)
             XCTAssertGreaterThanOrEqual(button.frame.height, 43.9, "\(id) tap height")
-            // A single text line is about 20-32 pt tall up to the largest non-accessibility size; a wrapped label is twice that.
-            let text = button.staticTexts.firstMatch
-            if !accessibilitySize, text.exists, id != "today.quick.more" { XCTAssertLessThan(text.frame.height, 40, "\(id) label wraps") }
+            // Padding sits inside the minimum height: one text line stays at ~44-50 pt up to the largest non-accessibility size,
+            // a wrapped label would add a second line (>= 20 pt) on top.
+            if !accessibilitySize, id != "today.quick.more" { XCTAssertLessThan(button.frame.height, 58, "\(id) label wraps") }
         }
     }
 

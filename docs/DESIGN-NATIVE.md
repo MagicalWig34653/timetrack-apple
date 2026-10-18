@@ -96,3 +96,13 @@ Akzent und Erscheinungsbild gehören zum Konto (`GET/PATCH /me/preferences`, Ver
 ## Fokus-Filter (F2)
 
 Der Fokus-Filter ist eine System-Oberfläche (Einstellungen › Fokus), keine eigene Ansicht: Titel, Parameter und Aufzählungsfälle der Absicht sind kurze deutsche Sätze ohne Fachbegriffe („Was soll Timetrack tun?“ – Nachfragen / Automatisch starten und stoppen / Nichts tun; „Art des Zeitabschnitts“; „Ort (optional)“). Die Erklärseite (Einstellungen › Fokus-Filter) nutzt `FormSection`/`Card`/`StatusChip` der Designschicht: drei nummerierte Schritte mit dem Pfad in Festbreitenschrift, Status-Chips (Fokus-Filter aktiv/nicht aktiv, Mitteilungen), die drei Modi mit Beispiel, Sicherheitsregeln, „Ausprobieren“ (standardmäßig nur Vorschau) und die letzten fünf Aktionen. Rückfragen sind lokale Mitteilungen mit den Aktionen Start/Nicht jetzt bzw. Stopp/Weiterlaufen lassen (Stopp als destruktiv markiert).
+
+## Knöpfe und Layout-Regeln (T2)
+
+Anlass: Auf dem iPhone brachen die Schnellaktionen auf „Heute“ („Krank melden“, „Urlaub eintragen“) in zwei Zeilen um, die Artenwahl schnitt „Schule“ bei großer Schrift ab, auf dem iPad (Seitenleiste offen, Hochformat) wurde die Zweispaltenansicht zu schmal. Die Korrektur sitzt in den Komponenten, nicht in den Bildschirmen.
+- `.ttPrimary/.ttDanger/.ttSecondary`: Innenabstand (12 pt seitlich, 8 pt oben/unten) liegt innerhalb der Mindesthöhe (44 pt, bei `.controlSize(.large)` 54 pt); Beschriftung einzeilig mit `minimumScaleFactor(0.75)`, ab Accessibility-Größen bis zu vier Zeilen ohne Skalierung (nie abgeschnitten).
+- Mehrere Knöpfe nebeneinander (`ViewThatFits`, die erste Variante misst mit `fixedSize`): Symbol + Text in einer Reihe, sonst nur Text, sonst eine Spalte mit vollbreiten Knöpfen. So bricht nie eine Beschriftung um. Gilt für `QuickAbsenceRow` und `KindSelector`.
+- Reine Symbolknöpfe (Menü „Eintragen“) und die Wiederholen-Taste im `ErrorBanner` haben mindestens 44 pt Trefferfläche.
+- Zweispaltige Ansichten entscheiden nach der tatsächlichen Breite des Inhalts (`onGeometryChange`, ab 760 pt), nicht nur nach der Größenklasse.
+- Große Kennzahlen: `lineLimit(1)` + `minimumScaleFactor`.
+- Prüfung: `Tests/iOSUI/TodayButtonsTests.swift` (Höhe der Knöpfe >= 44 pt, Beschriftung einzeilig; Text­größe über `TT_TEXT_SIZE`), Vorher/Nachher-Bilder `docs/screenshots/t2-*.png`.

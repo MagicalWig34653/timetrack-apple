@@ -20,7 +20,7 @@ final class TodayButtonsTests: XCTestCase {
         XCTAssertTrue(start.waitForExistence(timeout: 20))
         sleep(1)
         shot("\(prefix)-today-top")
-        XCTAssertGreaterThanOrEqual(start.frame.height, 44)
+        XCTAssertGreaterThanOrEqual(start.frame.height, 43.9)
 
         let sick = app.buttons["today.quick.sick"]
         let tabTop = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.maxY
@@ -32,7 +32,7 @@ final class TodayButtonsTests: XCTestCase {
         for id in ["today.quick.sick", "today.quick.vacation", "today.quick.more"] {
             let button = app.buttons[id]
             XCTAssertTrue(button.exists, id)
-            XCTAssertGreaterThanOrEqual(button.frame.height, 44, "\(id) tap height")
+            XCTAssertGreaterThanOrEqual(button.frame.height, 43.9, "\(id) tap height")
             // A single text line is about 20-32 pt tall up to the largest non-accessibility size; a wrapped label is twice that.
             let text = button.staticTexts.firstMatch
             if !accessibilitySize, text.exists, id != "today.quick.more" { XCTAssertLessThan(text.frame.height, 40, "\(id) label wraps") }

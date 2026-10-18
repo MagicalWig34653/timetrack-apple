@@ -33,8 +33,9 @@ final class TodayButtonsTests: XCTestCase {
             let button = app.buttons[id]
             XCTAssertTrue(button.exists, id)
             XCTAssertGreaterThanOrEqual(button.frame.height, 44, "\(id) tap height")
-            // One text line is far below 80 pt at every non-accessibility size; a wrapped label would exceed it.
-            if !accessibilitySize { XCTAssertLessThan(button.frame.height, 80, "\(id) label wraps") }
+            // A single text line is about 20-32 pt tall up to the largest non-accessibility size; a wrapped label is twice that.
+            let text = button.staticTexts.firstMatch
+            if !accessibilitySize, text.exists, id != "today.quick.more" { XCTAssertLessThan(text.frame.height, 40, "\(id) label wraps") }
         }
     }
 

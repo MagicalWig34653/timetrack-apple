@@ -27,9 +27,11 @@ final class ParityFlowTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE",
-                               "-appearance.accent", env["TT_SHOT_ACCENT"] ?? "wine", "-appearance.scheme", env["TT_SHOT_SCHEME"] ?? "system",
-                               "-appearance.glow", env["TT_SHOT_GLOW"] ?? "medium"]
+        // Launch arguments of UserDefaults keys act as a read-only override, so accent and glow are only forced on request (the flow changes them).
+        var arguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-appearance.scheme", env["TT_SHOT_SCHEME"] ?? "system"]
+        if let accent = env["TT_SHOT_ACCENT"] { arguments += ["-appearance.accent", accent] }
+        if let glow = env["TT_SHOT_GLOW"] { arguments += ["-appearance.glow", glow] }
+        app.launchArguments = arguments
         app.launch()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
         shot("today")

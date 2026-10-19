@@ -23,8 +23,9 @@ struct TimetrackMacApp: App {
                 .environment(model)
                 .environment(ui)
                 .widgetSync(model) // A7: widget snapshot
-                .frame(minWidth: 760, minHeight: 480)
+                .frame(minWidth: 900, minHeight: 560)
                 .ttAppearance()
+                .debugSettingsOpener()
                 .task {
                     await model.restore()
                     #if DEBUG
@@ -32,13 +33,17 @@ struct TimetrackMacApp: App {
                     #endif
                 }
         }
+        .defaultSize(width: 1100, height: 720)
         .commands { TimetrackCommands(model: model, ui: ui) }
 
-        MenuBarExtra("Timetrack", systemImage: model.today?.running == nil ? "clock" : "clock.fill") {
+        MenuBarExtra {
             MenuBarContent()
                 .environment(model)
+                .ttAppearance()
+        } label: {
+            MenuBarLabel().environment(model)
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
 
         Settings {
             SettingsView()
@@ -52,7 +57,16 @@ struct TimetrackMacApp: App {
 @Observable
 final class UIState {
     var selection: SidebarItem = .today
-    var newEntryRequest = 0
+    /// Pending command for the "Zeit" screen; `serial` changes on every send so repeated commands are noticed.
+    var timeCommand: TimeCommand?
+    var timeCommandSerial = 0
+    var inspectorVisible = true
+
+    func send(_ command: TimeCommand) {
+        selection = .time
+        timeCommand = command
+        timeCommandSerial += 1
+    }
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {
@@ -71,6 +85,9 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Sidebar section: capturing time vs. planning.
+    var isPlanning: Bool { self == .calendar || self == .vacation }
+
     var symbol: String {
         switch self {
         case .today: "sun.max"
@@ -79,47 +96,4 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .vacation: "beach.umbrella"
         }
     }
-}
-
-struct TimetrackCommands: Commands {
-    let model: AppModel
-    let ui: UIState
-
-    var body: some Commands {
-        CommandMenu("menu.time") {
-            Button(model.today?.running == nil ? "command.start" : "command.stop") {
-                Task { @MainActor in await toggleTimer(model) }
-            }
-            .keyboardShortcut("t", modifiers: [.command, .option])
-            .disabled(model.today == nil)
-
-            Divider()
-
-            Button("command.new_entry") {
-                ui.selection = .time
-                ui.newEntryRequest += 1
-            }
-            .keyboardShortcut("n", modifiers: .command)
-            .disabled(model.phase != .signedIn)
-
-            Button("command.reload") {
-                Task { @MainActor in
-                    await model.today?.load()
-                    await model.timeList?.load()
-                }
-            }
-            .keyboardShortcut("r", modifiers: .command)
-            .disabled(model.phase != .signedIn)
-        }
-        CommandGroup(after: .sidebar) {
-            Button("sidebar.today") { ui.selection = .today }.keyboardShortcut("1", modifiers: .command)
-            Button("sidebar.time") { ui.selection = .time }.keyboardShortcut("2", modifiers: .command)
-        }
-    }
-}
-
-@MainActor
-func toggleTimer(_ model: AppModel) async {
-    guard let today = model.today else { return }
-    if today.running == nil { await today.start() } else { await today.stop() }
 }

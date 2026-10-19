@@ -3,7 +3,7 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// Settings window: general (account, server, modules) and appearance (accent colour, light/dark, icon note).
+/// Settings window (⌘,): native toolbar tabs General, Appearance, Work and About; grouped forms instead of card pages.
 struct SettingsView: View {
     var body: some View {
         TabView {
@@ -11,8 +11,12 @@ struct SettingsView: View {
                 .tabItem { Label("settings.general", systemImage: "gearshape") }
             AppearanceSettingsView()
                 .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
+            WorkSettingsView()
+                .tabItem { Label(AD.s("settings.work"), systemImage: "briefcase") }
+            AboutSettingsView()
+                .tabItem { Label("settings.about", systemImage: "info.circle") }
         }
-        .frame(width: 520, height: 700)
+        .frame(width: 580, height: 560)
     }
 }
 
@@ -37,72 +41,38 @@ private struct AppearanceSettingsView: View {
 
 private struct GeneralSettingsView: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.ttTheme) private var theme
-    @State private var showWorkModels = false
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TT.Space.xl) {
-                if let account = model.account {
-                    Card {
-                        HStack(spacing: TT.Space.l) {
-                            Text(verbatim: String(account.displayName.prefix(1)).uppercased())
-                                .font(.system(.title2, design: .rounded, weight: .semibold))
-                                .foregroundStyle(theme.onAccent)
-                                .frame(width: 52, height: 52)
-                                .background(theme.accent.gradient, in: .circle)
-                                .accessibilityHidden(true)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(verbatim: account.displayName).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                                Text(verbatim: "@\(account.handle)").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                            }
-                            Spacer()
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
+        Form {
+            if let account = model.account {
+                Section("settings.account") {
+                    LabeledContent(AD.s("settings.name")) { Text(verbatim: account.displayName) }
+                    LabeledContent(AD.s("settings.handle")) { Text(verbatim: "@\(account.handle)") }
                 }
-                FormSection { // N1b: work model versions (correction with preview) and haptics
-                    Button { showWorkModels = true } label: {
-                        HStack {
-                            Label("workmodel.title", systemImage: "calendar.badge.clock").foregroundStyle(TT.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                        }
-                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("settings.workmodel")
-                    HapticsToggle().padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-                }
-                FormSection("settings.server") {
-                    FormRow("settings.server_url") { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled).lineLimit(1).truncationMode(.middle) }
-                    if let workModel = model.workModel {
-                        FormRow("settings.timezone") { Text(workModel.timeZone.identifier) }
-                    }
-                }
-                FormSection("settings.modules", footer: "settings.modules.hint") {
-                    ForEach(ModuleKey.all, id: \.self) { key in
-                        FormRow(moduleTitle(key)) {
-                            StatusChip(model.isEnabled(key) ? "settings.module.on" : "settings.module.off", tone: model.isEnabled(key) ? .success : .neutral)
-                        }
-                    }
-                }
-                HStack(spacing: TT.Space.m) {
-                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
-                        .buttonStyle(.ttSecondary)
-                        .disabled(model.phase == .signedOut)
-                    Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
-                        .foregroundStyle(TT.danger)
-                }
-                AboutSection(build: AppBuildInfo(platform: "macOS")) // N1b
             }
-            .padding(TT.Space.xl)
+            Section("settings.server") {
+                LabeledContent("settings.server_url") { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled).lineLimit(1).truncationMode(.middle) }
+                if let workModel = model.workModel {
+                    LabeledContent("settings.timezone") { Text(workModel.timeZone.identifier) }
+                }
+            }
+            Section {
+                ForEach(ModuleKey.all, id: \.self) { key in
+                    LabeledContent(moduleTitle(key)) {
+                        StatusChip(model.isEnabled(key) ? "settings.module.on" : "settings.module.off", tone: model.isEnabled(key) ? .success : .neutral)
+                    }
+                }
+            } header: { Text("settings.modules") } footer: { Text("settings.modules.hint") }
+            Section {
+                HStack {
+                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
+                        .disabled(model.phase == .signedOut)
+                    Spacer()
+                    Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
+                }
+            }
         }
-        .ttScreenBackground()
-        .sheet(isPresented: $showWorkModels) {
-            NavigationStack { WorkModelsScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showWorkModels = false } } } }
-                .frame(minWidth: 560, minHeight: 720)
-        }
+        .formStyle(.grouped)
     }
 
     private func moduleTitle(_ key: ModuleKey) -> LocalizedStringKey {
@@ -114,5 +84,34 @@ private struct GeneralSettingsView: View {
         case .mcp: "module.mcp"
         default: "module.unknown"
         }
+    }
+}
+
+private struct WorkSettingsView: View {
+    @State private var showWorkModels = false
+
+    var body: some View {
+        Form {
+            Section {
+                Button { showWorkModels = true } label: { Label("workmodel.title", systemImage: "calendar.badge.clock") }
+                    .accessibilityIdentifier("settings.workmodel")
+            } footer: { Text(AD.s("settings.work.workmodel_hint")) }
+            Section(AD.s("settings.feedback")) { HapticsToggle() }
+        }
+        .formStyle(.grouped)
+        .sheet(isPresented: $showWorkModels) {
+            NavigationStack { WorkModelsScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showWorkModels = false } } } }
+                .frame(minWidth: 560, minHeight: 640)
+        }
+    }
+}
+
+private struct AboutSettingsView: View {
+    var body: some View {
+        ScrollView {
+            AboutSection(build: AppBuildInfo(platform: "macOS")) // N1b
+                .padding(TT.Space.xl)
+        }
+        .ttScreenBackground()
     }
 }

@@ -24,66 +24,148 @@ private struct EditorRequest: Identifiable {
     let day: LocalDay
 }
 
+private struct VoidRequest: Identifiable {
+    let id = UUID()
+    let segments: [Segment]
+}
+
+/// AD1: Mac list with multi-selection, search, context menu, keyboard commands and an inspector for the selection.
 private struct TimeContent: View {
     let store: TimeListStore
     @Environment(UIState.self) private var ui
     @State private var editor: EditorRequest?
-    @State private var voiding: Segment?
+    @State private var voiding: VoidRequest?
+    @State private var selection = Set<UUID>()
+    @State private var query = ""
+    @SwiftUI.FocusState private var searchFocused: Bool
+
+    private var needle: String { query.trimmingCharacters(in: .whitespaces) }
+
+    private func matches(_ segment: Segment) -> Bool {
+        guard !needle.isEmpty else { return true }
+        let kindName: String
+        switch segment.kind {
+        case .work, .unknown: kindName = String(localized: "kind.work")
+        case .travel: kindName = String(localized: "kind.travel")
+        case .school: kindName = String(localized: "kind.school")
+        }
+        return kindName.localizedCaseInsensitiveContains(needle) || (segment.note ?? "").localizedCaseInsensitiveContains(needle)
+    }
+
+    /// Rows of a day; with a search term only matching segments (days without a match disappear).
+    private func rows(_ day: DayEvaluation) -> [TimeRow] {
+        let all = day.timeRows
+        guard !needle.isEmpty else { return all }
+        return all.filter { if case .segment(let segment, _) = $0 { matches(segment) } else { false } }
+    }
+
+    private var visibleDays: [DayEvaluation] { needle.isEmpty ? store.days : store.days.filter { !rows($0).isEmpty } }
+
+    private var selectedSegments: [Segment] {
+        store.days.flatMap { $0.segments ?? [] }.filter { selection.contains($0.id) && !$0.voided }
+            .sorted { $0.startedAt < $1.startedAt }
+    }
+
+    private func edit(_ ids: Set<UUID>) {
+        guard let segment = selectedSegments.first(where: { ids.contains($0.id) }),
+              let day = store.days.first(where: { ($0.segments ?? []).contains { $0.id == segment.id } })?.date else { return }
+        editor = EditorRequest(segment: segment, day: day)
+    }
+
+    private func requestVoid(_ ids: Set<UUID>) {
+        let segments = selectedSegments.filter { ids.contains($0.id) }
+        if !segments.isEmpty { voiding = VoidRequest(segments: segments) }
+    }
+
+    private func newEntry() { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) }
+
+    private func handleCommand() {
+        guard let command = ui.timeCommand else { return }
+        ui.timeCommand = nil
+        switch command {
+        case .previousWeek: Task { await store.shiftWeeks(-1) }
+        case .nextWeek: Task { await store.shiftWeeks(1) }
+        case .thisWeek: Task { await store.goToCurrentWeek() }
+        case .newEntry: newEntry()
+        case .search: searchFocused = true
+        case .toggleInspector: ui.inspectorVisible.toggle()
+        }
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TT.Space.l) {
-                WeekHeader(store: store)
-                if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
-                if store.days.isEmpty && store.isLoading { SkeletonList(rows: 3) }
-                ForEach(store.days) { day in
-                    VStack(alignment: .leading, spacing: TT.Space.s) {
-                        DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
-                            editor = EditorRequest(segment: nil, day: day.date)
+        @Bindable var ui = ui
+        List(selection: $selection) {
+            WeekHeader(store: store)
+                .listRowSeparator(.hidden).listRowBackground(Color.clear).selectionDisabled()
+            if let error = store.error {
+                ErrorBannerView(error: error) { Task { await store.load() } }
+                    .listRowSeparator(.hidden).listRowBackground(Color.clear).selectionDisabled()
+            }
+            if store.days.isEmpty && store.isLoading {
+                SkeletonList(rows: 3).listRowSeparator(.hidden).listRowBackground(Color.clear).selectionDisabled()
+            }
+            ForEach(visibleDays) { day in
+                Section {
+                    ForEach(rows(day)) { row in
+                        switch row {
+                        case .segment(let segment, _):
+                            SegmentRow(segment: segment, zone: store.calendar.timeZone).tag(segment.id)
+                        case .empty:
+                            EmptyDayRow(day: day).selectionDisabled()
                         }
-                        let rows = day.timeRows
-                        if case .empty = rows.first {
-                            Card(padding: 0) { EmptyDayRow(day: day) }
-                        } else {
-                            ListCard {
-                                ForEach(rows) { row in
-                                    if case .segment(let segment, _) = row {
-                                    SegmentRow(segment: segment, zone: store.calendar.timeZone)
-                                        .onTapGesture(count: 2) { editor = EditorRequest(segment: segment, day: day.date) }
-                                        .contextMenu {
-                                            Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }
-                                            Button("time.void", role: .destructive) { voiding = segment }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    }
+                } header: {
+                    DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
+                        editor = EditorRequest(segment: nil, day: day.date)
                     }
                 }
             }
-            .padding(TT.Space.xl)
-            .frame(maxWidth: TT.contentWidth, alignment: .leading)
-            .frame(maxWidth: .infinity)
+            if !needle.isEmpty && visibleDays.isEmpty && !store.isLoading {
+                EmptyState(symbol: "magnifyingglass", title: LocalizedStringKey(AD.s("time.search.empty")), message: LocalizedStringKey(AD.s("time.search.empty.hint")))
+                    .listRowSeparator(.hidden).listRowBackground(Color.clear).selectionDisabled()
+            }
         }
+        .listStyle(.inset)
+        .environment(\.defaultMinListRowHeight, 40)
+        .scrollContentBackground(.hidden)
         .ttScreenBackground()
+        .contextMenu(forSelectionType: UUID.self) { ids in
+            if ids.isEmpty {
+                Button("command.new_entry") { newEntry() }
+            } else {
+                if ids.count == 1 { Button("time.edit") { edit(ids) } }
+                Button("time.void", role: .destructive) { requestVoid(ids) }
+            }
+        } primaryAction: { ids in edit(ids) }
+        .onDeleteCommand { requestVoid(selection) }
+        .searchable(text: $query, placement: .toolbar, prompt: Text(AD.s("time.search.prompt")))
+        .searchFocused($searchFocused)
+        .inspector(isPresented: $ui.inspectorVisible) {
+            SegmentInspector(segments: selectedSegments, zone: store.calendar.timeZone,
+                             edit: { edit(selection) }, void: { requestVoid(selection) })
+                .inspectorColumnWidth(min: 240, ideal: 280, max: 360)
+        }
         .task { await store.load() }
-        .onChange(of: ui.newEntryRequest) { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) }
+        .onAppear(perform: handleCommand)
+        .onChange(of: ui.timeCommandSerial) { handleCommand() }
         .toolbar {
             ToolbarItemGroup {
                 Button { Task { await store.shiftWeeks(-1) } } label: { Label("time.previous_week", systemImage: "chevron.left") }
-                    .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+                    .help(Text("time.previous_week"))
                 Button("time.this_week") { Task { await store.goToCurrentWeek() } }
                 Button { Task { await store.shiftWeeks(1) } } label: { Label("time.next_week", systemImage: "chevron.right") }
-                    .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
-                Button { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) } label: { Label("command.new_entry", systemImage: "plus") }
+                    .help(Text("time.next_week"))
+                Button { newEntry() } label: { Label("command.new_entry", systemImage: "plus") }
                     .help(Text("command.new_entry"))
+                Button { ui.inspectorVisible.toggle() } label: { Label(AD.s("command.inspector"), systemImage: "sidebar.trailing") }
+                    .help(Text(AD.s("command.inspector")))
             }
         }
         .sheet(item: $editor) { request in
             SegmentEditor(store: store, segment: request.segment, day: request.day)
         }
-        .sheet(item: $voiding) { segment in
-            VoidSheet(store: store, segment: segment)
+        .sheet(item: $voiding) { request in
+            VoidSheet(store: store, segments: request.segments) { selection.subtract(request.segments.map(\.id)) }
         }
     }
 }
@@ -124,7 +206,7 @@ private struct EmptyDayRow: View {
             }
             Spacer()
         }
-        .padding(TT.Space.l)
+        .padding(.vertical, TT.Space.xs)
         .accessibilityElement(children: .combine)
     }
 }
@@ -254,13 +336,18 @@ private struct SegmentEditor: View {
 
 private struct VoidSheet: View {
     let store: TimeListStore
-    let segment: Segment
+    let segments: [Segment]
+    let done: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var reason = ""
+    @State private var working = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: TT.Space.l) {
             Text("void.title").font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary)
+            if segments.count > 1 {
+                Text(AD.s("void.many \(segments.count)")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+            }
             FormSection("editor.reason", footer: "void.hint") {
                 TextField("editor.reason", text: $reason).textFieldStyle(.plain).accessibilityIdentifier("void.reason").padding(TT.Space.m)
             }
@@ -268,16 +355,26 @@ private struct VoidSheet: View {
             HStack {
                 Spacer()
                 Button("common.cancel", role: .cancel) { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("time.void", role: .destructive) {
-                    Task { if await store.void(segment, reason: reason.trimmingCharacters(in: .whitespaces)) { dismiss() } }
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(reason.trimmingCharacters(in: .whitespaces).isEmpty)
+                Button("time.void", role: .destructive) { Task { await voidAll() } }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(reason.trimmingCharacters(in: .whitespaces).isEmpty || working)
             }
         }
         .padding(TT.Space.xl)
         .frame(width: 420)
         .ttScreenBackground()
         .onAppear { store.error = nil }
+    }
+
+    /// One reason for all selected segments; stops at the first failure so the error stays visible.
+    private func voidAll() async {
+        working = true
+        defer { working = false }
+        let trimmed = reason.trimmingCharacters(in: .whitespaces)
+        for segment in segments {
+            guard await store.void(segment, reason: trimmed) else { return }
+        }
+        done()
+        dismiss()
     }
 }

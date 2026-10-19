@@ -61,25 +61,24 @@ struct MainView: View {
             if sizeClass == .regular {
                 NavigationSplitView {
                     List(selection: Binding<AppSection?>(get: { ui.selection }, set: { if let value = $0 { selectSection(value) } })) {
-                        ForEach(sections) { section in
-                            Label(section.titleKey, systemImage: section.symbol)
-                                .tag(section)
-                                .accessibilityIdentifier("sidebar.\(section.rawValue)")
+                        // AD1: grouped like the Mac sidebar; the sections keep their identifiers for the UI tests.
+                        Section(IPadStrings.s("sidebar.section.capture")) {
+                            ForEach(sections.filter { $0.group == .capture }) { sidebarRow($0) }
+                        }
+                        if sections.contains(where: { $0.group == .planning }) {
+                            Section(IPadStrings.s("sidebar.section.planning")) {
+                                ForEach(sections.filter { $0.group == .planning }) { sidebarRow($0) }
+                            }
+                        }
+                        Section {
+                            ForEach(sections.filter { $0.group == .app }) { sidebarRow($0) }
                         }
                     }
                     .listStyle(.sidebar)
                     .scrollContentBackground(.hidden)
                     .background { TTBackdrop() }
                     .navigationTitle("Timetrack")
-                    .safeAreaInset(edge: .bottom) {
-                        if let account = model.account {
-                            HStack(spacing: TT.Space.s) {
-                                Image(systemName: "person.crop.circle.fill").foregroundStyle(TT.textSecondary)
-                                Text(verbatim: account.displayName).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(1)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading).padding(TT.Space.l)
-                        }
-                    }
+                    .safeAreaInset(edge: .bottom) { SidebarFooter() }
                 } detail: {
                     NavigationStack { SectionView(section: ui.selection) }
                 }
@@ -95,6 +94,38 @@ struct MainView: View {
         }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: sections) { if !sections.contains(ui.selection) { ui.selection = .today } }
+    }
+}
+
+extension MainView {
+    fileprivate func sidebarRow(_ section: AppSection) -> some View {
+        Label(section.titleKey, systemImage: section.symbol)
+            .tag(section)
+            .accessibilityIdentifier("sidebar.\(section.rawValue)")
+            .hoverEffect(.highlight) // pointer
+    }
+}
+
+/// Account name and, while a segment runs, a live elapsed time at the foot of the iPad sidebar.
+private struct SidebarFooter: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TT.Space.xs) {
+            if let running = model.today?.running {
+                HStack(spacing: TT.Space.xs) {
+                    Circle().fill(TT.success).frame(width: 8, height: 8).accessibilityHidden(true)
+                    Text(running.startedAt, style: .timer).monospacedDigit().font(TTFont.meta).foregroundStyle(TT.textPrimary)
+                }
+            }
+            if let account = model.account {
+                HStack(spacing: TT.Space.s) {
+                    Image(systemName: "person.crop.circle.fill").foregroundStyle(TT.textSecondary)
+                    Text(verbatim: account.displayName).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(1)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading).padding(TT.Space.l)
     }
 }
 

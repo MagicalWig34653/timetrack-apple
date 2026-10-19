@@ -35,7 +35,7 @@ Geteilte Dateien (Merge): `RootView.swift` und `TimetrackIOSApp.swift` (iOS, je 
 
 ## Prüfung
 - Kerntests 462 grün, Design 31 grün (`swift test --build-system native`). Builds macOS, iOS (Simulator), watchOS grün (unsigniert).
-- iPad-UI-Tests (Pro 11): `SmokeTests` und `SettingsShotTests` grün; `ParityFlowTests`: siehe STATUS (Befund im Abschnitt unten).
+- iPad-UI-Tests (Pro 11): `SmokeTests` und `SettingsShotTests` grün; `ParityFlowTests` scheitert auf iPad Pro 11 an `settings.about` (nicht gefunden), **identisch auf unverändertem main** (Gegenlauf), also nicht von AD1 verursacht.
 - Bilder: `docs/screenshots/ad1-before-*` und `ad1-after-*`: Mac (Heute, Zeit, Kalender, Urlaub, Einstellungs-Tabs; hell/dunkel), iPad Pro 13 hell/dunkel und Pro 11 hell (quer/hoch, alle Bereiche).
 - **Bildgrenzen:** Das Mac-Bild ist die eigene Ansicht des Fensters (`cacheDisplay`, keine Bildschirmaufnahme-Berechtigung). **Seitenleiste, Werkzeugleiste, Suchfeld und Menüleisten-Extra sind darin nicht sichtbar** (Systemmaterial). Die Einstellungs-Tabs „dunkel“ zeigen ggf. noch hell (Appearance-Override der App).
 

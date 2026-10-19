@@ -12,6 +12,10 @@ public final class PlanningStore {
     public private(set) var settings: VacationSettings?
     public private(set) var entries = VacationEntries()
     public private(set) var isLoading = false
+    /// Filter and sort of the absence list (V3); remembered in `defaults`.
+    public var listOptions: AbsenceListOptions {
+        didSet { if listOptions != oldValue { listOptions.save(to: defaults) } }
+    }
     public var error: TimetrackError?
     /// Called after every successful absence change (the calendar reloads its month).
     public var onAbsencesChanged: (@MainActor () -> Void)?
@@ -19,11 +23,14 @@ public final class PlanningStore {
     public var onOutcome: StoreOutcomeHandler?
 
     private let client: APIClient
+    private let defaults: UserDefaults
     public let calendar: DayCalendar
 
-    public init(client: APIClient, calendar: DayCalendar, now: Date = .now) {
+    public init(client: APIClient, calendar: DayCalendar, now: Date = .now, defaults: UserDefaults = .standard) {
         self.client = client
         self.calendar = calendar
+        self.defaults = defaults
+        self.listOptions = AbsenceListOptions.load(from: defaults)
         self.year = LocalDays.parse(calendar.day(for: now))?.year ?? Calendar(identifier: .gregorian).component(.year, from: now)
     }
 
@@ -48,6 +55,20 @@ public final class PlanningStore {
         } catch {
             self.error = .cancelled
         }
+    }
+
+    /// The absences after the selected filters and sort order.
+    public var visibleAbsences: [Absence] { listOptions.apply(to: absences, today: today) }
+
+    // MARK: - Attachments (contract v0.24.0)
+
+    public func attachments(of absence: Absence) async throws -> [FileMeta] {
+        try await client.listAbsenceAttachments(id: absence.id)
+    }
+
+    /// File content for the preview; uses `disposition=inline` for types the server can show inline.
+    public func fileData(_ file: FileMeta) async throws -> Data {
+        try await client.downloadFile(id: file.id, inline: file.supportsInline)
     }
 
     public func shiftYears(_ count: Int) async {

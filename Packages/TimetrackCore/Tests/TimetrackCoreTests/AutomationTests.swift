@@ -332,6 +332,19 @@ private func makeEngine(clock: Clock, sender: FakeSender?, location: FakeLocatio
         #expect(await queue.count == 0)
     }
 
+    /// Crash seen in TestFlight build 15: two overlapping drains both removed the same head ("Can't remove first element from an empty collection").
+    @Test func overlappingDrainsNeitherCrashNorSendTwice() async {
+        let queue = AutomationEventQueue(storage: InMemoryBlobStorage(), now: { t0 })
+        await queue.enqueue(event(1), placeName: "A")
+        let sender = FakeSender()
+        sender.kind = .booked
+        async let a = queue.drain(using: sender)
+        async let b = queue.drain(using: sender)
+        _ = await (a, b)
+        #expect(sender.sent.count == 1)
+        #expect(await queue.count == 0)
+    }
+
     @Test func offlineKeepsEventsWithTheSameIdForTheRetry() async {
         let queue = AutomationEventQueue(storage: InMemoryBlobStorage(), now: { t0 })
         await queue.enqueue(event(1), placeName: "A")

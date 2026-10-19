@@ -42,6 +42,7 @@ public actor AutomationEventQueue {
     private let storage: BlobStorage
     private let now: @Sendable () -> Date
     private var items: [QueuedEvent]
+    private var isDraining = false
 
     public init(storage: BlobStorage, now: @escaping @Sendable () -> Date = { .now }) {
         self.storage = storage
@@ -65,27 +66,31 @@ public actor AutomationEventQueue {
 
     /// Sends the queue oldest first (the server orders per device and place, so order matters) and stops at the first transient failure.
     public func drain(using sender: AutomationEventSending) async -> DrainSummary {
+        // The actor is re-entrant across `await`: a second drain would send and remove the same head (crash on removeFirst).
+        guard !isDraining else { return DrainSummary() }
+        isDraining = true
+        defer { isDraining = false }
         var summary = DrainSummary()
         while let first = items.first {
             if now().timeIntervalSince(first.queuedAt) > Self.maxAge {
-                items.removeFirst()
+                items.removeAll { $0.event.eventId == first.event.eventId }
                 summary.reports.append(DrainReport(queued: first, outcome: .dropped(code: "expired")))
                 persist()
                 continue
             }
             do {
                 let result = try await sender.send(first.event)
-                items.removeFirst()
+                items.removeAll { $0.event.eventId == first.event.eventId }
                 summary.reports.append(DrainReport(queued: first, outcome: .sent(result.result)))
                 persist()
             } catch let error as TimetrackError {
-                items[0].attempts += 1
+                if let index = items.firstIndex(where: { $0.event.eventId == first.event.eventId }) { items[index].attempts += 1 }
                 persist()
                 switch error {
                 case .api(let status, let code, _):
                     if status == 401 { summary.stop = .unauthorized; return summary }
                     if status == 429 || status >= 500 { summary.stop = .retryLater; return summary }
-                    items.removeFirst()
+                    items.removeAll { $0.event.eventId == first.event.eventId }
                     summary.reports.append(DrainReport(queued: first, outcome: .dropped(code: code)))
                     persist()
                 case .cancelled:

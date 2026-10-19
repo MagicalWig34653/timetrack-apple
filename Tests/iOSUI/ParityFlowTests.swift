@@ -14,6 +14,13 @@ final class ParityFlowTests: XCTestCase {
         if tab.exists { tab.tap() } else { el("sidebar.\(id)").tap() }
     }
 
+    /// S2: the vacation settings sheet is reached from Einstellungen › Urlaubsanspruch.
+    private func openVacationSettings() {
+        open("Einstellungen", "settings")
+        scrollTo(el("settings.vacation"))
+        el("settings.vacation").tap()
+    }
+
     private func scrollTo(_ element: XCUIElement, maxSwipes: Int = 8) {
         var swipes = 0
         while !element.isHittable && swipes < maxSwipes { app.swipeUp(); swipes += 1 }
@@ -43,7 +50,7 @@ final class ParityFlowTests: XCTestCase {
         shot("vacation")
         // R3: the entitlement is edited in the settings sheet (top right), not by a button in the tab.
         XCTAssertFalse(el("vacation.edit_entitlement").exists)
-        el("vacation.settings").tap()
+        openVacationSettings()
         let field = el("settings.entitlement")
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
@@ -53,14 +60,16 @@ final class ParityFlowTests: XCTestCase {
         shot("vacation-edit")
         el("settings.save").tap()
         el("settings.done").tap()
+        open("Urlaub", "vacation")
         // The tiles are gone (R3); the balance card stays, and the saved entitlement is in the settings sheet.
         XCTAssertTrue(el("vacation.available.value").waitForExistence(timeout: 10))
         XCTAssertFalse(el("vacation.tile.entitlement").exists)
-        el("vacation.settings").tap()
+        openVacationSettings()
         let again = el("settings.entitlement")
         XCTAssertTrue(again.waitForExistence(timeout: 5))
         XCTAssertTrue((again.value as? String ?? "").contains("28"), "saved entitlement, got \(String(describing: again.value))")
         el("settings.done").tap()
+        open("Urlaub", "vacation")
         shot("vacation-after")
 
         // Settings: work models.
@@ -97,13 +106,15 @@ final class ParityFlowTests: XCTestCase {
 
         // Back to settings: about, haptics.
         app.navigationBars.buttons.firstMatch.tap()
-        let haptics = el("haptics.toggle")
-        scrollTo(haptics)
-        XCTAssertTrue(haptics.exists)
+        // S2: the about page is one level down ("Über Timetrack"); the haptic level lives on the appearance page.
+        let aboutRow = el("settings.about")
+        scrollTo(aboutRow)
+        aboutRow.tap()
         let copy = el("about.copy")
-        scrollTo(copy)
-        XCTAssertTrue(el("about.backend.version").exists || el("about.unavailable").exists)
+        XCTAssertTrue(copy.waitForExistence(timeout: 10))
+        XCTAssertTrue(el("about.backend.version").waitForExistence(timeout: 10) || el("about.unavailable").exists)
         shot("about")
+        app.navigationBars.buttons.firstMatch.tap()
 
         // Appearance: grid with the new ids, glow.
         app.swipeDown(); app.swipeDown(); app.swipeDown()

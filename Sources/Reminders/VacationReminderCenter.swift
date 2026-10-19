@@ -61,10 +61,7 @@ final class VacationReminderCenter {
             return
         }
         await refreshAuthorization()
-        if authorization == .notDetermined {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-            authorization = await center.notificationSettings().authorizationStatus
-        }
+        authorization = await NotificationPermission.requestIfNeeded() // OT1: shared with the overwork notifications
         guard isAuthorized else { update { $0.enabled = false }; return }
         update { $0.enabled = true }
         await sync()

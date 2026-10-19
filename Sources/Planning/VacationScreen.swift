@@ -24,7 +24,10 @@ private struct VacationContent: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var request: AbsenceRequest?
-    @State private var showSettings = false
+    #if os(macOS)
+    @State private var showSettings = false // iOS reaches these settings from Einstellungen (S2)
+    #endif
+    @State private var attachmentsOf: Absence? // V3
 
     private var wide: Bool { planningIsWide(sizeClass) }
     private var today: LocalDay { store.today }
@@ -33,7 +36,7 @@ private struct VacationContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
                 yearSwitcher
-                if let error = store.error, !showSettings, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
+                if let error = store.error, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
                 if store.settings?.configured == false { HintBanner("vacation.not_configured") }
                 #if os(iOS)
                 ListCard { // R3: two slim entries instead of cards
@@ -57,7 +60,9 @@ private struct VacationContent: View {
         .refreshable { await store.load() }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                #if os(macOS)
                 Button { showSettings = true } label: { Label("vacation.settings", systemImage: "slider.horizontal.3") }.accessibilityIdentifier("vacation.settings")
+                #endif
                 Menu {
                     AbsenceQuickMenuItems(start: today, end: today) { request = $0 }
                 } label: { Label("plan.add", systemImage: "plus") }
@@ -68,7 +73,10 @@ private struct VacationContent: View {
         #if os(iOS)
         .vacationReminderOpen(store: store, request: $request) // R3: tap on a reminder opens that absence
         #endif
+        #if os(macOS)
         .sheet(isPresented: $showSettings) { VacationSettingsSheet(store: store) }
+        #endif
+        .sheet(item: $attachmentsOf) { AbsenceAttachmentsSheet(store: store, absence: $0) } // V3
     }
 
     private var yearSwitcher: some View {
@@ -89,20 +97,21 @@ private struct VacationContent: View {
             VStack(alignment: .leading, spacing: TT.Space.s) {
                 SectionHeader("vacation.balance")
                 Card {
-                    let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
-                    layout {
-                        let total = balance.entitlementHalfDays + balance.carryOverHalfDays + balance.adjustmentHalfDays
-                        ProgressRing(progress: total > 0 ? Double(max(balance.availableHalfDays, 0)) / Double(total) : 0, lineWidth: 12, tint: TT.kindVacation) {
-                            Image(systemName: "beach.umbrella.fill").font(.title2).foregroundStyle(TT.kindVacation)
+                    let ring = VacationRingSegments(balance)
+                    VStack(alignment: .leading, spacing: TT.Space.l) {
+                        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
+                        layout {
+                            VacationRing(segments: ring) // V3: booked solid, planned hatched
+                                .frame(width: 96, height: 96)
+                            VStack(alignment: .leading, spacing: TT.Space.xs) {
+                                Text("vacation.available").font(TTFont.label).foregroundStyle(TT.textSecondary)
+                                Text("vacation.days \(HalfDayFormat.days(balance.availableHalfDays))")
+                                    .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
+                                    .accessibilityIdentifier("vacation.available.value")
+                                Text("vacation.after_planned_short \(HalfDayFormat.days(balance.availableAfterPlannedHalfDays))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            }
                         }
-                        .frame(width: 96, height: 96)
-                        VStack(alignment: .leading, spacing: TT.Space.xs) {
-                            Text("vacation.available").font(TTFont.label).foregroundStyle(TT.textSecondary)
-                            Text("vacation.days \(HalfDayFormat.days(balance.availableHalfDays))")
-                                .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
-                                .accessibilityIdentifier("vacation.available.value")
-                            Text("vacation.after_planned_short \(HalfDayFormat.days(balance.availableAfterPlannedHalfDays))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                        }
+                        VacationRingLegend(segments: ring) // V3
                     }
                     .accessibilityElement(children: .combine)
                 }
@@ -112,8 +121,9 @@ private struct VacationContent: View {
         }
     }
 
-    private var upcoming: [Absence] { store.absences.filter { $0.status == .planned || $0.status == .requested } }
-    private var booked: [Absence] { store.absences.filter { $0.status != .planned && $0.status != .requested } }
+    private var visible: [Absence] { store.visibleAbsences } // V3: filter and sort
+    private var upcoming: [Absence] { visible.filter { $0.status == .planned || $0.status == .requested } }
+    private var booked: [Absence] { visible.filter { $0.status != .planned && $0.status != .requested } }
 
     private var absences: some View {
         VStack(alignment: .leading, spacing: TT.Space.l) {
@@ -121,8 +131,16 @@ private struct VacationContent: View {
                 SectionHeader("vacation.absences")
                 Card { EmptyState(symbol: "calendar", title: "vacation.none", message: "vacation.none_hint") }
             } else {
-                group("vacation.group.planned", upcoming)
-                group("vacation.group.booked", booked)
+                AbsenceFilterBar(store: store, shown: visible.count) // V3
+                if visible.isEmpty {
+                    Card { EmptyState(symbol: "line.3.horizontal.decrease.circle", title: LocalizedStringKey(VT.s("filter.none_match"))) }
+                } else if store.listOptions.isDefaultSort {
+                    group("vacation.group.planned", upcoming)
+                    group("vacation.group.booked", booked)
+                } else {
+                    // A custom sort order would be broken up by the groups, so the result is one list.
+                    group(LocalizedStringKey(VT.s("filter.results")), visible)
+                }
             }
         }
     }
@@ -133,10 +151,15 @@ private struct VacationContent: View {
                 SectionHeader(title) { Text(verbatim: "\(list.count)") }
                 ListCard {
                     ForEach(list) { absence in
-                        Button { request = AbsenceRequest(kind: absence.kind, start: absence.startDate, end: absence.endDate, editing: absence) } label: {
-                            AbsenceRow(absence: absence, calendar: store.calendar)
+                        HStack(spacing: 0) {
+                            Button { request = AbsenceRequest(kind: absence.kind, start: absence.startDate, end: absence.endDate, editing: absence) } label: {
+                                AbsenceRow(absence: absence, calendar: store.calendar)
+                            }
+                            .buttonStyle(.plain).accessibilityIdentifier("absence.row")
+                            if absence.attachmentCount > 0 { // V3: paperclip opens the attachment preview
+                                AttachmentButton(count: absence.attachmentCount) { attachmentsOf = absence }.padding(.trailing, TT.Space.s)
+                            }
                         }
-                        .buttonStyle(.plain).accessibilityIdentifier("absence.row")
                     }
                 }
             }

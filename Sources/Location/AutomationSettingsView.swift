@@ -154,6 +154,11 @@ struct AutomationSettingsView: View {
             }
             .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
             .accessibilityIdentifier("automation.cooldown")
+            Stepper(value: Binding(get: { store.config.leaveWaitMinutes }, set: { value in Task { await store.setLeaveWaitMinutes(value) } }), in: AutomationConfig.leaveWaitRange) {
+                HStack { Text("Wartezeit beim Verlassen"); Spacer(); Text("\(store.config.leaveWaitMinutes) min").foregroundStyle(TT.textSecondary).monospacedDigit() }
+            }
+            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+            .accessibilityIdentifier("automation.leaveWait")
         }
     }
 
@@ -286,6 +291,13 @@ struct PlaceAutomationRow: View {
             .labelsHidden()
             .disabled(store.isBusy)
             .accessibilityIdentifier("automation.mode.\(place.name)")
+            if mode != .off, automationAvailable {
+                Toggle("Beim Verlassen stoppen", isOn: Binding(get: { store.stopsOnLeave(place) }, set: { value in Task { await store.setStopOnLeave(value, for: place) } }))
+                    .font(TTFont.label)
+                    .accessibilityIdentifier("automation.stopOnLeave.\(place.name)")
+                hint(mode == .direct ? "Läuft beim Verlassen ein Timer (auch von Hand gestartet), wird er nach der Wartezeit zum Zeitpunkt des Verlassens gestoppt."
+                                     : "Läuft beim Verlassen ein Timer, fragt eine Mitteilung, ob er gestoppt werden soll.", symbol: "stop.circle", tone: TT.textSecondary)
+            }
             if !automationAvailable {
                 hint("Ohne Koordinaten kann die App diesen Ort nicht überwachen. Kurzbefehle funktionieren trotzdem.", symbol: "mappin.slash", tone: TT.textSecondary)
             } else if let radius = place.radiusMeters, radius < PlaceMonitorPlanner.minimumRadius {
@@ -362,6 +374,7 @@ enum AutomationLogText {
         case .shortcutArrive: "Kurzbefehl: Ankunft"
         case .shortcutLeave: "Kurzbefehl: Abfahrt"
         case .sync: "Senden"
+        case .leaveCheck: "Verlassen"
         }
     }
 
@@ -387,6 +400,16 @@ enum AutomationLogText {
         case .sendFailed: text = "Server nicht erreichbar, wird später gesendet"
         case .dropped: text = "Vom Server abgelehnt: \(entry.detail ?? "")"
         case .unauthorized: text = "Gerätetoken ungültig: bitte unter „Gerätetoken“ neu erzeugen"
+        case .leaveScheduled: text = "Verlassen vorgemerkt: \(entry.detail ?? "Timer wird nach der Wartezeit geprüft")"
+        case .leaveStayTooShort: text = "Verlassen ignoriert: Aufenthalt zu kurz (Vorbeifahrt), Timer läuft weiter"
+        case .leaveStopped: text = "Verlassen: \(entry.detail ?? "Timer gestoppt")"
+        case .leaveStopQueued: text = "Verlassen: \(entry.detail ?? "Stopp wartet auf Verbindung")"
+        case .leaveOffered: text = "Verlassen: \(entry.detail ?? "Nachfrage gesendet")"
+        case .leaveReturned: text = "Verlassen abgebrochen: \(entry.detail ?? "wieder am Ort, Timer läuft weiter")"
+        case .leaveNoTimer: text = "Verlassen: \(entry.detail ?? "kein Timer läuft"), nichts zu stoppen"
+        case .leaveTimerRestarted: text = "Verlassen: \(entry.detail ?? "Timer wurde neu gestartet"), nicht gestoppt"
+        case .leaveHandledByServer: text = "Verlassen: \(entry.detail ?? "Das Ende schlägt der Server vor")"
+        case .leaveExpired: text = "Verlassen verworfen: zu lange nicht geprüft werden können, Timer läuft weiter"
         }
         return text
     }

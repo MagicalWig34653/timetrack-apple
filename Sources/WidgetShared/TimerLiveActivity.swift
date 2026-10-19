@@ -21,6 +21,8 @@ enum TimerLiveActivity {
     static func sync(target desired: LiveActivityTarget?, source: String) async -> LiveActivityOutcome {
         let outcome = await gate.run { await apply(desired: desired, source: source) }
         outcomes.write(outcome)
+        // OT1: every timer change passes here with the snapshot already written (app, intents, Live Activity buttons, Focus filter, sign-out).
+        await OverworkScheduler.sync(snapshot: WidgetSnapshotStore().read())
         return outcome
     }
 

@@ -21,7 +21,9 @@ mkdir -p "$OUT"
 ARCHIVE="$OUT/$SCHEME.xcarchive"
 rm -rf "$ARCHIVE"
 xcodebuild archive -project Timetrack.xcodeproj -scheme "$SCHEME" -configuration Release -destination "$DEST" \
-  -archivePath "$ARCHIVE" -allowProvisioningUpdates DEVELOPMENT_TEAM="$TEAM_ID" | tail -5
+  -archivePath "$ARCHIVE" -allowProvisioningUpdates DEVELOPMENT_TEAM="$TEAM_ID" > "$OUT/archive.log" 2>&1 || true
+tail -5 "$OUT/archive.log"
+[ -d "$ARCHIVE" ] || { echo "ARCHIVE FAILED, nothing uploaded. Errors:" >&2; grep -E "error:" "$OUT/archive.log" | sort -u | head -10 >&2; exit 1; }
 [ "$MODE" = archive ] && { echo "archive: $ARCHIVE"; exit 0; }
 DESTINATION=export; [ "$MODE" = upload ] && DESTINATION=upload
 PLIST="$OUT/ExportOptions-$MODE.plist"

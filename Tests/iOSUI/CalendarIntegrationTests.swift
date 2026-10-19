@@ -25,21 +25,57 @@ final class CalendarIntegrationTests: XCTestCase {
         shot("cal-settings-before")
 
         el("calendar.allow").tap()
-        XCTAssertTrue(el("calendar.select.Arbeit").waitForExistence(timeout: 10))
+        XCTAssertTrue(el("calendar.mode.Arbeit").waitForExistence(timeout: 10))
         XCTAssertEqual(el("calendar.access.status").label, "Erlaubt")
-        XCTAssertEqual(el("calendar.select.Arbeit").value as? String, "0", "no calendar is selected by default")
         shot("cal-settings-granted")
 
-        el("calendar.select.Arbeit").switches.firstMatch.tap()
-        XCTAssertEqual(el("calendar.select.Arbeit").value as? String, "1")
-        XCTAssertEqual(el("calendar.write").value as? String, "0", "writing is off by default")
-        app.swipeUp()
-        shot("cal-settings-write")
+        XCTAssertTrue(el("calendar.mode.Arbeit").buttons["Aus"].isSelected, "every calendar starts off")
+        el("calendar.mode.Arbeit").buttons["Lesen"].tap()
+        XCTAssertTrue(el("calendar.mode.Arbeit").buttons["Lesen"].isSelected)
+        XCTAssertTrue(el("calendar.write.none").waitForExistence(timeout: 5), "reading alone never writes")
+        shot("cal-settings-read")
+    }
 
-        el("calendar.write").switches.firstMatch.tap()
-        XCTAssertEqual(el("calendar.write").value as? String, "1")
-        XCTAssertTrue(el("calendar.write.result").waitForExistence(timeout: 5))
-        shot("cal-settings-write-on")
+    /// E2: per-calendar read+write, planned vacation and sick days written as all-day events, change and void followed, cleanup button.
+    func testReadWriteWritesAbsencesAndCleanupRemovesThem() throws {
+        launch("TT_DEV_CALENDAR_WRITE")
+        XCTAssertTrue(el("calendar.allow").waitForExistence(timeout: 15))
+        el("calendar.allow").tap()
+        XCTAssertTrue(el("calendar.mode.Arbeit").waitForExistence(timeout: 10))
+        XCTAssertFalse(el("calendar.mode.Feiertage").buttons["Schreiben"].exists, "a subscribed calendar offers no write mode")
+
+        el("calendar.mode.Arbeit").buttons["Schreiben"].tap()
+        el("calendar.mode.Familie").buttons["Lesen"].tap()
+        shot("e2-modes")
+
+        el("demo.sync").tap()
+        let written = el("demo.written")
+        XCTAssertTrue(written.waitForExistence(timeout: 5))
+        XCTAssertTrue(written.label.contains("Urlaub (geplant) | Arbeit"), written.label)
+        XCTAssertTrue(written.label.contains("Krank | Arbeit"), written.label)
+        XCTAssertFalse(written.label.contains("Familie"), "read-only calendars receive nothing: \(written.label)")
+        XCTAssertFalse(written.label.contains("Arzt"), "notes never reach the calendar")
+        XCTAssertFalse(written.label.contains("Grippe"), "notes never reach the calendar")
+        shot("e2-written")
+
+        el("demo.approve").tap()
+        XCTAssertTrue(written.label.contains("Urlaub (genehmigt)"), written.label)
+        el("demo.void").tap()
+        XCTAssertFalse(written.label.contains("Urlaub"), "a voided absence disappears: \(written.label)")
+        XCTAssertTrue(written.label.contains("Krank"), written.label)
+
+        el("demo.sync").tap()
+        app.swipeUp()
+        app.swipeUp()
+        XCTAssertTrue(el("calendar.remove").waitForExistence(timeout: 5))
+        shot("e2-cleanup")
+        el("calendar.remove").tap()
+        XCTAssertTrue(el("calendar.remove.confirm").waitForExistence(timeout: 5))
+        shot("e2-confirm")
+        el("calendar.remove.confirm").tap()
+        XCTAssertTrue(el("calendar.remove.result").waitForExistence(timeout: 5))
+        XCTAssertTrue(el("calendar.remove.result").label.contains("2 Termine"), el("calendar.remove.result").label)
+        shot("e2-removed")
     }
 
     func testDayViewShowsEventsAndDraftNeedsExplicitKind() throws {

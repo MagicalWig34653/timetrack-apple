@@ -62,6 +62,8 @@ private struct CalendarContent: View {
             if wide, store.selectedDay == nil { await store.select(store.today) }
         }
         .onChange(of: store.planDays) { syncDeviceCalendar() }
+        .onChange(of: store.absences) { syncDeviceCalendar() }
+        .onChange(of: deviceCalendar?.preferences) { syncDeviceCalendar() }
         .refreshable { await store.load(); await store.loadDetail() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         .gesture(DragGesture(minimumDistance: 40).onEnded { value in
@@ -100,10 +102,11 @@ private struct CalendarContent: View {
         }
     }
 
-    /// E1: mirrors the visible plan into the dedicated Timetrack calendar. Does nothing unless the user enabled writing.
+    /// E1/E2: mirrors the visible plan days and the planned vacation/sick days into the calendars the user set to "Lesen + Schreiben".
+    /// Does nothing unless at least one calendar is set to write.
     private func syncDeviceCalendar() {
-        guard let deviceCalendar, deviceCalendar.preferences.writeEnabled, !store.isLoading, let from = store.gridDays.first, let to = store.gridDays.last else { return }
-        deviceCalendar.syncPlan(store.planDays, from: from, to: to, calendar: store.calendar) { "Arbeit: \($0.plainName)" }
+        guard let deviceCalendar, !deviceCalendar.preferences.writeCalendarIDs.isEmpty, !store.isLoading, let from = store.gridDays.first, let to = store.gridDays.last else { return }
+        deviceCalendar.sync(planDays: store.planDays, absences: store.absences, from: from, to: to, calendar: store.calendar) { "Arbeit: \($0.plainName)" }
     }
 
     private var header: some View {

@@ -13,7 +13,7 @@ public protocol DeviceCalendarProvider: AnyObject {
     func events(from: Date, to: Date, calendarIDs: Set<String>) -> [DeviceEvent]
     /// Finds or creates the dedicated "Timetrack" calendar and returns its identifier.
     func ensureTimetrackCalendar(existingID: String?) throws -> String
-    /// Events in the Timetrack calendar that carry Timetrack's marker URL.
+    /// Events in one calendar that carry Timetrack's marker URL (and only those).
     func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent]
     func apply(_ operations: [WriteOperation], calendarID: String, calendar: DayCalendar) throws
     /// Called when the system reports changes to the calendar database.
@@ -61,8 +61,9 @@ public enum CalendarWriteResult: Sendable, Equatable {
 
 /// State of the "Kalender" settings page and the read-only event context in the day view.
 ///
-/// Read-only by default: events are only read for calendars the user selected, and the store writes only after the user enabled
-/// writing, and then only into the dedicated Timetrack calendar. Event data never leaves the device.
+/// Per calendar the user chooses off / read / read+write. Events are only read from calendars set to read or read+write; the store
+/// writes only into calendars set to read+write, and only events carrying Timetrack's marker are ever changed or removed.
+/// Event data never leaves the device.
 @MainActor
 @Observable
 public final class DeviceCalendarStore {
@@ -73,6 +74,8 @@ public final class DeviceCalendarStore {
     /// Increments whenever the system calendar database changed; views reload their events on it.
     public private(set) var changeCount = 0
     public private(set) var lastWrite: CalendarWriteResult?
+    /// Number of events removed by the last "Von Timetrack geschriebene Termine entfernen".
+    public private(set) var lastRemoval: Int?
     /// Short German message for the settings page (permission denied, write failed).
     public private(set) var message: String?
 
@@ -88,8 +91,11 @@ public final class DeviceCalendarStore {
         refresh()
     }
 
-    /// Calendars the user can pick (Timetrack's own calendar is not offered as a source of context).
-    public var selectableCalendars: [DeviceCalendarInfo] { calendars.filter { $0.id != preferences.timetrackCalendarID } }
+    /// Calendars the user can pick (including Timetrack's own calendar, if it exists).
+    public var selectableCalendars: [DeviceCalendarInfo] { calendars }
+    public var writeCalendars: [DeviceCalendarInfo] { calendars.filter { preferences.mode(for: $0.id).writes } }
+    /// Whether a calendar titled like the dedicated one already exists (then the "create" button is hidden).
+    public var hasTimetrackCalendar: Bool { calendars.contains { $0.id == preferences.timetrackCalendarID } }
     public var hasSelection: Bool { !preferences.selectedCalendarIDs.isEmpty }
     public var showsEvents: Bool { access.canRead && hasSelection }
 
@@ -103,10 +109,10 @@ public final class DeviceCalendarStore {
             return
         }
         calendars = provider.calendars()
-        let known = Set(calendars.map(\.id))
-        let pruned = preferences.selectedCalendarIDs.intersection(known)
-        if pruned != preferences.selectedCalendarIDs {
-            preferences.selectedCalendarIDs = pruned
+        var pruned = preferences
+        pruned.retain(Set(calendars.map(\.id)))
+        if pruned != preferences {
+            preferences = pruned
             storage.save(preferences)
         }
     }
@@ -125,10 +131,47 @@ public final class DeviceCalendarStore {
         refresh()
     }
 
+    public func mode(for id: String) -> CalendarMode { preferences.mode(for: id) }
+
+    /// Convenience for read-only selection: on = read (an existing read+write stays), off = off.
     public func setSelected(_ id: String, _ selected: Bool) {
-        if selected { preferences.selectedCalendarIDs.insert(id) } else { preferences.selectedCalendarIDs.remove(id) }
+        if selected {
+            if preferences.mode(for: id) == .off { preferences.setMode(.read, for: id) }
+        } else {
+            preferences.setMode(.off, for: id)
+        }
         storage.save(preferences)
         changeCount += 1
+    }
+
+    /// Sets what Timetrack does with one calendar. Read+write needs full access and a calendar that accepts changes; leaving
+    /// read+write removes the events Timetrack wrote into that calendar (marker events only).
+    public func setMode(_ mode: CalendarMode, for id: String, calendar dayCalendar: DayCalendar? = nil) async {
+        message = nil
+        let previous = preferences.mode(for: id)
+        guard previous != mode else { return }
+        if mode != .off, !access.canRead { await requestAccess() }
+        guard mode == .off || access.canRead else { return }
+        if mode.writes {
+            guard calendars.first(where: { $0.id == id })?.allowsWrite == true else {
+                message = "Dieser Kalender erlaubt keine Änderungen."
+                return
+            }
+        }
+        if previous.writes, !mode.writes { removeWritten(inCalendar: id, dayCalendar: dayCalendar ?? DayCalendar(timeZone: .current)) }
+        preferences.setMode(mode, for: id)
+        storage.save(preferences)
+        changeCount += 1
+    }
+
+    public func setWritePlanDays(_ value: Bool) {
+        preferences.writePlanDays = value
+        storage.save(preferences)
+    }
+
+    public func setWriteAbsences(_ value: Bool) {
+        preferences.writeAbsences = value
+        storage.save(preferences)
     }
 
     public func setShowAllDay(_ value: Bool) {
@@ -137,31 +180,21 @@ public final class DeviceCalendarStore {
         changeCount += 1
     }
 
-    /// Switches writing on or off. Switching on needs full access (asked now if still missing) and creates the Timetrack calendar.
-    public func setWriteEnabled(_ enabled: Bool) async {
+    /// Creates (or finds) the optional dedicated calendar "Timetrack" and sets it to read+write. Asks for access if still missing.
+    public func createTimetrackCalendar() async {
         message = nil
-        guard enabled else {
-            preferences.writeEnabled = false
-            storage.save(preferences)
-            return
-        }
         if !access.canWrite { await requestAccess() }
-        guard access.canWrite else {
-            preferences.writeEnabled = false
-            storage.save(preferences)
-            return
-        }
+        guard access.canWrite else { return }
         do {
-            preferences.timetrackCalendarID = try provider.ensureTimetrackCalendar(existingID: preferences.timetrackCalendarID)
-            preferences.writeEnabled = true
-            // The new calendar must not become a context source by accident.
-            if let id = preferences.timetrackCalendarID { preferences.selectedCalendarIDs.remove(id) }
+            let id = try provider.ensureTimetrackCalendar(existingID: preferences.timetrackCalendarID)
+            preferences.timetrackCalendarID = id
+            preferences.setMode(.readWrite, for: id)
+            storage.save(preferences)
+            refresh()
+            changeCount += 1
         } catch {
-            preferences.writeEnabled = false
             message = "Der Kalender „Timetrack“ konnte nicht angelegt werden."
         }
-        storage.save(preferences)
-        refresh()
     }
 
     // MARK: Reading
@@ -188,37 +221,76 @@ public final class DeviceCalendarStore {
         return counts
     }
 
-    // MARK: Writing (only when enabled)
+    // MARK: Writing (only into calendars set to read+write)
 
-    /// Makes the Timetrack calendar match the plan for `[from, to]`. Does nothing unless writing is enabled and permitted.
+    /// Makes every read+write calendar match the plan days (if enabled) and the planned/approved vacation and sick days (if enabled)
+    /// for `[from, to]`. Does nothing without write access or without a read+write calendar. Only marker events are touched.
     @discardableResult
-    public func syncPlan(_ planDays: [LocalDay: PlanDay], from: LocalDay, to: LocalDay, calendar: DayCalendar, title: (PlanMode) -> String) -> CalendarWriteResult {
+    public func sync(planDays: [LocalDay: PlanDay], absences: [Absence], from: LocalDay, to: LocalDay, calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
         access = provider.access
-        guard preferences.writeEnabled, access.canWrite, let calendarID = preferences.timetrackCalendarID,
-              let start = calendar.interval(of: from)?.start, let end = calendar.interval(of: to)?.end else {
+        let targets = calendars.filter { preferences.mode(for: $0.id).writes && $0.allowsWrite }
+        guard access.canWrite, !targets.isEmpty, let start = calendar.interval(of: from)?.start, let end = calendar.interval(of: to)?.end else {
             lastWrite = .skipped
             return .skipped
         }
-        let desired = PlanWriteBackPlanner.desired(from: planDays, from: from, to: to, title: title)
-        let existing = provider.writtenEvents(calendarID: calendarID, from: start, to: end)
-        let operations = PlanWriteBackPlanner.operations(desired: desired, existing: existing, from: from, to: to)
-        guard !operations.isEmpty else {
-            lastWrite = .written(created: 0, updated: 0, deleted: 0)
-            return .written(created: 0, updated: 0, deleted: 0)
+        var desired: [CalendarEntry] = []
+        if preferences.writePlanDays { desired += CalendarWritePlanner.desiredPlanDays(from: planDays, from: from, to: to, title: planTitle) }
+        if preferences.writeAbsences { desired += CalendarWritePlanner.desiredAbsences(absences, from: from, to: to) }
+        var created = 0, updated = 0, deleted = 0
+        for target in targets {
+            let existing = provider.writtenEvents(calendarID: target.id, from: start, to: end)
+            let operations = CalendarWritePlanner.operations(desired: desired, existing: existing, from: from, to: to)
+            guard !operations.isEmpty else { continue }
+            do {
+                try provider.apply(operations, calendarID: target.id, calendar: calendar)
+                for operation in operations {
+                    switch operation {
+                    case .create: created += 1
+                    case .update: updated += 1
+                    case .delete: deleted += 1
+                    }
+                }
+            } catch {
+                lastWrite = .failed
+                message = "Die Termine konnten nicht in den Kalender „\(target.title)“ geschrieben werden."
+                return .failed
+            }
         }
+        message = nil
+        let result = CalendarWriteResult.written(created: created, updated: updated, deleted: deleted)
+        lastWrite = result
+        return result
+    }
+
+    /// Removes every event Timetrack wrote (marker URL) from all calendars that accept changes, within two years around today.
+    /// Events without the marker are never touched. Returns how many events were removed.
+    @discardableResult
+    public func removeAllWritten(calendar: DayCalendar, now: Date = .now) -> Int {
+        message = nil
+        guard access.canWrite else { return 0 }
+        var removed = 0
+        for info in calendars where info.allowsWrite {
+            removed += removeWritten(inCalendar: info.id, dayCalendar: calendar, now: now)
+        }
+        lastRemoval = removed
+        lastWrite = nil
+        changeCount += 1
+        return removed
+    }
+
+    @discardableResult
+    private func removeWritten(inCalendar id: String, dayCalendar: DayCalendar, now: Date = .now) -> Int {
+        let start = now.addingTimeInterval(-2 * 366 * 86_400)
+        let end = now.addingTimeInterval(2 * 366 * 86_400)
+        let existing = provider.writtenEvents(calendarID: id, from: start, to: end)
+        let operations = CalendarWritePlanner.removalOperations(for: existing)
+        guard !operations.isEmpty else { return 0 }
         do {
-            try provider.apply(operations, calendarID: calendarID, calendar: calendar)
-            let result = CalendarWriteResult.written(
-                created: operations.filter { if case .create = $0 { true } else { false } }.count,
-                updated: operations.filter { if case .update = $0 { true } else { false } }.count,
-                deleted: operations.filter { if case .delete = $0 { true } else { false } }.count)
-            lastWrite = result
-            message = nil
-            return result
+            try provider.apply(operations, calendarID: id, calendar: dayCalendar)
+            return operations.count
         } catch {
-            lastWrite = .failed
-            message = "Der Plan konnte nicht in den Kalender „Timetrack“ geschrieben werden."
-            return .failed
+            message = "Die Termine konnten nicht entfernt werden."
+            return 0
         }
     }
 

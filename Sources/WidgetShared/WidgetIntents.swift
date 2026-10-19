@@ -62,12 +62,35 @@ struct WidgetStartTimerIntent: LiveActivityIntent {
     }
 }
 
+/// Stopp from the Live Activity / widgets: applied at once and queued like every other press (offline-safe, LA1).
 struct WidgetStopTimerIntent: LiveActivityIntent {
     static let title = LocalizedStringResource("w.intent.stop", table: "Widget")
     static let isDiscoverable = false
 
     func perform() async throws -> some IntentResult {
-        try await WidgetTimerAction.perform(.stop)
+        await TimerControlRunner.perform(.stop)
+        return .result()
+    }
+}
+
+/// Pause: stops the running segment (a real gap, nothing invented); the activity stays and offers Weiter.
+struct WidgetPauseTimerIntent: LiveActivityIntent {
+    static let title = LocalizedStringResource("w.intent.pause", table: "Widget")
+    static let isDiscoverable = false
+
+    func perform() async throws -> some IntentResult {
+        await TimerControlRunner.perform(.pause)
+        return .result()
+    }
+}
+
+/// Weiter: starts a new segment of the paused kind.
+struct WidgetResumeTimerIntent: LiveActivityIntent {
+    static let title = LocalizedStringResource("w.intent.resume", table: "Widget")
+    static let isDiscoverable = false
+
+    func perform() async throws -> some IntentResult {
+        await TimerControlRunner.perform(.resume)
         return .result()
     }
 }
@@ -81,7 +104,7 @@ struct ToggleTimerControlIntent: SetValueIntent, LiveActivityIntent {
     var value: Bool
 
     func perform() async throws -> some IntentResult {
-        try await WidgetTimerAction.perform(value ? .start : .stop)
+        if value { try await WidgetTimerAction.perform(.start) } else { await TimerControlRunner.perform(.stop) }
         return .result()
     }
 }

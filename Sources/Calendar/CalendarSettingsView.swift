@@ -4,8 +4,8 @@ import TimetrackDesign
 import TimetrackStores
 import UIKit
 
-/// Settings > "Kalender": permission flow, choice of calendars (read-only context in the day view) and the optional write-back of
-/// planned work days into a dedicated "Timetrack" calendar. Everything here stays on this device.
+/// Settings > "Kalender": permission flow and, per calendar, off / read / read+write. Read shows events as context in the day view;
+/// read+write additionally writes planned vacation and sick days (optionally plan days) as all-day events. Everything stays on this device.
 struct CalendarSettingsView: View {
     @Environment(\.deviceCalendar) private var store
     @Environment(\.scenePhase) private var scenePhase
@@ -40,6 +40,7 @@ struct CalendarSettingsView: View {
 private struct CalendarSettingsContent: View {
     let store: DeviceCalendarStore
     let openSettings: () -> Void
+    @State private var confirmRemoval = false
 
     var body: some View {
         introCard
@@ -59,7 +60,7 @@ private struct CalendarSettingsContent: View {
                 KindGlyph(symbol: "calendar", tint: TT.kindHoliday)
                 VStack(alignment: .leading, spacing: TT.Space.xs) {
                     Text("Termine als Kontext").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                    Text("Timetrack zeigt Termine ausgewählter Kalender im Tag der Kalenderansicht, nur zur Ansicht. Auf Wunsch schlägst du aus einem Termin einen Zeitabschnitt vor, den du selbst einordnest und bestätigst.")
+                    Text("Du legst für jeden Kalender fest, was Timetrack damit tut: nichts, nur lesen oder lesen und schreiben („Schreiben“ schließt Lesen ein). Gelesene Termine erscheinen im Tag der Kalenderansicht, nur zur Ansicht. In Kalender mit „Schreiben“ trägt Timetrack deinen geplanten Urlaub und Krankheitstage ein.")
                         .font(TTFont.body).foregroundStyle(TT.textSecondary)
                 }
             }
@@ -69,7 +70,7 @@ private struct CalendarSettingsContent: View {
     // MARK: Permission
 
     private var accessSection: some View {
-        FormSection("Zugriff", footer: "iOS vergibt das Lesen von Terminen nur zusammen mit dem Schreiben („Vollzugriff“). Timetrack liest nur die Kalender, die du unten auswählst, und schreibt nur, wenn du das Schreiben selbst einschaltest.") {
+        FormSection("Zugriff", footer: "iOS vergibt das Lesen von Terminen nur zusammen mit dem Schreiben („Vollzugriff“). Timetrack liest nur Kalender auf „Lesen“ oder „Schreiben“ und schreibt nur in Kalender auf „Schreiben“.") {
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 HStack {
                     Text("Kalenderzugriff").font(TTFont.body).foregroundStyle(TT.textPrimary)
@@ -128,17 +129,8 @@ private struct CalendarSettingsContent: View {
             }
             ForEach(groups, id: \.key) { group in
                 FormSection(LocalizedStringKey(group.key.isEmpty ? "Kalender" : group.key),
-                            footer: group.key == groups.first?.key ? "Ohne Auswahl werden keine Termine angezeigt." : nil) {
-                    ForEach(group.value) { calendar in
-                        Toggle(isOn: Binding(get: { store.isSelected(calendar.id) }, set: { store.setSelected(calendar.id, $0) })) {
-                            HStack(spacing: TT.Space.m) {
-                                Circle().fill(color(calendar)).frame(width: 12, height: 12).accessibilityHidden(true)
-                                Text(verbatim: calendar.title).font(TTFont.body).foregroundStyle(TT.textPrimary)
-                            }
-                        }
-                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-                        .accessibilityIdentifier("calendar.select.\(calendar.title)")
-                    }
+                            footer: group.key == groups.first?.key ? "Standard ist „Aus“: Ohne Auswahl liest und schreibt Timetrack nichts." : nil) {
+                    ForEach(group.value) { calendar in modeRow(calendar) }
                 }
             }
             FormSection {
@@ -148,29 +140,81 @@ private struct CalendarSettingsContent: View {
         }
     }
 
+    private func modeRow(_ calendar: DeviceCalendarInfo) -> some View {
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            HStack(spacing: TT.Space.m) {
+                Circle().fill(color(calendar)).frame(width: 12, height: 12).accessibilityHidden(true)
+                Text(verbatim: calendar.title).font(TTFont.body).foregroundStyle(TT.textPrimary)
+                if !calendar.allowsWrite {
+                    Text("nur Lesen möglich").font(TTFont.meta).foregroundStyle(TT.textTertiary)
+                }
+            }
+            Picker(selection: Binding(get: { store.mode(for: calendar.id) }, set: { mode in Task { await store.setMode(mode, for: calendar.id) } })) {
+                Text("Aus").tag(CalendarMode.off)
+                Text("Lesen").tag(CalendarMode.read)
+                if calendar.allowsWrite { Text("Schreiben").tag(CalendarMode.readWrite) }
+            } label: {
+                Text(verbatim: "Modus für \(calendar.title)")
+            }
+            .pickerStyle(.segmented)
+            .accessibilityIdentifier("calendar.mode.\(calendar.title)")
+        }
+        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+        .accessibilityElement(children: .contain)
+    }
+
     private func color(_ calendar: DeviceCalendarInfo) -> Color {
         calendar.colorHex.flatMap { UInt32($0, radix: 16) }.map { Color(hex: $0) } ?? TT.textTertiary
     }
 
-    // MARK: Write-back
+    // MARK: Writing
 
     private var writeSection: some View {
-        FormSection("Schreiben (optional)",
-                    footer: "Ist das Schreiben an, legt Timetrack einen eigenen Kalender „Timetrack“ an und trägt dort deine geplanten Arbeitstage (Büro, Homeoffice, Kunde, Schule) als ganztägige Termine ein. Uhrzeiten gibt es im Plan nicht, deshalb werden keine erfunden. Deine anderen Kalender werden nie verändert.") {
-            Toggle("Geplante Arbeitstage in Kalender „Timetrack“ schreiben", isOn: Binding(get: { store.preferences.writeEnabled }, set: { value in Task { await store.setWriteEnabled(value) } }))
-                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).accessibilityIdentifier("calendar.write")
-            if store.preferences.writeEnabled {
-                let result = store.lastWrite ?? .skipped
-                Text(verbatim: summary(result)).font(TTFont.meta).foregroundStyle(result == .failed ? TT.danger : TT.textSecondary)
-                    .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m).accessibilityIdentifier("calendar.write.result")
+        VStack(alignment: .leading, spacing: TT.Space.xl) {
+            FormSection("Was geschrieben wird",
+                        footer: "Gilt für alle Kalender auf „Schreiben“. Titel sind allgemein („Urlaub (geplant)“, „Krank“); Notizen, Krankschein-Stand und Zeiten stehen nie im Kalender. Timetrack ändert oder löscht nur Termine mit eigener Kennung, nie andere. Stellst du einen Kalender zurück auf „Lesen“ oder „Aus“, entfernt Timetrack die dort geschriebenen Termine.") {
+                Toggle("Geplanten Urlaub und Krank schreiben", isOn: Binding(get: { store.preferences.writeAbsences }, set: { store.setWriteAbsences($0) }))
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s).accessibilityIdentifier("calendar.write.absences")
+                Toggle("Geplante Arbeitstage schreiben", isOn: Binding(get: { store.preferences.writePlanDays }, set: { store.setWritePlanDays($0) }))
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s).accessibilityIdentifier("calendar.write.plan")
+                if store.preferences.writeCalendarIDs.isEmpty {
+                    Text("Noch kein Kalender steht auf „Schreiben“, es wird nichts geschrieben.").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m).accessibilityIdentifier("calendar.write.none")
+                } else {
+                    let result = store.lastWrite ?? .skipped
+                    Text(verbatim: summary(result)).font(TTFont.meta).foregroundStyle(result == .failed ? TT.danger : TT.textSecondary)
+                        .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m).accessibilityIdentifier("calendar.write.result")
+                }
             }
+            FormSection("Aufräumen") {
+                VStack(alignment: .leading, spacing: TT.Space.m) {
+                    if !store.hasTimetrackCalendar {
+                        Button { Task { await store.createTimetrackCalendar() } } label: { Label("Eigenen Kalender „Timetrack“ anlegen", systemImage: "calendar.badge.plus") }
+                            .buttonStyle(.ttSecondary).accessibilityIdentifier("calendar.create")
+                    }
+                    Button(role: .destructive) { confirmRemoval = true } label: { Label { Text("Von Timetrack geschriebene Termine entfernen").fixedSize(horizontal: false, vertical: true) } icon: { Image(systemName: "trash") } }
+                        .buttonStyle(.ttSecondary).accessibilityIdentifier("calendar.remove")
+                    if let removed = store.lastRemoval {
+                        Text(verbatim: removed == 0 ? "Es gab keine Termine von Timetrack." : "\(removed) Termine von Timetrack entfernt.")
+                            .font(TTFont.meta).foregroundStyle(TT.textSecondary).accessibilityIdentifier("calendar.remove.result")
+                    }
+                }
+                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+            }
+        }
+        .confirmationDialog("Alle von Timetrack geschriebenen Termine entfernen?", isPresented: $confirmRemoval, titleVisibility: .visible) {
+            Button("Termine entfernen", role: .destructive) { store.removeAllWritten(calendar: DayCalendar(timeZone: .current)) }
+                .accessibilityIdentifier("calendar.remove.confirm")
+            Button("Abbrechen", role: .cancel) {}
+        } message: {
+            Text("Es werden nur Termine gelöscht, die Timetrack selbst geschrieben hat. Deine eigenen Termine bleiben unberührt.")
         }
     }
 
     private func summary(_ result: CalendarWriteResult) -> String {
         switch result {
         case .written(let created, let updated, let deleted): "Zuletzt: \(created) neu, \(updated) geändert, \(deleted) entfernt."
-        case .skipped: "Noch nichts geschrieben. Der Plan wird beim Öffnen der Kalenderansicht übertragen."
+        case .skipped: "Noch nichts geschrieben. Die Termine werden beim Öffnen der Kalenderansicht übertragen."
         case .failed: "Das Schreiben ist fehlgeschlagen."
         }
     }

@@ -37,6 +37,7 @@ struct TimetrackIOSApp: App {
                 .environment(\.deviceCalendar, deviceCalendar)
                 .widgetSync(model) // A7: widget snapshot, Live Activity
                 .focusSync(model) // F2: automation module flag for the Focus filter
+                .vacationReminderSync(model) // R3: local reminders to submit planned vacation
                 .environment(\.watchSender, watchSender)
                 .ttAppearance()
                 .task { await watchSender.start() }
@@ -76,6 +77,8 @@ struct TimetrackIOSApp: App {
         // Simulator/UI-test convenience: show the Focus filter page without signing in.
         if ProcessInfo.processInfo.environment["TT_DEV_FOCUS_PAGE"] == "1" {
             NavigationStack { FocusFilterView() }
+        } else if ProcessInfo.processInfo.environment["TT_DEV_REMINDERS_PAGE"] == "1" {
+            NavigationStack { VacationReminderSettingsView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_PAGE"] == "1" {
             NavigationStack { CalendarSettingsView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_WRITE"] == "1" {

@@ -66,6 +66,22 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("settings.calendar")
                 }
+                if model.isEnabled(.planning) { // R3: reminders to submit planned vacation
+                    FormSection {
+                        NavigationLink {
+                            VacationReminderSettingsView()
+                        } label: {
+                            HStack {
+                                Label("Urlaubserinnerungen", systemImage: "bell.badge").foregroundStyle(TT.textPrimary)
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                            }
+                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("settings.reminders")
+                    }
+                }
                 if model.isEnabled(.automation) { // L2: location automation (module `automation`)
                     FormSection {
                         NavigationLink {

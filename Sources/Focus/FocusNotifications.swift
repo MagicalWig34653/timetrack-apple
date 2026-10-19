@@ -97,6 +97,11 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let info = response.notification.request.content.userInfo
+        if let vacationID = info[VacationReminderCenter.absenceKey] as? String { // R3: vacation reminder tap opens the Urlaub tab
+            let start = (info[VacationReminderCenter.startKey] as? String) ?? ""
+            await MainActor.run { VacationReminderCenter.shared.handleTap(absenceID: vacationID, startDate: start) }
+            return
+        }
         guard let text = info["configuration"] as? String, let data = Data(base64Encoded: text),
               let configuration = try? JSONDecoder().decode(FocusConfiguration.self, from: data) else { return }
         // The stamp of the question makes repeated taps and answers to a superseded question harmless (see `FocusRunner.confirm*`).

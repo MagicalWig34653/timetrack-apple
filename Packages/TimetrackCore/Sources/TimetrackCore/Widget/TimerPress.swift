@@ -75,12 +75,13 @@ extension WidgetSnapshot {
             result.isRunning = true
             result.kind = kind
             result.startedAt = action.queuedAt
+            if result.firstStart == nil || todaySeconds(at: action.queuedAt) == nil { result.firstStart = action.queuedAt }
             var list = result.segments ?? []
             list.append(WidgetSegment(kind: kind, startedAt: action.queuedAt, endedAt: nil))
             result.segments = Array(list.suffix(Self.maxSegments))
         case .stop:
             if isRunning, let start = startedAt {
-                if todaySeconds(at: action.queuedAt) != nil { result.todaySeconds += max(0, Int(action.queuedAt.timeIntervalSince(start))) }
+                if todaySeconds(at: action.queuedAt) != nil { result.todaySeconds += LiveActivityTarget.wholeSeconds(action.queuedAt.timeIntervalSince(start)) }
                 if var list = result.segments, let last = list.indices.last, list[last].endedAt == nil {
                     list[last].endedAt = action.queuedAt
                     result.segments = list

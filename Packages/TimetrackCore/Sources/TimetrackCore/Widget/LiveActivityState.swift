@@ -60,14 +60,15 @@ extension LiveActivityTarget {
         let worked = sameDay ? (snapshot?.todaySeconds ?? 0) : 0
         let planned = sameDay ? snapshot.flatMap { $0.plannedSeconds ?? ($0.targetSeconds.flatMap { $0 > 0 ? $0 : nil }) } : nil
         let plannedEnd = sameDay ? snapshot?.plannedEnd : nil
+        let dayStart = sameDay ? snapshot?.firstStart : nil
         let accent = snapshot?.accentHex
         if running, let snapshot, let startedAt = snapshot.startedAt {
             return LiveActivityTarget(kind: snapshot.kind, startedAt: startedAt, workedSeconds: worked, plannedSeconds: planned,
-                                      plannedEnd: plannedEnd, accentHex: accent)
+                                      plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent)
         }
         if let marker = PauseMarker.current(pause, running: running, at: now) {
             return LiveActivityTarget(kind: marker.kind, startedAt: marker.pausedAt, pausedAt: marker.pausedAt, workedSeconds: worked,
-                                      plannedSeconds: planned, plannedEnd: plannedEnd, accentHex: accent)
+                                      plannedSeconds: planned, plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent)
         }
         return nil
     }
@@ -86,25 +87,61 @@ public enum LiveActivityEnd: Sendable, Equatable {
 extension LiveActivityTarget {
     /// Work of today at `date`: finished work plus the running segment; constant while paused.
     public func workedSeconds(at date: Date) -> Int {
-        guard !isPaused else { return workedSeconds }
-        return workedSeconds + max(0, Int(date.timeIntervalSince(startedAt)))
+        guard !isPaused else { return finishedSeconds }
+        return finishedSeconds + Self.wholeSeconds(date.timeIntervalSince(startedAt))
     }
 
-    /// Progress against the planned day, 0...1; nil without a planned length.
+    /// Day bar from the first start of today to the planned end (LA2). Nil without a planned end, without a plausible order or
+    /// when the first start is unknown and the worked origin would be needed (then the bar falls back to worked time).
+    public var dayInterval: ClosedRange<Date>? {
+        guard let plannedEnd else { return nil }
+        let start = dayStart ?? workedOrigin
+        return start < plannedEnd ? start...plannedEnd : nil
+    }
+
+    /// Progress of the day, 0...1. With a planned end: how far the time between the first start and Feierabend has passed (it keeps
+    /// moving during a pause, because Feierabend comes closer). Without one: worked time against the planned length.
     public func fraction(at date: Date) -> Double? {
+        if let day = dayInterval {
+            let total = day.upperBound.timeIntervalSince(day.lowerBound)
+            return min(1, max(0, date.timeIntervalSince(day.lowerBound) / total))
+        }
         guard let plannedSeconds, plannedSeconds > 0 else { return nil }
         return min(1, max(0, Double(workedSeconds(at: date)) / Double(plannedSeconds)))
     }
 
     /// Instant from which "today's work" counts upwards while running (`startedAt` minus the finished work). `Text(timerInterval:)`
-    /// and `ProgressView(timerInterval:)` derive from it, so they tick and fill without any update of the activity.
-    public var workedOrigin: Date { startedAt.addingTimeInterval(-TimeInterval(workedSeconds)) }
+    /// drives the clock from it, so it ticks without any update of the activity.
+    public var workedOrigin: Date { startedAt.addingTimeInterval(-TimeInterval(finishedSeconds)) }
 
-    /// Range for `ProgressView(timerInterval:)` while running; nil when paused or without a planned length.
+    /// `workedSeconds` as the views may rely on it: never negative. A negative value (stale or foreign content state) would turn a
+    /// `Text(timerInterval:)` range upside down, and SwiftUI traps on a range whose end precedes its start (LA2).
+    var finishedSeconds: Int { min(max(0, workedSeconds), 1_000_000_000) }
+
+    /// Non-negative whole seconds; never traps on NaN or infinity (`Int(Double)` does).
+    static func wholeSeconds(_ interval: TimeInterval) -> Int {
+        guard interval.isFinite else { return 0 }
+        return Int(min(max(interval, 0), 4_000_000_000))
+    }
+
+    /// The range and pause time for `Text(timerInterval:pauseTime:)` of today's work clock; the range is always valid
+    /// (start before end), whatever the state holds.
+    public var clock: (range: ClosedRange<Date>, pauseTime: Date?) {
+        let origin = workedOrigin
+        guard isPaused else { return (origin...Date.distantFuture, nil) }
+        let frozen = origin.addingTimeInterval(TimeInterval(finishedSeconds))
+        return (origin...frozen.addingTimeInterval(1), frozen)
+    }
+
+    /// Range for `ProgressView(timerInterval:)`: the day bar, else (running only) worked time against the planned length.
     public var progressInterval: ClosedRange<Date>? {
+        if let day = dayInterval { return day }
         guard !isPaused, let plannedSeconds, plannedSeconds > 0 else { return nil }
         return workedOrigin...workedOrigin.addingTimeInterval(TimeInterval(plannedSeconds))
     }
+
+    /// True when the bar's left label can name a real first start.
+    public var hasDayStart: Bool { dayStart != nil && dayInterval != nil }
 
     /// The planned end if the plan has one, else the estimate for reaching the target while the timer runs.
     public func end(at date: Date) -> LiveActivityEnd? {

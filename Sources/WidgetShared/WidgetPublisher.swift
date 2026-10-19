@@ -128,7 +128,8 @@ private struct WidgetSyncModifier: ViewModifier {
             let zone = model.dayCalendar.timeZone
             let appearance = model.appearance.local
             var snapshot = WidgetSnapshot.make(running: today.running, day: today.day, account: today.account, segments: today.segments, zone: zone,
-                                               accentHex: AppearanceKeys.effectiveHex(appearance), colorScheme: appearance.scheme)
+                                               accentHex: AppearanceKeys.effectiveHex(appearance), colorScheme: appearance.scheme,
+                                               evaluatedAt: today.lastLoaded)
             if let client = model.apiClient { await WidgetPublisher.attachPlan(to: &snapshot, client: client, day: snapshot.day, zone: zone) }
             await WidgetPublisher.publish(snapshot)
         case .restoring, .offline:

@@ -277,6 +277,28 @@
         }
       }
     },
+    "w.live.start %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn %@"
+          }
+        }
+      }
+    },
+    "w.live.target %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@ Std"
+          }
+        }
+      }
+    },
     "w.no_segments": {
       "extractionState": "manual",
       "localizations": {

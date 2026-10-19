@@ -30,12 +30,17 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     /// (`plannedSeconds`). Both belong to `day`; the Live Activity ignores them on another day.
     public var plannedEnd: Date?
     public var plannedSeconds: Int?
+    /// LA2 (optional): start of the first non-voided segment of `day` (the segment list is capped, so it is kept separately).
+    /// The Live Activity's bar runs from here to `plannedEnd`.
+    public var firstStart: Date?
 
     public static let maxSegments = 8
 
     public init(isRunning: Bool, kind: SegmentKind, startedAt: Date?, todaySeconds: Int, day: String, timeZone: String, updatedAt: Date,
                 targetSeconds: Int? = nil, balanceSeconds: Int? = nil, segments: [WidgetSegment]? = nil,
-                accentHex: String? = nil, colorScheme: String? = nil, plannedEnd: Date? = nil, plannedSeconds: Int? = nil) {
+                accentHex: String? = nil, colorScheme: String? = nil, plannedEnd: Date? = nil, plannedSeconds: Int? = nil,
+                firstStart: Date? = nil) {
+        self.firstStart = firstStart
         self.plannedEnd = plannedEnd
         self.plannedSeconds = plannedSeconds
         self.accentHex = accentHex.flatMap(Preferences.normalizedHex)
@@ -55,29 +60,44 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public static let appGroup = "group.de.linolaske.timetrack"
     public static let empty = WidgetSnapshot(isRunning: false, kind: .work, startedAt: nil, todaySeconds: 0, day: "", timeZone: "Europe/Berlin", updatedAt: .distantPast)
 
-    /// Builds the snapshot from what the app currently shows. `todaySeconds` is evaluated work plus credits (as on the Heute screen).
+    /// Finished work for the snapshot. The server evaluates an open segment up to the moment of evaluation (`endedAt ?? now`), so
+    /// `evaluated` already contains the running segment up to `evaluatedAt`. Views add the running segment themselves (from its
+    /// start), so it is taken out here; otherwise it would be counted twice (LA2).
+    public static func finishedSeconds(evaluated: Int, runningSince: Date?, evaluatedAt: Date) -> Int {
+        guard let runningSince else { return max(0, evaluated) }
+        return max(0, evaluated - LiveActivityTarget.wholeSeconds(evaluatedAt.timeIntervalSince(runningSince)))
+    }
+
+    /// Builds the snapshot from what the app currently shows. `todaySeconds` is evaluated work plus credits (as on the Heute screen)
+    /// without the running segment; `evaluatedAt` is when `day` was loaded (default `now`).
     public static func make(running: Segment?, day: DayEvaluation?, account: TimeAccount?, segments: [Segment], zone: TimeZone, now: Date = .now,
-                            accentHex: String? = nil, colorScheme: String? = nil, plan: PlanDay? = nil) -> WidgetSnapshot {
+                            accentHex: String? = nil, colorScheme: String? = nil, plan: PlanDay? = nil, evaluatedAt: Date? = nil) -> WidgetSnapshot {
         let calendar = DayCalendar(timeZone: zone)
         let planned = PlannedDay(plan: plan, zone: zone)
         let ordered = segments.filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
         return WidgetSnapshot(
             isRunning: running != nil, kind: running?.kind ?? .work, startedAt: running?.startedAt,
-            todaySeconds: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
+            todaySeconds: finishedSeconds(evaluated: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0), runningSince: running?.startedAt,
+                                          evaluatedAt: evaluatedAt ?? now),
             day: calendar.day(for: now), timeZone: zone.identifier, updatedAt: now,
             targetSeconds: day?.targetSeconds, balanceSeconds: account?.balanceSeconds,
             segments: ordered.map { WidgetSegment(kind: $0.kind, startedAt: $0.startedAt, endedAt: $0.endedAt) },
-            accentHex: accentHex, colorScheme: colorScheme, plannedEnd: planned.end, plannedSeconds: planned.seconds
+            accentHex: accentHex, colorScheme: colorScheme, plannedEnd: planned.end, plannedSeconds: planned.seconds,
+            firstStart: ordered.first?.startedAt
         )
     }
 
     /// Snapshot of what a compact screen shows (live data plus queued actions), for the complication and the next launch.
     public static func make(display: TodayDisplay, zone: TimeZone, now: Date = .now, accentHex: String? = nil, colorScheme: String? = nil) -> WidgetSnapshot {
         WidgetSnapshot(
-            isRunning: display.isRunning, kind: display.kind, startedAt: display.startedAt, todaySeconds: display.doneSeconds,
+            isRunning: display.isRunning, kind: display.kind, startedAt: display.startedAt,
+            // Live server data contains the open segment (see `finishedSeconds`); cached and queued displays are already finished work.
+            todaySeconds: display.source == .live && display.isRunning
+                ? finishedSeconds(evaluated: display.doneSeconds, runningSince: display.startedAt, evaluatedAt: display.updatedAt ?? now)
+                : display.doneSeconds,
             day: DayCalendar(timeZone: zone).day(for: now), timeZone: zone.identifier, updatedAt: now,
             targetSeconds: display.targetSeconds, balanceSeconds: display.balanceSeconds, segments: display.segments,
-            accentHex: accentHex, colorScheme: colorScheme
+            accentHex: accentHex, colorScheme: colorScheme, firstStart: display.segments.first?.startedAt
         )
     }
 

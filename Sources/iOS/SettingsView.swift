@@ -20,133 +20,14 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 accountCard
-                FormSection {
-                    NavigationLink {
-                        AppearanceView()
-                    } label: {
-                        HStack {
-                            Label("settings.appearance", systemImage: "paintpalette")
-                                .foregroundStyle(TT.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                        }
-                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("settings.appearance")
-                }
-                FormSection { // N1b: work model versions (correction with preview)
-                    NavigationLink {
-                        WorkModelsScreen()
-                    } label: {
-                        HStack {
-                            Label("workmodel.title", systemImage: "calendar.badge.clock").foregroundStyle(TT.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                        }
-                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("settings.workmodel")
-                }
-                FormSection(footer: "haptics.footer") { // N1b: plain on/off switch (grading stays on the appearance page)
-                    HapticsToggle().padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-                }
-                FormSection { // E1: device calendars (EventKit); on this device only
-                    NavigationLink {
-                        CalendarSettingsView()
-                    } label: {
-                        HStack {
-                            Label("Kalender", systemImage: "calendar").foregroundStyle(TT.textPrimary)
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                        }
-                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("settings.calendar")
-                }
-                if model.isEnabled(.automation) { // L2: location automation (module `automation`)
-                    FormSection {
-                        NavigationLink {
-                            AutomationSettingsView()
-                        } label: {
-                            HStack {
-                                Label("Standortautomatik", systemImage: "location.circle").foregroundStyle(TT.textPrimary)
-                                Spacer()
-                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                            }
-                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("settings.automation")
-                    }
-                }
-                if model.isEnabled(.automation) { // F2: hidden when the automation module is off (account or server-wide)
-                    FormSection(footer: "settings.focus.hint") {
-                        NavigationLink {
-                            FocusFilterView()
-                        } label: {
-                            HStack {
-                                Label("settings.focus", systemImage: "moon.circle").foregroundStyle(TT.textPrimary)
-                                Spacer()
-                                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
-                            }
-                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("settings.focus")
-                    }
-                }
-                FormSection("settings.server") {
-                    FormRow("settings.server_url", stacked: true) { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled) }
-                    if let workModel = model.workModel {
-                        FormRow("settings.timezone") { Text(workModel.timeZone.identifier) }
-                    }
-                }
-                FormSection("settings.modules", footer: "settings.modules.hint") {
-                    ForEach(ModuleKey.all, id: \.self) { key in
-                        FormRow(moduleTitle(key)) {
-                            StatusChip(model.isEnabled(key) ? "settings.module.on" : "settings.module.off", tone: model.isEnabled(key) ? .success : .neutral)
-                        }
-                    }
-                }
-                if let watchSender {
-                    FormSection("settings.watch", footer: "settings.watch.hint") {
-                        Button { Task { watchStatus = await watchSender.sendNow() } } label: {
-                            HStack {
-                                Label("settings.watch.send", systemImage: "applewatch")
-                                Spacer()
-                                Image(systemName: "arrow.up.circle").foregroundStyle(TT.textTertiary)
-                            }
-                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("settings.watch.send")
-                        if let watchStatus {
-                            HStack {
-                                StatusChip(Self.statusKey(watchStatus), tone: watchStatus == .sent ? .success : .neutral, symbol: Self.statusSymbol(watchStatus))
-                                Spacer()
-                            }
-                            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
-                            .accessibilityIdentifier("settings.watch.status")
-                        }
-                    }
-                }
-                VStack(spacing: TT.Space.m) {
-                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
-                        .buttonStyle(.ttSecondary)
-                        .accessibilityIdentifier("settings.sign_out")
-                    Button("settings.change_server", role: .destructive) { confirmingServerChange = true }
-                        .font(TTFont.label)
-                        .foregroundStyle(TT.danger)
-                }
-                AboutSection(build: AppBuildInfo(platform: "iOS")) // N1b
+                appearanceGroup
+                workGroup
+                automationGroup
+                devicesGroup
+                technicalGroup
+                sessionActions
             }
-            .padding(.horizontal, TT.Space.l)
-            .padding(.vertical, TT.Space.s)
-            .frame(maxWidth: 680)
-            .frame(maxWidth: .infinity)
+            .settingsPageLayout()
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.settings")
@@ -154,6 +35,74 @@ struct SettingsView: View {
             Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
         }
         .ttHaptic(.confirmDestructive, whenBecomesTrue: confirmingServerChange)
+    }
+
+    // MARK: - Groups (S2). Each group is a small computed property so later rows (for example vacation reminders) slot in as one line.
+
+    /// Look of the app: accent, scheme, glow, app icon, haptics (the haptic level lives on that page).
+    private var appearanceGroup: some View {
+        FormSection {
+            SettingsLinkRow(title: "settings.appearance", symbol: "paintpalette", id: "settings.appearance") { AppearanceView() }
+        }
+    }
+
+    /// Work and planning: work model versions, vacation entitlement.
+    private var workGroup: some View {
+        FormSection("Arbeit") {
+            SettingsLinkRow(title: "workmodel.title", symbol: "calendar.badge.clock", id: "settings.workmodel") { WorkModelsScreen() }
+            if model.isEnabled(.planning) {
+                VacationEntitlementRow()
+                // R3 inserts "Urlaubs-Erinnerungen" here.
+            }
+        }
+    }
+
+    /// What the app does on its own or with other apps: device calendars, location automation, Focus filter.
+    private var automationGroup: some View {
+        FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
+            SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
+            if model.isEnabled(.automation) { // L2/F2: hidden when the automation module is off (account or server-wide)
+                SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
+                SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
+            }
+        }
+    }
+
+    @ViewBuilder private var devicesGroup: some View {
+        if let watchSender {
+            FormSection("settings.watch", footer: "settings.watch.hint") {
+                SettingsActionRow(title: "settings.watch.send", symbol: "applewatch", trailingSymbol: "arrow.up.circle", id: "settings.watch.send") {
+                    Task { watchStatus = await watchSender.sendNow() }
+                }
+                if let watchStatus {
+                    HStack {
+                        StatusChip(Self.statusKey(watchStatus), tone: watchStatus == .sent ? .success : .neutral, symbol: Self.statusSymbol(watchStatus))
+                        Spacer()
+                    }
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+                    .accessibilityIdentifier("settings.watch.status")
+                }
+            }
+        }
+    }
+
+    /// Technical facts live at the bottom, one level down.
+    private var technicalGroup: some View {
+        FormSection {
+            SettingsLinkRow(title: "Server und Module", symbol: "server.rack", id: "settings.server") { ServerModulesView() }
+            SettingsLinkRow(title: "settings.about", symbol: "info.circle", value: AppBuildInfo(platform: "iOS").display, id: "settings.about") { AboutView() }
+        }
+    }
+
+    private var sessionActions: some View {
+        VStack(spacing: TT.Space.m) {
+            Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
+                .buttonStyle(.ttSecondary)
+                .accessibilityIdentifier("settings.sign_out")
+            Button("settings.change_server", role: .destructive) { confirmingServerChange = true }
+                .font(TTFont.label)
+                .foregroundStyle(TT.danger)
+        }
     }
 
     @ViewBuilder private var accountCard: some View {
@@ -192,17 +141,6 @@ struct SettingsView: View {
         case .sent: "checkmark.circle"
         case .queuedUnreachable: "clock"
         case .notPaired, .notSignedIn, .failed: "exclamationmark.circle"
-        }
-    }
-
-    private func moduleTitle(_ key: ModuleKey) -> LocalizedStringKey {
-        switch key {
-        case .reports: "module.reports"
-        case .planning: "module.planning"
-        case .transfer: "module.transfer"
-        case .automation: "module.automation"
-        case .mcp: "module.mcp"
-        default: "module.unknown"
         }
     }
 }

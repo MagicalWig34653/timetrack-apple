@@ -96,13 +96,15 @@ final class ParityFlowTests: XCTestCase {
 
         // Back to settings: about, haptics.
         app.navigationBars.buttons.firstMatch.tap()
-        let haptics = el("haptics.toggle")
-        scrollTo(haptics)
-        XCTAssertTrue(haptics.exists)
+        // S2: the about page is one level down ("Über Timetrack"); the haptic level lives on the appearance page.
+        let aboutRow = el("settings.about")
+        scrollTo(aboutRow)
+        aboutRow.tap()
         let copy = el("about.copy")
-        scrollTo(copy)
-        XCTAssertTrue(el("about.backend.version").exists || el("about.unavailable").exists)
+        XCTAssertTrue(copy.waitForExistence(timeout: 10))
+        XCTAssertTrue(el("about.backend.version").waitForExistence(timeout: 10) || el("about.unavailable").exists)
         shot("about")
+        app.navigationBars.buttons.firstMatch.tap()
 
         // Appearance: grid with the new ids, glow.
         app.swipeDown(); app.swipeDown(); app.swipeDown()

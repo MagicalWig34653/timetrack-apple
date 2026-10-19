@@ -52,7 +52,7 @@ struct SettingsView: View {
             SettingsLinkRow(title: "workmodel.title", symbol: "calendar.badge.clock", id: "settings.workmodel") { WorkModelsScreen() }
             if model.isEnabled(.planning) {
                 VacationEntitlementRow()
-                // R3 inserts "Urlaubs-Erinnerungen" here.
+                SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
             }
         }
     }

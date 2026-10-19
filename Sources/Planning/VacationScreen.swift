@@ -24,7 +24,9 @@ private struct VacationContent: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var request: AbsenceRequest?
-    @State private var showSettings = false
+    #if os(macOS)
+    @State private var showSettings = false // iOS reaches these settings from Einstellungen (S2)
+    #endif
 
     private var wide: Bool { planningIsWide(sizeClass) }
     private var today: LocalDay { store.today }
@@ -33,10 +35,13 @@ private struct VacationContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
                 yearSwitcher
-                if let error = store.error, !showSettings, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
+                if let error = store.error, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
                 if store.settings?.configured == false { HintBanner("vacation.not_configured") }
                 #if os(iOS)
-                VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
+                ListCard { // R3: two slim entries instead of cards
+                    VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
+                    VacationReminderLink() // R3: reminders to submit planned vacation
+                }
                 #endif
                 if wide {
                     HStack(alignment: .top, spacing: TT.Space.xl) { balance.frame(maxWidth: 440); absences }
@@ -54,7 +59,9 @@ private struct VacationContent: View {
         .refreshable { await store.load() }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                #if os(macOS)
                 Button { showSettings = true } label: { Label("vacation.settings", systemImage: "slider.horizontal.3") }.accessibilityIdentifier("vacation.settings")
+                #endif
                 Menu {
                     AbsenceQuickMenuItems(start: today, end: today) { request = $0 }
                 } label: { Label("plan.add", systemImage: "plus") }
@@ -62,7 +69,12 @@ private struct VacationContent: View {
             }
         }
         .absenceEditor($request, actions: AbsenceEditorActions(planning: store))
+        #if os(iOS)
+        .vacationReminderOpen(store: store, request: $request) // R3: tap on a reminder opens that absence
+        #endif
+        #if os(macOS)
         .sheet(isPresented: $showSettings) { VacationSettingsSheet(store: store) }
+        #endif
     }
 
     private var yearSwitcher: some View {
@@ -100,7 +112,6 @@ private struct VacationContent: View {
                     }
                     .accessibilityElement(children: .combine)
                 }
-                VacationFigures(store: store, balance: balance) // N1b: tiles + editable entitlement
             }
         } else if store.isLoading {
             SkeletonList(rows: 3)

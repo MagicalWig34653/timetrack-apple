@@ -75,6 +75,7 @@ public struct ProgressRing<Center: View>: View {
                 .animation(reduceMotion ? nil : .smooth(duration: 0.6), value: clamped)
             center
         }
+        .ttRingHalo(color)
         .accessibilityElement(children: .ignore)
         .accessibilityValue(Text(verbatim: "\(Int((progress * 100).rounded())) %"))
     }

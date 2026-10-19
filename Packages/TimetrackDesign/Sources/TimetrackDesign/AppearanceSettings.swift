@@ -11,6 +11,7 @@ public struct AppearanceSettingsPage<Icon: View>: View {
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.blue.rawValue
     @AppStorage(AppearanceKeys.customHex) private var customHex = "#2563EB"
     @AppStorage(AppearanceKeys.scheme) private var scheme = SchemeChoice.system.rawValue
+    @AppStorage(AppearanceKeys.glow) private var glow = Preferences.defaultGlow
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     /// `sync` writes accent and scheme through to the account; nil keeps the page purely local (previews).
@@ -35,6 +36,7 @@ public struct AppearanceSettingsPage<Icon: View>: View {
                 .padding(TT.Space.m)
                 .accessibilityIdentifier("appearance.scheme")
             }
+            glowSection
             FormSection("appearance.transparency", footer: "appearance.transparency.footer") {
                 FormRow("appearance.transparency.state") {
                     StatusChip(reduceTransparency ? "appearance.transparency.on" : "appearance.transparency.off", tone: reduceTransparency ? .accent : .neutral)
@@ -45,12 +47,31 @@ public struct AppearanceSettingsPage<Icon: View>: View {
         .onChange(of: accent) { sync?.localChanged() }
         .onChange(of: customHex) { sync?.localChanged() }
         .onChange(of: scheme) { sync?.localChanged() }
+        .onChange(of: glow) { sync?.localChanged() }
         .task { await sync?.refreshFromServer() }
+    }
+
+    private var selectedGlow: GlowPreference { GlowPreference(rawValue: glow) ?? .subtle }
+
+    /// "Leuchteffekt": Aus / Dezent / Mittel / Stark, synced with the account like the colour scheme.
+    private var glowSection: some View {
+        FormSection("appearance.glow", footer: "appearance.glow.footer") {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                Picker("appearance.glow", selection: $glow) {
+                    ForEach(GlowPreference.allCases) { Text($0.titleKey).tag($0.rawValue) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .accessibilityIdentifier("appearance.glow")
+                Text(selectedGlow.descriptionKey).font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(TT.Space.m)
+        }
     }
 
     private var accentSection: some View {
         FormSection("appearance.accent", footer: "appearance.accent.footer") {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 68), spacing: TT.Space.s)], alignment: .leading, spacing: TT.Space.m) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 72), spacing: TT.Space.s)], alignment: .leading, spacing: TT.Space.m) {
                 ForEach(AccentChoice.allCases) { choice in
                     Button { if accent != choice.rawValue { TTHaptics.play(.selection) }; accent = choice.rawValue } label: { swatch(choice) }
                         .buttonStyle(.plain)

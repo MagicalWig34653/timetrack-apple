@@ -163,6 +163,22 @@ public actor APIClient: PreferencesService {
     public func listWorkModels() async throws -> [WorkModel] { try await get("/work-models") }
     public func listPlaces() async throws -> [Place] { try await get("/places") }
 
+    // MARK: - Work model correction (contract v0.16.0, ADR-0004 addendum) and system info (v0.19.0, ADR-0023)
+
+    /// Replaces all editable fields of one version. `ifMatchVersion` is the model's `version` counter (412 `stale_version` when outdated).
+    public func correctWorkModel(id: UUID, _ input: WorkModelInput, ifMatchVersion: Int?) async throws -> WorkModel {
+        try await send(.put, "/work-models/\(id.uuidString.lowercased())", body: input,
+                       headers: ifMatchVersion.map { ["If-Match": String($0)] } ?? [:])
+    }
+
+    /// Same check as the correction without saving: balance up to today before and after.
+    public func previewWorkModelCorrection(id: UUID, _ input: WorkModelInput) async throws -> WorkModelPreview {
+        try await send(.post, "/work-models/\(id.uuidString.lowercased())/preview", body: input)
+    }
+
+    /// Version and build data; members get the version fields only. Old backends answer 404.
+    public func getSystemInfo() async throws -> SystemInfo { try await get("/system/info") }
+
     // MARK: - Places and device tokens (module `automation`, L2)
 
     public func createPlace(_ input: PlaceInput) async throws -> Place { try await send(.post, "/places", body: input) }

@@ -1,48 +1,27 @@
 import SwiftUI
 import TimetrackCore
 
-/// In-app accent choices: the six hues of the app icon (`IconAccent`), a neutral graphite and a custom colour.
-/// The choice is independent from the app icon (changing one never changes the other).
-public enum AccentChoice: String, CaseIterable, Identifiable, Sendable {
-    case blue, teal, violet, green, orange, pink, graphite, custom
+/// In-app accent choices: every id of the contract (v0.21.0), in the display order of the PWA picker. The hue of a preset is
+/// `AccentPreset.nativeHex`; the choice is independent from the app icon (changing one never changes the other).
+public typealias AccentChoice = AccentPreset
 
+extension AccentPreset: @retroactive Identifiable {
     public var id: String { rawValue }
 
-    /// Fixed colour of a preset; nil for `.custom`. Hues equal `IconAccent.strongHex` in the iOS target.
-    public var presetHex: UInt32? {
-        switch self {
-        case .blue: 0x2563EB
-        case .teal: 0x0EA5A4
-        case .violet: 0x7C3AED
-        case .green: 0x16A34A
-        case .orange: 0xF97316
-        case .pink: 0xEC4899
-        case .graphite: 0x52525B
-        case .custom: nil
-        }
-    }
+    /// Fixed colour of a preset; nil for `.custom`.
+    public var presetHex: UInt32? { nativeHex }
 
-    /// Keys live in each app's string catalog.
-    public var titleKey: LocalizedStringKey {
-        switch self {
-        case .blue: "appearance.accent.blue"
-        case .teal: "appearance.accent.teal"
-        case .violet: "appearance.accent.violet"
-        case .green: "appearance.accent.green"
-        case .orange: "appearance.accent.orange"
-        case .pink: "appearance.accent.pink"
-        case .graphite: "appearance.accent.graphite"
-        case .custom: "appearance.accent.custom"
-        }
-    }
+    /// German names as in the PWA picker; keys live in each app's string catalog.
+    public var titleKey: LocalizedStringKey { LocalizedStringKey("appearance.accent.\(rawValue)") }
 
-    /// Resolves the stored choice to the base hex ("#RRGGBB"); invalid custom values fall back to the default accent.
+    /// Resolves the stored choice to the base hex ("#RRGGBB"); an unknown id falls back to the default accent,
+    /// an invalid custom value too.
     public static func resolvedHex(choice: String, custom: String) -> String {
-        let selected = AccentChoice(rawValue: choice) ?? .blue
+        let selected = AccentPreset(rawValue: choice) ?? .blue
         if selected == .custom {
             return AccentDerivation.parse(custom).map(AccentDerivation.string) ?? AccentDerivation.string(TT.defaultAccentHex)
         }
-        return AccentDerivation.string(selected.presetHex ?? TT.defaultAccentHex)
+        return AccentDerivation.string(selected.nativeHex ?? TT.defaultAccentHex)
     }
 }
 
@@ -75,6 +54,7 @@ public enum AppearanceKeys {
     public static let accent = AppearanceStorageKeys.accent
     public static let customHex = AppearanceStorageKeys.customHex
     public static let scheme = AppearanceStorageKeys.scheme
+    public static let glow = AppearanceStorageKeys.glow
 
     /// Base accent `#RRGGBB` of a stored choice (preset hues are the native tokens, see `AccentChoice.presetHex`).
     public static func effectiveHex(_ local: LocalAppearance) -> String {
@@ -87,9 +67,11 @@ struct AppearanceModifier: ViewModifier {
     @AppStorage(AppearanceKeys.accent) private var accent = AccentChoice.blue.rawValue
     @AppStorage(AppearanceKeys.customHex) private var customHex = "#2563EB"
     @AppStorage(AppearanceKeys.scheme) private var scheme = SchemeChoice.system.rawValue
+    @AppStorage(AppearanceKeys.glow) private var glow = Preferences.defaultGlow
 
     func body(content: Content) -> some View {
         content
+            .environment(\.ttGlow, GlowPreference(rawValue: glow) ?? .subtle)
             .ttTheme(accentHex: AccentChoice.resolvedHex(choice: accent, custom: customHex))
             .preferredColorScheme((SchemeChoice(rawValue: scheme) ?? .system).colorScheme)
     }

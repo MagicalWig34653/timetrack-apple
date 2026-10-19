@@ -30,6 +30,8 @@ public final class AppModel {
     /// Session state of clients that start from stored credentials (`restoreFast`); kept in step on all paths.
     public private(set) var lifecycle = SessionLifecycle()
     public var lastError: TimetrackError?
+    /// Backend version data for "Über Timetrack" (`GET /system/info`); loaded on demand by `refreshSystemInfo()`.
+    public private(set) var systemInfo: SystemInfoState = .idle
 
     /// Account-level accent / colour scheme: reconciles the local cache with the account (see `AppearanceSync`).
     public let appearance: AppearanceSync
@@ -255,6 +257,17 @@ public final class AppModel {
         Task { await today?.load() }
     }
 
+    /// Loads the backend version data. Failures (old backend: 404) leave the section with the app version only.
+    public func refreshSystemInfo() async {
+        guard let client = context?.client else { systemInfo = .unavailable; return }
+        if systemInfo == .idle { systemInfo = .loading }
+        do {
+            systemInfo = .loaded(try await client.getSystemInfo())
+        } catch {
+            systemInfo = .unavailable
+        }
+    }
+
     public func refreshModules() async {
         guard let context, let statuses = try? await context.client.listModules() else { return }
         modules = ModuleSwitches(statuses)
@@ -294,6 +307,7 @@ public final class AppModel {
         calendar = nil
         workModel = nil
         modules = ModuleSwitches()
+        systemInfo = .idle
         self.phase = phase
     }
 }

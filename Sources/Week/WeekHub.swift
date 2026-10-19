@@ -55,16 +55,14 @@ enum TimeSegment: String, CaseIterable, Identifiable {
 struct TimeSegmentPicker: View {
     @Binding var selection: TimeSegment
     let planningEnabled: Bool
-    let guardLeaving: (TimeSegment) -> Bool
 
     var body: some View {
-        Picker(selection: Binding(get: { selection }, set: { new in if guardLeaving(new) { selection = new } }), label: Text(verbatim: "")) {
+        Picker(selection: $selection, label: Text(verbatim: "")) {
             ForEach(TimeSegment.allCases.filter { planningEnabled || $0 != .plan }) { Text(verbatim: $0.title).tag($0) }
         }
         .pickerStyle(.segmented)
         .accessibilityIdentifier("time.segments")
-        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.xs)
-        .frame(maxWidth: 560)
+        .frame(maxWidth: 420)
     }
 }
 

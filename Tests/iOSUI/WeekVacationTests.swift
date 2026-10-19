@@ -37,10 +37,16 @@ final class WeekVacationTests: XCTestCase {
     private func segment(_ title: String, target: String) {
         let button = app.segmentedControls["time.segments"].buttons[title]
         XCTAssertTrue(button.waitForExistence(timeout: 10), "segment \(title)")
+        XCTAssertTrue(button.isHittable, "segment \(title) not hittable, frame \(button.frame), window \(app.windows.firstMatch.frame)")
         for _ in 0..<4 where !el(target).exists {
             button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
             _ = el(target).waitForExistence(timeout: 6)
         }
+    }
+
+    private func expectDirty(_ label: String, file: StaticString = #filePath, line: UInt = #line) {
+        for _ in 0..<10 where el("plan.dirty_state").label != label { sleep(1) }
+        XCTAssertEqual(el("plan.dirty_state").label, label, file: file, line: line)
     }
 
     private func scrollTo(_ id: String) {
@@ -63,10 +69,10 @@ final class WeekVacationTests: XCTestCase {
         XCTAssertTrue(el("plan.standard").waitForExistence(timeout: 15))
         sleep(1)
         shot("planner-empty")
-        XCTAssertEqual(el("plan.dirty_state").label, "Alles gespeichert")
+        expectDirty("Alles gespeichert")
         scrollTo("plan.standard")
         el("plan.standard").tap()
-        XCTAssertEqual(el("plan.dirty_state").label, "Ungespeicherte Änderungen")
+        expectDirty("Nicht gespeichert")
         sleep(1)
         shot("planner-standard")
 
@@ -76,7 +82,7 @@ final class WeekVacationTests: XCTestCase {
         XCTAssertTrue(app.buttons["Weiter bearbeiten"].waitForExistence(timeout: 5))
         shot("planner-leave-dialog")
         app.buttons["Weiter bearbeiten"].tap()
-        XCTAssertEqual(el("plan.dirty_state").label, "Ungespeicherte Änderungen")
+        expectDirty("Nicht gespeichert")
 
         el("plan.save").tap()
         for _ in 0..<30 where el("plan.dirty_state").label != "Alles gespeichert" { sleep(1) }

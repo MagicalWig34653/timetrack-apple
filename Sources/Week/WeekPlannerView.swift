@@ -128,18 +128,25 @@ struct WeekPlannerView: View {
 
     // MARK: Save bar
 
+    private var dirtyLabel: some View {
+        W.t(store.isDirty ? "plan.dirty" : "plan.clean").font(TTFont.meta).foregroundStyle(store.isDirty ? TT.warning : TT.textSecondary)
+            .accessibilityIdentifier("plan.dirty_state")
+    }
+
+    @ViewBuilder private var saveButtons: some View {
+        if store.isDirty { Button { notice = nil; store.discard() } label: { W.t("plan.discard") }.buttonStyle(.ttSecondary).frame(maxWidth: 150).accessibilityIdentifier("plan.discard") }
+        Button { Task { await store.save() } } label: { W.t(store.isSaving ? "plan.saving" : "plan.save") }
+            .buttonStyle(.ttPrimary).frame(maxWidth: 200).disabled(!store.isDirty || store.isSaving).accessibilityIdentifier("plan.save")
+    }
+
     private var saveBar: some View {
         VStack(spacing: TT.Space.xs) {
             if store.error != nil || store.showProblems && store.hasProblem {
                 if store.showProblems && store.hasProblem { W.t("plan.fix_problems").font(TTFont.meta).foregroundStyle(TT.danger) }
             }
-            HStack(spacing: TT.Space.m) {
-                W.t(store.isDirty ? "plan.dirty" : "plan.clean").font(TTFont.meta).foregroundStyle(store.isDirty ? TT.warning : TT.textSecondary)
-                    .lineLimit(2).accessibilityIdentifier("plan.dirty_state")
-                Spacer(minLength: 0)
-                if store.isDirty { Button { notice = nil; store.discard() } label: { W.t("plan.discard") }.buttonStyle(.ttSecondary).frame(maxWidth: 150).accessibilityIdentifier("plan.discard") }
-                Button { Task { await store.save() } } label: { W.t(store.isSaving ? "plan.saving" : "plan.save") }
-                    .buttonStyle(.ttPrimary).frame(maxWidth: 200).disabled(!store.isDirty || store.isSaving).accessibilityIdentifier("plan.save")
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: TT.Space.m) { dirtyLabel.fixedSize(); Spacer(minLength: 0); saveButtons }
+                VStack(alignment: .leading, spacing: TT.Space.s) { dirtyLabel; HStack(spacing: TT.Space.m) { saveButtons } }
             }
         }
         .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
@@ -222,10 +229,9 @@ private struct PlanDayRow: View {
 
     private var times: some View {
         VStack(alignment: .leading, spacing: TT.Space.xs) {
-            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(spacing: TT.Space.m))
-            layout {
-                clockPicker("plan.start", value: draft.start, fallback: 8 * 60) { var d = draft; d.start = WeekPlan.formatClock($0); onChange(d) }
-                clockPicker("plan.end", value: draft.end, fallback: 16 * 60) { var d = draft; d.end = WeekPlan.formatClock($0); onChange(d) }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: TT.Space.m) { startPicker.fixedSize(); endPicker.fixedSize() }
+                VStack(alignment: .leading, spacing: TT.Space.xs) { startPicker; endPicker }
             }
             Stepper(value: Binding(get: { draft.breakMinutes }, set: { var d = draft; d.breakMinutes = $0; onChange(d) }), in: 0...WeekPlan.maxBreakMinutes, step: 5) {
                 W.t("plan.break", draft.breakMinutes).font(TTFont.body).monospacedDigit()
@@ -234,9 +240,17 @@ private struct PlanDayRow: View {
         }
     }
 
+    private var startPicker: some View {
+        clockPicker("plan.start", value: draft.start, fallback: 8 * 60) { var d = draft; d.start = WeekPlan.formatClock($0); onChange(d) }
+    }
+
+    private var endPicker: some View {
+        clockPicker("plan.end", value: draft.end, fallback: 16 * 60) { var d = draft; d.end = WeekPlan.formatClock($0); onChange(d) }
+    }
+
     private func clockPicker(_ label: String, value: String, fallback: Int, set: @escaping (Int) -> Void) -> some View {
         HStack {
-            W.t(label).font(TTFont.label).foregroundStyle(TT.textSecondary)
+            W.t(label).font(TTFont.label).foregroundStyle(TT.textSecondary).lineLimit(1)
             DatePicker("", selection: Binding(get: { ClockPicker.date(minutes: WeekPlan.parseClock(value) ?? fallback) }, set: { set(ClockPicker.minutes(of: $0)) }),
                        displayedComponents: .hourAndMinute)
                 .labelsHidden().environment(\.timeZone, ClockPicker.timeZone).environment(\.locale, Locale(identifier: "de_DE"))

@@ -9,11 +9,6 @@ struct TimeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            TimeSegmentPicker(selection: $segment, planningEnabled: model.isEnabled(.planning)) { target in
-                // Leaving the planner with unsaved changes: the draft stays in the cached store (shown as unsaved on return).
-                _ = target
-                return true
-            }
             switch segment {
             case .list:
                 Group {
@@ -29,6 +24,10 @@ struct TimeView: View {
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.time")
+        .toolbar {
+            // Leaving the planner with unsaved changes: the draft stays in the cached store (shown as unsaved on return).
+            ToolbarItem(placement: .principal) { TimeSegmentPicker(selection: $segment, planningEnabled: model.isEnabled(.planning)) }
+        }
     }
 }
 

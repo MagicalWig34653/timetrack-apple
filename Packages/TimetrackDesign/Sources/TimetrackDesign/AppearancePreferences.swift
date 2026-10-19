@@ -12,7 +12,32 @@ extension AccentPreset: @retroactive Identifiable {
     public var presetHex: UInt32? { nativeHex }
 
     /// German names as in the PWA picker; keys live in each app's string catalog.
-    public var titleKey: LocalizedStringKey { LocalizedStringKey("appearance.accent.\(rawValue)") }
+    public var titleKey: LocalizedStringKey {
+        switch self {
+        case .blue: "appearance.accent.blue"
+        case .teal: "appearance.accent.teal"
+        case .violet: "appearance.accent.violet"
+        case .green: "appearance.accent.green"
+        case .orange: "appearance.accent.orange"
+        case .pink: "appearance.accent.pink"
+        case .graphite: "appearance.accent.graphite"
+        case .indigo: "appearance.accent.indigo"
+        case .navy: "appearance.accent.navy"
+        case .purple: "appearance.accent.purple"
+        case .magenta: "appearance.accent.magenta"
+        case .crimson: "appearance.accent.crimson"
+        case .forest: "appearance.accent.forest"
+        case .petrol: "appearance.accent.petrol"
+        case .bronze: "appearance.accent.bronze"
+        case .wine: "appearance.accent.wine"
+        case .slate: "appearance.accent.slate"
+        case .cocoa: "appearance.accent.cocoa"
+        case .olive: "appearance.accent.olive"
+        case .ocean: "appearance.accent.ocean"
+        case .ink: "appearance.accent.ink"
+        case .custom: "appearance.accent.custom"
+        }
+    }
 
     /// Resolves the stored choice to the base hex ("#RRGGBB"); an unknown id falls back to the default accent,
     /// an invalid custom value too.

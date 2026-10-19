@@ -5034,7 +5034,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soll, Rundung, Schule und feste Pausen je Version. „Bearbeiten“ korrigiert eine Version, auch rückwirkend; vorher zeigt eine Vorschau, wie sich dein Zeitkonto ändert."
+            "value": "Soll, Rundung, Schule und feste Pausen je Version. „Version korrigieren“ ändert eine Version, auch rückwirkend; vorher zeigt eine Vorschau, wie sich dein Zeitkonto ändert."
           }
         }
       }

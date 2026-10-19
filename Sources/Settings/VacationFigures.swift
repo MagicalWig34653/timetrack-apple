@@ -38,7 +38,8 @@ struct VacationFigures: View {
     private func tile(_ title: LocalizedStringKey, _ halfDays: Int, note: LocalizedStringKey, signed: Bool = false, id: String) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(2)
-            Text("vacation.days \(signed && halfDays > 0 ? "+" : "")\(HalfDayFormat.days(halfDays))")
+            let amount = (signed && halfDays > 0 ? "+" : "") + HalfDayFormat.days(halfDays)
+            Text("vacation.days \(amount)")
                 .font(TTFont.stat).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.6)
                 .accessibilityIdentifier("vacation.tile.\(id)")
             Text(note).font(TTFont.eyebrow).foregroundStyle(TT.textTertiary).fixedSize(horizontal: false, vertical: true)

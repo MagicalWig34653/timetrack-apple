@@ -97,18 +97,7 @@ private struct VacationContent: View {
                     }
                     .accessibilityElement(children: .combine)
                 }
-                ListCard {
-                    if let date = balance.snapshotDate, let rest = balance.snapshotRemainingHalfDays {
-                        FormRow("vacation.snapshot_row \(PlanFormat.shortDay(date, calendar: store.calendar))") { Text("vacation.days \(HalfDayFormat.days(rest))").monospacedDigit() }
-                    } else {
-                        row("vacation.entitlement", balance.entitlementHalfDays)
-                        if balance.carryOverHalfDays != 0 { row("vacation.carry_over", balance.carryOverHalfDays) }
-                    }
-                    if balance.adjustmentHalfDays != 0 { row("vacation.adjustment", balance.adjustmentHalfDays) }
-                    row("vacation.booked", balance.bookedHalfDays)
-                    row("vacation.planned", balance.plannedHalfDays)
-                }
-                Text("vacation.balance_formula").font(TTFont.meta).foregroundStyle(TT.textSecondary).padding(.horizontal, TT.Space.xs)
+                VacationFigures(store: store, balance: balance) // N1b: tiles + editable entitlement
             }
         } else if store.isLoading {
             SkeletonList(rows: 3)

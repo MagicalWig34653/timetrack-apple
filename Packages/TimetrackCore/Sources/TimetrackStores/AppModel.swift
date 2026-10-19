@@ -268,6 +268,12 @@ public final class AppModel {
         }
     }
 
+    /// Re-reads the current work model (after a correction in "Arbeitsmodell"); days and balances reload with their screens.
+    public func reloadWorkModel() async {
+        guard let client = context?.client, let models = try? await client.listWorkModels() else { return }
+        workModel = models.current()
+    }
+
     public func refreshModules() async {
         guard let context, let statuses = try? await context.client.listModules() else { return }
         modules = ModuleSwitches(statuses)

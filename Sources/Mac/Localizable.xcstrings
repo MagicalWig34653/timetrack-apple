@@ -3499,6 +3499,1194 @@
           }
         }
       }
+    },
+    "about.api_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-Version"
+          }
+        }
+      }
+    },
+    "about.app_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Version"
+          }
+        }
+      }
+    },
+    "about.backend": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
+          }
+        }
+      }
+    },
+    "about.backend_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server-Version"
+          }
+        }
+      }
+    },
+    "about.build_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server gebaut am"
+          }
+        }
+      }
+    },
+    "about.copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiert"
+          }
+        }
+      }
+    },
+    "about.copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angaben für den Support kopieren"
+          }
+        }
+      }
+    },
+    "about.database": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenbank"
+          }
+        }
+      }
+    },
+    "about.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Angaben helfen bei Fehlermeldungen. Mitglieder sehen Versionsangaben, Administratoren zusätzlich Datenbank und Betrieb."
+          }
+        }
+      }
+    },
+    "about.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wird geladen …"
+          }
+        }
+      }
+    },
+    "about.migrations": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenbank-Migrationen"
+          }
+        }
+      }
+    },
+    "about.migrations_pending %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld angewendet, weitere ausstehend"
+          }
+        }
+      }
+    },
+    "about.migrations_value %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld angewendet"
+          }
+        }
+      }
+    },
+    "about.replica": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replikat"
+          }
+        }
+      }
+    },
+    "about.revision": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server-Revision"
+          }
+        }
+      }
+    },
+    "about.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Über Timetrack"
+          }
+        }
+      }
+    },
+    "about.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Server nennt keine Versionsangaben (ältere Version oder nicht erreichbar). Die App-Version gilt trotzdem."
+          }
+        }
+      }
+    },
+    "about.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unbekannt"
+          }
+        }
+      }
+    },
+    "about.uptime": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laufzeit"
+          }
+        }
+      }
+    },
+    "appearance.accent.bronze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bronze"
+          }
+        }
+      }
+    },
+    "appearance.accent.cocoa": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kakao"
+          }
+        }
+      }
+    },
+    "appearance.accent.crimson": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karmin"
+          }
+        }
+      }
+    },
+    "appearance.accent.forest": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waldgrün"
+          }
+        }
+      }
+    },
+    "appearance.accent.indigo": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indigo"
+          }
+        }
+      }
+    },
+    "appearance.accent.ink": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tinte"
+          }
+        }
+      }
+    },
+    "appearance.accent.magenta": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magenta"
+          }
+        }
+      }
+    },
+    "appearance.accent.navy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marine"
+          }
+        }
+      }
+    },
+    "appearance.accent.ocean": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ozean"
+          }
+        }
+      }
+    },
+    "appearance.accent.olive": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oliv"
+          }
+        }
+      }
+    },
+    "appearance.accent.petrol": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petrol"
+          }
+        }
+      }
+    },
+    "appearance.accent.purple": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purpur"
+          }
+        }
+      }
+    },
+    "appearance.accent.slate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schiefer"
+          }
+        }
+      }
+    },
+    "appearance.accent.wine": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wein"
+          }
+        }
+      }
+    },
+    "appearance.glow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leuchteffekt"
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Größerer Schein, farbige Kartenkanten und ein kräftigerer Farbhauch im Hintergrund."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Leuchteffekte, nur die Farben selbst."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.strong": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie Mittel, mit deutlichem Schein um Aktionen und Ringe und stärkerem Farbverlauf im Hintergrund."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hauptaktionen, Ringe und der Hintergrund haben einen kaum sichtbaren Schein."
+          }
+        }
+      }
+    },
+    "appearance.glow.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lässt Akzent- und Statusfarben leicht glühen. Wird im Konto gespeichert und gilt auf allen Geräten. Bei „Transparenz reduzieren“ und „Kontrast erhöhen“ entfällt der Schein."
+          }
+        }
+      }
+    },
+    "appearance.glow.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittel"
+          }
+        }
+      }
+    },
+    "appearance.glow.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "appearance.glow.strong": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stark"
+          }
+        }
+      }
+    },
+    "appearance.glow.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dezent"
+          }
+        }
+      }
+    },
+    "haptics.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurze Vibrationen bei Aktionen wie Start, Stopp, Speichern oder Auswahl."
+          }
+        }
+      }
+    },
+    "haptics.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptisches Feedback"
+          }
+        }
+      }
+    },
+    "vacation.edit_entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anspruch ändern"
+          }
+        }
+      }
+    },
+    "vacation.tile_adjustments": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gutschriften (+) oder Abzüge (−) von dir."
+          }
+        }
+      }
+    },
+    "vacation.tile_booked_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereits abgezogene Urlaubstage."
+          }
+        }
+      }
+    },
+    "vacation.tile_carry_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus dem Vorjahr, von dir eingetragen."
+          }
+        }
+      }
+    },
+    "vacation.tile_entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Anspruch für das Jahr laut Einstellungen."
+          }
+        }
+      }
+    },
+    "vacation.tile_planned_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant oder beantragt, noch nicht abgezogen."
+          }
+        }
+      }
+    },
+    "vacation.tile_replaced": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeichert, aber durch den Stichtagsbestand ersetzt."
+          }
+        }
+      }
+    },
+    "vacation.tile_snapshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stichtagsbestand"
+          }
+        }
+      }
+    },
+    "vacation.tile_snapshot_text %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub am %@, ersetzt Anspruch und Übertrag."
+          }
+        }
+      }
+    },
+    "workmodel.boundary": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tagesgrenze (Minuten nach Mitternacht)"
+          }
+        }
+      }
+    },
+    "workmodel.boundary_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge vor dieser Uhrzeit zählen zum Vortag. Standard 0."
+          }
+        }
+      }
+    },
+    "workmodel.break_add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pause hinzufügen"
+          }
+        }
+      }
+    },
+    "workmodel.break_from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von"
+          }
+        }
+      }
+    },
+    "workmodel.break_remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause entfernen"
+          }
+        }
+      }
+    },
+    "workmodel.break_to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bis"
+          }
+        }
+      }
+    },
+    "workmodel.breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pausen"
+          }
+        }
+      }
+    },
+    "workmodel.breaks_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine feste Pause zieht nur den Teil ab, der in Arbeitszeit liegt."
+          }
+        }
+      }
+    },
+    "workmodel.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich habe verstanden, dass sich Auswertungen ändern"
+          }
+        }
+      }
+    },
+    "workmodel.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuell"
+          }
+        }
+      }
+    },
+    "workmodel.daily_override": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für einzelne Wochentage sind eigene Tages-Soll-Werte hinterlegt. Sie haben Vorrang vor dem Wochen-Soll und bleiben unverändert."
+          }
+        }
+      }
+    },
+    "workmodel.daily_override_remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigene Tages-Soll-Werte entfernen"
+          }
+        }
+      }
+    },
+    "workmodel.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.edit_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch kein Arbeitsmodell angelegt."
+          }
+        }
+      }
+    },
+    "workmodel.error_overlap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Zeitraum überschneidet sich mit einer Nachbarversion. Prüfe „Gültig ab“ und „Gültig bis“."
+          }
+        }
+      }
+    },
+    "workmodel.error_stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Version wurde inzwischen anderswo geändert. Schließe das Fenster und öffne es neu."
+          }
+        }
+      }
+    },
+    "workmodel.future": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant"
+          }
+        }
+      }
+    },
+    "workmodel.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll, Rundung, Schule und feste Pausen je Version. „Bearbeiten“ korrigiert eine Version, auch rückwirkend; vorher zeigt eine Vorschau, wie sich dein Zeitkonto ändert."
+          }
+        }
+      }
+    },
+    "workmodel.invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte prüfe diesen Wert."
+          }
+        }
+      }
+    },
+    "workmodel.invalid_breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pausen brauchen gültige Uhrzeiten (hh:mm), der Beginn muss vor dem Ende liegen."
+          }
+        }
+      }
+    },
+    "workmodel.invalid_workdays": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle mindestens einen Arbeitstag."
+          }
+        }
+      }
+    },
+    "workmodel.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "workmodel.open_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heute und künftig"
+          }
+        }
+      }
+    },
+    "workmodel.open_end_toggle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Ende (läuft weiter)"
+          }
+        }
+      }
+    },
+    "workmodel.preview_fields %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geändert: %@"
+          }
+        }
+      }
+    },
+    "workmodel.preview_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrigiere zuerst die markierten Felder, dann erscheint die Vorschau."
+          }
+        }
+      }
+    },
+    "workmodel.preview_loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau wird berechnet …"
+          }
+        }
+      }
+    },
+    "workmodel.preview_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit diesen Werten ändert sich dein Zeitkonto nicht."
+          }
+        }
+      }
+    },
+    "workmodel.preview_previous %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorversion endet dann am %@."
+          }
+        }
+      }
+    },
+    "workmodel.preview_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau auf dein Zeitkonto"
+          }
+        }
+      }
+    },
+    "workmodel.range_open %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab %@"
+          }
+        }
+      }
+    },
+    "workmodel.rounding": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung"
+          }
+        }
+      }
+    },
+    "workmodel.rounding_enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung zugunsten der Arbeitszeit"
+          }
+        }
+      }
+    },
+    "workmodel.rounding_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur erster Tagesbeginn und letztes Tagesende; innere Grenzen und Pausen bleiben."
+          }
+        }
+      }
+    },
+    "workmodel.rounding_minutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung in Minuten"
+          }
+        }
+      }
+    },
+    "workmodel.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.school_credit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulgutschrift (h:mm)"
+          }
+        }
+      }
+    },
+    "workmodel.school_credit_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer lassen für das Tages-Soll."
+          }
+        }
+      }
+    },
+    "workmodel.school_threshold": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulschwelle (h:mm)"
+          }
+        }
+      }
+    },
+    "workmodel.school_threshold_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab dieser Schulzeit gilt der Tag als erfüllt. Darunter zählen nur die tatsächlichen Zeiten."
+          }
+        }
+      }
+    },
+    "workmodel.section_schedule": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum und Soll"
+          }
+        }
+      }
+    },
+    "workmodel.section_school": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schule"
+          }
+        }
+      }
+    },
+    "workmodel.timezone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitzone"
+          }
+        }
+      }
+    },
+    "workmodel.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsmodell"
+          }
+        }
+      }
+    },
+    "workmodel.travel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fahrtzeiten zählen als Arbeitszeit"
+          }
+        }
+      }
+    },
+    "workmodel.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Server kann Versionen noch nicht korrigieren. Die Ansicht zeigt die Versionen nur an."
+          }
+        }
+      }
+    },
+    "workmodel.valid_from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gültig ab"
+          }
+        }
+      }
+    },
+    "workmodel.valid_to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gültig bis"
+          }
+        }
+      }
+    },
+    "workmodel.warning %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn du diese Version änderst, werden die Zeiten aller Tage von %1$@ bis %2$@ neu berechnet. Dein Zeitkonto kann sich ändern. Bereits erfasste Zeiten bleiben unverändert, ihre Auswertung nicht."
+          }
+        }
+      }
+    },
+    "workmodel.warning_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achtung: Auswertungen ändern sich"
+          }
+        }
+      }
+    },
+    "workmodel.weekly": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochen-Soll"
+          }
+        }
+      }
+    },
+    "workmodel.weekly_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als h:mm, zum Beispiel 38:30."
+          }
+        }
+      }
+    },
+    "workmodel.workdays": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitstage"
+          }
+        }
+      }
     }
   }
 }

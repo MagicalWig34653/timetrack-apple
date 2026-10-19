@@ -86,3 +86,13 @@ final class RecordingPerformer: HapticPerforming {
         for kind in TTHaptic.allCases { _ = kind.sensoryFeedback }
     }
 }
+
+@Suite struct HapticsToggleTests {
+    @Test func switchMapsToLevels() {
+        #expect(HapticsToggle.isOn("normal") && HapticsToggle.isOn("subtle") && !HapticsToggle.isOn("off"))
+        #expect(HapticsToggle.isOn("garbage"), "unknown values mean the default (on)")
+        #expect(HapticsToggle.level(isOn: false, current: "normal") == "off")
+        #expect(HapticsToggle.level(isOn: true, current: "off") == "normal")
+        #expect(HapticsToggle.level(isOn: true, current: "subtle") == "subtle", "switching on keeps a finer level")
+    }
+}

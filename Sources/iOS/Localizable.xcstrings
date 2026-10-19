@@ -1,6 +1,215 @@
 {
   "sourceLanguage": "de",
   "strings": {
+    "about.api_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-Version"
+          }
+        }
+      }
+    },
+    "about.app_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-Version"
+          }
+        }
+      }
+    },
+    "about.backend": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
+          }
+        }
+      }
+    },
+    "about.backend_version": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server-Version"
+          }
+        }
+      }
+    },
+    "about.build_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server gebaut am"
+          }
+        }
+      }
+    },
+    "about.copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiert"
+          }
+        }
+      }
+    },
+    "about.copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angaben für den Support kopieren"
+          }
+        }
+      }
+    },
+    "about.database": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenbank"
+          }
+        }
+      }
+    },
+    "about.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Angaben helfen bei Fehlermeldungen. Mitglieder sehen Versionsangaben, Administratoren zusätzlich Datenbank und Betrieb."
+          }
+        }
+      }
+    },
+    "about.loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wird geladen …"
+          }
+        }
+      }
+    },
+    "about.migrations": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datenbank-Migrationen"
+          }
+        }
+      }
+    },
+    "about.migrations_pending %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld angewendet, weitere ausstehend"
+          }
+        }
+      }
+    },
+    "about.migrations_value %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld angewendet"
+          }
+        }
+      }
+    },
+    "about.replica": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replikat"
+          }
+        }
+      }
+    },
+    "about.revision": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server-Revision"
+          }
+        }
+      }
+    },
+    "about.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Über Timetrack"
+          }
+        }
+      }
+    },
+    "about.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Server nennt keine Versionsangaben (ältere Version oder nicht erreichbar). Die App-Version gilt trotzdem."
+          }
+        }
+      }
+    },
+    "about.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unbekannt"
+          }
+        }
+      }
+    },
+    "about.uptime": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laufzeit"
+          }
+        }
+      }
+    },
     "absence.excused": {
       "extractionState": "manual",
       "localizations": {
@@ -166,6 +375,39 @@
         }
       }
     },
+    "appearance.accent.bronze": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bronze"
+          }
+        }
+      }
+    },
+    "appearance.accent.cocoa": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kakao"
+          }
+        }
+      }
+    },
+    "appearance.accent.crimson": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karmin"
+          }
+        }
+      }
+    },
     "appearance.accent.custom": {
       "extractionState": "manual",
       "localizations": {
@@ -184,6 +426,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gilt für dein Konto auf allen Geräten, auf denen du angemeldet bist, und ist unabhängig vom App-Symbol (das nur für dieses Gerät gilt). Schrift- und Schaltflächenfarben werden automatisch so angepasst, dass sie gut lesbar bleiben."
+          }
+        }
+      }
+    },
+    "appearance.accent.forest": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waldgrün"
           }
         }
       }
@@ -210,6 +463,72 @@
         }
       }
     },
+    "appearance.accent.indigo": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indigo"
+          }
+        }
+      }
+    },
+    "appearance.accent.ink": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tinte"
+          }
+        }
+      }
+    },
+    "appearance.accent.magenta": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magenta"
+          }
+        }
+      }
+    },
+    "appearance.accent.navy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marine"
+          }
+        }
+      }
+    },
+    "appearance.accent.ocean": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ozean"
+          }
+        }
+      }
+    },
+    "appearance.accent.olive": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oliv"
+          }
+        }
+      }
+    },
     "appearance.accent.orange": {
       "extractionState": "manual",
       "localizations": {
@@ -221,6 +540,17 @@
         }
       }
     },
+    "appearance.accent.petrol": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Petrol"
+          }
+        }
+      }
+    },
     "appearance.accent.pink": {
       "extractionState": "manual",
       "localizations": {
@@ -228,6 +558,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rosa"
+          }
+        }
+      }
+    },
+    "appearance.accent.purple": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purpur"
+          }
+        }
+      }
+    },
+    "appearance.accent.slate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schiefer"
           }
         }
       }
@@ -254,6 +606,17 @@
         }
       }
     },
+    "appearance.accent.wine": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wein"
+          }
+        }
+      }
+    },
     "appearance.custom_color": {
       "extractionState": "manual",
       "localizations": {
@@ -261,6 +624,116 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eigene Farbe"
+          }
+        }
+      }
+    },
+    "appearance.glow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leuchteffekt"
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Größerer Schein, farbige Kartenkanten und ein kräftigerer Farbhauch im Hintergrund."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Leuchteffekte, nur die Farben selbst."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.strong": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie Mittel, mit deutlichem Schein um Aktionen und Ringe und stärkerem Farbverlauf im Hintergrund."
+          }
+        }
+      }
+    },
+    "appearance.glow.desc.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hauptaktionen, Ringe und der Hintergrund haben einen kaum sichtbaren Schein."
+          }
+        }
+      }
+    },
+    "appearance.glow.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lässt Akzent- und Statusfarben leicht glühen. Wird im Konto gespeichert und gilt auf allen Geräten. Bei „Transparenz reduzieren“ und „Kontrast erhöhen“ entfällt der Schein."
+          }
+        }
+      }
+    },
+    "appearance.glow.medium": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mittel"
+          }
+        }
+      }
+    },
+    "appearance.glow.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "appearance.glow.strong": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stark"
+          }
+        }
+      }
+    },
+    "appearance.glow.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dezent"
           }
         }
       }
@@ -3862,6 +4335,17 @@
         }
       }
     },
+    "vacation.edit_entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anspruch ändern"
+          }
+        }
+      }
+    },
     "vacation.entitlement": {
       "extractionState": "manual",
       "localizations": {
@@ -4236,6 +4720,94 @@
         }
       }
     },
+    "vacation.tile_adjustments": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gutschriften (+) oder Abzüge (−) von dir."
+          }
+        }
+      }
+    },
+    "vacation.tile_booked_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bereits abgezogene Urlaubstage."
+          }
+        }
+      }
+    },
+    "vacation.tile_carry_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus dem Vorjahr, von dir eingetragen."
+          }
+        }
+      }
+    },
+    "vacation.tile_entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Anspruch für das Jahr laut Einstellungen."
+          }
+        }
+      }
+    },
+    "vacation.tile_planned_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant oder beantragt, noch nicht abgezogen."
+          }
+        }
+      }
+    },
+    "vacation.tile_replaced": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gespeichert, aber durch den Stichtagsbestand ersetzt."
+          }
+        }
+      }
+    },
+    "vacation.tile_snapshot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stichtagsbestand"
+          }
+        }
+      }
+    },
+    "vacation.tile_snapshot_text %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resturlaub am %@, ersetzt Anspruch und Übertrag."
+          }
+        }
+      }
+    },
     "void.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -4258,1318 +4830,765 @@
         }
       }
     },
-<<<<<<< HEAD
     "wk.aria.balance": {
-=======
-    "about.api_version": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Saldo %@"
-=======
-            "value": "API-Version"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.aria.hours": {
-=======
-    "about.app_version": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Stunden"
-=======
-            "value": "App-Version"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.aria.planned": {
-=======
-    "about.backend": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "geplant %@ Stunden"
-=======
-            "value": "Server"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.blocked.excused": {
-=======
-    "about.backend_version": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Freigestellt."
-=======
-            "value": "Server-Version"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.blocked.holiday": {
-=======
-    "about.build_date": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Feiertag, hier ist kein Plan nötig."
-=======
-            "value": "Server gebaut am"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.blocked.kept": {
-=======
-    "about.copied": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Ein gespeicherter Plan bleibt erhalten, zählt aber nicht."
-=======
-            "value": "Kopiert"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.blocked.sick": {
-=======
-    "about.copy": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Krankmeldung eingetragen."
-=======
-            "value": "Angaben für den Support kopieren"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.blocked.vacation": {
-=======
-    "about.database": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Urlaub eingetragen."
-=======
-            "value": "Datenbank"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.cell.booked": {
-=======
-    "about.footer": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Schon als Urlaub eingetragen"
-=======
-            "value": "Diese Angaben helfen bei Fehlermeldungen. Mitglieder sehen Versionsangaben, Administratoren zusätzlich Datenbank und Betrieb."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.cell.conflict": {
-=======
-    "about.loading": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Konflikt: %@"
-=======
-            "value": "wird geladen …"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.cell.free": {
-=======
-    "about.migrations": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Frei"
-=======
-            "value": "Datenbank-Migrationen"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.cell.holiday": {
-=======
-    "about.migrations_pending %lld": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Feiertag %@"
-=======
-            "value": "%lld angewendet, weitere ausstehend"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.cell.vacation": {
-=======
-    "about.migrations_value %lld": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Urlaubstag"
-=======
-            "value": "%lld angewendet"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.average": {
-=======
-    "about.replica": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Ø %@–%@"
-=======
-            "value": "Replikat"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.holiday.one": {
-=======
-    "about.revision": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Feiertag"
-=======
-            "value": "Server-Revision"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.holiday.other": {
-=======
-    "about.title": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Feiertage"
-=======
-            "value": "Über Timetrack"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.school.one": {
-=======
-    "about.unavailable": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Schultag"
-=======
-            "value": "Der Server nennt keine Versionsangaben (ältere Version oder nicht erreichbar). Die App-Version gilt trotzdem."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.school.other": {
-=======
-    "about.unknown": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Schultage"
-=======
-            "value": "unbekannt"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.sick.one": {
-=======
-    "about.uptime": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Krankheitstag"
-=======
-            "value": "Laufzeit"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.sick.other": {
-=======
-    "appearance.accent.bronze": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Krankheitstage"
-=======
-            "value": "Bronze"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.vacation.one": {
-=======
-    "appearance.accent.cocoa": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Urlaubstag"
-=======
-            "value": "Kakao"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.chip.vacation.other": {
-=======
-    "appearance.accent.crimson": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Urlaubstage"
-=======
-            "value": "Karmin"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.conflict.absence": {
-=======
-    "appearance.accent.forest": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Abwesenheit eingetragen"
-=======
-            "value": "Waldgrün"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.conflict.already_vacation": {
-=======
-    "appearance.accent.indigo": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Schon als Urlaub eingetragen"
-=======
-            "value": "Indigo"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.conflict.plan": {
-=======
-    "appearance.accent.ink": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Arbeit geplant"
-=======
-            "value": "Tinte"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.conflict.school_day": {
-=======
-    "appearance.accent.magenta": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Berufsschultag"
-=======
-            "value": "Magenta"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.future": {
-=======
-    "appearance.accent.navy": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Noch nicht erfasst"
-=======
-            "value": "Marine"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.half_day": {
-=======
-    "appearance.accent.ocean": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ (halber Tag)"
-=======
-            "value": "Ozean"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.no_work": {
-=======
-    "appearance.accent.olive": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Keine Zeit erfasst"
-=======
-            "value": "Oliv"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.plan": {
-=======
-    "appearance.accent.petrol": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Plan %@"
-=======
-            "value": "Petrol"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.plan_dot": {
-=======
-    "appearance.accent.purple": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "· Plan %@"
-=======
-            "value": "Purpur"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.provisional": {
-=======
-    "appearance.accent.slate": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "läuft noch"
-=======
-            "value": "Schiefer"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.span": {
-=======
-    "appearance.accent.wine": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@–%@"
-=======
-            "value": "Wein"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.target": {
-=======
-    "appearance.glow": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Soll %@"
-=======
-            "value": "Leuchteffekt"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.day.today": {
-=======
-    "appearance.glow.desc.medium": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Heute"
-=======
-            "value": "Größerer Schein, farbige Kartenkanten und ein kräftigerer Farbhauch im Hintergrund."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.days.one": {
-=======
-    "appearance.glow.desc.off": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Tag"
-=======
-            "value": "Keine Leuchteffekte, nur die Farben selbst."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.days.other": {
-=======
-    "appearance.glow.desc.strong": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ Tage"
-=======
-            "value": "Wie Mittel, mit deutlichem Schein um Aktionen und Ringe und stärkerem Farbverlauf im Hintergrund."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.empty.plan": {
-=======
-    "appearance.glow.desc.subtle": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Woche planen"
-=======
-            "value": "Hauptaktionen, Ringe und der Hintergrund haben einen kaum sichtbaren Schein."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.kind.bridge": {
-=======
-    "appearance.glow.footer": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Brückentag"
-=======
-            "value": "Lässt Akzent- und Statusfarben leicht glühen. Wird im Konto gespeichert und gilt auf allen Geräten. Bei „Transparenz reduzieren“ und „Kontrast erhöhen“ entfällt der Schein."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.kind.holiday_cluster": {
-=======
-    "appearance.glow.medium": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Feiertagsblock"
-=======
-            "value": "Mittel"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.kind.long_break": {
-=======
-    "appearance.glow.off": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Langer Urlaub"
-=======
-            "value": "Aus"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.kind.school_holiday_extension": {
-=======
-    "appearance.glow.strong": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Schulferien-Verlängerung"
-=======
-            "value": "Stark"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.leave.discard": {
-=======
-    "appearance.glow.subtle": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Änderungen verwerfen"
-=======
-            "value": "Dezent"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.leave.keep": {
-=======
-    "vacation.edit_entitlement": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Weiter bearbeiten"
-=======
-            "value": "Anspruch ändern"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.leave.message": {
-=======
-    "vacation.tile_adjustments": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Der Plan dieser Woche wurde noch nicht gespeichert."
-=======
-            "value": "Gutschriften (+) oder Abzüge (−) von dir."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.leave.title": {
-=======
-    "vacation.tile_booked_text": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Ungespeicherte Änderungen"
-=======
-            "value": "Bereits abgezogene Urlaubstage."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.excused": {
-=======
-    "vacation.tile_carry_text": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Freigestellt"
-=======
-            "value": "Aus dem Vorjahr, von dir eingetragen."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.holiday": {
-=======
-    "vacation.tile_entitlement": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Feiertag"
-=======
-            "value": "Dein Anspruch für das Jahr laut Einstellungen."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.off": {
-=======
-    "vacation.tile_planned_text": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Frei"
-=======
-            "value": "Geplant oder beantragt, noch nicht abgezogen."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.school": {
-=======
-    "vacation.tile_replaced": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Schule"
-=======
-            "value": "Gespeichert, aber durch den Stichtagsbestand ersetzt."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.sick": {
-=======
-    "vacation.tile_snapshot": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Krank"
-=======
-            "value": "Stichtagsbestand"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.vacation": {
-=======
-    "vacation.tile_snapshot_text %@": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Urlaub"
-=======
-            "value": "Resturlaub am %@, ersetzt Anspruch und Übertrag."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.mark.work": {
-=======
-    "workmodel.boundary": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Arbeit"
-=======
-            "value": "Tagesgrenze (Minuten nach Mitternacht)"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.nav.kw": {
-=======
-    "workmodel.boundary_hint": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "KW %d"
-=======
-            "value": "Einträge vor dieser Uhrzeit zählen zum Vortag. Standard 0."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.nav.next": {
-=======
-    "workmodel.break_add": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Nächste Woche"
-=======
-            "value": "Feste Pause hinzufügen"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.nav.previous": {
-=======
-    "workmodel.break_from": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Vorherige Woche"
-=======
-            "value": "von"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.nav.this_week": {
-=======
-    "workmodel.break_remove": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Diese Woche"
-=======
-            "value": "Pause entfernen"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.action_clear": {
-=======
-    "workmodel.break_to": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Leeren"
-=======
-            "value": "bis"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.action_copy": {
-=======
-    "workmodel.breaks": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Wie letzte Woche"
-=======
-            "value": "Feste Pausen"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.action_same": {
-=======
-    "workmodel.breaks_hint": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Alle gleich"
-=======
-            "value": "Eine feste Pause zieht nur den Teil ab, der in Arbeitszeit liegt."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.action_standard": {
-=======
-    "workmodel.confirm": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Standardwoche"
-=======
-            "value": "Ich habe verstanden, dass sich Auswertungen ändern"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.actions": {
-=======
-    "workmodel.current": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Schnellaktionen"
-=======
-            "value": "Aktuell"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.break": {
-=======
-    "workmodel.daily_override": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Pause: %d Min."
-=======
-            "value": "Für einzelne Wochentage sind eigene Tages-Soll-Werte hinterlegt. Sie haben Vorrang vor dem Wochen-Soll und bleiben unverändert."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.clean": {
-=======
-    "workmodel.daily_override_remove": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Alles gespeichert"
-=======
-            "value": "Eigene Tages-Soll-Werte entfernen"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.day_target": {
-=======
-    "workmodel.edit": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Soll %@"
-=======
-            "value": "Version korrigieren"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.diff_equal": {
-=======
-    "workmodel.edit_title": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "genau im Soll"
-=======
-            "value": "Version korrigieren"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.diff_over": {
-=======
-    "workmodel.empty": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ über Soll"
-=======
-            "value": "Noch kein Arbeitsmodell angelegt."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.diff_under": {
-=======
-    "workmodel.error_overlap": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ unter Soll"
-=======
-            "value": "Der Zeitraum überschneidet sich mit einer Nachbarversion. Prüfe „Gültig ab“ und „Gültig bis“."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.dirty": {
-=======
-    "workmodel.error_stale": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Nicht gespeichert"
-=======
-            "value": "Diese Version wurde inzwischen anderswo geändert. Schließe das Fenster und öffne es neu."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.plan.discard": {
       "extractionState": "manual",
       "localizations": {
@@ -6363,9 +6382,6 @@
       }
     },
     "wk.vp.planned": {
-=======
-    "workmodel.future": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -6376,418 +6392,683 @@
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.range_invalid": {
-=======
-    "workmodel.intro": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Das Ende muss nach dem Beginn liegen, der Zeitraum darf höchstens 18 Monate umfassen."
-=======
-            "value": "Soll, Rundung, Schule und feste Pausen je Version. „Version korrigieren“ ändert eine Version, auch rückwirkend; vorher zeigt eine Vorschau, wie sich dein Zeitkonto ändert."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.remaining": {
-=======
-    "workmodel.invalid": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Rest"
-=======
-            "value": "Bitte prüfe diesen Wert."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.remaining_after": {
-=======
-    "workmodel.invalid_breaks": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Danach noch %@ übrig"
-=======
-            "value": "Feste Pausen brauchen gültige Uhrzeiten (hh:mm), der Beginn muss vor dem Ende liegen."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.reset": {
-=======
-    "workmodel.invalid_workdays": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Zurücksetzen"
-=======
-            "value": "Wähle mindestens einen Arbeitstag."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.results": {
-=======
-    "workmodel.off": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Vorschläge, beste zuerst"
-=======
-            "value": "Aus"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.saved_hint": {
-=======
-    "workmodel.open_end": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Deine Filter werden auf diesem Gerät gemerkt."
-=======
-            "value": "heute und künftig"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.show_all": {
-=======
-    "workmodel.open_end_toggle": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Alle zeigen"
-=======
-            "value": "Ohne Ende (läuft weiter)"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.stale": {
-=======
-    "workmodel.preview_fields %@": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Zeitraum oder Grenzen wurden geändert. Tippe auf „Aktualisieren“, um neue Vorschläge zu holen."
-=======
-            "value": "Geändert: %@"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.summary": {
-=======
-    "workmodel.preview_invalid": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%@ → %@"
-=======
-            "value": "Korrigiere zuerst die markierten Felder, dann erscheint die Vorschau."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.take": {
-=======
-    "workmodel.preview_loading": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "In meinen Urlaub übernehmen"
-=======
-            "value": "Vorschau wird berechnet …"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.taken": {
-=======
-    "workmodel.preview_none": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Genommen"
-=======
-            "value": "Mit diesen Werten ändert sich dein Zeitkonto nicht."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.title": {
-=======
-    "workmodel.preview_previous %@": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Urlaubsplanung"
-=======
-            "value": "Die Vorversion endet dann am %@."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.to": {
-=======
-    "workmodel.preview_title": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Zeitraum bis"
-=======
-            "value": "Vorschau auf dein Zeitkonto"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.unavailable": {
-=======
-    "workmodel.range_open %@": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Die Urlaubsplanung braucht eine neuere Serverversion."
-=======
-            "value": "Ab %@"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.vacation_one": {
-=======
-    "workmodel.rounding": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%d Urlaubstag"
-=======
-            "value": "Rundung"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.vp.vacation_other": {
-=======
-    "workmodel.rounding_enabled": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "%d Urlaubstage"
-=======
-            "value": "Rundung zugunsten der Arbeitszeit"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.copy_empty": {
-=======
-    "workmodel.rounding_hint": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Die letzte Woche hat keinen Plan."
-=======
-            "value": "Nur erster Tagesbeginn und letztes Tagesende; innere Grenzen und Pausen bleiben."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.empty_text": {
-=======
-    "workmodel.rounding_minutes": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Sobald du Zeiten erfasst oder Urlaub einträgst, erscheint hier die Übersicht."
-=======
-            "value": "Rundung in Minuten"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.empty_title": {
-=======
-    "workmodel.save": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Noch keine Einträge in dieser Woche"
-=======
-            "value": "Version korrigieren"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.past_hint": {
-=======
-    "workmodel.school_credit": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Diese Woche liegt in der Vergangenheit. Die tatsächliche Zeit steht in der Übersicht."
-=======
-            "value": "Schulgutschrift (h:mm)"
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.plan_unavailable": {
-=======
-    "workmodel.school_credit_hint": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Die Wochenplanung braucht eine neuere Serverversion."
-=======
-            "value": "Leer lassen für das Tages-Soll."
->>>>>>> main
           }
         }
       }
     },
-<<<<<<< HEAD
     "wk.week.unavailable": {
-=======
-    "workmodel.school_threshold": {
->>>>>>> main
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-<<<<<<< HEAD
             "value": "Die Wochenübersicht braucht eine neuere Serverversion."
-=======
+          }
+        }
+      }
+    },
+    "workmodel.boundary": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tagesgrenze (Minuten nach Mitternacht)"
+          }
+        }
+      }
+    },
+    "workmodel.boundary_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge vor dieser Uhrzeit zählen zum Vortag. Standard 0."
+          }
+        }
+      }
+    },
+    "workmodel.break_add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pause hinzufügen"
+          }
+        }
+      }
+    },
+    "workmodel.break_from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von"
+          }
+        }
+      }
+    },
+    "workmodel.break_remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause entfernen"
+          }
+        }
+      }
+    },
+    "workmodel.break_to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bis"
+          }
+        }
+      }
+    },
+    "workmodel.breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pausen"
+          }
+        }
+      }
+    },
+    "workmodel.breaks_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine feste Pause zieht nur den Teil ab, der in Arbeitszeit liegt."
+          }
+        }
+      }
+    },
+    "workmodel.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich habe verstanden, dass sich Auswertungen ändern"
+          }
+        }
+      }
+    },
+    "workmodel.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuell"
+          }
+        }
+      }
+    },
+    "workmodel.daily_override": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für einzelne Wochentage sind eigene Tages-Soll-Werte hinterlegt. Sie haben Vorrang vor dem Wochen-Soll und bleiben unverändert."
+          }
+        }
+      }
+    },
+    "workmodel.daily_override_remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigene Tages-Soll-Werte entfernen"
+          }
+        }
+      }
+    },
+    "workmodel.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.edit_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch kein Arbeitsmodell angelegt."
+          }
+        }
+      }
+    },
+    "workmodel.error_overlap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Zeitraum überschneidet sich mit einer Nachbarversion. Prüfe „Gültig ab“ und „Gültig bis“."
+          }
+        }
+      }
+    },
+    "workmodel.error_stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Version wurde inzwischen anderswo geändert. Schließe das Fenster und öffne es neu."
+          }
+        }
+      }
+    },
+    "workmodel.future": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant"
+          }
+        }
+      }
+    },
+    "workmodel.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll, Rundung, Schule und feste Pausen je Version. „Version korrigieren“ ändert eine Version, auch rückwirkend; vorher zeigt eine Vorschau, wie sich dein Zeitkonto ändert."
+          }
+        }
+      }
+    },
+    "workmodel.invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte prüfe diesen Wert."
+          }
+        }
+      }
+    },
+    "workmodel.invalid_breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pausen brauchen gültige Uhrzeiten (hh:mm), der Beginn muss vor dem Ende liegen."
+          }
+        }
+      }
+    },
+    "workmodel.invalid_workdays": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle mindestens einen Arbeitstag."
+          }
+        }
+      }
+    },
+    "workmodel.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "workmodel.open_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heute und künftig"
+          }
+        }
+      }
+    },
+    "workmodel.open_end_toggle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Ende (läuft weiter)"
+          }
+        }
+      }
+    },
+    "workmodel.preview_fields %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geändert: %@"
+          }
+        }
+      }
+    },
+    "workmodel.preview_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrigiere zuerst die markierten Felder, dann erscheint die Vorschau."
+          }
+        }
+      }
+    },
+    "workmodel.preview_loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau wird berechnet …"
+          }
+        }
+      }
+    },
+    "workmodel.preview_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit diesen Werten ändert sich dein Zeitkonto nicht."
+          }
+        }
+      }
+    },
+    "workmodel.preview_previous %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorversion endet dann am %@."
+          }
+        }
+      }
+    },
+    "workmodel.preview_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau auf dein Zeitkonto"
+          }
+        }
+      }
+    },
+    "workmodel.range_open %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab %@"
+          }
+        }
+      }
+    },
+    "workmodel.rounding": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung"
+          }
+        }
+      }
+    },
+    "workmodel.rounding_enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung zugunsten der Arbeitszeit"
+          }
+        }
+      }
+    },
+    "workmodel.rounding_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur erster Tagesbeginn und letztes Tagesende; innere Grenzen und Pausen bleiben."
+          }
+        }
+      }
+    },
+    "workmodel.rounding_minutes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung in Minuten"
+          }
+        }
+      }
+    },
+    "workmodel.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version korrigieren"
+          }
+        }
+      }
+    },
+    "workmodel.school_credit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulgutschrift (h:mm)"
+          }
+        }
+      }
+    },
+    "workmodel.school_credit_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer lassen für das Tages-Soll."
+          }
+        }
+      }
+    },
+    "workmodel.school_threshold": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
             "value": "Schulschwelle (h:mm)"
           }
         }
@@ -6943,7 +7224,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Arbeitstage"
->>>>>>> main
           }
         }
       }

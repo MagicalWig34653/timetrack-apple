@@ -1,6 +1,6 @@
 import XCTest
 
-/// N1b: accent grid (22 ids) and glow, work-model correction with preview and confirmation, vacation tiles with editable entitlement,
+/// N1b: accent grid (22 ids) and glow, work-model correction with preview and confirmation, balance card (R3: tiles removed), entitlement edited in the vacation settings sheet,
 /// about section. Needs the throwaway server environment (TT_DEV_SERVER, TT_DEV_COOKIE; the account must be allowed to edit work models
 /// and vacation settings); optional TT_SHOT_DIR, TT_SHOT_PREFIX, TT_SHOT_SCHEME (system|light|dark), TT_SHOT_GLOW, TT_SHOT_ACCENT.
 final class ParityFlowTests: XCTestCase {
@@ -38,28 +38,29 @@ final class ParityFlowTests: XCTestCase {
 
         // Vacation: tiles and the entitlement edit.
         open("Urlaub", "vacation")
-        XCTAssertTrue(el("vacation.tile.entitlement").waitForExistence(timeout: 10))
+        XCTAssertTrue(el("vacation.available.value").waitForExistence(timeout: 10))
+        XCTAssertFalse(el("vacation.tile.entitlement").exists, "the five tiles are removed (R3)")
         shot("vacation")
-        let edit = el("vacation.edit_entitlement")
-        app.swipeUp(); app.swipeUp()
-        edit.tap()
-        let field = el("vacation.entitlement.field")
+        // R3: the entitlement is edited in the settings sheet (top right), not by a button in the tab.
+        XCTAssertFalse(el("vacation.edit_entitlement").exists)
+        el("vacation.settings").tap()
+        let field = el("settings.entitlement")
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.press(forDuration: 1.0)
         if app.menuItems["Alles auswählen"].waitForExistence(timeout: 1) { app.menuItems["Alles auswählen"].tap() }
         field.typeText("28")
         shot("vacation-edit")
-        el("vacation.entitlement.save").tap()
-        let tile = el("vacation.tile.entitlement")
-        XCTAssertTrue(el("vacation.edit_entitlement").waitForExistence(timeout: 10))
-        app.swipeDown(); app.swipeDown()
-        var updated = false
-        for _ in 0..<20 where !updated {
-            updated = tile.label.contains("28")
-            if !updated { usleep(500_000) }
-        }
-        XCTAssertTrue(updated, "the tile must show the new entitlement, got \(tile.label)")
+        el("settings.save").tap()
+        el("settings.done").tap()
+        // The tiles are gone (R3); the balance card stays, and the saved entitlement is in the settings sheet.
+        XCTAssertTrue(el("vacation.available.value").waitForExistence(timeout: 10))
+        XCTAssertFalse(el("vacation.tile.entitlement").exists)
+        el("vacation.settings").tap()
+        let again = el("settings.entitlement")
+        XCTAssertTrue(again.waitForExistence(timeout: 5))
+        XCTAssertTrue((again.value as? String ?? "").contains("28"), "saved entitlement, got \(String(describing: again.value))")
+        el("settings.done").tap()
         shot("vacation-after")
 
         // Settings: work models.

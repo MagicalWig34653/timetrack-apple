@@ -71,7 +71,7 @@ targets:
       - Sources/Settings # N1b
       - Sources/Calendar # E1: EventKit device calendars (iOS only; macOS does not use it yet)
       - Sources/Week # N1a: week overview, week planner, vacation planner (iOS only)
-      - Sources/Reminders # R3: local reminders to submit planned vacation (iOS only)
+      - Sources/Reminders # R3: local reminders to submit planned vacation, OT1 overwork notifications (iOS only)
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon

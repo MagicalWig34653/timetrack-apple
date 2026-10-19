@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */; };
 		03D19B1A44B6F1403EFD1564 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 25C1D8D3BDCB8BC0109AC511 /* TimetrackCore */; };
 		043F287187BED2FE2F8CF439 /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		047DB10873C68BD6C43702BE /* WeekVacationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8008229515AD5E7F5DCE042 /* WeekVacationTests.swift */; };
 		06221817F67F2A501C8C9EC4 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4650AA0727E578260AF0D33 /* SettingsScreen.swift */; };
 		06D674907DEC9A1604862D3C /* TimerIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */; };
+		0804C1E8F63FD4C1AEADD27C /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		088D157283A97F53FE808FE1 /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
 		0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24BBA312CA476B29515F081 /* ScreenshotTests.swift */; };
 		09731A1E6B40C1779A07A540 /* TimetrackBars.icon in Resources */ = {isa = PBXBuildFile; fileRef = 0859D2EE9711528A95BE57B4 /* TimetrackBars.icon */; };
@@ -31,6 +33,7 @@
 		238491B473F682FED835B5E2 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8477364AADA1DCD3E8009749 /* WidgetViews.swift */; };
 		239165EC0EBAB514D6320BBD /* SettingsSubpages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D664773736598F0B0415370D /* SettingsSubpages.swift */; };
 		24A76FC36034D31829407763 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 98DF67487F7C0957DAA9CBB6 /* TimetrackStores */; };
+		24F90E026F42CAC10937CAD7 /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		25AFCB98E35413F9354AE95D /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		266312FC3489A3A78AAA9090 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6FBF4DC896362A66FCFB8D /* TimetrackDesign */; };
 		27FA5D9F3CC64869659B5753 /* CalendarEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9681420E6F893816773EC783 /* CalendarEnvironment.swift */; };
@@ -38,6 +41,7 @@
 		2836437453435B3BCF7189E7 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4DB0741E3449BE34F2E06C70 /* TimetrackCore */; };
 		2BE1B6C97FEA9377FC870DCB /* TimetrackClockDark.icon in Resources */ = {isa = PBXBuildFile; fileRef = 7258FFA9682C41F91725088D /* TimetrackClockDark.icon */; };
 		2C39DB43DDDA0B442A248B6D /* TimetrackWidgetMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */; };
+		2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */; };
 		2E16F1E67DF6B39F85C6BC5B /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
 		2F85187B902C40C214900927 /* TimetrackWidgetMac.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6AFED35FEDDDCA6FF903C27A /* TimetrackWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		305AE3BD8A638B02FECC7D80 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00CEADF7DB2FF6603875D8 /* RootView.swift */; };
@@ -110,6 +114,7 @@
 		81C4EA3F7D129693905837A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E9D54CF2D57C695B3BB75C0 /* Assets.xcassets */; };
 		8216F25A878503520E814CB1 /* CalendarWriteDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3086FE84FF9D116230486C6 /* CalendarWriteDemo.swift */; };
 		828137061B385FD65C835D56 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */; };
+		832FB3C2732E1E28BDFFAF68 /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		837B835737740160340479A1 /* AccountAccentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD24C654F67761698F18312 /* AccountAccentTests.swift */; };
 		8404724EEBCA85512B15917D /* DeviceEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D38CCC85F93C994D8FC6E35 /* DeviceEvents.swift */; };
 		840FBEA7782724833B2A4CA6 /* VacationReminderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */; };
@@ -178,6 +183,7 @@
 		EC404B9243C5C5FAEFFDD980 /* TimetrackMonogramC.icon in Resources */ = {isa = PBXBuildFile; fileRef = C7DF70C9AD2D133E1571E445 /* TimetrackMonogramC.icon */; };
 		ED52BD1346D78AD51B2333D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73F39B90E98816E491A9DAA /* SettingsView.swift */; };
 		EF51C3F714BFCAD75351173D /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
+		F009EF3BCB7E602DEB9B6E93 /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		F02063BE4EA09E026CC5BA88 /* QuickAbsenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8597EA72F400AE8400C3242E /* QuickAbsenceRow.swift */; };
 		F11D5311CB8F6DC19256E1A5 /* AutomationRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5AAE907118B638C7B34FA5 /* AutomationRuntime.swift */; };
 		F13519AEE045A70418824EC3 /* TimetrackStopwatch.icon in Resources */ = {isa = PBXBuildFile; fileRef = 8E422A87184929AD155B5655 /* TimetrackStopwatch.icon */; };
@@ -300,6 +306,7 @@
 		1B187FA479E187BC190C6E8F /* WeekHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekHub.swift; sourceTree = "<group>"; };
 		1BB3DFF54A49CFF428D635AD /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		1C33A6670711590FC8267A79 /* TimetrackWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackWidget.entitlements; sourceTree = "<group>"; };
+		1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverworkNotificationTests.swift; sourceTree = "<group>"; };
 		1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerIntents.swift; sourceTree = "<group>"; };
 		20F6CD08AEBBEA531E9C333B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarIntegrationTests.swift; sourceTree = "<group>"; };
@@ -364,6 +371,7 @@
 		9681420E6F893816773EC783 /* CalendarEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEnvironment.swift; sourceTree = "<group>"; };
 		98C4F20086A31C26C1546744 /* FocusFilterIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFilterIntent.swift; sourceTree = "<group>"; };
 		998E07C5366CFACA526CB54A /* WeekOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekOverviewView.swift; sourceTree = "<group>"; };
+		9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverworkScheduler.swift; sourceTree = "<group>"; };
 		9F569C77334284DF6CDE5D34 /* FocusFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFilterView.swift; sourceTree = "<group>"; };
 		A1A2981A44D076DDAD6C3130 /* FocusEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusEnvironment.swift; sourceTree = "<group>"; };
 		A35F0A803D3DB0919C873148 /* SignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInView.swift; sourceTree = "<group>"; };
@@ -377,6 +385,7 @@
 		B75B194F88E2A859DB0A105E /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		B761C2EA9067E60DEF3A5F52 /* FocusNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusNotifications.swift; sourceTree = "<group>"; };
 		B7F011F68766315CA396856B /* TimetrackIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackIOSApp.swift; sourceTree = "<group>"; };
+		B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverworkSettingsView.swift; sourceTree = "<group>"; };
 		B971A56FC5DF66A6FD49DDCC /* TimetrackMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackMac.entitlements; sourceTree = "<group>"; };
 		B9FD72ECC0D1BDFB75745274 /* ComplicationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationView.swift; sourceTree = "<group>"; };
 		BD733A09D977D0687741719F /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
@@ -540,6 +549,7 @@
 				CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */,
 				21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */,
 				521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */,
+				1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */,
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
 				E24BBA312CA476B29515F081 /* ScreenshotTests.swift */,
@@ -615,6 +625,7 @@
 		9011DE3F7ADDC3CBB5A7F36B /* Reminders */ = {
 			isa = PBXGroup;
 			children = (
+				B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */,
 				8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */,
 				84CD59A5554B59B86E61DDB2 /* VacationReminderSettingsView.swift */,
 			);
@@ -651,6 +662,7 @@
 			isa = PBXGroup;
 			children = (
 				8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */,
+				9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */,
 				CE23C37A37C9E12F463E83FD /* TimerControlRunner.swift */,
 				04AB666CFC135DC93A7790FE /* TimerLiveActivity.swift */,
 				EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */,
@@ -1109,6 +1121,7 @@
 				281B755166F4633E094FD1E6 /* Formatters.swift in Sources */,
 				C396A1DF046B2D4027690D95 /* LiveActivityViews.swift in Sources */,
 				56D2B9931A45D34C7740D856 /* MenuBarContent.swift in Sources */,
+				832FB3C2732E1E28BDFFAF68 /* OverworkScheduler.swift in Sources */,
 				0EDA5EACE903627A685D6360 /* PlanSheets.swift in Sources */,
 				A0955EC7B5DB0D73E6E2AB76 /* PlanningShared.swift in Sources */,
 				F02063BE4EA09E026CC5BA88 /* QuickAbsenceRow.swift in Sources */,
@@ -1153,6 +1166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2E16F1E67DF6B39F85C6BC5B /* LiveActivityViews.swift in Sources */,
+				0804C1E8F63FD4C1AEADD27C /* OverworkScheduler.swift in Sources */,
 				54E38E92AE7F4B1B777FC25D /* TimerControlRunner.swift in Sources */,
 				6EF83BAA3EC094369E14A4D8 /* TimerLiveActivity.swift in Sources */,
 				756A2A0D2144C31874488EB2 /* TimetrackProvider.swift in Sources */,
@@ -1194,6 +1208,8 @@
 				9138C7BDD813C4E6F854B8A3 /* LocationIntents.swift in Sources */,
 				149F469262A0F5F1B16B8090 /* LocationService.swift in Sources */,
 				B469FA4F96199AC22D41F102 /* NewPlaceSheet.swift in Sources */,
+				F009EF3BCB7E602DEB9B6E93 /* OverworkScheduler.swift in Sources */,
+				2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */,
 				AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */,
 				A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */,
 				441DC2D5FBD277B97AF63CEA /* QuickAbsenceRow.swift in Sources */,
@@ -1238,6 +1254,7 @@
 				0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */,
 				540F7CEDD1A0819445FA6740 /* CalendarIntegrationTests.swift in Sources */,
 				1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */,
+				0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */,
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
 				0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */,
@@ -1255,6 +1272,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B82DB5EDA8396818C6F6D31B /* LiveActivityViews.swift in Sources */,
+				24F90E026F42CAC10937CAD7 /* OverworkScheduler.swift in Sources */,
 				974DAB34ED6D5150EC3AB851 /* TimerControlRunner.swift in Sources */,
 				6331B22CE68B76CCF38F6E27 /* TimerLiveActivity.swift in Sources */,
 				584C3B406C337511A67E331B /* TimetrackProvider.swift in Sources */,

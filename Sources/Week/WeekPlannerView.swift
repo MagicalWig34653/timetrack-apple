@@ -134,9 +134,9 @@ struct WeekPlannerView: View {
     }
 
     @ViewBuilder private var saveButtons: some View {
-        if store.isDirty { Button { notice = nil; store.discard() } label: { W.t("plan.discard") }.buttonStyle(.ttSecondary).frame(maxWidth: 150).accessibilityIdentifier("plan.discard") }
+        if store.isDirty { Button { notice = nil; store.discard() } label: { W.t("plan.discard") }.buttonStyle(.ttSecondary).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 150).accessibilityIdentifier("plan.discard") }
         Button { Task { await store.save() } } label: { W.t(store.isSaving ? "plan.saving" : "plan.save") }
-            .buttonStyle(.ttPrimary).frame(maxWidth: 200).disabled(!store.isDirty || store.isSaving).accessibilityIdentifier("plan.save")
+            .buttonStyle(.ttPrimary).frame(maxWidth: typeSize.isAccessibilitySize ? .infinity : 200).disabled(!store.isDirty || store.isSaving).accessibilityIdentifier("plan.save")
     }
 
     private var saveBar: some View {

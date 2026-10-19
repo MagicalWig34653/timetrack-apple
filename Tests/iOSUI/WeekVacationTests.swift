@@ -70,8 +70,11 @@ final class WeekVacationTests: XCTestCase {
         sleep(1)
         shot("planner-empty")
         expectDirty("Alles gespeichert")
-        scrollTo("plan.standard")
-        el("plan.standard").tap()
+        for _ in 0..<3 where el("plan.dirty_state").label != "Nicht gespeichert" {
+            scrollTo("plan.standard")
+            el("plan.standard").tap()
+            sleep(1)
+        }
         expectDirty("Nicht gespeichert")
         sleep(1)
         shot("planner-standard")

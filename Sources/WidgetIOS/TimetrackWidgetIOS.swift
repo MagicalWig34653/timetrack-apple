@@ -40,10 +40,12 @@ struct TimetrackLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
             LiveActivityContent(state: context.state)
-                .activityBackgroundTint(nil)
+                .activityBackgroundTint(context.state.backgroundTint)
         } dynamicIsland: { context in
             DynamicIsland {
-                DynamicIslandExpandedRegion(.bottom) { IslandExpanded(state: context.state) }
+                DynamicIslandExpandedRegion(.leading) { IslandExpandedLeading(state: context.state) }
+                DynamicIslandExpandedRegion(.trailing) { IslandExpandedTrailing(state: context.state) }
+                DynamicIslandExpandedRegion(.bottom) { IslandExpandedBottom(state: context.state) }
             } compactLeading: {
                 IslandCompactLeading(state: context.state)
             } compactTrailing: {

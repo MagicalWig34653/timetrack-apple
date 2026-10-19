@@ -24,17 +24,16 @@ struct VacationPlannerView: View {
 struct VacationPlannerLink: View {
     var body: some View {
         NavigationLink { VacationPlannerView() } label: {
-            Card {
-                HStack(spacing: TT.Space.m) {
-                    KindGlyph(symbol: "sparkles", tint: TT.kindVacation)
-                    VStack(alignment: .leading, spacing: 2) {
-                        W.t("vp.open").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                        W.t("vp.open_text").font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right").foregroundStyle(TT.textTertiary).accessibilityHidden(true)
+            HStack(spacing: TT.Space.m) {
+                KindGlyph(symbol: "sparkles", tint: TT.kindVacation)
+                VStack(alignment: .leading, spacing: 2) {
+                    W.t("vp.open").font(TTFont.body).foregroundStyle(TT.textPrimary)
+                    W.t("vp.open_text").font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
                 }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary).accessibilityHidden(true)
             }
+            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("vacation.planner.open")

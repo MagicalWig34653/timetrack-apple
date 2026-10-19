@@ -78,7 +78,7 @@ public struct TodayDisplay: Equatable, Sendable {
                 result.startedAt = action.queuedAt
             case .stop:
                 if result.isRunning, let start = result.startedAt {
-                    result.doneSeconds += max(0, Int(action.queuedAt.timeIntervalSince(start)))
+                    result.doneSeconds += LiveActivityTarget.wholeSeconds(action.queuedAt.timeIntervalSince(start))
                 }
                 result.isRunning = false
                 result.startedAt = nil

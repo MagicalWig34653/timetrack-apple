@@ -51,7 +51,11 @@ struct WidgetGallery: View {
                 }
                 Text(verbatim: "Live Activity / Dynamic Island").font(.subheadline.bold()).foregroundStyle(TT.textSecondary)
                 #if os(iOS)
-                LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
+                if ProcessInfo.processInfo.environment["TT_DEV_LA_WATCH"] == "1" {
+                    LiveActivityWatchPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
+                } else {
+                    LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
+                }
                 #endif
             }
             .padding(16)

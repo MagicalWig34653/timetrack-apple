@@ -59,7 +59,8 @@ import Testing
         let account = TimeAccount(asOf: "2026-10-16", balanceSeconds: -1800)
         let snapshot = WidgetSnapshot.make(running: running, day: day, account: account, segments: [running, first, voided], zone: zone, now: now)
         #expect(snapshot.isRunning && snapshot.kind == .school)
-        #expect(snapshot.todaySeconds == 4200 && snapshot.targetSeconds == 28_800 && snapshot.balanceSeconds == -1800)
+        #expect(snapshot.todaySeconds == 3600 && // 4200 evaluated + credit, minus the 600 s of the open segment
+                 snapshot.targetSeconds == 28_800 && snapshot.balanceSeconds == -1800)
         #expect(snapshot.segments?.map(\.kind) == [.work, .school])
         #expect(snapshot.timeZone == "Europe/Berlin")
     }

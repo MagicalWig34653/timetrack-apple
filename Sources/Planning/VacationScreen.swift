@@ -36,7 +36,10 @@ private struct VacationContent: View {
                 if let error = store.error, !showSettings, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
                 if store.settings?.configured == false { HintBanner("vacation.not_configured") }
                 #if os(iOS)
-                VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
+                ListCard { // R3: two slim entries instead of cards
+                    VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
+                    VacationReminderLink() // R3: reminders to submit planned vacation
+                }
                 #endif
                 if wide {
                     HStack(alignment: .top, spacing: TT.Space.xl) { balance.frame(maxWidth: 440); absences }
@@ -62,6 +65,9 @@ private struct VacationContent: View {
             }
         }
         .absenceEditor($request, actions: AbsenceEditorActions(planning: store))
+        #if os(iOS)
+        .vacationReminderOpen(store: store, request: $request) // R3: tap on a reminder opens that absence
+        #endif
         .sheet(isPresented: $showSettings) { VacationSettingsSheet(store: store) }
     }
 
@@ -100,7 +106,6 @@ private struct VacationContent: View {
                     }
                     .accessibilityElement(children: .combine)
                 }
-                VacationFigures(store: store, balance: balance) // N1b: tiles + editable entitlement
             }
         } else if store.isLoading {
             SkeletonList(rows: 3)

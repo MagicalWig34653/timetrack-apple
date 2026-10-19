@@ -53,6 +53,17 @@
         }
       }
     },
+    "error.database_unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datenbank des Servers ist gerade nicht erreichbar. Bitte versuche es in ein paar Sekunden erneut."
+          }
+        }
+      }
+    },
     "error.decoding": {
       "localizations": {
         "de": {
@@ -103,6 +114,17 @@
         }
       }
     },
+    "error.invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Eingaben sind ungültig. Prüfe Zeitraum und Zahlen."
+          }
+        }
+      }
+    },
     "error.invalid_code": {
       "localizations": {
         "de": {
@@ -119,6 +141,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Serveradresse ist ungültig."
+          }
+        }
+      }
+    },
+    "error.invalid_week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Kalenderwoche ist ungültig."
           }
         }
       }
@@ -223,6 +256,28 @@
         }
       }
     },
+    "error.plan_break_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die geplante Pause muss zwischen 0 und 600 Minuten liegen und braucht Beginn und Ende."
+          }
+        }
+      }
+    },
+    "error.plan_time_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib Beginn und Ende als Uhrzeit an; das Ende muss nach dem Beginn liegen."
+          }
+        }
+      }
+    },
     "error.range_too_large": {
       "localizations": {
         "de": {
@@ -299,6 +354,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Du bist nicht angemeldet oder die Anmeldung ist abgelaufen."
+          }
+        }
+      }
+    },
+    "error.week_day_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Tage der Woche sind ungültig."
           }
         }
       }

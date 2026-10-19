@@ -84,7 +84,11 @@ struct PlanDaySheet: View {
         saving = true
         defer { saving = false }
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
-        if await store.savePlan(day: day, PlanDayInput(mode: mode, placeId: store.planDays[day]?.placeId, note: trimmed.isEmpty ? nil : trimmed)) { dismiss() }
+        // PUT replaces the whole day: planned times from the week planner (K1) must be sent along.
+        let stored = store.planDays[day]
+        let input = PlanDayInput(mode: mode, placeId: stored?.placeId, note: trimmed.isEmpty ? nil : trimmed, plannedStart: stored?.plannedStart,
+                                 plannedEnd: stored?.plannedEnd, plannedBreakMinutes: stored?.plannedBreakMinutes)
+        if await store.savePlan(day: day, input) { dismiss() }
     }
 }
 

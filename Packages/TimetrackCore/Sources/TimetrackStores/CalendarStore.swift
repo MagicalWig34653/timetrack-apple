@@ -260,7 +260,8 @@ public final class CalendarStore {
     @discardableResult
     public func savePlan(day: LocalDay, _ input: PlanDayInput) async -> Bool {
         let before = planDays
-        planDays[day] = PlanDay(date: day, mode: input.mode, placeId: input.placeId, note: input.note)
+        planDays[day] = PlanDay(date: day, mode: input.mode, placeId: input.placeId, note: input.note, plannedStart: input.plannedStart,
+                                plannedEnd: input.plannedEnd, plannedBreakMinutes: input.plannedBreakMinutes, plannedSeconds: before[day]?.plannedSeconds)
         do {
             planDays[day] = try await client.putPlanDay(day, input)
             error = nil

@@ -11,6 +11,14 @@ public actor APIClient: PreferencesService {
     private let encoder = JSONCoding.makeEncoder()
     private var csrfToken: String?
     private var moduleDisabledHandler: (@Sendable () -> Void)?
+    /// Waits before a retry of a read that hit 503 `database_unavailable` (replaceable so tests do not sleep).
+    private var retrySleeper: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+
+    /// Reads (GET) answered with 503 `database_unavailable` are repeated up to this many times after the server's `Retry-After`.
+    public static let maxUnavailableRetries = 2
+    /// Upper bound for one wait, whatever the server asks for, so a screen never hangs for long.
+    public static let maxRetryAfter: Duration = .seconds(10)
+    public static let defaultRetryAfter: Duration = .seconds(2)
 
     public init(baseURL: URL, transport: HTTPTransport) {
         self.baseURL = baseURL
@@ -19,6 +27,8 @@ public actor APIClient: PreferencesService {
 
     /// Callback when any call answers 404 `module_disabled` (stores refresh their module switches).
     public func setModuleDisabledHandler(_ handler: (@Sendable () -> Void)?) { moduleDisabledHandler = handler }
+
+    public func setRetrySleeper(_ sleeper: @escaping @Sendable (Duration) async throws -> Void) { retrySleeper = sleeper }
 
     public func setCSRFToken(_ token: String?) { csrfToken = token }
     public var currentCSRFToken: String? { csrfToken }
@@ -47,6 +57,7 @@ public actor APIClient: PreferencesService {
 
     private func perform(_ method: Method, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, headers: [String: String] = [:]) async throws -> Data {
         var refreshedCSRF = false
+        var unavailableRetries = 0
         while true {
             try Task.checkCancellation()
             let request = try makeRequest(method, path, query: query, body: body, headers: headers)
@@ -68,8 +79,22 @@ public actor APIClient: PreferencesService {
                 if (try? await refreshSession()) != nil { continue }
             }
             if response.statusCode == 404, failure.code == APIErrorCode.moduleDisabled.rawValue { moduleDisabledHandler?() }
+            // 503 database_unavailable (contract v0.20.0): the database is briefly unreachable; `Retry-After` says when to ask again.
+            // Only reads are repeated automatically; a write that may have been processed is reported to the caller instead.
+            if response.statusCode == 503, failure.code == APIErrorCode.databaseUnavailable.rawValue, method == .get,
+               unavailableRetries < Self.maxUnavailableRetries {
+                unavailableRetries += 1
+                do { try await retrySleeper(Self.retryDelay(response.value(forHTTPHeaderField: "Retry-After"))) } catch { throw TimetrackError.cancelled }
+                continue
+            }
             throw failure
         }
+    }
+
+    /// `Retry-After` in seconds (the HTTP-date form is not used by the backend); missing or invalid values fall back to the default.
+    static func retryDelay(_ header: String?) -> Duration {
+        guard let header, let seconds = Int(header.trimmingCharacters(in: .whitespaces)), seconds >= 0 else { return defaultRetryAfter }
+        return min(.seconds(seconds), maxRetryAfter)
     }
 
     private func parseError(status: Int, data: Data) -> TimetrackError {
@@ -265,7 +290,23 @@ public actor APIClient: PreferencesService {
     public func putPlanDay(_ date: LocalDay, _ input: PlanDayInput) async throws -> PlanDay { try await send(.put, "/plan/days/\(date)", body: input) }
     public func deletePlanDay(_ date: LocalDay) async throws { try await sendVoid(.delete, "/plan/days/\(date)") }
 
+    // MARK: - Week plan and vacation suggestions (K1, V2)
+
+    public func getPlanWeek(_ isoWeek: String) async throws -> PlanWeek { try await get("/plan/weeks/\(isoWeek)") }
+
+    public func putPlanWeek(_ isoWeek: String, _ input: PlanWeekInput) async throws -> PlanWeek {
+        try await send(.put, "/plan/weeks/\(isoWeek)", body: input)
+    }
+
+    /// Read-only: nothing is booked. Book a suggestion with `createAbsence`.
+    public func getVacationSuggestions(_ query: VacationSuggestionQuery = VacationSuggestionQuery()) async throws -> VacationSuggestions {
+        try await get("/vacation/suggestions", query: query.queryItems)
+    }
+
     // MARK: - Evaluation and account
+
+    /// One-call week overview (core feature, no module needed).
+    public func getTimeWeek(_ isoWeek: String) async throws -> TimeWeek { try await get("/time/weeks/\(isoWeek)") }
 
     /// The API allows at most 93 days per request; longer ranges are loaded in chunks.
     public static let maxDaysPerRequest = 93

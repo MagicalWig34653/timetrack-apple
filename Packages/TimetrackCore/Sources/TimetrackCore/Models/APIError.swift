@@ -26,6 +26,13 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case rangeTooLarge = "range_too_large"
     case absenceOverlap = "absence_overlap"
     case insufficientScope = "insufficient_scope"
+    /// 503 with `Retry-After`: the database is briefly unreachable (contract v0.20.0).
+    case databaseUnavailable = "database_unavailable"
+    case invalid
+    case invalidWeek = "invalid_week"
+    case weekDayInvalid = "week_day_invalid"
+    case planTimeInvalid = "plan_time_invalid"
+    case planBreakInvalid = "plan_break_invalid"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

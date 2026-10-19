@@ -273,20 +273,37 @@ public struct PlanDayInput: Encodable, Sendable, Hashable {
     public var mode: PlanMode
     public var placeId: UUID?
     public var note: String?
+    /// Planned local wall-clock times `HH:mm` (contract v0.17.0): both or none, start before end. `PUT` replaces the whole day,
+    /// so callers that only change mode or note must pass the stored times along.
+    public var plannedStart: String?
+    public var plannedEnd: String?
+    public var plannedBreakMinutes: Int?
 
-    public init(mode: PlanMode, placeId: UUID? = nil, note: String? = nil) {
+    public init(mode: PlanMode, placeId: UUID? = nil, note: String? = nil, plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil) {
         self.mode = mode
         self.placeId = placeId
         self.note = note
+        self.plannedStart = plannedStart
+        self.plannedEnd = plannedEnd
+        self.plannedBreakMinutes = plannedBreakMinutes
     }
 
-    private enum CodingKeys: String, CodingKey { case mode, placeId, note }
+    /// Input that keeps everything of `plan` (used when only mode or note change).
+    public init(keeping plan: PlanDay, mode: PlanMode? = nil, note: String?? = nil) {
+        self.init(mode: mode ?? plan.mode, placeId: plan.placeId, note: note ?? plan.note, plannedStart: plan.plannedStart,
+                  plannedEnd: plan.plannedEnd, plannedBreakMinutes: plan.plannedBreakMinutes)
+    }
+
+    private enum CodingKeys: String, CodingKey { case mode, placeId, note, plannedStart, plannedEnd, plannedBreakMinutes }
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(mode, forKey: .mode)
         try c.encode(placeId, forKey: .placeId)
         try c.encode(note, forKey: .note)
+        try c.encode(plannedStart, forKey: .plannedStart)
+        try c.encode(plannedEnd, forKey: .plannedEnd)
+        try c.encode(plannedBreakMinutes, forKey: .plannedBreakMinutes)
     }
 }
 
@@ -296,13 +313,23 @@ public struct PlanDay: Codable, Sendable, Hashable, Identifiable {
     public let mode: PlanMode
     public let placeId: UUID?
     public let note: String?
+    public let plannedStart: String?
+    public let plannedEnd: String?
+    public let plannedBreakMinutes: Int?
+    /// Server-derived: end - start - break, never negative; nil without times.
+    public let plannedSeconds: Int?
     public var id: LocalDay { date }
 
-    public init(date: LocalDay, mode: PlanMode, placeId: UUID? = nil, note: String? = nil) {
+    public init(date: LocalDay, mode: PlanMode, placeId: UUID? = nil, note: String? = nil, plannedStart: String? = nil, plannedEnd: String? = nil,
+                plannedBreakMinutes: Int? = nil, plannedSeconds: Int? = nil) {
         self.date = date
         self.mode = mode
         self.placeId = placeId
         self.note = note
+        self.plannedStart = plannedStart
+        self.plannedEnd = plannedEnd
+        self.plannedBreakMinutes = plannedBreakMinutes
+        self.plannedSeconds = plannedSeconds
     }
 }
 

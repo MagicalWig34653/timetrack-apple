@@ -33,7 +33,7 @@ public struct TimerControlPlan: Sendable, Equatable {
     public var isApplied: Bool { ignored == nil }
 }
 
-public enum TimerControl {
+public enum TimerPress {
     public static func plan(_ action: TimerControlAction, snapshot: WidgetSnapshot?, marker stored: PauseMarker?,
                             now: Date = .now, eventId: UUID = UUID()) -> TimerControlPlan {
         let running = snapshot?.isRunning == true

@@ -22,7 +22,10 @@ enum WidgetPublisher {
         store.write(snapshot)
         reloadAll()
         #if os(iOS)
-        await TimerLiveActivity.sync(running: snapshot.isRunning ? snapshot.startedAt.map { ($0, snapshot.kind) } : nil, source: source)
+        // A running timer ends any pause (resumed in the app or elsewhere); otherwise a pause marker keeps a paused activity.
+        let markers = PauseMarkerStore()
+        if snapshot.isRunning { markers.clear() }
+        await TimerLiveActivity.sync(target: .desired(snapshot: snapshot, pause: markers.read()), source: source)
         #endif
     }
 
@@ -31,7 +34,8 @@ enum WidgetPublisher {
         store.clear()
         reloadAll()
         #if os(iOS)
-        await TimerLiveActivity.sync(running: nil, source: "signedOut")
+        PauseMarkerStore().clear()
+        await TimerLiveActivity.sync(target: nil, source: "signedOut")
         #endif
     }
 
@@ -57,8 +61,28 @@ enum WidgetPublisher {
         async let balance = try? await client.getTimeAccount(asOf: today)
         let (answer, day, account) = await (timer, evaluation, balance)
         guard case .success(let running) = answer else { return }
+        // Presses still waiting in the queue are newer than the server's answer: keep the optimistic snapshot until they arrive.
+        #if os(iOS)
+        guard await TimerControlRunner.queue.count == 0 else { return }
+        #endif
         let segments = (day?.segments ?? []).filter { !$0.voided }
-        await publish(.make(running: running, day: day, account: account, segments: segments, zone: zone), source: source)
+        var snapshot = WidgetSnapshot.make(running: running, day: day, account: account, segments: segments, zone: zone)
+        await attachPlan(to: &snapshot, client: client, day: today, zone: zone)
+        await publish(snapshot, source: source)
+    }
+
+    /// LA1: today's planned end and length (plan day, contract 0.17.0). A failed or empty read keeps what the previous snapshot of the
+    /// same day had, so a flaky network does not make the planned end disappear.
+    static func attachPlan(to snapshot: inout WidgetSnapshot, client: APIClient, day: LocalDay, zone: TimeZone,
+                           store: WidgetSnapshotStore = WidgetSnapshotStore()) async {
+        if let days = try? await client.listPlanDays(from: day, to: day) {
+            let planned = PlannedDay(plan: days.first { $0.date == day }, zone: zone)
+            snapshot.plannedEnd = planned.end
+            snapshot.plannedSeconds = planned.seconds
+        } else if let previous = store.read(), previous.day == snapshot.day {
+            snapshot.plannedEnd = previous.plannedEnd
+            snapshot.plannedSeconds = previous.plannedSeconds
+        }
     }
 }
 
@@ -103,8 +127,10 @@ private struct WidgetSyncModifier: ViewModifier {
             guard let today = model.today, today.lastLoaded != nil else { return }
             let zone = model.dayCalendar.timeZone
             let appearance = model.appearance.local
-            await WidgetPublisher.publish(.make(running: today.running, day: today.day, account: today.account, segments: today.segments, zone: zone,
-                                                accentHex: AppearanceKeys.effectiveHex(appearance), colorScheme: appearance.scheme))
+            var snapshot = WidgetSnapshot.make(running: today.running, day: today.day, account: today.account, segments: today.segments, zone: zone,
+                                               accentHex: AppearanceKeys.effectiveHex(appearance), colorScheme: appearance.scheme)
+            if let client = model.apiClient { await WidgetPublisher.attachPlan(to: &snapshot, client: client, day: snapshot.day, zone: zone) }
+            await WidgetPublisher.publish(snapshot)
         case .restoring, .offline:
             break // credentials stay; keep showing the last snapshot (marked stale after a while)
         }

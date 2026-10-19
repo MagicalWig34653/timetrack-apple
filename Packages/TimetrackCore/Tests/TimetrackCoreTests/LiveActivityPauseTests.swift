@@ -170,7 +170,7 @@ struct LiveActivityPauseTests {
     // MARK: Button presses
 
     @Test func pauseStopsTheSegmentAndRemembersTheKind() throws {
-        let plan = TimerControl.plan(.pause, snapshot: snapshot(running: true, startedMinutesAgo: 30, kind: .travel), marker: nil, now: now)
+        let plan = TimerPress.plan(.pause, snapshot: snapshot(running: true, startedMinutesAgo: 30, kind: .travel), marker: nil, now: now)
         #expect(plan.isApplied)
         #expect(plan.queued?.command == .stop && plan.queued?.queuedAt == now)
         #expect(plan.marker == .set(PauseMarker(kind: .travel, pausedAt: now)))
@@ -183,7 +183,7 @@ struct LiveActivityPauseTests {
 
     @Test func resumeStartsANewSegmentOfTheSameKind() throws {
         let marker = PauseMarker(kind: .school, pausedAt: now.addingTimeInterval(-900))
-        let plan = TimerControl.plan(.resume, snapshot: snapshot(running: false), marker: marker, now: now)
+        let plan = TimerPress.plan(.resume, snapshot: snapshot(running: false), marker: marker, now: now)
         #expect(plan.queued?.command == .start(.school) && plan.queued?.queuedAt == now)
         #expect(plan.marker == .clear)
         let after = try #require(plan.snapshot)
@@ -193,28 +193,28 @@ struct LiveActivityPauseTests {
     }
 
     @Test func stopWhileRunningStopsAndClears() {
-        let plan = TimerControl.plan(.stop, snapshot: snapshot(running: true), marker: nil, now: now)
+        let plan = TimerPress.plan(.stop, snapshot: snapshot(running: true), marker: nil, now: now)
         #expect(plan.queued?.command == .stop && plan.marker == .clear && plan.snapshot?.isRunning == false)
     }
 
     @Test func stopWhilePausedOnlyEndsThePause() {
         let marker = PauseMarker(kind: .work, pausedAt: now.addingTimeInterval(-60))
-        let plan = TimerControl.plan(.stop, snapshot: snapshot(running: false), marker: marker, now: now)
+        let plan = TimerPress.plan(.stop, snapshot: snapshot(running: false), marker: marker, now: now)
         #expect(plan.isApplied && plan.queued == nil && plan.marker == .clear)
     }
 
     @Test func pressesThatMakeNoSenseAreIgnored() {
-        #expect(TimerControl.plan(.pause, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .notRunning)
-        #expect(TimerControl.plan(.resume, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .nothingToResume)
-        #expect(TimerControl.plan(.resume, snapshot: snapshot(running: false), marker: PauseMarker(kind: .work, pausedAt: now.addingTimeInterval(-PauseMarker.maxAge - 5)), now: now).ignored == .nothingToResume)
-        let running = TimerControl.plan(.resume, snapshot: snapshot(running: true), marker: PauseMarker(kind: .work, pausedAt: now), now: now)
+        #expect(TimerPress.plan(.pause, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .notRunning)
+        #expect(TimerPress.plan(.resume, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .nothingToResume)
+        #expect(TimerPress.plan(.resume, snapshot: snapshot(running: false), marker: PauseMarker(kind: .work, pausedAt: now.addingTimeInterval(-PauseMarker.maxAge - 5)), now: now).ignored == .nothingToResume)
+        let running = TimerPress.plan(.resume, snapshot: snapshot(running: true), marker: PauseMarker(kind: .work, pausedAt: now), now: now)
         #expect(running.ignored == .alreadyRunning && running.marker == .clear && running.queued == nil)
-        #expect(TimerControl.plan(.start, snapshot: snapshot(running: true), marker: nil, now: now).ignored == .alreadyRunning)
-        #expect(TimerControl.plan(.stop, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .notRunning)
+        #expect(TimerPress.plan(.start, snapshot: snapshot(running: true), marker: nil, now: now).ignored == .alreadyRunning)
+        #expect(TimerPress.plan(.stop, snapshot: snapshot(running: false), marker: nil, now: now).ignored == .notRunning)
     }
 
     @Test func startQueuesAWorkSegmentAndClearsAPause() {
-        let plan = TimerControl.plan(.start, snapshot: snapshot(running: false), marker: nil, now: now)
+        let plan = TimerPress.plan(.start, snapshot: snapshot(running: false), marker: nil, now: now)
         #expect(plan.queued?.command == .start(.work) && plan.marker == .clear && plan.snapshot?.isRunning == true)
     }
 
@@ -222,9 +222,9 @@ struct LiveActivityPauseTests {
 
     @Test func pausePressesGoThroughTheSharedQueueInOrder() async {
         let queue = TimerActionQueue(fileURL: nil)
-        let paused = TimerControl.plan(.pause, snapshot: snapshot(running: true), marker: nil, now: now, eventId: UUID())
+        let paused = TimerPress.plan(.pause, snapshot: snapshot(running: true), marker: nil, now: now, eventId: UUID())
         await queue.enqueue(paused.queued!)
-        let resumed = TimerControl.plan(.resume, snapshot: paused.snapshot, marker: PauseMarker(kind: .work, pausedAt: now), now: now.addingTimeInterval(600))
+        let resumed = TimerPress.plan(.resume, snapshot: paused.snapshot, marker: PauseMarker(kind: .work, pausedAt: now), now: now.addingTimeInterval(600))
         await queue.enqueue(resumed.queued!)
         let commands = await queue.pending.map(\.command)
         #expect(commands == [.stop, .start(.work)])

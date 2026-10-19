@@ -25,9 +25,11 @@
 		1EDE8928219BD32D4AC74C59 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 7407DC8FE0428CE13426EE93 /* TimetrackDesign */; };
 		20262E82CD2B7FF81BFD15D9 /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E299FCCA25A9EAA2930CF1A /* WidgetGallery.swift */; };
 		21C819F6E7A1CA1931427FAF /* WidgetSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340F4AF58707F25617DBB5DD /* WidgetSupport.swift */; };
+		221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */; };
 		2287E67D40C9004141982206 /* TimetrackWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F133A559F1596CF467BF722A /* TimetrackWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		231C5C58B962CAECECE27D94 /* TimetrackWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57B3E3F601DC94B9F783CE4 /* TimetrackWatchApp.swift */; };
 		238491B473F682FED835B5E2 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8477364AADA1DCD3E8009749 /* WidgetViews.swift */; };
+		239165EC0EBAB514D6320BBD /* SettingsSubpages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D664773736598F0B0415370D /* SettingsSubpages.swift */; };
 		24A76FC36034D31829407763 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 98DF67487F7C0957DAA9CBB6 /* TimetrackStores */; };
 		25AFCB98E35413F9354AE95D /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		266312FC3489A3A78AAA9090 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6FBF4DC896362A66FCFB8D /* TimetrackDesign */; };
@@ -129,6 +131,7 @@
 		A3482430E86BC604BD3A6099 /* FocusNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B761C2EA9067E60DEF3A5F52 /* FocusNotifications.swift */; };
 		A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46440267C56A837E5719850 /* PlanningShared.swift */; };
 		A4895B951818FA56A9B32BAD /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F94BC7DC26E230FC2EF77F /* RootView.swift */; };
+		A7CD34A36039B93AC3F99306 /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75B194F88E2A859DB0A105E /* SettingsRows.swift */; };
 		A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */; };
 		AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829AB0BC0EA6FA97BA015CB8 /* PlanSheets.swift */; };
 		AB2757DFA7A1DAA43FF12A55 /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E299FCCA25A9EAA2930CF1A /* WidgetGallery.swift */; };
@@ -301,6 +304,7 @@
 		20F6CD08AEBBEA531E9C333B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarIntegrationTests.swift; sourceTree = "<group>"; };
 		22C089E2303199136FDFB343 /* TimetrackSunset.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackSunset.icon; sourceTree = "<group>"; };
+		2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsShotTests.swift; sourceTree = "<group>"; };
 		2D38CCC85F93C994D8FC6E35 /* DeviceEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceEvents.swift; sourceTree = "<group>"; };
 		2E8B431C2FDA0A08C46D88C9 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		2E9D54CF2D57C695B3BB75C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -370,6 +374,7 @@
 		ACE1DE866570CFDDF38E1863 /* LaunchTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTrace.swift; sourceTree = "<group>"; };
 		B0498DABC31FF9913799DE85 /* IconPreviews.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = IconPreviews.xcassets; sourceTree = "<group>"; };
 		B73F39B90E98816E491A9DAA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B75B194F88E2A859DB0A105E /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		B761C2EA9067E60DEF3A5F52 /* FocusNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusNotifications.swift; sourceTree = "<group>"; };
 		B7F011F68766315CA396856B /* TimetrackIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackIOSApp.swift; sourceTree = "<group>"; };
 		B971A56FC5DF66A6FD49DDCC /* TimetrackMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackMac.entitlements; sourceTree = "<group>"; };
@@ -385,6 +390,7 @@
 		CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationFlowTests.swift; sourceTree = "<group>"; };
 		CE23C37A37C9E12F463E83FD /* TimerControlRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerControlRunner.swift; sourceTree = "<group>"; };
 		D46440267C56A837E5719850 /* PlanningShared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningShared.swift; sourceTree = "<group>"; };
+		D664773736598F0B0415370D /* SettingsSubpages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSubpages.swift; sourceTree = "<group>"; };
 		D728A14521078775540E5870 /* ComplicationGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationGallery.swift; sourceTree = "<group>"; };
 		D753667477D8FD54ABCCDBF6 /* AutomationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationSettingsView.swift; sourceTree = "<group>"; };
 		D7D3F7BE9453F3BC452D436D /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -537,6 +543,7 @@
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
 				E24BBA312CA476B29515F081 /* ScreenshotTests.swift */,
+				2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */,
 				703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */,
 				063404462ED7AFBF099CDC1D /* TodayButtonsTests.swift */,
 				E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */,
@@ -766,6 +773,8 @@
 				4C0C49D7FA292920DEE517AB /* Info.plist */,
 				DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */,
 				10DEE4BE7051A858A40C724C /* RootView.swift */,
+				B75B194F88E2A859DB0A105E /* SettingsRows.swift */,
+				D664773736598F0B0415370D /* SettingsSubpages.swift */,
 				E45107C842B9211EE861FA97 /* SettingsView.swift */,
 				56CA38F0CFAEA12FDCC59C72 /* SignInView.swift */,
 				1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */,
@@ -1189,6 +1198,8 @@
 				A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */,
 				441DC2D5FBD277B97AF63CEA /* QuickAbsenceRow.swift in Sources */,
 				EA2C0B9A74F7A4A74FFABF97 /* RootView.swift in Sources */,
+				A7CD34A36039B93AC3F99306 /* SettingsRows.swift in Sources */,
+				239165EC0EBAB514D6320BBD /* SettingsSubpages.swift in Sources */,
 				734927ED72C96E14E7E76889 /* SettingsView.swift in Sources */,
 				483F0360FA8F21B501EF46D5 /* ShortcutGuideView.swift in Sources */,
 				FCE0D9FD218D559D40EC67AE /* SignInView.swift in Sources */,
@@ -1230,6 +1241,7 @@
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
 				0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */,
+				221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */,
 				A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */,
 				99F3E3509C85A93432F9C75B /* TodayButtonsTests.swift in Sources */,
 				AF65F3440AC015F904519C17 /* VacationReminderTests.swift in Sources */,

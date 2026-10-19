@@ -72,6 +72,7 @@ private struct LiveActivityContent: View {
     }
 }
 
+#if DEBUG
 #Preview("Lock Screen running", as: .content, using: TimerActivityAttributes()) {
     TimetrackLiveActivity()
 } contentStates: {
@@ -85,6 +86,7 @@ private struct LiveActivityContent: View {
     LiveActivityTarget.sample()
     LiveActivityTarget.sample(paused: true)
 }
+#endif
 
 // MARK: - Control Center
 

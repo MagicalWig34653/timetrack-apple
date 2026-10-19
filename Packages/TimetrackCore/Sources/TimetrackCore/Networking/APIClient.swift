@@ -254,8 +254,22 @@ public actor APIClient: PreferencesService {
 
     // MARK: - Planning (module `planning`)
 
-    public func listAbsences(from: LocalDay, to: LocalDay) async throws -> [Absence] {
-        try await get("/absences", query: [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)])
+    /// `hasAttachment` (contract v0.24.0) restricts the list server side to absences with (`true`) or without (`false`) attachments.
+    public func listAbsences(from: LocalDay, to: LocalDay, hasAttachment: Bool? = nil) async throws -> [Absence] {
+        var query = [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)]
+        if let hasAttachment { query.append(URLQueryItem(name: "hasAttachment", value: hasAttachment ? "true" : "false")) }
+        return try await get("/absences", query: query)
+    }
+
+    /// `GET /absences/{id}/attachments` (contract v0.24.0): the stored attachments of one absence.
+    public func listAbsenceAttachments(id: UUID) async throws -> [FileMeta] {
+        try await get("/absences/\(id.uuidString.lowercased())/attachments")
+    }
+
+    /// `GET /files/{id}`; with `inline` the server sends `Content-Disposition: inline` for previewable types and falls back to attachment otherwise.
+    public func downloadFile(id: UUID, inline: Bool) async throws -> Data {
+        let query = inline ? [URLQueryItem(name: "disposition", value: "inline")] : []
+        return try await perform(.get, "/files/\(id.uuidString.lowercased())", query: query, headers: ["Accept": "*/*"])
     }
 
     public func getVacationBalance(year: Int) async throws -> VacationBalance {

@@ -40,11 +40,14 @@ public struct Absence: Codable, Sendable, Hashable, Identifiable {
     public let documentSubmittedOn: LocalDay?
     public let documentReferenceStart: LocalDay?
     public let documentReferenceEnd: LocalDay?
+    /// Stored, readable attachments (contract v0.24.0); 0 when an older backend omits the field.
+    public let attachmentCount: Int
 
     public init(id: UUID, version: Int = 1, kind: AbsenceKind, startDate: LocalDay, endDate: LocalDay, halfDayStart: Bool? = nil,
                 halfDayEnd: Bool? = nil, status: AbsenceStatus, note: String? = nil, countedHalfDays: Int,
                 documentStatus: DocumentStatus? = nil, documentSubmittedOn: LocalDay? = nil,
-                documentReferenceStart: LocalDay? = nil, documentReferenceEnd: LocalDay? = nil) {
+                documentReferenceStart: LocalDay? = nil, documentReferenceEnd: LocalDay? = nil, attachmentCount: Int = 0) {
+        self.attachmentCount = attachmentCount
         self.documentStatus = documentStatus
         self.documentSubmittedOn = documentSubmittedOn
         self.documentReferenceStart = documentReferenceStart
@@ -59,6 +62,30 @@ public struct Absence: Codable, Sendable, Hashable, Identifiable {
         self.status = status
         self.note = note
         self.countedHalfDays = countedHalfDays
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, version, kind, startDate, endDate, halfDayStart, halfDayEnd, status, note, countedHalfDays
+        case documentStatus, documentSubmittedOn, documentReferenceStart, documentReferenceEnd, attachmentCount
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        version = try c.decode(Int.self, forKey: .version)
+        kind = try c.decode(AbsenceKind.self, forKey: .kind)
+        startDate = try c.decode(LocalDay.self, forKey: .startDate)
+        endDate = try c.decode(LocalDay.self, forKey: .endDate)
+        halfDayStart = try c.decodeIfPresent(Bool.self, forKey: .halfDayStart)
+        halfDayEnd = try c.decodeIfPresent(Bool.self, forKey: .halfDayEnd)
+        status = try c.decode(AbsenceStatus.self, forKey: .status)
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+        countedHalfDays = try c.decode(Int.self, forKey: .countedHalfDays)
+        documentStatus = try c.decodeIfPresent(DocumentStatus.self, forKey: .documentStatus)
+        documentSubmittedOn = try c.decodeIfPresent(LocalDay.self, forKey: .documentSubmittedOn)
+        documentReferenceStart = try c.decodeIfPresent(LocalDay.self, forKey: .documentReferenceStart)
+        documentReferenceEnd = try c.decodeIfPresent(LocalDay.self, forKey: .documentReferenceEnd)
+        attachmentCount = max(try c.decodeIfPresent(Int.self, forKey: .attachmentCount) ?? 0, 0)
     }
 }
 

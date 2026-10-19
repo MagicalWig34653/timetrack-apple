@@ -60,6 +60,7 @@ final class ParityFlowTests: XCTestCase {
         shot("vacation-edit")
         el("settings.save").tap()
         el("settings.done").tap()
+        open("Urlaub", "vacation")
         // The tiles are gone (R3); the balance card stays, and the saved entitlement is in the settings sheet.
         XCTAssertTrue(el("vacation.available.value").waitForExistence(timeout: 10))
         XCTAssertFalse(el("vacation.tile.entitlement").exists)

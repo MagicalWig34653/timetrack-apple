@@ -29,8 +29,9 @@ final class SettingsShotTests: XCTestCase {
             shot("settings-\(page)")
         }
         // Sub pages (only the ones the new structure has).
-        for (id, name) in [("settings.appearance", "appearance"), ("settings.vacation", "vacation"), ("settings.server", "server"), ("settings.about", "about")] {
-            for _ in 0..<6 where !el(id).isHittable { app.swipeDown() }
+        for (id, name) in [("settings.server", "server"), ("settings.about", "about"), ("settings.vacation", "vacation"), ("settings.appearance", "appearance")] {
+            for _ in 0..<6 where !el(id).isHittable { app.swipeUp() }
+            if !el(id).isHittable { for _ in 0..<6 where !el(id).isHittable { app.swipeDown() } }
             guard el(id).isHittable else { continue }
             el(id).tap()
             sleep(2)

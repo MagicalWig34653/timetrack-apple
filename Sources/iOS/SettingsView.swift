@@ -88,7 +88,7 @@ struct SettingsView: View {
 
     /// Technical facts live at the bottom, one level down.
     private var technicalGroup: some View {
-        FormSection {
+        FormSection("Info") {
             SettingsLinkRow(title: "Server und Module", symbol: "server.rack", id: "settings.server") { ServerModulesView() }
             SettingsLinkRow(title: "settings.about", symbol: "info.circle", value: AppBuildInfo(platform: "iOS").display, id: "settings.about") { AboutView() }
         }

@@ -79,6 +79,8 @@ struct TimetrackIOSApp: App {
             NavigationStack { FocusFilterView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_REMINDERS_PAGE"] == "1" {
             NavigationStack { VacationReminderSettingsView() }
+        } else if ProcessInfo.processInfo.environment["TT_DEV_OVERWORK_PAGE"] == "1" {
+            NavigationStack { OverworkSettingsView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_PAGE"] == "1" {
             NavigationStack { CalendarSettingsView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_WRITE"] == "1" {

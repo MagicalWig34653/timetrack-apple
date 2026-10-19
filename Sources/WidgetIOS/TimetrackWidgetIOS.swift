@@ -40,7 +40,7 @@ struct TimetrackLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
             LiveActivityContent(state: context.state)
-                .activityBackgroundTint(TTTheme(accentHex: context.state.accentHex).accent.opacity(0.18))
+                .activityBackgroundTint(context.state.backgroundTint)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) { IslandExpandedLeading(state: context.state) }

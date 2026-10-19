@@ -152,6 +152,7 @@
 		C5F53D83EC8C94AFA44D91D2 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 8B1C4EF1FB7F7021FD68BECF /* TimetrackStores */; };
 		C5FE21F448AF752E9992B34B /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = D5ABC4A98D257C9ACD688EBF /* TimetrackStores */; };
 		C8FEFF1B4DBF584BD89FDEAB /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = E006E6843F9452A0AB2BEDD0 /* TimetrackStores */; };
+		CC9A135EB8E39FBB2C141369 /* LeaveStopActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0130CA5EF5402B99A1417ECF /* LeaveStopActions.swift */; };
 		CD03C15E5CD2BCA1077F1045 /* SignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F0A803D3DB0919C873148 /* SignInView.swift */; };
 		CF1E200A0644E500E5B5F49C /* TimetrackMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDDA3D3AF17289B8F42E7594 /* TimetrackMacApp.swift */; };
 		CF7826CAE36594DEFF357608 /* TimerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AB666CFC135DC93A7790FE /* TimerLiveActivity.swift */; };
@@ -276,6 +277,7 @@
 /* Begin PBXFileReference section */
 		00034D02ECB5AFAE00E8D16D /* IconCatalog.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconCatalog.generated.swift; sourceTree = "<group>"; };
 		00C3B7A31037D7334ED12DD1 /* TimetrackGreen.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackGreen.icon; sourceTree = "<group>"; };
+		0130CA5EF5402B99A1417ECF /* LeaveStopActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaveStopActions.swift; sourceTree = "<group>"; };
 		0460EDC2CEE74D3D22F4AF2D /* TimetrackMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimetrackMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04AB666CFC135DC93A7790FE /* TimerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerLiveActivity.swift; sourceTree = "<group>"; };
 		063404462ED7AFBF099CDC1D /* TodayButtonsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayButtonsTests.swift; sourceTree = "<group>"; };
@@ -618,6 +620,7 @@
 			children = (
 				FA5AAE907118B638C7B34FA5 /* AutomationRuntime.swift */,
 				D753667477D8FD54ABCCDBF6 /* AutomationSettingsView.swift */,
+				0130CA5EF5402B99A1417ECF /* LeaveStopActions.swift */,
 				C8CD0513317393D3CB5C87EE /* LocationIntents.swift */,
 				2E8B431C2FDA0A08C46D88C9 /* LocationService.swift */,
 				4A31FA3C9AA134A414F010ED /* NewPlaceSheet.swift */,
@@ -1177,6 +1180,7 @@
 				A3482430E86BC604BD3A6099 /* FocusNotifications.swift in Sources */,
 				54BD5DCFCEF0F95C8BDFF8BB /* Formatters.swift in Sources */,
 				30D2583DE2256E52FCAD663C /* IconCatalog.generated.swift in Sources */,
+				CC9A135EB8E39FBB2C141369 /* LeaveStopActions.swift in Sources */,
 				C1F2E52C0F157881B395628F /* LiveActivityViews.swift in Sources */,
 				9138C7BDD813C4E6F854B8A3 /* LocationIntents.swift in Sources */,
 				149F469262A0F5F1B16B8090 /* LocationService.swift in Sources */,

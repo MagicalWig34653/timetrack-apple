@@ -80,7 +80,12 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
             actions: [UNNotificationAction(identifier: FocusNotificationID.stopAction, title: "Stopp", options: [.destructive]),
                       UNNotificationAction(identifier: "keep", title: "Weiterlaufen lassen", options: [])],
             intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([start, stop])
+        let leave = UNNotificationCategory( // L4: "Du hast {Ort} verlassen – Timer stoppen?"
+            identifier: LeaveStopNotification.category,
+            actions: [UNNotificationAction(identifier: LeaveStopNotification.stopAction, title: "Stoppen", options: [.destructive]),
+                      UNNotificationAction(identifier: LeaveStopNotification.keepAction, title: "Weiterlaufen lassen", options: [])],
+            intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([start, stop, leave])
     }
 
     static func requestPermission() async -> Bool {
@@ -100,6 +105,10 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
         if let vacationID = info[VacationReminderCenter.absenceKey] as? String { // R3: vacation reminder tap opens the Urlaub tab
             let start = (info[VacationReminderCenter.startKey] as? String) ?? ""
             await MainActor.run { VacationReminderCenter.shared.handleTap(absenceID: vacationID, startDate: start) }
+            return
+        }
+        if info[LeaveStopNotification.eventKey] != nil { // L4: answer to the leave question
+            await LeaveStopNotification.answer(action: response.actionIdentifier, info: info)
             return
         }
         guard let text = info["configuration"] as? String, let data = Data(base64Encoded: text),

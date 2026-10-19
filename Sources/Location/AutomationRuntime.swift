@@ -44,7 +44,8 @@ final class AutomationRuntime {
                 guard let server = secrets.read(SecretKey.serverURL), let url = URL(string: server),
                       let token = secrets.read(AutomationSecretKey.deviceToken) else { return nil }
                 return DeviceTokenEventSender(baseURL: url, token: token, transport: URLSessionTransport())
-            })
+            },
+            leaveStop: AppLeaveStopActions())
     }
 
     /// Stable, non-personal name of this installation for the server (`ios-` plus six hex characters).

@@ -133,6 +133,24 @@ public final class AutomationStore {
         await apply(config)
     }
 
+    public func setLeaveWaitMinutes(_ minutes: Int) async {
+        var config = state.config
+        config.leaveWaitMinutes = minutes
+        await apply(config)
+    }
+
+    /// L4: whether leaving this place stops (direct) or offers to stop (suggestion) a running timer. Device setting.
+    public func stopsOnLeave(_ place: Place) -> Bool {
+        guard let cached = AutomationPlace(place) else { return false }
+        return state.config.stopsOnLeave(cached)
+    }
+
+    public func setStopOnLeave(_ enabled: Bool, for place: Place) async {
+        var config = state.config
+        config.stopOnLeaveOverrides[place.id.uuidString] = enabled
+        await apply(config)
+    }
+
     private func apply(_ config: AutomationConfig) async {
         await engine.setConfig(config)
         await refreshFromEngine()

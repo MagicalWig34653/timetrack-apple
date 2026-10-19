@@ -8,6 +8,8 @@ public protocol LocationFixProviding: Sendable {
 
 public enum LogTrigger: String, Codable, Sendable, Hashable {
     case regionEnter, regionExit, check, reconcile, shortcutArrive, shortcutLeave, sync
+    /// L4: the check after the leave wait ("stop when leaving").
+    case leaveCheck
 }
 
 public struct AutomationLogEntry: Codable, Sendable, Hashable, Identifiable {
@@ -29,8 +31,22 @@ public struct AutomationState: Codable, Sendable, Equatable {
     public var log: [AutomationLogEntry] = []
     /// Last position the app knew (significant change / one-shot fix); only used to choose the nearest regions.
     public var lastKnown: GeoPoint?
+    /// L4: leaves waiting for their check ("stop when leaving"), by place id.
+    public var pendingLeaves: [String: PendingLeave] = [:]
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey { case config, places, runtime, log, lastKnown, pendingLeaves }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        config = try container.decodeIfPresent(AutomationConfig.self, forKey: .config) ?? AutomationConfig()
+        places = try container.decodeIfPresent([AutomationPlace].self, forKey: .places) ?? []
+        runtime = try container.decodeIfPresent([String: PlaceRuntimeState].self, forKey: .runtime) ?? [:]
+        log = try container.decodeIfPresent([AutomationLogEntry].self, forKey: .log) ?? []
+        lastKnown = try container.decodeIfPresent(GeoPoint.self, forKey: .lastKnown)
+        pendingLeaves = try container.decodeIfPresent([String: PendingLeave].self, forKey: .pendingLeaves) ?? [:]
+    }
 
     public static let logLimit = 50
 
@@ -54,12 +70,15 @@ public actor AutomationEngine {
     private let deviceId: String
     private let now: @Sendable () -> Date
     private let makeID: @Sendable () -> UUID
+    private let leaveStop: LeaveStopActing?
     private var state: AutomationState
     private var changeHandler: (@Sendable () -> Void)?
 
     public init(storage: BlobStorage, queue: AutomationEventQueue, location: LocationFixProviding, deviceId: String,
                 senderFactory: @escaping @Sendable () -> AutomationEventSending?,
-                now: @escaping @Sendable () -> Date = { .now }, makeID: @escaping @Sendable () -> UUID = { UUID() }) {
+                now: @escaping @Sendable () -> Date = { .now }, makeID: @escaping @Sendable () -> UUID = { UUID() },
+                leaveStop: LeaveStopActing? = nil) {
+        self.leaveStop = leaveStop
         self.stateStorage = storage
         self.queue = queue
         self.location = location
@@ -93,6 +112,7 @@ public actor AutomationEngine {
         state.places = cached
         let ids = Set(cached.map { $0.id.uuidString })
         state.runtime = state.runtime.filter { ids.contains($0.key) }
+        state.pendingLeaves = state.pendingLeaves.filter { ids.contains($0.key) }
         persist()
     }
 
@@ -149,7 +169,8 @@ public actor AutomationEngine {
             guard let runtime = state.runtime[place.id.uuidString], runtime.phase == .pending, let dueAt = runtime.dueAt else { return false }
             return current >= dueAt || current.timeIntervalSince(runtime.arrivedAt ?? current) > AutomationConfig.pendingExpiry
         }
-        if !due.isEmpty {
+        let dueLeaves = leaveStop == nil ? [] : state.pendingLeaves.values.filter { current >= $0.dueAt }.sorted { $0.dueAt < $1.dueAt }
+        if !due.isEmpty || !dueLeaves.isEmpty {
             let fix = await location.currentFix()
             if let fix { state.lastKnown = GeoPoint(latitude: fix.latitude, longitude: fix.longitude) }
             let filter = ArrivalFilter(config: state.config, makeID: makeID)
@@ -160,13 +181,23 @@ public actor AutomationEngine {
                 await apply(result, place: place, trigger: .check)
                 outcomes.append(AutomationOutcome(decision: result.decision, placeName: place.name, mode: place.mode, dwellMinutes: nil))
             }
+            if !dueLeaves.isEmpty { await flush() } // departure events first, so the server ends what it created before the app checks the timer
+            for leave in dueLeaves { if let outcome = await checkLeave(leave, fix: fix) { outcomes.append(outcome) } }
         }
         await flush()
         return outcomes
     }
 
+    /// Logs the answer to a "Timer stoppen?" question (the notification action runs outside the evaluation).
+    public func recordLeaveAnswer(placeName: String, decision: AutomationDecision, detail: String?) {
+        appendLog(placeName: placeName, trigger: .leaveCheck, decision: decision, confidence: nil, detail: detail)
+        persist()
+    }
+
     /// Earliest time a pending arrival becomes checkable (the platform schedules a background refresh for it).
-    public func nextDueDate() -> Date? { state.runtime.values.filter { $0.phase == .pending }.compactMap(\.dueAt).min() }
+    public func nextDueDate() -> Date? {
+        (state.runtime.values.filter { $0.phase == .pending }.compactMap(\.dueAt) + state.pendingLeaves.values.map(\.dueAt)).min()
+    }
 
     public func flush() async {
         guard await queue.count > 0 else { return }
@@ -200,6 +231,10 @@ public actor AutomationEngine {
         let result = filter.enter(&runtime, place: place, at: time, origin: origin)
         state.runtime[placeId.uuidString] = runtime
         appendLog(placeName: place.name, trigger: trigger, decision: result.decision, confidence: nil, detail: nil)
+        if state.pendingLeaves.removeValue(forKey: placeId.uuidString) != nil {
+            // Back at the place before the wait ended: the user did not leave for good, the timer keeps running.
+            appendLog(placeName: place.name, trigger: trigger, decision: .leaveReturned, confidence: nil, detail: "Wieder am Ort, Timer läuft weiter")
+        }
         persist()
         return AutomationOutcome(decision: result.decision, placeName: place.name, mode: place.mode, dwellMinutes: Int((filter.dwell(for: place) / 60).rounded(.up)))
     }
@@ -210,8 +245,64 @@ public actor AutomationEngine {
         let result = ArrivalFilter(config: state.config, makeID: makeID).exit(&runtime, place: place, at: time)
         state.runtime[placeId.uuidString] = runtime
         await apply(result, place: place, trigger: trigger)
+        if leaveStop != nil {
+            let planned = LeaveStopFilter(config: state.config).schedule(place: place, leftAt: time, exit: result, eventId: makeID())
+            if let leave = planned.leave { state.pendingLeaves[placeId.uuidString] = leave }
+            if let decision = planned.decision {
+                appendLog(placeName: place.name, trigger: trigger, decision: decision, confidence: nil,
+                          detail: decision == .leaveScheduled ? "Timer wird nach \(state.config.leaveWaitMinutes) min außerhalb geprüft" : nil)
+            }
+            persist()
+        }
         await flush()
+        // A zero-length wait could be due right away; normally the next wake-up finds it.
         return AutomationOutcome(decision: result.decision, placeName: place.name, mode: place.mode, dwellMinutes: nil)
+    }
+
+    /// Final check of one leave: back inside, timer idle or restarted -> nothing; otherwise stop (direct) or ask (suggestion).
+    /// The leave is taken out of the state while the platform acts, so a second `evaluate()` cannot handle it twice.
+    private func checkLeave(_ leave: PendingLeave, fix: LocationFix?) async -> AutomationOutcome? {
+        guard let leaveStop, state.pendingLeaves[leave.placeId.uuidString] == leave else { return nil }
+        guard let place = state.place(leave.placeId) else {
+            state.pendingLeaves.removeValue(forKey: leave.placeId.uuidString)
+            persist()
+            return nil
+        }
+        state.pendingLeaves.removeValue(forKey: leave.placeId.uuidString)
+        let filter = LeaveStopFilter(config: state.config)
+        let verification = PresenceVerification.from(fix: fix, place: place)
+        let timer = (verification == .outside || verification == .unavailable) ? await leaveStop.observeTimer() : TimerObservation.unknown
+        var check = filter.check(leave, place: place, now: now(), verification: verification, timer: timer)
+        var detail: String?
+        let clock = LeaveStopFilter.clockText(leave.leftAt)
+        switch check.action {
+        case .stop:
+            switch await leaveStop.stopTimer(eventId: leave.eventId, at: leave.leftAt) {
+            case .stopped: detail = "Timer gestoppt um \(clock)"
+            case .queued: check.decision = .leaveStopQueued; detail = "Stopp um \(clock) wartet auf Verbindung"
+            case .alreadyGone: check.decision = .leaveNoTimer
+            case .failed: check.keepWaiting = true
+            }
+        case .offer:
+            detail = await leaveStop.offerStop(placeName: place.name, leftAt: leave.leftAt, eventId: leave.eventId)
+                ? "Nachfrage gesendet: Stopp um \(clock)?" : "Mitteilungen nicht erlaubt, keine Nachfrage möglich"
+        case .none:
+            switch check.decision {
+            case .leaveReturned: detail = "Wieder am Ort, Timer läuft weiter"
+            case .leaveNoTimer: detail = "Kein Timer läuft"
+            case .leaveTimerRestarted: detail = "Timer wurde nach dem Verlassen neu gestartet"
+            case .leaveHandledByServer: detail = "Das Ende schlägt der Server vor"
+            default: break
+            }
+        }
+        if check.keepWaiting {
+            state.pendingLeaves[leave.placeId.uuidString] = leave
+            persist(notify: false)
+            return nil
+        }
+        appendLog(placeName: place.name, trigger: .leaveCheck, decision: check.decision, confidence: nil, detail: detail)
+        persist()
+        return AutomationOutcome(decision: check.decision, placeName: place.name, mode: place.mode, dwellMinutes: nil)
     }
 
     private func apply(_ result: FilterResult, place: AutomationPlace, trigger: LogTrigger) async {

@@ -14,12 +14,15 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     public let queuedAt: Date
     /// Optional place for a start (F3: the Focus filter can book a start with a place). Absent in entries written before F3.
     public let placeId: UUID?
+    /// L4 (optional): reason recorded with the correction when a late delivery is moved back to `queuedAt`. Default: "Offline gestartet/gestoppt".
+    public let correctionReason: String?
 
-    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil) {
+    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil) {
         self.id = id
         self.command = command
         self.queuedAt = queuedAt
         self.placeId = placeId
+        self.correctionReason = correctionReason
     }
 }
 
@@ -125,12 +128,12 @@ public actor TimerActionQueue {
         case .start(let kind):
             let segment = try await client.startTimer(clientEventId: action.id, kind: kind, placeId: action.placeId)
             if late, segment.startedAt > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
-                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(startedAt: action.queuedAt, reason: "Offline gestartet"), ifMatchVersion: segment.version)
+                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(startedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestartet"), ifMatchVersion: segment.version)
             }
         case .stop:
             let segment = try await client.stopTimer(clientEventId: action.id)
             if late, let end = segment.endedAt, end > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
-                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(endedAt: action.queuedAt, reason: "Offline gestoppt"), ifMatchVersion: segment.version)
+                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(endedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestoppt"), ifMatchVersion: segment.version)
             }
         }
     }

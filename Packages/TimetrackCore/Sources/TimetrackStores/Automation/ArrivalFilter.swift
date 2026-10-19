@@ -9,8 +9,13 @@ public struct AutomationConfig: Codable, Sendable, Hashable {
     public var dwellMinutes = 4
     /// After a booked visit ended, a new arrival at the same place within this time is ignored (GPS jitter), 10 to 60 minutes.
     public var cooldownMinutes = 10
+    /// L4: after leaving a place, the running timer is only stopped when the device stayed outside this long (GPS jumps, short detours), 1 to 15 minutes.
+    public var leaveWaitMinutes = 3
+    /// L4: per-place override of "stop when leaving" (key: place id). Without an entry the default applies (on unless the place is off).
+    public var stopOnLeaveOverrides: [String: Bool] = [:]
 
     public static let dwellRange = 2...15
+    public static let leaveWaitRange = 1...15
     public static let cooldownRange = 10...60
     /// Above this speed (m/s, about 29 km/h) the device is considered to be driving past.
     public static let maxSpeed = 8.0
@@ -19,8 +24,27 @@ public struct AutomationConfig: Codable, Sendable, Hashable {
 
     public init() {}
 
+    private enum CodingKeys: String, CodingKey { case enabled, dwellMinutes, cooldownMinutes, leaveWaitMinutes, stopOnLeaveOverrides }
+
+    /// Tolerant decoding: stored settings from before L4 have no leave keys and must keep working.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        dwellMinutes = try container.decodeIfPresent(Int.self, forKey: .dwellMinutes) ?? 4
+        cooldownMinutes = try container.decodeIfPresent(Int.self, forKey: .cooldownMinutes) ?? 10
+        leaveWaitMinutes = try container.decodeIfPresent(Int.self, forKey: .leaveWaitMinutes) ?? 3
+        stopOnLeaveOverrides = try container.decodeIfPresent([String: Bool].self, forKey: .stopOnLeaveOverrides) ?? [:]
+    }
+
+    /// Whether leaving `place` stops (direct) or offers to stop (suggestion) a running timer. Default: on for every active place.
+    public func stopsOnLeave(_ place: AutomationPlace) -> Bool {
+        guard place.mode != .off else { return false }
+        return stopOnLeaveOverrides[place.id.uuidString] ?? true
+    }
+
     public var clamped: AutomationConfig {
         var copy = self
+        copy.leaveWaitMinutes = min(max(leaveWaitMinutes, Self.leaveWaitRange.lowerBound), Self.leaveWaitRange.upperBound)
         copy.dwellMinutes = min(max(dwellMinutes, Self.dwellRange.lowerBound), Self.dwellRange.upperBound)
         copy.cooldownMinutes = min(max(cooldownMinutes, Self.cooldownRange.lowerBound), Self.cooldownRange.upperBound)
         return copy
@@ -50,6 +74,8 @@ public enum AutomationDecision: String, Codable, Sendable, Hashable {
     case stillWaiting, speedTooHigh, passBy, outsideAtCheck, expired
     case confirmed, confirmedOnExit, departureQueued, noArrival
     case sent, sendFailed, dropped, unauthorized
+    /// L4 (stop when leaving): scheduled, back inside, no timer, timer restarted, stopped, queued offline, offered, failed, expired.
+    case leaveScheduled, leaveReturned, leaveNoTimer, leaveTimerRestarted, leaveStopped, leaveStopQueued, leaveOffered, leaveHandledByServer, leaveExpired, leaveStayTooShort
 }
 
 public struct PlannedEvent: Sendable, Hashable {
@@ -62,6 +88,8 @@ public struct FilterResult: Sendable, Hashable {
     public var decision: AutomationDecision
     public var events: [PlannedEvent] = []
     public var confidence: PresenceConfidence?
+    /// How long the device was inside the place before this exit (nil: unknown, e.g. the app never saw the entry).
+    public var stay: TimeInterval?
 }
 
 /// Where the device is relative to a place at check time.
@@ -110,8 +138,24 @@ public struct PlaceRuntimeState: Codable, Sendable, Hashable {
     public var arrivalEventId: UUID?
     /// End of the last confirmed visit; starts the cooldown.
     public var lastDepartureAt: Date?
+    /// L4: first time the device was seen inside the place for the current stay, whether or not the arrival filter accepted it
+    /// (cooldown, mode off). Used to tell a pass-by from a real stay when leaving.
+    public var enteredAt: Date?
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey { case phase, origin, arrivedAt, dueAt, arrivalEventId, lastDepartureAt, enteredAt }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        phase = try container.decodeIfPresent(Phase.self, forKey: .phase) ?? .outside
+        origin = try container.decodeIfPresent(ArrivalOrigin.self, forKey: .origin) ?? .region
+        arrivedAt = try container.decodeIfPresent(Date.self, forKey: .arrivedAt)
+        dueAt = try container.decodeIfPresent(Date.self, forKey: .dueAt)
+        arrivalEventId = try container.decodeIfPresent(UUID.self, forKey: .arrivalEventId)
+        lastDepartureAt = try container.decodeIfPresent(Date.self, forKey: .lastDepartureAt)
+        enteredAt = try container.decodeIfPresent(Date.self, forKey: .enteredAt)
+    }
 }
 
 /// Pure decision logic. A location signal is never booked directly: an arrival becomes "pending", and only presence that lasted
@@ -132,6 +176,7 @@ public struct ArrivalFilter: Sendable {
     }
 
     public func enter(_ state: inout PlaceRuntimeState, place: AutomationPlace, at: Date, origin: ArrivalOrigin) -> FilterResult {
+        if state.enteredAt == nil { state.enteredAt = at }
         guard config.enabled else { return FilterResult(decision: .globalOff) }
         guard place.mode != .off else { return FilterResult(decision: .modeOff) }
         guard state.phase == .outside else { return FilterResult(decision: .alreadyInside) }
@@ -173,6 +218,14 @@ public struct ArrivalFilter: Sendable {
     }
 
     public func exit(_ state: inout PlaceRuntimeState, place: AutomationPlace, at: Date) -> FilterResult {
+        let stay = state.enteredAt.map { at.timeIntervalSince($0) }
+        state.enteredAt = nil
+        var result = exitVisit(&state, place: place, at: at)
+        result.stay = stay
+        return result
+    }
+
+    private func exitVisit(_ state: inout PlaceRuntimeState, place: AutomationPlace, at: Date) -> FilterResult {
         switch state.phase {
         case .outside:
             return FilterResult(decision: .noArrival)

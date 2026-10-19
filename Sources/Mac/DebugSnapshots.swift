@@ -11,6 +11,10 @@ enum DebugSnapshots {
         let env = ProcessInfo.processInfo.environment
         guard let directory = env["TT_DEV_SNAPSHOT_DIR"], let server = env["TT_DEV_SERVER"], let cookie = env["TT_DEV_COOKIE"] else { return }
         if model.phase != .signedIn { await model.signInWithSessionCookie(serverInput: server, cookie: cookie) }
+        if let size = env["TT_DEV_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2,
+           let window = NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil }) {
+            window.setContentSize(NSSize(width: size[0], height: size[1]))
+        }
         for (appearance, name) in [(NSAppearance.Name.aqua, "light"), (.darkAqua, "dark")] {
             NSApp.appearance = NSAppearance(named: appearance)
             for item in SidebarItem.allCases {

@@ -86,7 +86,23 @@ private struct LiveButtonLabel: View {
         }
         .font(.system(.footnote, design: .rounded, weight: .semibold)).foregroundStyle(ink)
         .padding(.horizontal, 14).padding(.vertical, 9).frame(maxWidth: expand ? .infinity : nil).frame(minHeight: 36)
-        .background(fill, in: .capsule)
+        .modifier(LiveGlassFill(fill: fill))
+    }
+}
+
+/// E2: Liquid Glass for the Live Activity buttons. `glassEffect` is the glass API usable in widget content on iOS
+/// (`WidgetTexture.glass` is visionOS only; the Lock Screen background is the system's own material, `activityBackgroundTint(nil)`).
+/// The glass is tinted with the button colour; with Reduce Transparency the solid fill stays so the label keeps its contrast.
+private struct LiveGlassFill: ViewModifier {
+    let fill: Color
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    func body(content: Content) -> some View {
+        if reduceTransparency {
+            content.background(fill, in: .capsule)
+        } else {
+            content.glassEffect(.regular.tint(fill), in: .capsule)
+        }
     }
 }
 

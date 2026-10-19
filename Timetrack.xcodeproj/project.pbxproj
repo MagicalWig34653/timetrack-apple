@@ -99,6 +99,7 @@
 		80269B3C174A73B5EA721B7C /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818ECBA7BD8240465F832821 /* TodayView.swift */; };
 		808B50ADE18678BBA4E85405 /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
 		81C4EA3F7D129693905837A4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2E9D54CF2D57C695B3BB75C0 /* Assets.xcassets */; };
+		8216F25A878503520E814CB1 /* CalendarWriteDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3086FE84FF9D116230486C6 /* CalendarWriteDemo.swift */; };
 		828137061B385FD65C835D56 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */; };
 		837B835737740160340479A1 /* AccountAccentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD24C654F67761698F18312 /* AccountAccentTests.swift */; };
 		8404724EEBCA85512B15917D /* DeviceEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D38CCC85F93C994D8FC6E35 /* DeviceEvents.swift */; };
@@ -355,6 +356,7 @@
 		BD733A09D977D0687741719F /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
 		BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackWidgetMac.swift; sourceTree = "<group>"; };
 		C2ACE9C3D67570713F02692D /* TimetrackHourglass.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackHourglass.icon; sourceTree = "<group>"; };
+		C3086FE84FF9D116230486C6 /* CalendarWriteDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWriteDemo.swift; sourceTree = "<group>"; };
 		C4650AA0727E578260AF0D33 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
 		C7DF70C9AD2D133E1571E445 /* TimetrackMonogramC.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackMonogramC.icon; sourceTree = "<group>"; };
 		C8CD0513317393D3CB5C87EE /* LocationIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationIntents.swift; sourceTree = "<group>"; };
@@ -562,6 +564,7 @@
 				EE856B5EA18565180559244C /* CalendarDayDemo.swift */,
 				9681420E6F893816773EC783 /* CalendarEnvironment.swift */,
 				0C994C099357497A50E66E11 /* CalendarSettingsView.swift */,
+				C3086FE84FF9D116230486C6 /* CalendarWriteDemo.swift */,
 				4FB2A52DD3CB4C5FA9AE43EF /* EventKitProvider.swift */,
 			);
 			name = Calendar;
@@ -1096,6 +1099,7 @@
 				27FA5D9F3CC64869659B5753 /* CalendarEnvironment.swift in Sources */,
 				5D9B9C20637004A003D445CB /* CalendarScreen.swift in Sources */,
 				3D79385F6489C0A63390405C /* CalendarSettingsView.swift in Sources */,
+				8216F25A878503520E814CB1 /* CalendarWriteDemo.swift in Sources */,
 				801B22C2374BCC7A42BF0DE4 /* DayDetail.swift in Sources */,
 				8404724EEBCA85512B15917D /* DeviceEvents.swift in Sources */,
 				5FA31A4A50BDB1856AC43881 /* EventKitProvider.swift in Sources */,

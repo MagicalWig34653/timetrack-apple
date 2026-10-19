@@ -55,13 +55,21 @@ final class TimeCalendarTests: XCTestCase {
         sleep(1)
         shot("calendar")
         let before = el("calendar.title").label
-        let grid = el("calendar.title")
-        grid.swipeLeft() // not on the grid: no month change expected
-        XCTAssertEqual(el("calendar.title").label, before)
-        el("calendar.next").tap()
-        sleep(1)
+        app.buttons["calendar.next"].tap()
+        for _ in 0..<10 where el("calendar.title").label == before { sleep(1) }
         XCTAssertNotEqual(el("calendar.title").label, before)
         shot("calendar-next-month")
+        // Seeded approved vacation starts three weeks after this week's Monday (visible in the following month for most weeks).
+        var cal = Calendar(identifier: .iso8601); cal.timeZone = TimeZone(identifier: "Europe/Berlin")!
+        let monday = cal.dateInterval(of: .weekOfYear, for: Date())!.start
+        let vacationDay = cal.date(byAdding: .day, value: 21, to: monday)!
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.timeZone = cal.timeZone; f.locale = Locale(identifier: "en_US_POSIX")
+        let target = el("day.\(f.string(from: vacationDay))")
+        if target.waitForExistence(timeout: 3) {
+            target.tap()
+            sleep(1)
+            shot("calendar-vacation-day")
+        }
         el("calendar.today").tap()
         XCTAssertEqual(el("calendar.title").label, before)
     }

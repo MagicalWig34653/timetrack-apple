@@ -43,7 +43,7 @@ private struct CalendarContent: View {
             if wide {
                 HStack(alignment: .top, spacing: TT.Space.xl) {
                     VStack(alignment: .leading, spacing: TT.Space.m) { header; pagedGrid; Legend(); Spacer(minLength: 0) }
-                        .frame(maxWidth: 560)
+                        .frame(maxWidth: 640)
                     detailScroll.frame(maxWidth: .infinity)
                 }
                 .padding(.horizontal, TT.Space.l)
@@ -297,6 +297,7 @@ private struct DayCell: View {
     let store: CalendarStore
     let day: LocalDay
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
         let info = store.info(for: day)
@@ -313,7 +314,7 @@ private struct DayCell: View {
             .frame(height: 7)
         }
         .padding(.vertical, 5)
-        .frame(maxWidth: .infinity, minHeight: 52)
+        .frame(maxWidth: .infinity, minHeight: sizeClass == .regular ? 92 : 52)
         .background(inRange ? Color.accentColor.opacity(0.22) : .clear, in: .rect(cornerRadius: 10))
         .opacity(inMonth ? 1 : 0.5)
         .contentShape(.rect)

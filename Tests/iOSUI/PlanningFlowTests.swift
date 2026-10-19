@@ -43,7 +43,7 @@ final class PlanningFlowTests: XCTestCase {
 
         // 1) Range selection by long press + tap, then vacation.
         // Next week may start in the following month (the grid shows one month).
-        if !el("day.\(day(0))").exists { el("calendar.next").tap() }
+        if !el("day.\(day(0))").exists { app.buttons["calendar.next"].tap() }
         let first = el("day.\(day(0))")
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.press(forDuration: 0.9)
@@ -83,7 +83,7 @@ final class PlanningFlowTests: XCTestCase {
         if row.waitForExistence(timeout: 5) {
             row.press(forDuration: 1.0)
             if app.buttons["Krankschein als eingereicht markieren"].waitForExistence(timeout: 3) { app.buttons["Krankschein als eingereicht markieren"].tap() }
-            else { app.tap() }
+            else { app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.03)).tap() } // dismiss the menu without hitting the inline day actions
         }
         sleep(1)
         shot("daysheet-sick")
@@ -130,6 +130,7 @@ final class PlanningFlowTests: XCTestCase {
         if el("daysheet.done").exists { el("daysheet.done").tap() }
 
         // 6) Re-create one vacation so the Urlaub tab has data, then look at it.
+        if !el("day.\(day(7))").exists { app.buttons["calendar.next"].tap() }
         el("day.\(day(7))").tap()
         XCTAssertTrue(el("day.vacation").waitForExistence(timeout: 5))
         el("day.vacation").tap()

@@ -16,7 +16,7 @@ struct DayDetail: View {
     var body: some View {
         let info = store.info(for: day)
         VStack(alignment: .leading, spacing: TT.Space.m) {
-            if showTitle { Eyebrow(verbatim: PlanFormat.longDay(day, calendar: store.calendar)).accessibilityAddTraits(.isHeader) }
+            if showTitle { Text(verbatim: PlanFormat.longDay(day, calendar: store.calendar)).font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary).accessibilityAddTraits(.isHeader) }
             evaluation
             if !info.holidays.isEmpty || !info.schoolHolidays.isEmpty { holidays(info) }
             if !info.absences.isEmpty { absences(info) }
@@ -30,20 +30,16 @@ struct DayDetail: View {
         .ttHaptic(.confirmDestructive, whenBecomesTrue: cancelling != nil)
     }
 
+    /// Target and actual of the day as one subtitle line under the date (the list tab shows the same figures per entry).
     @ViewBuilder private var evaluation: some View {
         if let detail = store.detail, detail.date == day {
-            Card(padding: TT.Space.m) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("calendar.evaluation").font(TTFont.label).foregroundStyle(TT.textSecondary)
-                        Text("calendar.evaluation_text \(DurationFormat.hoursMinutes(detail.targetSeconds)) \(DurationFormat.hoursMinutes(detail.evaluatedWorkSeconds + detail.creditSeconds))")
-                            .font(TTFont.numeral).foregroundStyle(TT.textPrimary)
-                    }
-                    Spacer()
-                    if let mark = detail.mark, mark != .unmarked, mark != .unknown { StatusChip(markKeyPlan(mark), tone: .neutral) }
-                }
-                .accessibilityElement(children: .combine)
+            HStack {
+                Text("calendar.evaluation_text \(DurationFormat.hoursMinutes(detail.targetSeconds)) \(DurationFormat.hoursMinutes(detail.evaluatedWorkSeconds + detail.creditSeconds))")
+                    .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                Spacer()
+                if let mark = detail.mark, mark != .unmarked, mark != .unknown { StatusChip(markKeyPlan(mark), tone: .neutral) }
             }
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -136,7 +132,7 @@ struct DayDetail: View {
     }
 
     private var actions: some View {
-        let columns = [GridItem(.adaptive(minimum: 140), spacing: TT.Space.s)]
+        let columns = [GridItem(.adaptive(minimum: 104), spacing: TT.Space.s)]
         return LazyVGrid(columns: columns, spacing: TT.Space.s) {
             ForEach(AbsenceKind.selectable, id: \.self) { kind in
                 Button { absenceRequest = AbsenceRequest(kind: kind, start: day, end: day) } label: { Label(kind.shortKey, systemImage: kind.ttSymbol).lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity) }

@@ -3,31 +3,21 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
+/// The "Zeit" tab (Z1): one screen per week. Week navigation and total once at the top, the days with their entries below
+/// (each day header carries its own Ist/Soll). The week overview (Zeitkonto, plan comparison, averages) is a drill-down, not a second list.
 struct TimeView: View {
     @Environment(AppModel.self) private var model
-    @State private var segment: TimeSegment = .list // N1a: day list, week overview, week planner
 
     var body: some View {
-        VStack(spacing: 0) {
-            switch segment {
-            case .list:
-                Group {
-                    if let store = model.timeList {
-                        TimeContent(store: store)
-                    } else {
-                        ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
-                    }
-                }
-            case .week, .plan:
-                WeekHub(segment: $segment)
+        Group {
+            if let store = model.timeList {
+                TimeContent(store: store)
+            } else {
+                ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
             }
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.time")
-        .toolbar {
-            // Leaving the planner with unsaved changes: the draft stays in the cached store (shown as unsaved on return).
-            ToolbarItem(placement: .principal) { TimeSegmentPicker(selection: $segment, planningEnabled: model.isEnabled(.planning)) }
-        }
     }
 }
 
@@ -44,26 +34,9 @@ private struct TimeContent: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
 
     var body: some View {
-        Group {
-            if sizeClass == .regular {
-                HStack(alignment: .top, spacing: TT.Space.xl) {
-                    dayList.frame(maxWidth: TT.contentWidth)
-                    ScrollView {
-                        VStack(spacing: TT.Space.l) {
-                            WeekHeader(store: store)
-                            WeekOverview(store: store)
-                        }
-                        .padding(.top, TT.Space.s)
-                    }
-                    .frame(maxWidth: 380)
-                    .scrollIndicators(.hidden)
-                }
-                .padding(.horizontal, TT.Space.l)
-                .frame(maxWidth: .infinity)
-            } else {
-                dayList
-            }
-        }
+        dayList
+            .frame(maxWidth: sizeClass == .regular ? 760 : .infinity)
+            .frame(maxWidth: .infinity)
         .ttScreenBackground()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -83,10 +56,8 @@ private struct TimeContent: View {
 
     private var dayList: some View {
         List {
-            if sizeClass != .regular {
-                WeekHeader(store: store)
-                    .listRowBackground(Color.clear).listRowInsets(.init(top: 0, leading: 0, bottom: 4, trailing: 0)).listRowSeparator(.hidden)
-            }
+            WeekHeader(store: store)
+                .listRowBackground(Color.clear).listRowInsets(.init(top: 0, leading: 0, bottom: 4, trailing: 0)).listRowSeparator(.hidden)
             if let error = store.error {
                 ErrorBannerView(error: error) { Task { await store.load() } }
                     .listRowBackground(Color.clear).listRowSeparator(.hidden)
@@ -165,32 +136,11 @@ private struct WeekHeader: View {
                     if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
                 }
                 .accessibilityElement(children: .combine)
-            }
-        }
-    }
-}
-
-/// Per-day bars of the loaded week (iPad side column).
-private struct WeekOverview: View {
-    let store: TimeListStore
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: TT.Space.s) {
-            SectionHeader("time.overview")
-            Card {
-                VStack(spacing: TT.Space.m) {
-                    ForEach(store.days) { day in
-                        let done = day.evaluatedWorkSeconds + day.creditSeconds
-                        HStack(spacing: TT.Space.m) {
-                            Text(verbatim: dayTitle(day.date, calendar: store.calendar)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                                .frame(width: 84, alignment: .leading)
-                            ProgressBar(progress: day.targetSeconds > 0 ? Double(done) / Double(day.targetSeconds) : (done > 0 ? 1 : 0), height: 8)
-                            Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.numeralSmall).foregroundStyle(TT.textPrimary)
-                                .frame(width: 44, alignment: .trailing)
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
+                NavigationLink { WeekDetailScreen(day: store.weekStart) } label: {
+                    HStack { W.t("detail.link"); Spacer() }
+                        .font(TTFont.meta).foregroundStyle(TT.textSecondary).contentShape(.rect)
                 }
+                .buttonStyle(.plain).accessibilityIdentifier("time.week_details")
             }
         }
     }

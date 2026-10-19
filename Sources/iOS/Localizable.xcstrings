@@ -5237,6 +5237,28 @@
         }
       }
     },
+    "wk.detail.link": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochendetails: Zeitkonto, Plan, Durchschnitt"
+          }
+        }
+      }
+    },
+    "wk.detail.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wochendetails"
+          }
+        }
+      }
+    },
     "wk.empty.plan": {
       "extractionState": "manual",
       "localizations": {

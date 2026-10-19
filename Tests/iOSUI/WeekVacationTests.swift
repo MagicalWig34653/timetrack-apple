@@ -33,15 +33,16 @@ final class WeekVacationTests: XCTestCase {
         try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(prefix)-\(name).png"))
     }
 
-    /// Taps a segment (coordinate tap, retried) until `target` shows up; the plain tap is unreliable inside the iPad split view.
-    private func segment(_ title: String, target: String) {
-        let button = app.segmentedControls["time.segments"].buttons[title]
-        XCTAssertTrue(button.waitForExistence(timeout: 10), "segment \(title)")
-        XCTAssertTrue(button.isHittable, "segment \(title) not hittable, frame \(button.frame), window \(app.windows.firstMatch.frame)")
-        for _ in 0..<4 where !el(target).exists {
-            button.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-            _ = el(target).waitForExistence(timeout: 6)
-        }
+    /// Z1: week details are a drill-down of the time list; the planner is pushed from the details.
+    private func openWeekDetails() {
+        XCTAssertTrue(el("time.week_details").waitForExistence(timeout: 15))
+        el("time.week_details").tap()
+    }
+
+    private func openPlanner() {
+        let button = el("week.plan")
+        XCTAssertTrue(button.waitForExistence(timeout: 10))
+        button.tap()
     }
 
     private func expectDirty(_ label: String, file: StaticString = #filePath, line: UInt = #line) {
@@ -56,7 +57,7 @@ final class WeekVacationTests: XCTestCase {
     func testWeekOverviewAndPlanner() throws {
         try launch()
         open("Zeit", "time")
-        segment("Woche", target: "week.summary")
+        openWeekDetails()
         XCTAssertTrue(el("week.summary").waitForExistence(timeout: 15))
         sleep(1)
         shot("week-overview")
@@ -65,7 +66,7 @@ final class WeekVacationTests: XCTestCase {
         XCTAssertTrue(el("week.current").waitForExistence(timeout: 10))
         el("week.current").tap()
 
-        segment("Planen", target: "plan.standard")
+        openPlanner()
         XCTAssertTrue(el("plan.standard").waitForExistence(timeout: 15))
         sleep(1)
         shot("planner-empty")
@@ -93,7 +94,8 @@ final class WeekVacationTests: XCTestCase {
         shot("planner-saved")
 
         // Overview now shows the plan next to actual time.
-        segment("Woche", target: "week.summary")
+        app.navigationBars.buttons.element(boundBy: 0).tap() // back to the week details
+        XCTAssertTrue(el("week.summary").waitForExistence(timeout: 15))
         el("week.next").tap()
         sleep(2)
         shot("week-overview-planned")

@@ -45,41 +45,47 @@ final class WeekStoreCache {
     }
 }
 
-enum TimeSegment: String, CaseIterable, Identifiable {
-    case list, week, plan
-    var id: String { rawValue }
-    var title: String { W.s("segment.\(rawValue)") }
-}
-
-/// Segmented switch of the "Zeit" tab: day list (existing), week overview and week planner.
-struct TimeSegmentPicker: View {
-    @Binding var selection: TimeSegment
-    let planningEnabled: Bool
+/// Week details pushed from the "Zeit" tab: the read-only week overview of the week the list shows. Planning is reachable from here
+/// (and from the calendar's menu), not as a competing segment of the time list.
+struct WeekDetailScreen: View {
+    let day: LocalDay
+    @Environment(AppModel.self) private var model
+    @State private var planning = false
 
     var body: some View {
-        Picker(selection: $selection, label: Text(verbatim: "")) {
-            ForEach(TimeSegment.allCases.filter { planningEnabled || $0 != .plan }) { Text(verbatim: $0.title).tag($0) }
+        Group {
+            if let client = model.apiClient {
+                let store = WeekStoreCache.shared.weekStore(client, calendar: model.dayCalendar)
+                WeekOverviewView(store: store, planningEnabled: model.isEnabled(.planning)) { planning = true }
+                    .task { await store.go(to: day) }
+            }
         }
-        .pickerStyle(.segmented)
-        .accessibilityIdentifier("time.segments")
-        .frame(maxWidth: 420)
+        .navigationTitle(W.s("detail.title"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if model.isEnabled(.planning) {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { planning = true } label: { Label(W.s("segment.plan"), systemImage: "calendar.badge.checkmark") }
+                        .accessibilityIdentifier("week.plan")
+                }
+            }
+        }
+        .navigationDestination(isPresented: $planning) { WeekPlannerScreen() }
     }
 }
 
-/// Week overview and planner content for the "Zeit" tab.
-struct WeekHub: View {
-    @Binding var segment: TimeSegment
+/// The week planner as a pushed screen (calendar menu and week details).
+struct WeekPlannerScreen: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        if let client = model.apiClient {
-            let cache = WeekStoreCache.shared
-            switch segment {
-            case .plan where model.isEnabled(.planning):
+        Group {
+            if let client = model.apiClient {
+                let cache = WeekStoreCache.shared
                 WeekPlannerView(store: cache.planStore(client, calendar: model.dayCalendar), overview: cache.weekStore(client, calendar: model.dayCalendar))
-            default:
-                WeekOverviewView(store: cache.weekStore(client, calendar: model.dayCalendar), planningEnabled: model.isEnabled(.planning)) { segment = .plan }
             }
         }
+        .navigationTitle(W.s("segment.plan"))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

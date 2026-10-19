@@ -42,6 +42,8 @@ final class PlanningFlowTests: XCTestCase {
         func day(_ offset: Int) -> String { iso(Calendar.current.date(byAdding: .day, value: offset, to: monday)!) }
 
         // 1) Range selection by long press + tap, then vacation.
+        // Next week may start in the following month (the grid shows one month).
+        if !el("day.\(day(0))").exists { el("calendar.next").tap() }
         let first = el("day.\(day(0))")
         XCTAssertTrue(first.waitForExistence(timeout: 5))
         first.press(forDuration: 0.9)

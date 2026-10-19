@@ -15,7 +15,7 @@ struct CalendarScreen: View {
                 ScrollView { EmptyState(symbol: "calendar", title: "vacation.disabled").padding(TT.Space.l) }.ttScreenBackground()
             }
         }
-        .navigationTitle("sidebar.calendar")
+        .navigationTitle(Text(verbatim: ""))
     }
 }
 
@@ -27,79 +27,103 @@ private struct CalendarContent: View {
     @Environment(\.deviceCalendar) private var deviceCalendar
     @State private var absenceRequest: AbsenceRequest?
     @State private var sheet: PlanSheet?
-    @State private var daySheet = false
     @State private var picker = false
+    @State private var pagingEdge: Edge = .trailing
+    @State private var planningWeek = false
 
     private var wide: Bool { planningIsWide(sizeClass) }
     private var actions: AbsenceEditorActions { AbsenceEditorActions(calendar: store) }
     private var focusDay: LocalDay { store.selectedDay ?? store.today }
 
+    /// Z1: modelled on the Apple Calendar month view. The grid stays put, the details of the selected day sit below (iPhone) or beside it (iPad).
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TT.Space.m) {
-                if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("calendar.error") }
-                if store.isRangeMode { rangeBar }
-                if wide {
-                    HStack(alignment: .top, spacing: TT.Space.xl) {
-                        VStack(alignment: .leading, spacing: TT.Space.m) { header; MonthGrid(store: store, onTap: tap, onLongPress: longPress); Legend() }
-                            .frame(maxWidth: 560)
-                        DayDetail(store: store, day: focusDay, absenceRequest: $absenceRequest, sheet: $sheet).frame(maxWidth: .infinity)
-                    }
-                } else {
-                    header
-                    MonthGrid(store: store, onTap: tap, onLongPress: longPress)
-                    Legend()
+        VStack(spacing: 0) {
+            if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("calendar.error").padding(.horizontal, TT.Space.l) }
+            if store.isRangeMode { rangeBar.padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.s) }
+            if wide {
+                HStack(alignment: .top, spacing: TT.Space.xl) {
+                    VStack(alignment: .leading, spacing: TT.Space.m) { header; pagedGrid; Legend(); Spacer(minLength: 0) }
+                        .frame(maxWidth: 560)
+                    detailScroll.frame(maxWidth: .infinity)
                 }
+                .padding(.horizontal, TT.Space.l)
+                .frame(maxWidth: 1200)
+                .frame(maxWidth: .infinity)
+            } else {
+                VStack(spacing: TT.Space.s) { header; pagedGrid }
+                    .padding(.horizontal, TT.Space.l)
+                detailScroll
             }
-            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-            .frame(maxWidth: wide ? 1200 : TT.contentWidth)
-            .frame(maxWidth: .infinity)
         }
         .ttScreenBackground()
         .task {
             await store.load()
             syncDeviceCalendar()
-            if wide, store.selectedDay == nil { await store.select(store.today) }
+            if store.selectedDay == nil { await store.select(store.today) }
         }
         .onChange(of: store.planDays) { syncDeviceCalendar() }
         .onChange(of: store.absences) { syncDeviceCalendar() }
         .onChange(of: deviceCalendar?.preferences) { syncDeviceCalendar() }
-        .refreshable { await store.load(); await store.loadDetail() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
-        .gesture(DragGesture(minimumDistance: 40).onEnded { value in
-            guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
-            TTHaptics.play(.softTap)
-            Task { await store.shiftMonths(value.translation.width < 0 ? 1 : -1) }
-        })
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { TTHaptics.play(.softTap); Task { await store.goToToday() } } label: { Text("calendar.today") }.accessibilityIdentifier("calendar.today")
+                Button { TTHaptics.play(.softTap); pagingEdge = store.firstOfMonth < store.today ? .trailing : .leading; Task { await store.goToToday(); await store.select(store.today) } } label: { Text("calendar.today") }.accessibilityIdentifier("calendar.today")
                 Menu {
-                    AbsenceQuickMenuItems(start: focusDay, end: focusDay) { absenceRequest = $0 }
-                    Divider()
-                    Button { sheet = .plan(focusDay) } label: { Label("plan.action.plan", systemImage: "calendar.badge.checkmark") }
-                    Button { sheet = .customDay(focusDay) } label: { Label("plan.action.custom_day", systemImage: "flag") }
-                    if model.timeList != nil { Button { sheet = .manualEntry(focusDay) } label: { Label("plan.action.segment", systemImage: "clock.badge.plus") } }
-                    Divider()
+                    if model.isEnabled(.planning) {
+                        Button { planningWeek = true } label: { Label(W.s("segment.plan"), systemImage: "calendar.badge.checkmark") }.accessibilityIdentifier("calendar.plan_week")
+                    }
                     Button { store.beginRange(at: focusDay) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
                 } label: { Label("plan.add", systemImage: "plus") }
                     .accessibilityIdentifier("calendar.add")
             }
         }
+        .navigationDestination(isPresented: $planningWeek) { WeekPlannerScreen() }
         .absenceEditor($absenceRequest, actions: actions)
         .sheet(item: $sheet) { sheet in PlanSheetHost(sheet: sheet, store: store) }
-        .sheet(isPresented: $daySheet) {
-            NavigationStack {
-                ScrollView {
-                    DayDetail(store: store, day: focusDay, absenceRequest: $absenceRequest, sheet: $sheet, showTitle: false).padding(TT.Space.l)
-                }
-                .ttScreenBackground()
-                .navigationTitle(Text(verbatim: PlanFormat.longDay(focusDay, calendar: store.calendar)))
-                .inlineNavigationTitle()
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { daySheet = false }.accessibilityIdentifier("daysheet.done") } }
+    }
+
+    /// Details of the selected day. The list scrolls, the month grid above does not (like Apple Calendar).
+    private var detailScroll: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                DayDetail(store: store, day: focusDay, absenceRequest: $absenceRequest, sheet: $sheet)
+                if !wide { Legend() }
             }
-            .presentationDetents([.medium, .large])
+            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+            .frame(maxWidth: wide ? .infinity : TT.contentWidth, alignment: .leading)
+            .frame(maxWidth: .infinity)
         }
+        .refreshable { await store.load(); await store.loadDetail() }
+    }
+
+    /// The grid with a push transition between months and a horizontal swipe, as in Apple Calendar.
+    private var pagedGrid: some View {
+        MonthGrid(store: store, onTap: tap, onLongPress: longPress)
+            .id(store.firstOfMonth)
+            .transition(.push(from: pagingEdge))
+            .animation(.smooth(duration: 0.3), value: store.firstOfMonth)
+            .clipped()
+            .contentShape(.rect)
+            .simultaneousGesture(DragGesture(minimumDistance: 30).onEnded { value in
+                guard abs(value.translation.width) > abs(value.translation.height) * 1.5 else { return }
+                shift(value.translation.width < 0 ? 1 : -1)
+            })
+    }
+
+    private func shift(_ count: Int) {
+        TTHaptics.play(.softTap)
+        pagingEdge = count > 0 ? .trailing : .leading
+        Task {
+            await store.shiftMonths(count)
+            await selectDefault()
+        }
+    }
+
+    /// After a month change the selection moves into the new month: today when visible, otherwise the 1st.
+    private func selectDefault() async {
+        guard !store.isRangeMode else { return }
+        await store.select(store.isInVisibleMonth(store.today) ? store.today : store.firstOfMonth)
     }
 
     /// E1/E2: mirrors the visible plan days and the planned vacation/sick days into the calendars the user set to "Lesen + Schreiben".
@@ -111,21 +135,28 @@ private struct CalendarContent: View {
 
     private var header: some View {
         HStack(spacing: TT.Space.s) {
-            Button { TTHaptics.play(.softTap); Task { await store.shiftMonths(-1) } } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
-                .accessibilityLabel(Text("calendar.previous_month")).accessibilityIdentifier("calendar.prev")
-            Spacer()
             Button { picker = true } label: {
-                HStack(spacing: 4) {
-                    Text(verbatim: PlanFormat.monthTitle(year: store.year, month: store.month, calendar: store.calendar)).font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary)
-                    Image(systemName: "chevron.down").font(.caption.bold()).foregroundStyle(TT.textSecondary)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(verbatim: PlanFormat.monthName(store.month, calendar: store.calendar)).font(.system(.largeTitle, design: .default, weight: .bold)).foregroundStyle(TT.textPrimary)
+                    Text(verbatim: String(store.year)).font(.system(.title2, weight: .regular)).foregroundStyle(Color.accentColor)
                 }
+                .lineLimit(1).minimumScaleFactor(0.6)
             }
+            .accessibilityLabel(Text(verbatim: PlanFormat.monthTitle(year: store.year, month: store.month, calendar: store.calendar)))
             .accessibilityIdentifier("calendar.title")
             .accessibilityHint(Text("calendar.picker.hint"))
-            .popover(isPresented: $picker) { MonthPicker(store: store) { picker = false }.presentationCompactAdaptation(.popover) }
-            Spacer()
-            Button { TTHaptics.play(.softTap); Task { await store.shiftMonths(1) } } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
-                .accessibilityLabel(Text("calendar.next_month")).accessibilityIdentifier("calendar.next")
+            .popover(isPresented: $picker) { MonthPicker(store: store) { picker = false; Task { await selectDefault() } }.presentationCompactAdaptation(.popover) }
+            Spacer(minLength: TT.Space.s)
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    Button { shift(-1) } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+                        .glassEffect(.regular.interactive(), in: .circle)
+                        .accessibilityLabel(Text("calendar.previous_month")).accessibilityIdentifier("calendar.prev")
+                    Button { shift(1) } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+                        .glassEffect(.regular.interactive(), in: .circle)
+                        .accessibilityLabel(Text("calendar.next_month")).accessibilityIdentifier("calendar.next")
+                }
+            }
         }
         .buttonStyle(.borderless)
     }
@@ -166,7 +197,6 @@ private struct CalendarContent: View {
         }
         TTHaptics.play(.selection)
         Task { await store.select(day) }
-        if !wide { daySheet = true }
         if !store.isInVisibleMonth(day), let p = LocalDays.parse(day) { Task { await store.goTo(year: p.year, month: p.month) } }
     }
 
@@ -231,21 +261,22 @@ private struct MonthGrid: View {
     let store: CalendarStore
     let onTap: (LocalDay) -> Void
     let onLongPress: (LocalDay) -> Void
-    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let days = store.gridDays
         let rows = stride(from: 0, to: days.count, by: 7).map { Array(days[$0..<min($0 + 7, days.count)]) }
-        VStack(spacing: 2) {
-            HStack(spacing: 2) {
-                Text("calendar.week_short").frame(width: 28).accessibilityHidden(true)
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Text("calendar.week_short").frame(width: 26).accessibilityHidden(true)
                 ForEach(PlanFormat.weekdayHeaders, id: \.self) { Text(verbatim: String($0.prefix(2))).frame(maxWidth: .infinity) }
             }
             .font(TTFont.eyebrow).foregroundStyle(TT.textTertiary)
+            .padding(.bottom, TT.Space.xs)
             ForEach(rows, id: \.first) { week in
-                HStack(spacing: 2) {
+                Divider().overlay(TT.textTertiary.opacity(0.25))
+                HStack(spacing: 0) {
                     Text(verbatim: week.first.flatMap { LocalDays.isoWeek(of: $0) }.map(String.init) ?? "")
-                        .font(TTFont.eyebrow).foregroundStyle(TT.textTertiary).frame(width: 28)
+                        .font(.caption2).foregroundStyle(TT.textTertiary).frame(width: 26)
                         .accessibilityLabel(Text("calendar.week_label \(week.first.flatMap { LocalDays.isoWeek(of: $0) } ?? 0)"))
                     ForEach(week, id: \.self) { day in
                         DayCell(store: store, day: day)
@@ -258,12 +289,10 @@ private struct MonthGrid: View {
                 }
             }
         }
-        .padding(TT.Space.s)
-        .ttSurface()
-        .animation(.smooth(duration: 0.2), value: store.absences)
     }
 }
 
+/// One day of the grid: number (today = accent circle, selection = dark circle) and up to three dots, no cell fills.
 private struct DayCell: View {
     let store: CalendarStore
     let day: LocalDay
@@ -277,23 +306,33 @@ private struct DayCell: View {
         let inRange = store.isInRange(day)
         let weekend = (LocalDays.isoWeekday(day) ?? 1) >= 6
         VStack(spacing: 3) {
-            Text(verbatim: String(LocalDays.parse(day)?.day ?? 0))
-                .font(.system(.callout, design: .rounded, weight: isToday ? .bold : .regular)).monospacedDigit()
-                .foregroundStyle(isToday ? Color.white : (inMonth ? (weekend ? TT.textSecondary : TT.textPrimary) : TT.textTertiary))
-                .frame(width: 28, height: 28)
-                .background(isToday ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.clear), in: .circle)
-            HStack(spacing: 2) {
+            number(isToday: isToday, selected: selected, inMonth: inMonth, weekend: weekend, holiday: info.isHoliday)
+            HStack(spacing: 3) {
                 ForEach(Array(markers(info).enumerated()), id: \.offset) { _, tint in Circle().fill(tint).frame(width: 6, height: 6) }
             }
-            .frame(height: 8)
+            .frame(height: 7)
         }
-        .frame(maxWidth: .infinity, minHeight: 50)
-        .background(background(info: info, selected: selected, inRange: inRange), in: .rect(cornerRadius: 10))
-        .overlay { if selected { RoundedRectangle(cornerRadius: 10).strokeBorder(Color.accentColor, lineWidth: 2) } }
-        .opacity(inMonth ? 1 : 0.55)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, minHeight: 52)
+        .background(inRange ? Color.accentColor.opacity(0.22) : .clear, in: .rect(cornerRadius: 10))
+        .opacity(inMonth ? 1 : 0.5)
         .contentShape(.rect)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: label(info)))
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    @ViewBuilder private func number(isToday: Bool, selected: Bool, inMonth: Bool, weekend: Bool, holiday: Bool) -> some View {
+        let text = Text(verbatim: String(LocalDays.parse(day)?.day ?? 0))
+            .font(.system(.title3, design: .default, weight: isToday || selected ? .semibold : .regular)).monospacedDigit()
+            .frame(width: 36, height: 36)
+        if isToday {
+            text.foregroundStyle(Color.white).glassEffect(.regular.tint(Color.accentColor), in: .circle)
+        } else if selected {
+            text.foregroundStyle(scheme == .dark ? Color.black : Color.white).background(TT.textPrimary, in: .circle)
+        } else {
+            text.foregroundStyle(holiday ? TT.kindHoliday : (inMonth ? (weekend ? TT.textSecondary : TT.textPrimary) : TT.textTertiary))
+        }
     }
 
     private func markers(_ info: CalendarDayInfo) -> [Color] {
@@ -301,14 +340,6 @@ private struct DayCell: View {
         if info.isHoliday { list.append(TT.kindHoliday) }
         if let plan = info.plan { list.append(plan.mode.tint) }
         return Array(list.prefix(3))
-    }
-
-    private func background(info: CalendarDayInfo, selected: Bool, inRange: Bool) -> Color {
-        if inRange { return Color.accentColor.opacity(0.22) }
-        if let absence = info.absences.first { return absence.kind.ttTint.opacity(scheme == .dark ? 0.26 : 0.16) }
-        if info.isHoliday { return TT.kindHoliday.opacity(scheme == .dark ? 0.24 : 0.18) }
-        if !info.schoolHolidays.isEmpty { return TT.kindHoliday.opacity(0.07) }
-        return selected ? Color.accentColor.opacity(0.08) : .clear
     }
 
     private func label(_ info: CalendarDayInfo) -> String {

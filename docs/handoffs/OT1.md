@@ -21,7 +21,7 @@ Lokale Mitteilungen, wenn die Arbeitszeit des Tages Grenzen erreicht, auch bei g
 
 ## Tests und Belege
 - Kern: 18 neue Tests (`OverworkNotificationTests`): Standard aus, alle Arten, einzeln schaltbar, Vorarbeit verschiebt, Pause/Weiter verschiebt um die Pause, Pause/Stopp entfernt, Fahrt/Schule nichts, überschrittene Grenzen ohne Sofort-Hinweis, Idempotenz, Pausen (Teilpause < 15 Min zählt nicht, 30 Min reichen für 6 h, nicht für 9 h, keine erfundene Pause), Mitternachtsrand, anderer Tag, Umstelltage, Texte, Speicher. `swift test --build-system native` im Kern: **413 Tests grün** (vorher 395).
-- iOS-Build (unsigniert) grün. UI-Test `Tests/iOSUI/OverworkNotificationTests.swift` (Dev-Seite, beantwortet die System-Abfrage): Bilder `docs/screenshots/ot1-overwork-{off,on}.png`.
+- iOS-Build (unsigniert) grün. UI-Test `Tests/iOSUI/OverworkNotificationTests.swift` (Dev-Seite `TT_DEV_OVERWORK_PAGE`): **nur teilweise belegt**. Der Lauf erreichte die Seite im Aus-Zustand und erzeugte `docs/screenshots/ot1-overwork-off.png` (alle drei Schalter aus, Hinweiskarte, Fußnote). Der zweite Teil (Einschalten, System-Abfrage, Zustand an, Bild `ot1-overwork-on.png`) blieb aus: ein Lauf scheiterte an einer falschen Erwartung (später korrigiert auf Warten auf den Schalterwert), die weiteren Läufe hingen im Simulator (parallele Pakete, frisch gestartetes Gerät) und wurden abgebrochen. Der Test in der jetzigen Fassung ist daher nicht grün bestätigt.
 
 ## Offen / nicht geprüft
 - **Zustellung am Gerät ungeprüft**: echte Mitteilungen zum Zeitpunkt, Verschieben nach Pause über Live-Activity-Knöpfe bei gesperrtem Gerät, Fokus-/Nicht-stören-Verhalten und Tippen auf eine Mitteilung (öffnet nur die App, keine eigene Aktion).

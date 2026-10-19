@@ -35,6 +35,9 @@ private struct VacationContent: View {
                 yearSwitcher
                 if let error = store.error, !showSettings, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
                 if store.settings?.configured == false { HintBanner("vacation.not_configured") }
+                #if os(iOS)
+                VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
+                #endif
                 if wide {
                     HStack(alignment: .top, spacing: TT.Space.xl) { balance.frame(maxWidth: 440); absences }
                 } else {

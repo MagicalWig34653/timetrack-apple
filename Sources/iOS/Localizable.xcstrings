@@ -4257,6 +4257,1810 @@
           }
         }
       }
+    },
+    "wk.aria.balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saldo %@"
+          }
+        }
+      }
+    },
+    "wk.aria.hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Stunden"
+          }
+        }
+      }
+    },
+    "wk.aria.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "geplant %@ Stunden"
+          }
+        }
+      }
+    },
+    "wk.blocked.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigestellt."
+          }
+        }
+      }
+    },
+    "wk.blocked.holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag, hier ist kein Plan nötig."
+          }
+        }
+      }
+    },
+    "wk.blocked.kept": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein gespeicherter Plan bleibt erhalten, zählt aber nicht."
+          }
+        }
+      }
+    },
+    "wk.blocked.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krankmeldung eingetragen."
+          }
+        }
+      }
+    },
+    "wk.blocked.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub eingetragen."
+          }
+        }
+      }
+    },
+    "wk.cell.booked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schon als Urlaub eingetragen"
+          }
+        }
+      }
+    },
+    "wk.cell.conflict": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Konflikt: %@"
+          }
+        }
+      }
+    },
+    "wk.cell.free": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "wk.cell.holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag %@"
+          }
+        }
+      }
+    },
+    "wk.cell.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubstag"
+          }
+        }
+      }
+    },
+    "wk.chip.average": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ø %@–%@"
+          }
+        }
+      }
+    },
+    "wk.chip.holiday.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Feiertag"
+          }
+        }
+      }
+    },
+    "wk.chip.holiday.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Feiertage"
+          }
+        }
+      }
+    },
+    "wk.chip.school.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Schultag"
+          }
+        }
+      }
+    },
+    "wk.chip.school.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Schultage"
+          }
+        }
+      }
+    },
+    "wk.chip.sick.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Krankheitstag"
+          }
+        }
+      }
+    },
+    "wk.chip.sick.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Krankheitstage"
+          }
+        }
+      }
+    },
+    "wk.chip.vacation.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Urlaubstag"
+          }
+        }
+      }
+    },
+    "wk.chip.vacation.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Urlaubstage"
+          }
+        }
+      }
+    },
+    "wk.conflict.absence": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abwesenheit eingetragen"
+          }
+        }
+      }
+    },
+    "wk.conflict.already_vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schon als Urlaub eingetragen"
+          }
+        }
+      }
+    },
+    "wk.conflict.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeit geplant"
+          }
+        }
+      }
+    },
+    "wk.conflict.school_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berufsschultag"
+          }
+        }
+      }
+    },
+    "wk.day.future": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nicht erfasst"
+          }
+        }
+      }
+    },
+    "wk.day.half_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (halber Tag)"
+          }
+        }
+      }
+    },
+    "wk.day.no_work": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Zeit erfasst"
+          }
+        }
+      }
+    },
+    "wk.day.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan %@"
+          }
+        }
+      }
+    },
+    "wk.day.plan_dot": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· Plan %@"
+          }
+        }
+      }
+    },
+    "wk.day.provisional": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "läuft noch"
+          }
+        }
+      }
+    },
+    "wk.day.span": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@–%@"
+          }
+        }
+      }
+    },
+    "wk.day.target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@"
+          }
+        }
+      }
+    },
+    "wk.day.today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute"
+          }
+        }
+      }
+    },
+    "wk.days.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tag"
+          }
+        }
+      }
+    },
+    "wk.days.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tage"
+          }
+        }
+      }
+    },
+    "wk.empty.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woche planen"
+          }
+        }
+      }
+    },
+    "wk.kind.bridge": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brückentag"
+          }
+        }
+      }
+    },
+    "wk.kind.holiday_cluster": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertagsblock"
+          }
+        }
+      }
+    },
+    "wk.kind.long_break": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langer Urlaub"
+          }
+        }
+      }
+    },
+    "wk.kind.school_holiday_extension": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schulferien-Verlängerung"
+          }
+        }
+      }
+    },
+    "wk.leave.discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Änderungen verwerfen"
+          }
+        }
+      }
+    },
+    "wk.leave.keep": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter bearbeiten"
+          }
+        }
+      }
+    },
+    "wk.leave.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Plan dieser Woche wurde noch nicht gespeichert."
+          }
+        }
+      }
+    },
+    "wk.leave.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ungespeicherte Änderungen"
+          }
+        }
+      }
+    },
+    "wk.mark.excused": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigestellt"
+          }
+        }
+      }
+    },
+    "wk.mark.holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag"
+          }
+        }
+      }
+    },
+    "wk.mark.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "wk.mark.school": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schule"
+          }
+        }
+      }
+    },
+    "wk.mark.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krank"
+          }
+        }
+      }
+    },
+    "wk.mark.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub"
+          }
+        }
+      }
+    },
+    "wk.mark.work": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeit"
+          }
+        }
+      }
+    },
+    "wk.nav.kw": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KW %d"
+          }
+        }
+      }
+    },
+    "wk.nav.next": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nächste Woche"
+          }
+        }
+      }
+    },
+    "wk.nav.previous": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorherige Woche"
+          }
+        }
+      }
+    },
+    "wk.nav.this_week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "wk.plan.action_clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeren"
+          }
+        }
+      }
+    },
+    "wk.plan.action_copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie letzte Woche"
+          }
+        }
+      }
+    },
+    "wk.plan.action_same": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle gleich"
+          }
+        }
+      }
+    },
+    "wk.plan.action_standard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standardwoche"
+          }
+        }
+      }
+    },
+    "wk.plan.actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnellaktionen"
+          }
+        }
+      }
+    },
+    "wk.plan.break": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause: %d Min."
+          }
+        }
+      }
+    },
+    "wk.plan.clean": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles gespeichert"
+          }
+        }
+      }
+    },
+    "wk.plan.day_target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@"
+          }
+        }
+      }
+    },
+    "wk.plan.diff_equal": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "genau im Soll"
+          }
+        }
+      }
+    },
+    "wk.plan.diff_over": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ über Soll"
+          }
+        }
+      }
+    },
+    "wk.plan.diff_under": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ unter Soll"
+          }
+        }
+      }
+    },
+    "wk.plan.dirty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ungespeicherte Änderungen"
+          }
+        }
+      }
+    },
+    "wk.plan.discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwerfen"
+          }
+        }
+      }
+    },
+    "wk.plan.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende"
+          }
+        }
+      }
+    },
+    "wk.plan.fix_problems": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte korrigiere die markierten Tage."
+          }
+        }
+      }
+    },
+    "wk.plan.mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art"
+          }
+        }
+      }
+    },
+    "wk.plan.mode_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht geplant"
+          }
+        }
+      }
+    },
+    "wk.plan.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "wk.plan.planned_hours": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant %@"
+          }
+        }
+      }
+    },
+    "wk.plan.problem.break": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Pause darf 0 bis 600 Minuten betragen."
+          }
+        }
+      }
+    },
+    "wk.plan.problem.order": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Ende muss nach dem Beginn liegen."
+          }
+        }
+      }
+    },
+    "wk.plan.problem.times": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte Beginn und Ende angeben."
+          }
+        }
+      }
+    },
+    "wk.plan.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichern"
+          }
+        }
+      }
+    },
+    "wk.plan.saving": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speichert …"
+          }
+        }
+      }
+    },
+    "wk.plan.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn"
+          }
+        }
+      }
+    },
+    "wk.plan.suggestion_fallback": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschlag: %@ Uhr plus Sollzeit, %d Min. Pause."
+          }
+        }
+      }
+    },
+    "wk.plan.suggestion_history": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschlag aus deinen letzten Wochen: %@–%@, %d Min. Pause."
+          }
+        }
+      }
+    },
+    "wk.plan.total_label": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan der Woche"
+          }
+        }
+      }
+    },
+    "wk.plan.total_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan %@ von %@ Soll"
+          }
+        }
+      }
+    },
+    "wk.segment.list": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liste"
+          }
+        }
+      }
+    },
+    "wk.segment.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planen"
+          }
+        }
+      }
+    },
+    "wk.segment.week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woche"
+          }
+        }
+      }
+    },
+    "wk.sum.account": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitkonto"
+          }
+        }
+      }
+    },
+    "wk.sum.account_before": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Davor %@"
+          }
+        }
+      }
+    },
+    "wk.sum.actual": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ist"
+          }
+        }
+      }
+    },
+    "wk.sum.actual_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet und angerechnet"
+          }
+        }
+      }
+    },
+    "wk.sum.balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saldo"
+          }
+        }
+      }
+    },
+    "wk.sum.balance_past": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ist minus Soll der Woche"
+          }
+        }
+      }
+    },
+    "wk.sum.balance_running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ist minus Soll bis heute"
+          }
+        }
+      }
+    },
+    "wk.sum.plan_line": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant %@, bisher %@ gearbeitet."
+          }
+        }
+      }
+    },
+    "wk.sum.target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll"
+          }
+        }
+      }
+    },
+    "wk.sum.target_full": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll der ganzen Woche"
+          }
+        }
+      }
+    },
+    "wk.sum.target_to_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bis heute %@"
+          }
+        }
+      }
+    },
+    "wk.take.ack_budget": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mir ist klar, dass dieser Urlaub mein Budget überschreitet."
+          }
+        }
+      }
+    },
+    "wk.take.ack_conflicts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich habe die Hinweise gelesen und möchte trotzdem übernehmen."
+          }
+        }
+      }
+    },
+    "wk.take.budget_warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dafür fehlen %@ im Urlaubsbudget."
+          }
+        }
+      }
+    },
+    "wk.take.busy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird eingetragen …"
+          }
+        }
+      }
+    },
+    "wk.take.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt eintragen"
+          }
+        }
+      }
+    },
+    "wk.take.cost_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertage und freie Tage im Zeitraum kosten nichts. Der Server zählt nur Arbeitstage."
+          }
+        }
+      }
+    },
+    "wk.take.text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es werden %d Urlaube als „geplant“ angelegt:"
+          }
+        }
+      }
+    },
+    "wk.take.text_one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es wird ein Urlaub als „geplant“ angelegt:"
+          }
+        }
+      }
+    },
+    "wk.take.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diesen Urlaub eintragen?"
+          }
+        }
+      }
+    },
+    "wk.vp.apply": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktualisieren"
+          }
+        }
+      }
+    },
+    "wk.vp.budget_note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest = Anspruch − genommen − geplant. Jeder Vorschlag wird einzeln gegen den Rest geprüft, nicht zusammen mit anderen Vorschlägen."
+          }
+        }
+      }
+    },
+    "wk.vp.budget_title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Budget %@"
+          }
+        }
+      }
+    },
+    "wk.vp.conflicts_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Achtung, das passt nicht ganz"
+          }
+        }
+      }
+    },
+    "wk.vp.count": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzahl Vorschläge: %d"
+          }
+        }
+      }
+    },
+    "wk.vp.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschläge, wie du mit wenigen Urlaubstagen möglichst viele freie Tage bekommst. Es wird nichts eingetragen, bevor du bestätigst."
+          }
+        }
+      }
+    },
+    "wk.vp.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Urlaube eingetragen: %@ bis %@."
+          }
+        }
+      }
+    },
+    "wk.vp.done_one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub eingetragen: %@ bis %@."
+          }
+        }
+      }
+    },
+    "wk.vp.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine passenden Vorschläge im Zeitraum. Erweitere den Zeitraum oder erhöhe die Urlaubstage."
+          }
+        }
+      }
+    },
+    "wk.vp.empty_hidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle gefundenen Vorschläge liegen unter dem Mindest-Faktor."
+          }
+        }
+      }
+    },
+    "wk.vp.entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anspruch"
+          }
+        }
+      }
+    },
+    "wk.vp.exact_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Tage nimmst du Urlaub"
+          }
+        }
+      }
+    },
+    "wk.vp.factor": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faktor %@"
+          }
+        }
+      }
+    },
+    "wk.vp.filter_summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ bis %@, höchstens %d Urlaubstage, mindestens %d freie Tage, Faktor ab %@"
+          }
+        }
+      }
+    },
+    "wk.vp.filters": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
+          }
+        }
+      }
+    },
+    "wk.vp.from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum von"
+          }
+        }
+      }
+    },
+    "wk.vp.hidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Vorschläge mit geringem Nutzen ausgeblendet (Faktor unter %@)."
+          }
+        }
+      }
+    },
+    "wk.vp.hidden_one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Vorschlag mit geringem Nutzen ausgeblendet (Faktor unter %@)."
+          }
+        }
+      }
+    },
+    "wk.vp.legend_booked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schon Urlaub"
+          }
+        }
+      }
+    },
+    "wk.vp.legend_free": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "wk.vp.legend_holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag"
+          }
+        }
+      }
+    },
+    "wk.vp.legend_vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubstag"
+          }
+        }
+      }
+    },
+    "wk.vp.max_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Höchstens Urlaubstage: %d"
+          }
+        }
+      }
+    },
+    "wk.vp.min_factor": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindest-Faktor: %@"
+          }
+        }
+      }
+    },
+    "wk.vp.min_factor_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freie Tage pro Urlaubstag. Ab 2 lohnt sich ein Vorschlag; niedriger zeigt auch Füllfenster."
+          }
+        }
+      }
+    },
+    "wk.vp.min_off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mindestens freie Tage: %d"
+          }
+        }
+      }
+    },
+    "wk.vp.no_budget": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passt nicht ins Budget"
+          }
+        }
+      }
+    },
+    "wk.vp.off_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Tage frei"
+          }
+        }
+      }
+    },
+    "wk.vp.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub planen"
+          }
+        }
+      }
+    },
+    "wk.vp.open_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brückentage und lange Auszeiten finden, die dein Urlaubskonto schonen."
+          }
+        }
+      }
+    },
+    "wk.vp.over_budget": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es fehlen %@ im Budget %@."
+          }
+        }
+      }
+    },
+    "wk.vp.partial": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur %d von %d Urlauben eingetragen. %@"
+          }
+        }
+      }
+    },
+    "wk.vp.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant"
+          }
+        }
+      }
+    },
+    "wk.vp.range_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Ende muss nach dem Beginn liegen, der Zeitraum darf höchstens 18 Monate umfassen."
+          }
+        }
+      }
+    },
+    "wk.vp.remaining": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest"
+          }
+        }
+      }
+    },
+    "wk.vp.remaining_after": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danach noch %@ übrig"
+          }
+        }
+      }
+    },
+    "wk.vp.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurücksetzen"
+          }
+        }
+      }
+    },
+    "wk.vp.results": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschläge, beste zuerst"
+          }
+        }
+      }
+    },
+    "wk.vp.saved_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Filter werden auf diesem Gerät gemerkt."
+          }
+        }
+      }
+    },
+    "wk.vp.show_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle zeigen"
+          }
+        }
+      }
+    },
+    "wk.vp.stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum oder Grenzen wurden geändert. Tippe auf „Aktualisieren“, um neue Vorschläge zu holen."
+          }
+        }
+      }
+    },
+    "wk.vp.summary": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ → %@"
+          }
+        }
+      }
+    },
+    "wk.vp.take": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In meinen Urlaub übernehmen"
+          }
+        }
+      }
+    },
+    "wk.vp.taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genommen"
+          }
+        }
+      }
+    },
+    "wk.vp.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubsplanung"
+          }
+        }
+      }
+    },
+    "wk.vp.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum bis"
+          }
+        }
+      }
+    },
+    "wk.vp.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Urlaubsplanung braucht eine neuere Serverversion."
+          }
+        }
+      }
+    },
+    "wk.vp.vacation_one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Urlaubstag"
+          }
+        }
+      }
+    },
+    "wk.vp.vacation_other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Urlaubstage"
+          }
+        }
+      }
+    },
+    "wk.week.copy_empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die letzte Woche hat keinen Plan."
+          }
+        }
+      }
+    },
+    "wk.week.empty_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobald du Zeiten erfasst oder Urlaub einträgst, erscheint hier die Übersicht."
+          }
+        }
+      }
+    },
+    "wk.week.empty_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Einträge in dieser Woche"
+          }
+        }
+      }
+    },
+    "wk.week.past_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche liegt in der Vergangenheit. Die tatsächliche Zeit steht in der Übersicht."
+          }
+        }
+      }
+    },
+    "wk.week.plan_unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wochenplanung braucht eine neuere Serverversion."
+          }
+        }
+      }
+    },
+    "wk.week.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wochenübersicht braucht eine neuere Serverversion."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

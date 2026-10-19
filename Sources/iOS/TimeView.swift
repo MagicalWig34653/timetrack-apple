@@ -5,15 +5,29 @@ import TimetrackStores
 
 struct TimeView: View {
     @Environment(AppModel.self) private var model
+    @State private var segment: TimeSegment = .list // N1a: day list, week overview, week planner
 
     var body: some View {
-        Group {
-            if let store = model.timeList {
-                TimeContent(store: store)
-            } else {
-                ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
+        VStack(spacing: 0) {
+            TimeSegmentPicker(selection: $segment, planningEnabled: model.isEnabled(.planning)) { target in
+                // Leaving the planner with unsaved changes: the draft stays in the cached store (shown as unsaved on return).
+                _ = target
+                return true
+            }
+            switch segment {
+            case .list:
+                Group {
+                    if let store = model.timeList {
+                        TimeContent(store: store)
+                    } else {
+                        ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
+                    }
+                }
+            case .week, .plan:
+                WeekHub(segment: $segment)
             }
         }
+        .ttScreenBackground()
         .navigationTitle("sidebar.time")
     }
 }

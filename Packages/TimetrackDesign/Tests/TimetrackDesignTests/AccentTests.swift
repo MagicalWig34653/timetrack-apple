@@ -91,7 +91,7 @@ import TimetrackCore
     @Test func effectiveHexResolvesPresetsAndCustom() {
         #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "orange", customHex: "#112233", scheme: "system")) == "#F97316")
         #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "custom", customHex: "#112233", scheme: "system")) == "#112233")
-        #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "magenta", customHex: "#112233", scheme: "system")) == "#2563EB")
+        #expect(AppearanceKeys.effectiveHex(LocalAppearance(accent: "magenta", customHex: "#112233", scheme: "system")) == "#A21CAF")
     }
 
     @Test func widgetInkKeepsContrastForEveryAccount­Preset() {
@@ -108,5 +108,62 @@ import TimetrackCore
             }
             #expect(AccentDerivation.contrast(tokens.onFillLight, tokens.fillLight) >= AccentDerivation.minTextContrast, "\(choice) onFill")
         }
+    }
+}
+
+@Suite struct AccentParityTests {
+    /// Hues from docs/handoffs/AC2.md (backend) and the PWA's accent.ts; the six oldest keep their native values.
+    static let darkFills: [String: UInt32] = [
+        "indigo": 0x4338CA, "navy": 0x1E3A8A, "purple": 0x7E22CE, "magenta": 0xA21CAF, "crimson": 0xB91C1C, "forest": 0x166534,
+        "petrol": 0x0F766E, "bronze": 0x92400E, "wine": 0x7F1D3F, "slate": 0x475A8C, "cocoa": 0x5C4033, "olive": 0x4D6B1F, "ocean": 0x0E7490, "ink": 0x334155,
+    ]
+
+    @Test func everyContractIdIsAChoiceWithAHue() {
+        #expect(AccentChoice.allCases.count == 22)
+        for (id, hex) in Self.darkFills { #expect(AccentChoice(rawValue: id)?.presetHex == hex, "\(id)") }
+        #expect(AccentChoice.allCases.filter { $0.presetHex == nil } == [.custom])
+        #expect(Set(AccentChoice.allCases.compactMap(\.presetHex)).count == 21, "hues are distinct")
+    }
+
+    @Test func darkPresetsCarryWhiteText() {
+        for (id, hex) in Self.darkFills {
+            let tokens = AccentDerivation.tokens(for: hex)
+            #expect(tokens.onFillLight == 0xFFFFFF, "\(id) white on accent (light)")
+            #expect(AccentDerivation.contrast(tokens.fillLight, 0xFFFFFF) >= 4.5, "\(id)")
+            #expect(AccentDerivation.contrast(tokens.fillDark, tokens.onFillDark) >= 4.5, "\(id) dark")
+            #expect(tokens.fillLight == hex, "\(id) keeps its hue in light mode")
+        }
+    }
+
+    @Test func unknownIdFallsBackToBlue() {
+        #expect(AccentChoice.resolvedHex(choice: "chartreuse", custom: "#112233") == "#2563EB")
+        #expect(AccentChoice.resolvedHex(choice: "wine", custom: "#112233") == "#7F1D3F")
+        #expect(AccentChoice.resolvedHex(choice: "", custom: "") == "#2563EB")
+    }
+}
+
+@Suite struct GlowStyleTests {
+    @Test func strengthGrowsWithTheLevel() {
+        let styles = GlowPreference.allCases.map { GlowStyle(level: $0) }
+        #expect(styles.map(\.effectiveLevel) == [0, 1, 2, 3])
+        #expect(styles[0].haloOpacity == 0 && styles[0].backdropFactor == 0 && !styles[0].isOn)
+        for (a, b) in zip(styles.dropFirst(), styles.dropFirst(2)) {
+            #expect(a.haloOpacity < b.haloOpacity && a.haloRadius < b.haloRadius && a.ringOpacity < b.ringOpacity && a.backdropFactor < b.backdropFactor)
+        }
+        #expect(styles[1].cardEdgeOpacity == 0 && styles[2].cardEdgeOpacity > 0)
+        #expect(styles[1].backdropFactor == 1, "subtle keeps the baseline backdrop")
+    }
+
+    @Test func accessibilitySettingsSwitchHalosOff() {
+        for level in GlowPreference.allCases {
+            for (transparency, contrast) in [(true, false), (false, true), (true, true)] {
+                let style = GlowStyle(level: level, reduceTransparency: transparency, increasedContrast: contrast)
+                #expect(style.effectiveLevel == 0 && style.haloOpacity == 0 && style.ringRadius == 0 && style.cardEdgeOpacity == 0 && style.backdropFactor == 0)
+            }
+        }
+    }
+
+    @Test func storageKeyAndDefault() {
+        #expect(AppearanceKeys.glow == "appearance.glow" && Preferences.defaultGlow == "subtle")
     }
 }

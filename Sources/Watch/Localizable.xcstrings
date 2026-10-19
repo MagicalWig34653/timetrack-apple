@@ -23,6 +23,28 @@
         }
       }
     },
+    "haptics.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kurze Vibrationen bei Aktionen wie Start, Stopp, Speichern oder Auswahl."
+          }
+        }
+      }
+    },
+    "haptics.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haptisches Feedback"
+          }
+        }
+      }
+    },
     "kind.school": {
       "extractionState": "manual",
       "localizations": {

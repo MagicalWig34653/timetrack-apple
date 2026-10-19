@@ -6,6 +6,8 @@ public enum AppearanceStorageKeys {
     public static let accent = "appearance.accent"
     public static let customHex = "appearance.customHex"
     public static let scheme = "appearance.scheme"
+    /// "Leuchteffekt": `off|subtle|medium|strong` (N1b).
+    public static let glow = "appearance.glow"
     /// Account id the cached values belong to (so a choice never flows into somebody else's account).
     public static let owner = "appearance.cacheOwner"
     /// Account id with an unsent local change.
@@ -17,30 +19,66 @@ public struct LocalAppearance: Sendable, Equatable {
     public var accent: String
     public var customHex: String
     public var scheme: String
+    public var glow: String
 
     public static let defaultCustomHex = "#2563EB"
     public static let defaults = LocalAppearance(accent: Preferences.defaultAccent, customHex: defaultCustomHex, scheme: Preferences.defaultColorScheme)
 
-    public init(accent: String, customHex: String, scheme: String) {
+    public init(accent: String, customHex: String, scheme: String, glow: String = Preferences.defaultGlow) {
         self.accent = accent
         self.customHex = customHex
         self.scheme = scheme
+        self.glow = glow
     }
 
     /// True when the visible choice differs from the defaults (the custom hex only matters for `custom`).
     public var differsFromDefaults: Bool {
-        accent != Preferences.defaultAccent || scheme != Preferences.defaultColorScheme
+        accent != Preferences.defaultAccent || scheme != Preferences.defaultColorScheme || glow != Preferences.defaultGlow
     }
 
-    /// Patch for the contract: always `accent` and `colorScheme`, the hex only with `custom` (a malformed hex degrades to `blue`).
+    /// Patch for the contract: always `accent`, `colorScheme` and `glow`, the hex only with `custom` (a malformed hex degrades to `blue`).
     public var patch: PreferencesPatch {
         let scheme = ColorSchemePreference(rawValue: scheme)?.rawValue ?? Preferences.defaultColorScheme
+        let glow = GlowPreference(rawValue: glow)?.rawValue ?? Preferences.defaultGlow
         if accent == AccentPreset.custom.rawValue, let hex = Preferences.normalizedHex(customHex) {
-            return PreferencesPatch(accent: AccentPreset.custom.rawValue, colorScheme: scheme, customHex: .set(hex))
+            return PreferencesPatch(accent: AccentPreset.custom.rawValue, colorScheme: scheme, glow: glow, customHex: .set(hex))
         }
         let preset = AccentPreset(rawValue: accent).flatMap { $0 == .custom ? nil : $0 } ?? .blue
-        return PreferencesPatch(accent: preset.rawValue, colorScheme: scheme)
+        return PreferencesPatch(accent: preset.rawValue, colorScheme: scheme, glow: glow)
     }
+
+    /// Patches to try, in order, when the server answers 400 to `patch` (servers before contract v0.21.0 reject the six newest
+    /// ids, servers before v0.15.0 also reject `glow` and the v0.15.0 ids). Like the PWA, a rejected preset is sent as
+    /// `custom` plus its hex (the colour survives, the name does not); `glow` stays local when even that is rejected.
+    public var fallbackPatches: [PreferencesPatch] {
+        let scheme = ColorSchemePreference(rawValue: scheme)?.rawValue ?? Preferences.defaultColorScheme
+        let glow = GlowPreference(rawValue: glow)?.rawValue ?? Preferences.defaultGlow
+        let preset = AccentPreset(rawValue: accent) ?? .blue
+        var candidates: [PreferencesPatch] = []
+        func hexed() -> PreferencesPatch? {
+            guard preset != .custom, !preset.isLegacy || preset.needsV021, let hex = preset.nativeHex.map(AccentPresetHex.string) else { return nil }
+            return PreferencesPatch(accent: AccentPreset.custom.rawValue, colorScheme: scheme, glow: glow, customHex: .set(hex))
+        }
+        if let withGlow = hexed() {
+            if preset.needsV021 { candidates.append(withGlow) }
+            var plain = withGlow
+            plain.glow = nil
+            candidates.append(plain)
+        } else {
+            var plain = patch
+            plain.glow = nil
+            candidates.append(plain)
+        }
+        let original = patch
+        var result: [PreferencesPatch] = []
+        for candidate in candidates where candidate != original && !result.contains(candidate) { result.append(candidate) }
+        return result
+    }
+}
+
+/// `#RRGGBB` text of a hex number (shared by the preset table and the fallback patches).
+public enum AccentPresetHex {
+    public static func string(_ hex: UInt32) -> String { String(format: "#%06X", hex) }
 }
 
 /// Keeps the local appearance cache and the account's preferences in step (P2 handoff, "Abgleich").
@@ -92,7 +130,8 @@ public final class AppearanceSync {
         LocalAppearance(
             accent: defaults.string(forKey: AppearanceStorageKeys.accent) ?? LocalAppearance.defaults.accent,
             customHex: defaults.string(forKey: AppearanceStorageKeys.customHex) ?? LocalAppearance.defaultCustomHex,
-            scheme: defaults.string(forKey: AppearanceStorageKeys.scheme) ?? LocalAppearance.defaults.scheme
+            scheme: defaults.string(forKey: AppearanceStorageKeys.scheme) ?? LocalAppearance.defaults.scheme,
+            glow: defaults.string(forKey: AppearanceStorageKeys.glow) ?? Preferences.defaultGlow
         )
     }
 
@@ -100,6 +139,7 @@ public final class AppearanceSync {
         defaults.set(value.accent, forKey: AppearanceStorageKeys.accent)
         defaults.set(value.customHex, forKey: AppearanceStorageKeys.customHex)
         defaults.set(value.scheme, forKey: AppearanceStorageKeys.scheme)
+        defaults.set(value.glow, forKey: AppearanceStorageKeys.glow)
         local = value
     }
 
@@ -115,6 +155,7 @@ public final class AppearanceSync {
         var value = current
         value.accent = prefs.accentPreset.rawValue
         value.scheme = prefs.scheme.rawValue
+        if prefs.hasGlow { value.glow = prefs.glowLevel.rawValue } // an older server stays silent: keep the local choice
         if prefs.accentPreset == .custom, let hex = prefs.customHex {
             value.customHex = hex
         } else if prefs.accentPreset == .custom {
@@ -215,7 +256,7 @@ public final class AppearanceSync {
             let sent = Self.read(defaults)
             status = .syncing
             do {
-                _ = try await service.updatePreferences(sent.patch)
+                _ = try await Self.send(sent, with: service)
                 guard self.accountId == accountId else { return }
                 if Self.read(defaults) != sent { continue } // changed meanwhile: send the newest state next
                 setPending(nil)
@@ -235,6 +276,18 @@ public final class AppearanceSync {
                 scheduleRetry()
                 return
             }
+        }
+    }
+
+    /// Sends the full patch; on 400 retries with the compatibility patches for older servers (see `fallbackPatches`).
+    static func send(_ value: LocalAppearance, with service: any PreferencesService) async throws -> Preferences {
+        do {
+            return try await service.updatePreferences(value.patch)
+        } catch let error as TimetrackError where error.status == 400 {
+            for fallback in value.fallbackPatches {
+                do { return try await service.updatePreferences(fallback) } catch let next as TimetrackError where next.status == 400 { continue }
+            }
+            throw error
         }
     }
 

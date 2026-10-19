@@ -38,6 +38,7 @@ private struct AppearanceSettingsView: View {
 private struct GeneralSettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.ttTheme) private var theme
+    @State private var showWorkModels = false
 
     var body: some View {
         ScrollView {
@@ -60,6 +61,19 @@ private struct GeneralSettingsView: View {
                         .accessibilityElement(children: .combine)
                     }
                 }
+                FormSection { // N1b: work model versions (correction with preview) and haptics
+                    Button { showWorkModels = true } label: {
+                        HStack {
+                            Label("workmodel.title", systemImage: "calendar.badge.clock").foregroundStyle(TT.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                        }
+                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("settings.workmodel")
+                    HapticsToggle().padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                }
                 FormSection("settings.server") {
                     FormRow("settings.server_url") { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled).lineLimit(1).truncationMode(.middle) }
                     if let workModel = model.workModel {
@@ -80,19 +94,15 @@ private struct GeneralSettingsView: View {
                     Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
                         .foregroundStyle(TT.danger)
                 }
-                FormSection("settings.about") {
-                    FormRow("settings.version") { Text(verbatim: Self.versionText).monospacedDigit() }
-                    FormRow("settings.license") { Text(verbatim: "AGPL-3.0-only") }
-                }
+                AboutSection(build: AppBuildInfo(platform: "macOS")) // N1b
             }
             .padding(TT.Space.xl)
         }
         .ttScreenBackground()
-    }
-
-    private static var versionText: String {
-        let info = Bundle.main.infoDictionary
-        return "\(info?["CFBundleShortVersionString"] as? String ?? "?") (\(info?["CFBundleVersion"] as? String ?? "?"))"
+        .sheet(isPresented: $showWorkModels) {
+            NavigationStack { WorkModelsScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showWorkModels = false } } } }
+                .frame(minWidth: 560, minHeight: 720)
+        }
     }
 
     private func moduleTitle(_ key: ModuleKey) -> LocalizedStringKey {

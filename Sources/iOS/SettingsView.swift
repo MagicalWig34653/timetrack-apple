@@ -35,6 +35,23 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("settings.appearance")
                 }
+                FormSection { // N1b: work model versions (correction with preview)
+                    NavigationLink {
+                        WorkModelsScreen()
+                    } label: {
+                        HStack {
+                            Label("workmodel.title", systemImage: "calendar.badge.clock").foregroundStyle(TT.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                        }
+                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("settings.workmodel")
+                }
+                FormSection(footer: "haptics.footer") { // N1b: plain on/off switch (grading stays on the appearance page)
+                    HapticsToggle().padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                }
                 FormSection { // E1: device calendars (EventKit); on this device only
                     NavigationLink {
                         CalendarSettingsView()
@@ -124,10 +141,7 @@ struct SettingsView: View {
                         .font(TTFont.label)
                         .foregroundStyle(TT.danger)
                 }
-                FormSection("settings.about") {
-                    FormRow("settings.version") { Text(verbatim: Self.versionText).monospacedDigit() }
-                    FormRow("settings.license") { Text(verbatim: "AGPL-3.0-only") }
-                }
+                AboutSection(build: AppBuildInfo(platform: "iOS")) // N1b
             }
             .padding(.horizontal, TT.Space.l)
             .padding(.vertical, TT.Space.s)
@@ -179,13 +193,6 @@ struct SettingsView: View {
         case .queuedUnreachable: "clock"
         case .notPaired, .notSignedIn, .failed: "exclamationmark.circle"
         }
-    }
-
-    private static var versionText: String {
-        let info = Bundle.main.infoDictionary
-        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
-        return "\(version) (\(build))"
     }
 
     private func moduleTitle(_ key: ModuleKey) -> LocalizedStringKey {

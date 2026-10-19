@@ -12,7 +12,7 @@ import Testing
         let unset = try JSONCoding.makeDecoder().decode(Preferences.self, from: Data(#"{"accent":"blue","colorScheme":"system"}"#.utf8))
         #expect(unset.isUnset && unset.accentCustomHex == nil && unset.accentPreset == .blue)
         // Unknown future ids show as defaults and are flagged.
-        let future = try JSONCoding.makeDecoder().decode(Preferences.self, from: Data(#"{"accent":"magenta","colorScheme":"twilight","updatedAt":"2026-10-16T21:04:05.250Z"}"#.utf8))
+        let future = try JSONCoding.makeDecoder().decode(Preferences.self, from: Data(#"{"accent":"zebra","colorScheme":"twilight","updatedAt":"2026-10-16T21:04:05.250Z"}"#.utf8))
         #expect(future.accentPreset == .blue && future.hasUnknownAccent && future.scheme == .system && future.hasUnknownScheme)
     }
 
@@ -95,10 +95,18 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
 
     func getPreferences() async throws -> Preferences { Preferences() }
 
+    /// Emulates an older server: answers 400 to these accent ids and (when set) to any `glow` key.
+    var rejectedAccents: Set<String> = []
+    var rejectsGlow = false
+
     func updatePreferences(_ patch: PreferencesPatch) async throws -> Preferences {
         try lock.withLock {
             _sent.append(patch)
             if !_failures.isEmpty { throw _failures.removeFirst() }
+            if let accent = patch.accent, rejectedAccents.contains(accent) || (rejectsGlow && patch.glow != nil) {
+                throw TimetrackError.api(status: 400, code: "bad_request", message: "unsupported")
+            }
+            if rejectsGlow, patch.glow != nil { throw TimetrackError.api(status: 400, code: "bad_request", message: "unsupported") }
         }
         return Preferences(accent: patch.accent ?? "blue", colorScheme: patch.colorScheme ?? "system", updatedAt: .now)
     }
@@ -148,7 +156,7 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
         let service = FakeService()
         await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(accent: "orange", updatedAt: .now), canWrite: true)
         await sync.waitUntilIdle()
-        #expect(service.sent == [PreferencesPatch(accent: "pink", colorScheme: "dark")])
+        #expect(service.sent == [PreferencesPatch(accent: "pink", colorScheme: "dark", glow: "subtle")])
         #expect(defaults.string(forKey: AppearanceStorageKeys.accent) == "pink")
         #expect(!sync.hasPending(for: accountA))
         #expect(sync.status == .synced)
@@ -170,7 +178,7 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
         let service = FakeService()
         await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(), canWrite: true)
         await sync.waitUntilIdle()
-        #expect(service.sent == [PreferencesPatch(accent: "violet", colorScheme: "dark")])
+        #expect(service.sent == [PreferencesPatch(accent: "violet", colorScheme: "dark", glow: "subtle")])
         #expect(defaults.string(forKey: AppearanceStorageKeys.owner) == accountA.uuidString)
         // Second launch: the account is set now, the server value wins and nothing is sent again.
         await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(accent: "violet", colorScheme: "dark", updatedAt: .now), canWrite: true)
@@ -216,7 +224,7 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
         let defaults = makeDefaults(accent: "teal", owner: accountA)
         let sync = sync(defaults)
         let service = FakeService()
-        await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(accent: "magenta", colorScheme: "twilight", updatedAt: .now), canWrite: true)
+        await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(accent: "zebra", colorScheme: "twilight", updatedAt: .now), canWrite: true)
         await sync.waitUntilIdle()
         #expect(defaults.string(forKey: AppearanceStorageKeys.accent) == "blue")
         #expect(defaults.string(forKey: AppearanceStorageKeys.scheme) == "system")
@@ -234,14 +242,14 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
         }
         #expect(sync.status == .pending)
         await sync.waitUntilIdle()
-        #expect(service.sent == [PreferencesPatch(accent: "orange", colorScheme: "system")])
+        #expect(service.sent == [PreferencesPatch(accent: "orange", colorScheme: "system", glow: "subtle")])
         #expect(sync.status == .synced)
     }
 
     @Test func customColourSendsHexOthersDoNot() {
-        #expect(LocalAppearance(accent: "custom", customHex: "#ab12cd", scheme: "light").patch == PreferencesPatch(accent: "custom", colorScheme: "light", customHex: .set("#AB12CD")))
-        #expect(LocalAppearance(accent: "custom", customHex: "oops", scheme: "light").patch == PreferencesPatch(accent: "blue", colorScheme: "light"))
-        #expect(LocalAppearance(accent: "graphite", customHex: "#AB12CD", scheme: "dark").patch == PreferencesPatch(accent: "graphite", colorScheme: "dark"))
+        #expect(LocalAppearance(accent: "custom", customHex: "#ab12cd", scheme: "light").patch == PreferencesPatch(accent: "custom", colorScheme: "light", glow: "subtle", customHex: .set("#AB12CD")))
+        #expect(LocalAppearance(accent: "custom", customHex: "oops", scheme: "light").patch == PreferencesPatch(accent: "blue", colorScheme: "light", glow: "subtle"))
+        #expect(LocalAppearance(accent: "graphite", customHex: "#AB12CD", scheme: "dark").patch == PreferencesPatch(accent: "graphite", colorScheme: "dark", glow: "subtle"))
     }
 
     @Test func offlineKeepsMarkAndRetriesLater() async {
@@ -272,10 +280,101 @@ private final class FakeService: PreferencesService, @unchecked Sendable {
         if case .failed = sync.status {} else { Issue.record("expected failed") }
         #expect(sync.hasPending(for: accountA))
 
-        service.failNext(.api(status: 400, code: "bad_request", message: "x"))
+        // The server rejects the full patch and the compatibility patch (a genuine validation error).
+        service.failNext(.api(status: 400, code: "bad_request", message: "x"), .api(status: 400, code: "bad_request", message: "x"))
         await sync.retryNow()
         if case .failed = sync.status {} else { Issue.record("expected failed") }
         #expect(!sync.hasPending(for: accountA))
+    }
+
+    @Test func glowIsCachedFromTheServerAndKeptWhenTheServerIsSilent() async {
+        let defaults = makeDefaults(owner: accountA)
+        defaults.set("strong", forKey: AppearanceStorageKeys.glow)
+        let sync = sync(defaults)
+        // An older server sends no glow: the local choice stays.
+        await sync.connect(accountId: accountA, service: FakeService(), serverPreferences: Preferences(accent: "teal", updatedAt: .now), canWrite: true)
+        #expect(defaults.string(forKey: AppearanceStorageKeys.glow) == "strong")
+        // A newer server wins; an unknown future level shows as the default.
+        await sync.connect(accountId: accountA, service: FakeService(), serverPreferences: Preferences(accent: "teal", glow: "medium", updatedAt: .now), canWrite: true)
+        #expect(defaults.string(forKey: AppearanceStorageKeys.glow) == "medium")
+        await sync.connect(accountId: accountA, service: FakeService(), serverPreferences: Preferences(accent: "teal", glow: "blazing", updatedAt: .now), canWrite: true)
+        #expect(defaults.string(forKey: AppearanceStorageKeys.glow) == "subtle")
+    }
+
+    @Test func glowChangeIsSynced() async {
+        let defaults = makeDefaults(owner: accountA)
+        let sync = sync(defaults)
+        let service = FakeService()
+        await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(glow: "subtle", updatedAt: .now), canWrite: true)
+        defaults.set("strong", forKey: AppearanceStorageKeys.glow)
+        sync.localChanged()
+        await sync.waitUntilIdle()
+        #expect(service.sent == [PreferencesPatch(accent: "blue", colorScheme: "system", glow: "strong")])
+        #expect(sync.status == .synced)
+    }
+
+    @Test func newIdsFallBackToCustomHexOnOlderServers() async {
+        // Server v0.15.0 to v0.20.0: knows glow, rejects the six newest ids.
+        let defaults = makeDefaults(owner: accountA)
+        let sync = sync(defaults)
+        let service = FakeService()
+        service.rejectedAccents = ["wine"]
+        await sync.connect(accountId: accountA, service: service, serverPreferences: Preferences(updatedAt: .now), canWrite: true)
+        defaults.set("wine", forKey: AppearanceStorageKeys.accent)
+        defaults.set("medium", forKey: AppearanceStorageKeys.glow)
+        sync.localChanged()
+        await sync.waitUntilIdle()
+        #expect(service.sent.count == 2)
+        #expect(service.sent[1] == PreferencesPatch(accent: "custom", colorScheme: "system", glow: "medium", customHex: .set("#7F1D3F")))
+        #expect(sync.status == .synced && !sync.hasPending(for: accountA))
+        #expect(defaults.string(forKey: AppearanceStorageKeys.accent) == "wine") // the local name stays
+
+        // Server before v0.15.0: also rejects glow and the v0.15.0 ids.
+        let oldDefaults = makeDefaults(owner: accountA)
+        let oldSync = self.sync(oldDefaults)
+        let old = FakeService()
+        old.rejectedAccents = ["crimson"]
+        old.rejectsGlow = true
+        await oldSync.connect(accountId: accountA, service: old, serverPreferences: Preferences(updatedAt: .now), canWrite: true)
+        oldDefaults.set("crimson", forKey: AppearanceStorageKeys.accent)
+        oldSync.localChanged()
+        await oldSync.waitUntilIdle()
+        #expect(old.sent.last == PreferencesPatch(accent: "custom", colorScheme: "system", customHex: .set("#B91C1C")))
+        #expect(oldSync.status == .synced)
+
+        // A legacy accent only loses the glow key.
+        let legacyDefaults = makeDefaults(owner: accountA)
+        let legacySync = self.sync(legacyDefaults)
+        let legacy = FakeService()
+        legacy.rejectsGlow = true
+        await legacySync.connect(accountId: accountA, service: legacy, serverPreferences: Preferences(updatedAt: .now), canWrite: true)
+        legacyDefaults.set("teal", forKey: AppearanceStorageKeys.accent)
+        legacySync.localChanged()
+        await legacySync.waitUntilIdle()
+        #expect(legacy.sent.last == PreferencesPatch(accent: "teal", colorScheme: "system"))
+        #expect(legacySync.status == .synced)
+    }
+
+    @Test func allAccentIdsOfTheContractAreKnown() {
+        let contract = ["blue", "teal", "violet", "green", "orange", "pink", "graphite", "custom", "indigo", "navy", "purple", "magenta", "crimson", "forest",
+                        "petrol", "bronze", "wine", "slate", "cocoa", "olive", "ocean", "ink"]
+        #expect(Set(AccentPreset.allCases.map(\.rawValue)) == Set(contract) && AccentPreset.allCases.count == 22)
+        #expect(AccentPreset.allCases.last == .custom)
+        #expect(AccentPreset.allCases.filter { $0.nativeHex == nil } == [.custom])
+        #expect(AccentPreset.ink.nativeHex == 0x334155 && AccentPreset.wine.nativeHex == 0x7F1D3F)
+        #expect(GlowPreference.allCases.map(\.rawValue) == ["off", "subtle", "medium", "strong"])
+    }
+
+    @Test func preferencesDecodeGlow() throws {
+        let decoder = JSONCoding.makeDecoder()
+        let withGlow = try decoder.decode(Preferences.self, from: Data(#"{"accent":"ink","colorScheme":"dark","glow":"strong","updatedAt":"2026-10-16T21:04:05Z"}"#.utf8))
+        #expect(withGlow.accentPreset == .ink && withGlow.glowLevel == .strong && withGlow.hasGlow)
+        let old = try decoder.decode(Preferences.self, from: Data(#"{"accent":"blue","colorScheme":"system"}"#.utf8))
+        #expect(!old.hasGlow && old.glowLevel == .subtle)
+        let future = try decoder.decode(Preferences.self, from: Data(#"{"accent":"blue","colorScheme":"system","glow":"blazing"}"#.utf8))
+        #expect(future.glowLevel == .subtle && future.hasGlow)
+        let broken = try decoder.decode(Preferences.self, from: Data(#"{"accent":"blue","colorScheme":"system","glow":3}"#.utf8))
+        #expect(!broken.hasGlow)
     }
 
     @Test func widgetSnapshotCarriesAccentAdditively() throws {

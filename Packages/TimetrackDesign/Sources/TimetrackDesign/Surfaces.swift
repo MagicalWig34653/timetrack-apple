@@ -1,4 +1,5 @@
 import SwiftUI
+import TimetrackCore
 
 extension EnvironmentValues {
     /// Forces solid surfaces (previews of the Reduce Transparency fallback, or contexts without glass).
@@ -11,6 +12,9 @@ extension EnvironmentValues {
 public struct TTBackdrop: View {
     @Environment(\.ttTheme) private var theme
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.ttGlow) private var level
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     public init() {}
 
@@ -18,7 +22,8 @@ public struct TTBackdrop: View {
         ZStack {
             TT.background
             GeometryReader { proxy in
-                let glow = scheme == .dark ? 0.20 : 0.11
+                let factor = GlowStyle(level: level, reduceTransparency: reduceTransparency, increasedContrast: contrast == .increased).backdropFactor
+                let glow = (scheme == .dark ? 0.20 : 0.11) * factor
                 Circle()
                     .fill(theme.accent.opacity(glow))
                     .frame(width: proxy.size.width * 0.9)
@@ -56,11 +61,17 @@ extension View {
 
 struct TTSurfaceModifier: ViewModifier {
     let radius: CGFloat
+    @Environment(\.ttTheme) private var theme
+    @Environment(\.ttGlow) private var level
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
 
     func body(content: Content) -> some View {
+        let edge = GlowStyle(level: level, reduceTransparency: reduceTransparency, increasedContrast: contrast == .increased).cardEdgeOpacity
         content
             .background(TT.surface, in: .rect(cornerRadius: radius, style: .continuous))
             .overlay { RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(TT.cardBorder, lineWidth: 1) }
+            .overlay { if edge > 0 { RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(theme.accent.opacity(edge), lineWidth: 1) } }
             .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
     }
 }

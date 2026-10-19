@@ -27,6 +27,7 @@ struct SettingsScreen: View {
             } footer: {
                 Text("watch.adopt_session.hint")
             }
+            Section { HapticsToggle() } footer: { Text("haptics.footer") }
             Section("settings.about") {
                 LabeledContent("settings.version") { Text(verbatim: Self.versionText) }
                 LabeledContent("settings.license") { Text(verbatim: "AGPL-3.0-only") }

@@ -20,7 +20,7 @@ public struct TTPrimaryButtonStyle: ButtonStyle {
             .padding(.vertical, TT.Space.s)
             .frame(maxWidth: .infinity, minHeight: controlSize == .large ? 54 : 44)
             .background(fill.gradient, in: .rect(cornerRadius: TT.Radius.control + 2, style: .continuous))
-            .shadow(color: fill.opacity(isEnabled ? 0.28 : 0), radius: 10, y: 4)
+            .ttHalo(isEnabled ? fill : .clear)
             .opacity(isEnabled ? 1 : 0.45)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)

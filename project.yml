@@ -14,7 +14,7 @@ settings:
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: J2DU2P47XW
     MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: 10
+    CURRENT_PROJECT_VERSION: 11
     SWIFT_EMIT_LOC_STRINGS: YES
 targets:
   TimetrackMac:
@@ -24,6 +24,7 @@ targets:
     sources:
       - Sources/Mac
       - Sources/Planning # A10: absences, calendar, vacation settings (shared with iOS)
+      - Sources/Settings # N1b: work model editor, vacation figures, about section (shared with iOS)
       - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
@@ -67,6 +68,7 @@ targets:
       - Sources/Location # L2: location automation (region monitoring, shortcuts)
       - Sources/Focus # F2: Focus filter, notifications, explainer page
       - Sources/Planning # A10
+      - Sources/Settings # N1b
       - Sources/Calendar # E1: EventKit device calendars (iOS only; macOS does not use it yet)
       - Sources/Week # N1a: week overview, week planner, vacation planner (iOS only)
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery

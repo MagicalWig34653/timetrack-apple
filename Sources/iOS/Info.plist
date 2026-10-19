@@ -28,6 +28,8 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Timetrack zeigt Termine der von dir gewählten Kalender im Tag als Kontext. Die Termine bleiben auf diesem Gerät. Schreiben tut Timetrack nur, wenn du es in den Einstellungen einschaltest, und nur in den eigenen Kalender „Timetrack“.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Mit „Immer“ kann iOS Timetrack beim Betreten und Verlassen deiner Orte kurz wecken, damit Ankunft und Abfahrt erkannt werden. Die App fragt den Standort nicht laufend ab; gemeldet werden nur Ort und Uhrzeit.</string>
 	<key>NSLocationTemporaryUsageDescriptionDictionary</key>

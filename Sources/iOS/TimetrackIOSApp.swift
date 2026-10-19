@@ -9,6 +9,7 @@ struct TimetrackIOSApp: App {
     @UIApplicationDelegateAdaptor(QuickActionDelegate.self) private var delegate
     @State private var model: AppModel
     @State private var ui = UIState.shared
+    @State private var deviceCalendar = CalendarEnvironment.makeStore() // E1: device calendars (EventKit), read-only by default
     @Environment(\.scenePhase) private var scenePhase
     /// Hands the session to the Apple Watch app (WatchConnectivity); the watch stores it in its own Keychain.
     private let watchSender = WatchHandoffSender(channel: WCSessionChannel(), secrets: KeychainSecretStore())
@@ -33,6 +34,7 @@ struct TimetrackIOSApp: App {
             Self.rootContent
                 .environment(model)
                 .environment(ui)
+                .environment(\.deviceCalendar, deviceCalendar)
                 .widgetSync(model) // A7: widget snapshot, Live Activity
                 .focusSync(model) // F2: automation module flag for the Focus filter
                 .environment(\.watchSender, watchSender)
@@ -74,6 +76,10 @@ struct TimetrackIOSApp: App {
         // Simulator/UI-test convenience: show the Focus filter page without signing in.
         if ProcessInfo.processInfo.environment["TT_DEV_FOCUS_PAGE"] == "1" {
             NavigationStack { FocusFilterView() }
+        } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_PAGE"] == "1" {
+            NavigationStack { CalendarSettingsView() }
+        } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_DAY"] == "1" {
+            CalendarDayDemo()
         } else {
             RootView()
         }

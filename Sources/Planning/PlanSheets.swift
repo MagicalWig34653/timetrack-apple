@@ -15,12 +15,14 @@ struct PlanSheetHost: View {
         case .customDay(let day): CustomDaySheet(store: store, day: day)
         case .manualEntry(let day):
             if let list = model.timeList { ManualEntrySheet(store: store, list: list, day: day) }
+        case .eventDraft(let day, let event):
+            if let list = model.timeList { EventDraftSheet(store: store, list: list, day: day, event: event) }
         case .settings: EmptyView()
         }
     }
 }
 
-private struct SheetFrame<Content: View>: View {
+struct SheetFrame<Content: View>: View {
     let title: LocalizedStringKey
     let canSave: Bool
     let saving: Bool

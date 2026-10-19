@@ -24,6 +24,7 @@ private struct CalendarContent: View {
     @Environment(AppModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.deviceCalendar) private var deviceCalendar
     @State private var absenceRequest: AbsenceRequest?
     @State private var sheet: PlanSheet?
     @State private var daySheet = false
@@ -57,8 +58,10 @@ private struct CalendarContent: View {
         .ttScreenBackground()
         .task {
             await store.load()
+            syncDeviceCalendar()
             if wide, store.selectedDay == nil { await store.select(store.today) }
         }
+        .onChange(of: store.planDays) { syncDeviceCalendar() }
         .refreshable { await store.load(); await store.loadDetail() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         .gesture(DragGesture(minimumDistance: 40).onEnded { value in
@@ -95,6 +98,12 @@ private struct CalendarContent: View {
             }
             .presentationDetents([.medium, .large])
         }
+    }
+
+    /// E1: mirrors the visible plan into the dedicated Timetrack calendar. Does nothing unless the user enabled writing.
+    private func syncDeviceCalendar() {
+        guard let deviceCalendar, deviceCalendar.preferences.writeEnabled, !store.isLoading, let from = store.gridDays.first, let to = store.gridDays.last else { return }
+        deviceCalendar.syncPlan(store.planDays, from: from, to: to, calendar: store.calendar) { "Arbeit: \($0.plainName)" }
     }
 
     private var header: some View {

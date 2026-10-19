@@ -67,6 +67,7 @@ targets:
       - Sources/Location # L2: location automation (region monitoring, shortcuts)
       - Sources/Focus # F2: Focus filter, notifications, explainer page
       - Sources/Planning # A10
+      - Sources/Calendar # E1: EventKit device calendars (iOS only; macOS does not use it yet)
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
@@ -148,6 +149,8 @@ targets:
         NSLocationAlwaysAndWhenInUseUsageDescription: Mit „Immer“ kann iOS Timetrack beim Betreten und Verlassen deiner Orte kurz wecken, damit Ankunft und Abfahrt erkannt werden. Die App fragt den Standort nicht laufend ab; gemeldet werden nur Ort und Uhrzeit.
         NSLocationTemporaryUsageDescriptionDictionary:
           AutomationVerification: Für die Standortautomatik braucht Timetrack einmalig den genauen Standort, um Ankünfte zuverlässig zu erkennen.
+        # E1: EventKit. Reading events needs full access; Timetrack writes only after the user switches it on, and only to its own calendar.
+        NSCalendarsFullAccessUsageDescription: Timetrack zeigt Termine der von dir gewählten Kalender im Tag als Kontext. Die Termine bleiben auf diesem Gerät. Schreiben tut Timetrack nur, wenn du es in den Einstellungen einschaltest, und nur in den eigenen Kalender „Timetrack“.
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [de.linolaske.timetrack.automation.refresh, de.linolaske.timetrack.focus.retry]
         UIApplicationSceneManifest:

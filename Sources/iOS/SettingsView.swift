@@ -35,6 +35,20 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("settings.appearance")
                 }
+                FormSection { // E1: device calendars (EventKit); on this device only
+                    NavigationLink {
+                        CalendarSettingsView()
+                    } label: {
+                        HStack {
+                            Label("Kalender", systemImage: "calendar").foregroundStyle(TT.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary)
+                        }
+                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("settings.calendar")
+                }
                 if model.isEnabled(.automation) { // L2: location automation (module `automation`)
                     FormSection {
                         NavigationLink {

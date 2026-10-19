@@ -265,6 +265,7 @@ enum PlanSheet: Identifiable {
     case plan(LocalDay)
     case customDay(LocalDay)
     case manualEntry(LocalDay)
+    case eventDraft(LocalDay, DeviceEvent) // E1: proposal derived from a device calendar event
     case settings
 
     var id: String {
@@ -272,6 +273,7 @@ enum PlanSheet: Identifiable {
         case .plan(let day): "plan-\(day)"
         case .customDay(let day): "custom-\(day)"
         case .manualEntry(let day): "entry-\(day)"
+        case .eventDraft(let day, let event): "event-\(day)-\(event.id)"
         case .settings: "settings"
         }
     }

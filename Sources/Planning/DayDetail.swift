@@ -21,6 +21,7 @@ struct DayDetail: View {
             if !info.holidays.isEmpty || !info.schoolHolidays.isEmpty { holidays(info) }
             if !info.absences.isEmpty { absences(info) }
             planRow(info)
+            DeviceEventsSection(day: day, calendar: store.calendar, canSuggest: model.timeList != nil, sheet: $sheet) // E1: read-only context from the device calendars
             actions
         }
         .confirmationDialog("plan.cancel.title", isPresented: Binding(get: { cancelling != nil }, set: { if !$0 { cancelling = nil } }), titleVisibility: .visible) {

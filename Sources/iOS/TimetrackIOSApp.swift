@@ -70,6 +70,7 @@ struct TimetrackIOSApp: App {
                     #endif
                 }
         }
+        .commands { IOSCommands(model: model, ui: ui) } // AD1: hardware keyboard shortcuts and the iPadOS menu bar
     }
 
     @ViewBuilder private static var rootContent: some View {
@@ -135,6 +136,16 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
         case .settings: "sidebar.settings"
+        }
+    }
+
+    /// AD1: sidebar grouping on iPad.
+    enum Group { case capture, planning, app }
+    var group: Group {
+        switch self {
+        case .today, .time: .capture
+        case .calendar, .vacation: .planning
+        case .settings: .app
         }
     }
 

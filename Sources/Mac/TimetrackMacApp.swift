@@ -25,6 +25,7 @@ struct TimetrackMacApp: App {
                 .widgetSync(model) // A7: widget snapshot
                 .frame(minWidth: 900, minHeight: 560)
                 .ttAppearance()
+                .debugSettingsOpener()
                 .task {
                     await model.restore()
                     #if DEBUG

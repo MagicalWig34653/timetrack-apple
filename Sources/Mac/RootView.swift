@@ -29,45 +29,88 @@ struct MainView: View {
     @Environment(AppModel.self) private var model
     @Environment(UIState.self) private var ui
 
-    private var items: [SidebarItem] {
-        SidebarItem.allCases.filter { item in item.requiredModule.map(model.isEnabled) ?? true }
+    private func items(planning: Bool) -> [SidebarItem] {
+        SidebarItem.allCases.filter { $0.isPlanning == planning && ($0.requiredModule.map(model.isEnabled) ?? true) }
     }
 
     var body: some View {
         @Bindable var ui = ui
         NavigationSplitView {
-            List(items, selection: $ui.selection) { item in
-                Label(item.titleKey, systemImage: item.symbol)
-                    .tag(item)
-                    .accessibilityIdentifier("sidebar.\(item.rawValue)")
-            }
-            .navigationSplitViewColumnWidth(min: 190, ideal: 210)
-            .safeAreaInset(edge: .top) {
-                HStack(spacing: TT.Space.s) {
-                    BrandMark(size: 28)
-                    Text("signin.brand").font(.system(.headline, design: .rounded, weight: .bold))
-                    Spacer()
+            List(selection: $ui.selection) {
+                Section(AD.s("sidebar.section.capture")) {
+                    ForEach(items(planning: false)) { row($0) }
                 }
-                .padding(.horizontal, TT.Space.l).padding(.top, TT.Space.s)
-            }
-            .safeAreaInset(edge: .bottom) {
-                if let account = model.account {
-                    HStack(spacing: TT.Space.s) {
-                        Image(systemName: "person.crop.circle.fill").foregroundStyle(TT.textSecondary)
-                        Text(verbatim: account.displayName).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(1)
+                if !items(planning: true).isEmpty {
+                    Section(AD.s("sidebar.section.planning")) {
+                        ForEach(items(planning: true)) { row($0) }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(TT.Space.m)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(Text("account.signed_in_as \(account.displayName)"))
                 }
             }
+            .listStyle(.sidebar)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 260)
+            .safeAreaInset(edge: .bottom, spacing: 0) { SidebarFooter() }
         } detail: {
             switch ui.selection {
             case .today: TodayView()
             case .time: TimeView()
             case .calendar: CalendarScreen()
             case .vacation: VacationScreen()
+            }
+        }
+        .toolbar { ToolbarItem(placement: .primaryAction) { TimerToolbarButton() } }
+        // A module switched off while its screen is open falls back to "Heute".
+        .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }
+    }
+
+    private func row(_ item: SidebarItem) -> some View {
+        Label(item.titleKey, systemImage: item.symbol)
+            .tag(item)
+            .accessibilityIdentifier("sidebar.\(item.rawValue)")
+    }
+}
+
+/// Account name and, while a segment runs, a live elapsed time at the foot of the sidebar.
+private struct SidebarFooter: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: TT.Space.xs) {
+            if let running = model.today?.running {
+                HStack(spacing: TT.Space.xs) {
+                    Circle().fill(TT.success).frame(width: 7, height: 7).accessibilityHidden(true)
+                    Text(running.startedAt, style: .timer).monospacedDigit().font(TTFont.meta).foregroundStyle(TT.textPrimary)
+                }
+            }
+            if let account = model.account {
+                HStack(spacing: TT.Space.s) {
+                    Image(systemName: "person.crop.circle.fill").foregroundStyle(TT.textSecondary)
+                    Text(verbatim: account.displayName).font(TTFont.meta).foregroundStyle(TT.textSecondary).lineLimit(1)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(Text("account.signed_in_as \(account.displayName)"))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, TT.Space.m).padding(.vertical, TT.Space.s)
+    }
+}
+
+/// Window toolbar button: start (last used kind) or stop, on every screen.
+private struct TimerToolbarButton: View {
+    @Environment(AppModel.self) private var model
+    @AppStorage("mac.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+
+    var body: some View {
+        if let today = model.today {
+            if today.running != nil {
+                Button { Task { await today.stop() } } label: { Label("command.stop", systemImage: "stop.fill") }
+                    .help(Text("command.stop")).tint(TT.danger)
+            } else {
+                Button {
+                    let kind = SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work
+                    Task { await today.start(kind: kind) }
+                } label: { Label("command.start", systemImage: "play.fill") }
+                    .help(Text("command.start"))
             }
         }
     }

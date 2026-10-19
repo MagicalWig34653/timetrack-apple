@@ -26,12 +26,18 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     /// (widgets follow the system appearance). No account data, nothing secret.
     public var accentHex: String?
     public var colorScheme: String?
+    /// LA1 (optional): the planned end of today (instant, from the plan day's `plannedEnd`) and the planned working seconds
+    /// (`plannedSeconds`). Both belong to `day`; the Live Activity ignores them on another day.
+    public var plannedEnd: Date?
+    public var plannedSeconds: Int?
 
     public static let maxSegments = 8
 
     public init(isRunning: Bool, kind: SegmentKind, startedAt: Date?, todaySeconds: Int, day: String, timeZone: String, updatedAt: Date,
                 targetSeconds: Int? = nil, balanceSeconds: Int? = nil, segments: [WidgetSegment]? = nil,
-                accentHex: String? = nil, colorScheme: String? = nil) {
+                accentHex: String? = nil, colorScheme: String? = nil, plannedEnd: Date? = nil, plannedSeconds: Int? = nil) {
+        self.plannedEnd = plannedEnd
+        self.plannedSeconds = plannedSeconds
         self.accentHex = accentHex.flatMap(Preferences.normalizedHex)
         self.colorScheme = colorScheme.flatMap { ColorSchemePreference(rawValue: $0)?.rawValue }
         self.targetSeconds = targetSeconds
@@ -51,8 +57,9 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
 
     /// Builds the snapshot from what the app currently shows. `todaySeconds` is evaluated work plus credits (as on the Heute screen).
     public static func make(running: Segment?, day: DayEvaluation?, account: TimeAccount?, segments: [Segment], zone: TimeZone, now: Date = .now,
-                            accentHex: String? = nil, colorScheme: String? = nil) -> WidgetSnapshot {
+                            accentHex: String? = nil, colorScheme: String? = nil, plan: PlanDay? = nil) -> WidgetSnapshot {
         let calendar = DayCalendar(timeZone: zone)
+        let planned = PlannedDay(plan: plan, zone: zone)
         let ordered = segments.filter { !$0.voided }.sorted { $0.startedAt < $1.startedAt }
         return WidgetSnapshot(
             isRunning: running != nil, kind: running?.kind ?? .work, startedAt: running?.startedAt,
@@ -60,7 +67,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
             day: calendar.day(for: now), timeZone: zone.identifier, updatedAt: now,
             targetSeconds: day?.targetSeconds, balanceSeconds: account?.balanceSeconds,
             segments: ordered.map { WidgetSegment(kind: $0.kind, startedAt: $0.startedAt, endedAt: $0.endedAt) },
-            accentHex: accentHex, colorScheme: colorScheme
+            accentHex: accentHex, colorScheme: colorScheme, plannedEnd: planned.end, plannedSeconds: planned.seconds
         )
     }
 

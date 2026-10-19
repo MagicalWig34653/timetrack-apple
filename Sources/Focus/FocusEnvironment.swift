@@ -16,10 +16,7 @@ enum FocusEnvironment {
     static let changed = Notification.Name("de.linolaske.timetrack.focus.changed")
 
     /// One queue instance per process (an actor guarding one file).
-    static let queue: TimerActionQueue = {
-        let directory = (try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)) ?? FileManager.default.temporaryDirectory
-        return TimerActionQueue(fileURL: directory.appendingPathComponent("focus-queue.json"), limit: 8)
-    }()
+    static var queue: TimerActionQueue { TimerControlRunner.queue } // LA1: shared with the Live Activity buttons
 
     /// Client for the stored session WITHOUT a validation round trip (that call is the first to time out on a bad network).
     /// A rejected session surfaces as a 401 on the real call and is handled there.

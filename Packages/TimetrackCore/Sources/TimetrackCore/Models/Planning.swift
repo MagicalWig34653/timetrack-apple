@@ -296,13 +296,24 @@ public struct PlanDay: Codable, Sendable, Hashable, Identifiable {
     public let mode: PlanMode
     public let placeId: UUID?
     public let note: String?
+    /// Contract 0.17.0 (optional, absent for older servers): planned local times `HH:mm` in the work model's zone, planned break
+    /// and the read-only `plannedSeconds` (end - start - break). Used by the Live Activity for the planned end of the day.
+    public let plannedStart: String?
+    public let plannedEnd: String?
+    public let plannedBreakMinutes: Int?
+    public let plannedSeconds: Int?
     public var id: LocalDay { date }
 
-    public init(date: LocalDay, mode: PlanMode, placeId: UUID? = nil, note: String? = nil) {
+    public init(date: LocalDay, mode: PlanMode, placeId: UUID? = nil, note: String? = nil,
+                plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil, plannedSeconds: Int? = nil) {
         self.date = date
         self.mode = mode
         self.placeId = placeId
         self.note = note
+        self.plannedStart = plannedStart
+        self.plannedEnd = plannedEnd
+        self.plannedBreakMinutes = plannedBreakMinutes
+        self.plannedSeconds = plannedSeconds
     }
 }
 

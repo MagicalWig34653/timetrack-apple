@@ -3,11 +3,11 @@ import Foundation
 /// Which device events are shown for a local day.
 public enum DeviceEventFilter {
     /// Events of the selected calendars that touch `day`, all-day first, then by start. Declined and cancelled events are hidden.
-    /// The calendar Timetrack writes itself (`preferences.timetrackCalendarID`) is never shown again as context.
+    /// Events Timetrack wrote itself (marker URL) are never shown again as context, wherever they live.
     public static func events(on day: LocalDay, in events: [DeviceEvent], preferences: CalendarPreferences, calendar: DayCalendar) -> [DeviceEvent] {
         guard let interval = calendar.interval(of: day) else { return [] }
         let result = events.filter { event in
-            guard preferences.selectedCalendarIDs.contains(event.calendarID), event.calendarID != preferences.timetrackCalendarID else { return false }
+            guard preferences.selectedCalendarIDs.contains(event.calendarID), !event.isWrittenByTimetrack else { return false }
             guard !event.isDeclined, !event.isCancelled else { return false }
             if event.isAllDay {
                 guard preferences.showAllDay else { return false }
@@ -25,9 +25,14 @@ public enum DeviceEventFilter {
 
     /// Local days an all-day event covers. EventKit ends all-day events at 23:59:59 of the last day (or at the next midnight).
     static func allDayRange(of event: DeviceEvent, calendar: DayCalendar) -> ClosedRange<LocalDay> {
-        let first = calendar.day(for: event.start)
-        guard event.end > event.start else { return first...first }
-        let last = calendar.day(for: event.end.addingTimeInterval(-1))
+        allDayDays(start: event.start, end: event.end, calendar: calendar)
+    }
+
+    /// Local days an all-day span covers; shared with the EventKit provider when it reads written events back.
+    public static func allDayDays(start: Date, end: Date, calendar: DayCalendar) -> ClosedRange<LocalDay> {
+        let first = calendar.day(for: start)
+        guard end > start else { return first...first }
+        let last = calendar.day(for: end.addingTimeInterval(-1))
         return last >= first ? first...last : first...first
     }
 }
@@ -76,94 +81,5 @@ public enum EventDraftMapper {
         guard draft.endedAt > draft.startedAt else { throw EventDraftError.emptyInterval }
         let note = draft.note.trimmingCharacters(in: .whitespacesAndNewlines)
         return SegmentInput(kind: kind, startedAt: draft.startedAt, endedAt: draft.endedAt, note: note.isEmpty ? nil : note)
-    }
-}
-
-// MARK: - Write-back of planned work days
-
-/// A planned work day as an all-day event in the dedicated Timetrack calendar. The plan has no clock times, so none are invented.
-public struct PlannedWorkEvent: Sendable, Equatable {
-    public let day: LocalDay
-    public let mode: PlanMode
-    public let title: String
-
-    public init(day: LocalDay, mode: PlanMode, title: String) {
-        self.day = day
-        self.mode = mode
-        self.title = title
-    }
-}
-
-/// An event Timetrack wrote earlier (recognised by its marker URL, see `PlanMarker`).
-public struct WrittenEvent: Sendable, Equatable {
-    public let eventID: String
-    public let day: LocalDay
-    public let title: String
-
-    public init(eventID: String, day: LocalDay, title: String) {
-        self.eventID = eventID
-        self.day = day
-        self.title = title
-    }
-}
-
-public enum WriteOperation: Sendable, Equatable {
-    case create(PlannedWorkEvent)
-    case update(eventID: String, PlannedWorkEvent)
-    case delete(eventID: String, day: LocalDay)
-}
-
-public enum PlanMarker {
-    public static let scheme = "timetrack"
-    public static let host = "plan"
-
-    public static func url(for day: LocalDay) -> URL? { URL(string: "\(scheme)://\(host)/\(day)") }
-
-    /// The day of a marker URL; nil for anything not written by Timetrack.
-    public static func day(from url: URL?) -> LocalDay? {
-        guard let url, url.scheme == scheme, url.host == host else { return nil }
-        let day = url.lastPathComponent
-        return LocalDays.parse(day) == nil ? nil : day
-    }
-}
-
-public enum PlanWriteBackPlanner {
-    /// Only days that actually mean "I work": office, home, customer, school. Days off and unknown modes are not written.
-    public static func isWritten(_ mode: PlanMode) -> Bool { [.office, .home, .customer, .school].contains(mode) }
-
-    public static func desired(from planDays: [LocalDay: PlanDay], from: LocalDay, to: LocalDay, title: (PlanMode) -> String) -> [PlannedWorkEvent] {
-        planDays.values
-            .filter { $0.date >= from && $0.date <= to && isWritten($0.mode) }
-            .sorted { $0.date < $1.date }
-            .map { PlannedWorkEvent(day: $0.date, mode: $0.mode, title: title($0.mode)) }
-    }
-
-    /// Minimal operations that make the written events of `[from, to]` match `desired`. Events outside the range and events without
-    /// Timetrack's marker are never touched; duplicates for one day are removed.
-    public static func operations(desired: [PlannedWorkEvent], existing: [WrittenEvent], from: LocalDay, to: LocalDay) -> [WriteOperation] {
-        var operations: [WriteOperation] = []
-        var kept: [LocalDay: WrittenEvent] = [:]
-        for event in existing where event.day >= from && event.day <= to {
-            if kept[event.day] == nil { kept[event.day] = event } else { operations.append(.delete(eventID: event.eventID, day: event.day)) }
-        }
-        let wanted = Dictionary(desired.map { ($0.day, $0) }, uniquingKeysWith: { _, last in last })
-        for day in wanted.keys.sorted() {
-            guard let target = wanted[day] else { continue }
-            if let current = kept[day] {
-                if current.title != target.title { operations.append(.update(eventID: current.eventID, target)) }
-            } else {
-                operations.append(.create(target))
-            }
-        }
-        for (day, event) in kept where wanted[day] == nil { operations.append(.delete(eventID: event.eventID, day: day)) }
-        return operations.sorted { sortKey($0) < sortKey($1) }
-    }
-
-    private static func sortKey(_ operation: WriteOperation) -> String {
-        switch operation {
-        case .create(let event): "\(event.day)-1"
-        case .update(_, let event): "\(event.day)-2"
-        case .delete(let id, let day): "\(day)-3-\(id)"
-        }
     }
 }

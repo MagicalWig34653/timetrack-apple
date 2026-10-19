@@ -52,7 +52,8 @@ final class EventKitProvider: DeviceCalendarProvider {
             let identifier = event.eventIdentifier ?? UUID().uuidString
             return DeviceEvent(id: "\(identifier)@\(Int(event.startDate.timeIntervalSince1970))", calendarID: event.calendar.calendarIdentifier,
                                title: event.title ?? "", location: event.location, start: event.startDate, end: event.endDate, isAllDay: event.isAllDay,
-                               isDeclined: Self.isDeclined(event), isCancelled: event.status == .canceled)
+                               isDeclined: Self.isDeclined(event), isCancelled: event.status == .canceled,
+                               isWrittenByTimetrack: EntryMarker.key(from: event.url) != nil)
         }
     }
 
@@ -74,10 +75,12 @@ final class EventKitProvider: DeviceCalendarProvider {
 
     func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent] {
         guard let calendar = store.calendar(withIdentifier: calendarID) else { return [] }
+        let dayCalendar = DayCalendar(timeZone: .current)
         let predicate = store.predicateForEvents(withStart: from, end: to, calendars: [calendar])
         return store.events(matching: predicate).compactMap { event in
-            guard let day = PlanMarker.day(from: event.url), let id = event.eventIdentifier else { return nil }
-            return WrittenEvent(eventID: id, day: day, title: event.title ?? "")
+            guard let key = EntryMarker.key(from: event.url), let id = event.eventIdentifier else { return nil }
+            let days = DeviceEventFilter.allDayDays(start: event.startDate, end: event.endDate, calendar: dayCalendar)
+            return WrittenEvent(eventID: id, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: event.title ?? "")
         }
     }
 
@@ -92,12 +95,12 @@ final class EventKitProvider: DeviceCalendarProvider {
                     try fill(event, with: planned, dayCalendar: dayCalendar)
                     try store.save(event, span: .thisEvent, commit: false)
                 case .update(let id, let planned):
-                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, PlanMarker.day(from: event.url) != nil else { continue }
+                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url) != nil else { continue }
                     try fill(event, with: planned, dayCalendar: dayCalendar)
                     try store.save(event, span: .thisEvent, commit: false)
-                case .delete(let id, _):
+                case .delete(let id):
                     // Only events carrying Timetrack's marker inside the Timetrack calendar are ever removed.
-                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, PlanMarker.day(from: event.url) != nil else { continue }
+                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url) != nil else { continue }
                     try store.remove(event, span: .thisEvent, commit: false)
                 }
             }
@@ -108,13 +111,13 @@ final class EventKitProvider: DeviceCalendarProvider {
         }
     }
 
-    private func fill(_ event: EKEvent, with planned: PlannedWorkEvent, dayCalendar: DayCalendar) throws {
-        guard let interval = dayCalendar.interval(of: planned.day) else { throw CocoaError(.formatting) }
+    private func fill(_ event: EKEvent, with planned: CalendarEntry, dayCalendar: DayCalendar) throws {
+        guard let first = dayCalendar.interval(of: planned.firstDay), let last = dayCalendar.interval(of: planned.lastDay), last.start >= first.start else { throw CocoaError(.formatting) }
         event.title = planned.title
         event.isAllDay = true
-        event.startDate = interval.start
-        event.endDate = interval.start // all-day events end on their last day
-        event.url = PlanMarker.url(for: planned.day)
+        event.startDate = first.start
+        event.endDate = last.start // all-day events end on their last day
+        event.url = EntryMarker.url(forKey: planned.key)
         event.availability = .free
     }
 

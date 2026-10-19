@@ -1,17 +1,43 @@
 import Foundation
 
 /// What a timer Live Activity shows. `startedAt` drives the ticking text, so it is the identity of "the same timer".
-public struct LiveActivityTarget: Sendable, Equatable, Hashable {
+///
+/// LA1: the target is also the activity's content state, so it carries everything the views need to draw without a network
+/// round trip: the pause state (`pausedAt`), the finished work of today, the planned day and the account accent.
+/// A pause is a normal pause: the work segment is stopped, so a paused target has no running segment; its `startedAt` is the
+/// moment the pause began (the identity of "this pause").
+public struct LiveActivityTarget: Sendable, Codable, Equatable, Hashable {
     public var kind: SegmentKind
     public var startedAt: Date
+    /// Set while paused (equal to `startedAt`); nil while the timer runs.
+    public var pausedAt: Date?
+    /// Finished work of today without the running segment (what the Heute screen counts as done).
+    public var workedSeconds: Int
+    /// Planned length of the day (plan day's `plannedSeconds`, else the work model's target); nil when there is none.
+    public var plannedSeconds: Int?
+    /// Planned end of the day from the plan, when planned times exist.
+    public var plannedEnd: Date?
+    /// Account accent (`#RRGGBB`); nil = default blue.
+    public var accentHex: String?
 
-    public init(kind: SegmentKind, startedAt: Date) {
+    public init(kind: SegmentKind, startedAt: Date, pausedAt: Date? = nil, workedSeconds: Int = 0, plannedSeconds: Int? = nil,
+                plannedEnd: Date? = nil, accentHex: String? = nil) {
         self.kind = kind
         self.startedAt = startedAt
+        self.pausedAt = pausedAt
+        self.workedSeconds = workedSeconds
+        self.plannedSeconds = plannedSeconds
+        self.plannedEnd = plannedEnd
+        self.accentHex = accentHex
     }
 
-    /// Server timestamps and the JSON round trip through the App Group may differ by sub-second noise.
-    func sameTimer(as other: LiveActivityTarget) -> Bool { abs(startedAt.timeIntervalSince(other.startedAt)) < 1 }
+    public var isPaused: Bool { pausedAt != nil }
+
+    /// Server timestamps and the JSON round trip through the App Group may differ by sub-second noise. A running timer and a
+    /// pause are never "the same timer".
+    func sameTimer(as other: LiveActivityTarget) -> Bool {
+        isPaused == other.isPaused && abs(startedAt.timeIntervalSince(other.startedAt)) < 1
+    }
 }
 
 /// One activity that is currently alive (active or stale; ended/dismissed ones are filtered out by the caller).

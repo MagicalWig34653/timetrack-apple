@@ -39,7 +39,7 @@ private extension WidgetFamily {
 struct TimetrackLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
-            LiveActivityBanner(state: context.state)
+            LiveActivityContent(state: context.state)
                 .activityBackgroundTint(nil)
         } dynamicIsland: { context in
             DynamicIsland {
@@ -49,11 +49,41 @@ struct TimetrackLiveActivity: Widget {
             } compactTrailing: {
                 IslandCompactTrailing(state: context.state)
             } minimal: {
-                IslandCompactLeading(state: context.state)
+                IslandMinimal(state: context.state)
             }
+            .keylineTint(TTTheme(accentHex: context.state.accentHex).accent)
             .widgetURL(WidgetLinks.today)
         }
+        // LA1: the paired watch mirrors the activity in its Smart Stack with this layout (buttons run on the iPhone).
+        .supplementalActivityFamilies([.small])
     }
+}
+
+/// Lock Screen on the iPhone or the compact layout of the watch, depending on where the system draws the activity.
+private struct LiveActivityContent: View {
+    @Environment(\.activityFamily) private var family
+    let state: LiveActivityTarget
+
+    var body: some View {
+        switch family {
+        case .small: LiveActivitySmall(state: state)
+        default: LiveActivityBanner(state: state)
+        }
+    }
+}
+
+#Preview("Lock Screen running", as: .content, using: TimerActivityAttributes()) {
+    TimetrackLiveActivity()
+} contentStates: {
+    LiveActivityTarget.sample()
+    LiveActivityTarget.sample(paused: true)
+}
+
+#Preview("Island expanded", as: .dynamicIsland(.expanded), using: TimerActivityAttributes()) {
+    TimetrackLiveActivity()
+} contentStates: {
+    LiveActivityTarget.sample()
+    LiveActivityTarget.sample(paused: true)
 }
 
 // MARK: - Control Center

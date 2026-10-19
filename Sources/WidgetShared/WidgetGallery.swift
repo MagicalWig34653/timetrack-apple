@@ -13,6 +13,10 @@ struct WidgetGallery: View {
     static var mode: String? { rawMode?.replacingOccurrences(of: "-live", with: "") }
     static var liveOnly: Bool { rawMode?.hasSuffix("-live") ?? false }
     static var isRequested: Bool { rawMode != nil }
+    /// LA1 sample switches: `TT_DEV_LA_PAUSED=1`, `TT_DEV_LA_NOPLAN=1`, `TT_DEV_LA_ACCENT=#RRGGBB`.
+    static var pausedSample: Bool { ProcessInfo.processInfo.environment["TT_DEV_LA_PAUSED"] == "1" }
+    static var noPlanSample: Bool { ProcessInfo.processInfo.environment["TT_DEV_LA_NOPLAN"] == "1" }
+    static var accentSample: String? { ProcessInfo.processInfo.environment["TT_DEV_LA_ACCENT"] }
 
     @Environment(\.colorScheme) private var scheme
 
@@ -47,7 +51,7 @@ struct WidgetGallery: View {
                 }
                 Text(verbatim: "Live Activity / Dynamic Island").font(.subheadline.bold()).foregroundStyle(TT.textSecondary)
                 #if os(iOS)
-                LiveActivityPreview(state: .init(kind: entry.kind, startedAt: entry.runningSince ?? entry.date.addingTimeInterval(-3_723)))
+                LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
                 #endif
             }
             .padding(16)

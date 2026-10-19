@@ -78,6 +78,8 @@ struct TimetrackIOSApp: App {
             NavigationStack { FocusFilterView() }
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_PAGE"] == "1" {
             NavigationStack { CalendarSettingsView() }
+        } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_WRITE"] == "1" {
+            CalendarWriteDemo()
         } else if ProcessInfo.processInfo.environment["TT_DEV_CALENDAR_DAY"] == "1" {
             CalendarDayDemo()
         } else {

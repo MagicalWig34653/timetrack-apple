@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import TimetrackCore
 import TimetrackDesign
@@ -168,3 +169,4 @@ extension MonthMarker {
         }
     }
 }
+#endif

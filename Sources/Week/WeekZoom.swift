@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import TimetrackCore
 import TimetrackDesign
@@ -259,3 +260,4 @@ struct DayHeader: View {
         }
     }
 }
+#endif

@@ -16,7 +16,9 @@ struct VacationPlannerView: View {
             }
         }
         .navigationTitle(W.s("vp.title"))
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }
 
@@ -449,7 +451,10 @@ private struct TakeSheet: View {
                 .padding(TT.Space.l).frame(maxWidth: 560).frame(maxWidth: .infinity)
             }
             .ttScreenBackground()
-            .navigationTitle(W.s("take.title")).navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(W.s("take.title"))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("common.cancel") { dismiss() }.accessibilityIdentifier("take.cancel") } }
         }
         .presentationDetents([.medium, .large])

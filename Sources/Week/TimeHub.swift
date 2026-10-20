@@ -1,3 +1,4 @@
+#if os(iOS)
 import SwiftUI
 import TimetrackCore
 import TimetrackDesign
@@ -32,6 +33,7 @@ struct TimeHub: View {
     @State private var absenceRequest: AbsenceRequest?
     @State private var sheet: PlanSheet?
     @State private var picker = false
+    @State private var planningArea = false
     @State private var pendingNavigation: PendingNavigation?
     @Namespace private var selectionSpace
 
@@ -83,6 +85,11 @@ struct TimeHub: View {
                 .presentationDetents([.fraction(0.75), .large])
         }
         .sheet(item: $voiding, onDismiss: refreshAfterEdit) { segment in VoidSheet(store: timeList, segment: segment) }
+        .navigationDestination(isPresented: $planningArea) { PlanningHubScreen() }
+        .environment(\.openPlanWeek) { monday in
+            planningArea = false
+            planStoreOpen(monday)
+        }
         .modifier(CalendarSheets(calendar: calendar, absenceRequest: $absenceRequest, sheet: $sheet))
         .alert(W.s("leave.title"), isPresented: Binding(get: { pendingNavigation != nil }, set: { if !$0 { pendingNavigation = nil } })) {
             Button(W.s("leave.discard"), role: .destructive) {
@@ -131,6 +138,13 @@ struct TimeHub: View {
             }
         }
         ToolbarItemGroup(placement: .topBarTrailing) {
+            if planEnabled {
+                Menu {
+                    Button { planningArea = true } label: { Label(PA.s("hub.title"), systemImage: "calendar.badge.clock") }
+                        .accessibilityIdentifier("time.planning_area")
+                } label: { Label(Z2.s("more.label"), systemImage: "ellipsis.circle") }
+                    .accessibilityIdentifier("time.more")
+            }
             Button { goToToday() } label: { Text("calendar.today") }.accessibilityIdentifier("time.today")
             if let calendar, zoom == .month {
                 Button { calendar.beginRange(at: focus.day) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
@@ -322,6 +336,16 @@ struct TimeHub: View {
         withAnimation(animation) { focus.move(toMonth: MonthKey(index: index), preferring: today) }
     }
 
+    /// The planning area ("Kommende Wochen") hands a week over: it opens in the planning mode of the week zoom.
+    private func planStoreOpen(_ monday: LocalDay) {
+        withAnimation(animation) {
+            focus.setZoom(.week)
+            focus.select(monday)
+            focus.isPlanning = true
+        }
+        storedZoom = TimeZoom.week.rawValue
+    }
+
     // MARK: - Loading
 
     private func syncStores() {
@@ -476,3 +500,4 @@ struct DayEntries: View {
         }
     }
 }
+#endif

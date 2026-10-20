@@ -36,7 +36,7 @@ struct WeekPlannerView: View {
         .ttScreenBackground()
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) { saveBar }
-        .task { if store.week == nil { await store.load() } }
+        .task { if store.week == nil && !store.isLoading { await store.load() } }
         .refreshable { if !store.isDirty { await store.load() } }
     }
 

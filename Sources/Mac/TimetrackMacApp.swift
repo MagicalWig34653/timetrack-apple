@@ -70,28 +70,30 @@ final class UIState {
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case today, time, calendar, vacation
+    case today, time, planning, calendar, vacation
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
-    var requiredModule: ModuleKey? { self == .calendar || self == .vacation ? .planning : nil }
+    var requiredModule: ModuleKey? { self == .planning || self == .calendar || self == .vacation ? .planning : nil }
 
     var titleKey: LocalizedStringKey {
         switch self {
         case .today: "sidebar.today"
         case .time: "sidebar.time"
+        case .planning: "sidebar.planning"
         case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
         }
     }
 
     /// Sidebar section: capturing time vs. planning.
-    var isPlanning: Bool { self == .calendar || self == .vacation }
+    var isPlanning: Bool { self == .planning || self == .calendar || self == .vacation }
 
     var symbol: String {
         switch self {
         case .today: "sun.max"
         case .time: "calendar.day.timeline.left"
+        case .planning: "calendar.badge.checkmark"
         case .calendar: "calendar"
         case .vacation: "beach.umbrella"
         }

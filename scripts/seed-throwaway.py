@@ -25,15 +25,21 @@ db = sqlite3.connect(os.path.join(workdir, "tt.sqlite"))
 db.execute("insert into accounts (id,handle,display_name,email,role,created_at) values (?,?,?,?,?,?)", (account, "alex", "Alex Beispiel", None, "admin", now))
 db.execute("insert into sessions (id,account_id,token_hash,csrf_token_hash,recovery,created_at,expires_at) values (?,?,?,?,?,?,?)",
            (str(uuid.uuid4()).upper(), account, b64(hashlib.sha256(token.encode()).digest()), b64(hashlib.sha256(csrf.encode()).digest()), 0, now, now + 86400 * 30))
+# PL1: a second synthetic account that shares its plan and vacation with alex (incoming share), created through its own session.
+other, other_token = str(uuid.uuid4()).upper(), b64(secrets.token_bytes(32))
+other_csrf = b64(hashlib.sha256(("timetrack.csrf.v1:" + other_token).encode()).digest())
+db.execute("insert into accounts (id,handle,display_name,email,role,created_at) values (?,?,?,?,?,?)", (other, "ben", "Ben Beispiel", None, "member", now))
+db.execute("insert into sessions (id,account_id,token_hash,csrf_token_hash,recovery,created_at,expires_at) values (?,?,?,?,?,?,?)",
+           (str(uuid.uuid4()).upper(), other, b64(hashlib.sha256(other_token.encode()).digest()), b64(hashlib.sha256(other_csrf.encode()).digest()), 0, now, now + 86400 * 30))
 db.commit(); db.close()
 
 server = subprocess.Popen([exe, "serve", "--hostname", "127.0.0.1", "--port", str(port)], cwd=workdir, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 open(os.path.join(workdir, "pid"), "w").write(str(server.pid))
 base = f"http://127.0.0.1:{port}/api/v1"
 
-def call(method, path, body=None):
+def call(method, path, body=None, as_other=False):
     request = urllib.request.Request(base + path, method=method, data=json.dumps(body).encode() if body is not None else None,
-                                     headers={"Content-Type": "application/json", "Cookie": f"tt_session={token}", "X-CSRF-Token": csrf})
+                                     headers={"Content-Type": "application/json", "Cookie": f"tt_session={other_token if as_other else token}", "X-CSRF-Token": other_csrf if as_other else csrf})
     try:
         with urllib.request.urlopen(request) as response:
             data = response.read()
@@ -89,6 +95,13 @@ for kind, start, end, status in [("vacation", nxt, nxt + dt.timedelta(days=4), "
                                  ("excused", monday - dt.timedelta(days=40), monday - dt.timedelta(days=40), "taken")]:
     try: call("POST", "/absences", {"kind": kind, "startDate": start.isoformat(), "endDate": end.isoformat(), "status": status})
     except SystemExit as error: print("absence skipped:", error, file=sys.stderr)
+
+try:
+    call("POST", "/shares", {"recipientHandle": "alex", "scopes": {"plan": True, "vacation": True}}, as_other=True)
+    for offset, mode in [(0, "office"), (1, "home"), (2, "office")]:
+        call("PUT", f"/plan/days/{(monday + dt.timedelta(days=offset)).isoformat()}", {"mode": mode, "plannedStart": "08:00", "plannedEnd": "16:30", "plannedBreakMinutes": 30}, as_other=True)
+    call("POST", "/absences", {"kind": "vacation", "startDate": (monday + dt.timedelta(days=28)).isoformat(), "endDate": (monday + dt.timedelta(days=32)).isoformat(), "status": "approved"}, as_other=True)
+except SystemExit as error: print("share seed skipped:", error, file=sys.stderr)
 
 if "--running" in sys.argv:
     call("POST", "/time/timer/start", {"clientEventId": str(uuid.uuid4()), "kind": "work"})

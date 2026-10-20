@@ -53,6 +53,7 @@ struct MainView: View {
             switch ui.selection {
             case .today: TodayView()
             case .time: TimeView()
+            case .planning: NavigationStack { PlanningHubScreen() }
             case .calendar: CalendarScreen()
             case .vacation: VacationScreen()
             }

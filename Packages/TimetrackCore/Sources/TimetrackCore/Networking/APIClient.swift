@@ -328,6 +328,25 @@ public actor APIClient: PreferencesService {
         try await send(.put, "/plan/weeks/\(isoWeek)", body: input)
     }
 
+    // MARK: - Plan shares (PL1, module planning)
+
+    public func listShares() async throws -> [Share] { try await get("/shares") }
+
+    public func createShare(_ input: ShareCreateInput) async throws -> Share { try await send(.post, "/shares", body: input) }
+
+    public func updateShare(id: UUID, scopes: ShareScopes) async throws -> Share {
+        try await send(.patch, "/shares/\(id.uuidString.lowercased())", body: ShareScopesInput(scopes: scopes))
+    }
+
+    /// Revokes at once; further views by the recipient answer 404.
+    public func revokeShare(id: UUID) async throws { try await sendVoid(.delete, "/shares/\(id.uuidString.lowercased())") }
+
+    public func listIncomingShares() async throws -> [IncomingShare] { try await get("/shares/incoming") }
+
+    public func viewShared(shareId: UUID, from: LocalDay, to: LocalDay) async throws -> SharedView {
+        try await get("/shares/incoming/\(shareId.uuidString.lowercased())/view", query: [URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to)])
+    }
+
     /// Read-only: nothing is booked. Book a suggestion with `createAbsence`.
     public func getVacationSuggestions(_ query: VacationSuggestionQuery = VacationSuggestionQuery()) async throws -> VacationSuggestions {
         try await get("/vacation/suggestions", query: query.queryItems)

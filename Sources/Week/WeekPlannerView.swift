@@ -39,7 +39,7 @@ struct WeekPlannerView: View {
         .ttScreenBackground()
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) { saveBar }
-        .task { if store.week == nil { await store.load() } }
+        .task { if store.week == nil && !store.isLoading { await store.load() } }
         .refreshable { if !store.isDirty { await store.load() } }
         .alert(W.s("leave.title"), isPresented: Binding(get: { pendingShift != nil }, set: { if !$0 { pendingShift = nil } })) {
             Button(W.s("leave.discard"), role: .destructive) {

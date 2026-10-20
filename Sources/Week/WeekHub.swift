@@ -12,10 +12,12 @@ final class WeekStoreCache {
     private var week: WeekStore?
     private var plan: WeekPlanStore?
     private var vacation: VacationPlannerStore?
+    private var horizon: PlanHorizonStore?
+    private var sharing: SharingStore?
 
     private func reset(for client: APIClient) {
         let id = ObjectIdentifier(client)
-        if owner != id { owner = id; week = nil; plan = nil; vacation = nil }
+        if owner != id { owner = id; week = nil; plan = nil; vacation = nil; horizon = nil; sharing = nil }
     }
 
     func weekStore(_ client: APIClient, calendar: DayCalendar) -> WeekStore {
@@ -32,6 +34,23 @@ final class WeekStoreCache {
         let created = WeekPlanStore(client: client, calendar: calendar)
         created.onOutcome = { TTHaptics.handle($0) }
         plan = created
+        return created
+    }
+
+    func horizonStore(_ client: APIClient, calendar: DayCalendar) -> PlanHorizonStore {
+        reset(for: client)
+        if let horizon { return horizon }
+        let created = PlanHorizonStore(client: client, calendar: calendar)
+        horizon = created
+        return created
+    }
+
+    func sharingStore(_ client: APIClient, calendar: DayCalendar, ownHandle: String?) -> SharingStore {
+        reset(for: client)
+        if let sharing { return sharing }
+        let created = SharingStore(client: client, calendar: calendar, ownHandle: ownHandle)
+        created.onOutcome = { TTHaptics.handle($0) }
+        sharing = created
         return created
     }
 
@@ -61,7 +80,9 @@ struct WeekDetailScreen: View {
             }
         }
         .navigationTitle(W.s("detail.title"))
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             if model.isEnabled(.planning) {
                 ToolbarItem(placement: .primaryAction) {
@@ -74,18 +95,38 @@ struct WeekDetailScreen: View {
     }
 }
 
-/// The week planner as a pushed screen (calendar menu and week details).
+/// The week planner as a pushed screen (calendar menu, week details, planning area). `monday` opens that week; the menu leads to the
+/// planning area (coming weeks, vacation planner, shares) and is left out when the screen is pushed from there.
 struct WeekPlannerScreen: View {
+    var monday: LocalDay?
+    var showsAreaMenu = true
     @Environment(AppModel.self) private var model
 
     var body: some View {
         Group {
             if let client = model.apiClient {
                 let cache = WeekStoreCache.shared
-                WeekPlannerView(store: cache.planStore(client, calendar: model.dayCalendar), overview: cache.weekStore(client, calendar: model.dayCalendar))
+                let planStore = cache.planStore(client, calendar: model.dayCalendar)
+                WeekPlannerView(store: planStore, overview: cache.weekStore(client, calendar: model.dayCalendar))
+                    .task {
+                        if let monday, planStore.monday != LocalDays.mondayOfWeek(containing: monday) { await planStore.open(monday: monday) }
+                    }
             }
         }
         .navigationTitle(W.s("segment.plan"))
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            if showsAreaMenu && model.isEnabled(.planning) {
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        NavigationLink { PlanningHubScreen() } label: { Label(PA.s("hub.menu.weeks"), systemImage: "calendar.badge.clock") }
+                        NavigationLink { SharingScreen() } label: { Label(PA.s("hub.menu.shares"), systemImage: "person.2") }
+                    } label: { Label(PA.s("hub.menu"), systemImage: "ellipsis.circle") }
+                        .accessibilityIdentifier("week.plan.menu")
+                }
+            }
+        }
     }
 }

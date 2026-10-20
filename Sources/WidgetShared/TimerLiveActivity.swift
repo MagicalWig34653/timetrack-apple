@@ -30,7 +30,7 @@ enum TimerLiveActivity {
     /// be requested in the background appears as soon as the app is in front.
     @discardableResult
     static func reconcileFromSnapshot(source: String = "foreground") async -> LiveActivityOutcome {
-        await sync(target: .desired(snapshot: WidgetSnapshotStore().read(), pause: PauseMarkerStore().read()), source: source)
+        await sync(target: .desired(snapshot: WidgetSnapshotStore().read(), pause: PauseMarkerStore().read(), iconStyle: LiveActivityIconStore().read()), source: source)
     }
 
     private static func apply(desired: LiveActivityTarget?, source: String) async -> LiveActivityOutcome {

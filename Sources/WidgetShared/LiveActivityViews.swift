@@ -13,6 +13,71 @@ private extension LiveActivityTarget {
     var stateTitle: Text { isPaused ? wtext("w.paused") : wtext("w.running") }
 }
 
+/// LA4: the kind icon. While work runs and an animation style is chosen it is a poses font driven by a ticking timer text (the only
+/// content a Live Activity changes by itself); otherwise the plain SF Symbol. Reduce Motion and the Always-On display show one
+/// resting pose instead, and a pause or another kind keeps the symbol.
+struct LiveKindIcon: View {
+    let state: LiveActivityTarget
+    var size: CGFloat = 36
+    /// Tinted rounded badge (Lock Screen, expanded) or the bare glyph (compact, minimal, Smart Stack).
+    var badge = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isLuminanceReduced) private var dimmed
+
+    var body: some View {
+        let symbol = state.isPaused ? "pause.fill" : state.kind.ttSymbol
+        let style = state.activeIconStyle
+        if let font = style.fontName {
+            let tint = state.kind.ttTint
+            let box = badge ? size * 0.74 : size
+            Group {
+                if reduceMotion || dimmed {
+                    Text(verbatim: "\(style.restingFrame)").font(.custom(font, fixedSize: box)).lineLimit(1).fixedSize().frame(width: box, height: box)
+                } else {
+                    let clock = state.clock
+                    // Only the last character (the seconds digit) stays inside the frame; the rest of the timer text is clipped away.
+                    Text(timerInterval: clock.range, pauseTime: clock.pauseTime, countsDown: false, showsHours: true)
+                        .font(.custom(font, fixedSize: box)).lineLimit(1).fixedSize().frame(width: box, height: box, alignment: .trailing).clipped()
+                }
+            }
+            .foregroundStyle(tint)
+            .frame(width: size, height: size)
+            .background(badge ? tint.opacity(0.16) : Color.clear, in: .rect(cornerRadius: size * 0.3, style: .continuous))
+            .accessibilityHidden(true)
+        } else if badge {
+            KindGlyph(symbol: symbol, tint: state.isPaused ? Color.orange : state.kind.ttTint, size: size)
+        } else {
+            Image(systemName: symbol).foregroundStyle(state.isPaused ? Color.orange : state.kind.ttTint)
+        }
+    }
+}
+
+/// LA4: in-app preview of the chosen icon (settings). Unlike the Live Activity this runs real SwiftUI time, so it plays at 5 poses per
+/// second; the Live Activity itself shows one pose per second. Static with Reduce Motion or no style.
+struct LiveIconPreview: View {
+    let style: LiveActivityIconStyle
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        HStack {
+            Spacer()
+            Group {
+                if let font = style.fontName {
+                    TimelineView(.periodic(from: .now, by: 0.2)) { context in
+                        let frame = reduceMotion ? style.restingFrame : LiveActivityIconStyle.frame(atElapsed: Int(context.date.timeIntervalSinceReferenceDate * 5))
+                        Text(verbatim: "\(frame)").font(.custom(font, fixedSize: 64)).foregroundStyle(Color.accentColor)
+                    }
+                } else {
+                    Image(systemName: SegmentKind.work.ttSymbol).font(.system(size: 40)).foregroundStyle(Color.accentColor)
+                }
+            }
+            .frame(width: 80, height: 80)
+            Spacer()
+        }
+        .accessibilityHidden(true)
+    }
+}
+
 /// Today's work as a clock: ticking while running, frozen while paused.
 struct LiveWorkedClock: View {
     let state: LiveActivityTarget
@@ -118,7 +183,7 @@ private struct LiveHeadline: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            KindGlyph(symbol: state.isPaused ? "pause.fill" : state.kind.ttSymbol, tint: state.kind.ttTint, size: 44)
+            LiveKindIcon(state: state, size: 44)
             VStack(alignment: .leading, spacing: 0) {
                 LiveCaption(state: state)
                 LiveWorkedClock(state: state)
@@ -217,7 +282,7 @@ struct IslandExpandedLeading: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            KindGlyph(symbol: state.isPaused ? "pause.fill" : state.kind.ttSymbol, tint: state.kind.ttTint, size: 36)
+            LiveKindIcon(state: state, size: 36)
             LiveCaption(state: state)
         }
     }
@@ -250,7 +315,7 @@ struct IslandCompactLeading: View {
     let state: LiveActivityTarget
 
     var body: some View {
-        Image(systemName: state.isPaused ? "pause.fill" : state.kind.ttSymbol).foregroundStyle(state.isPaused ? Color.orange : state.kind.ttTint)
+        LiveKindIcon(state: state, size: 22, badge: false)
     }
 }
 
@@ -297,7 +362,7 @@ struct LiveActivitySmall: View {
         let theme = state.theme
         VStack(alignment: .leading, spacing: 5) {
             HStack(spacing: 4) {
-                Image(systemName: state.isPaused ? "pause.fill" : state.kind.ttSymbol).foregroundStyle(state.isPaused ? Color.orange : state.kind.ttTint)
+                LiveKindIcon(state: state, size: 14, badge: false)
                 state.stateTitle
             }
             .font(.system(.caption2, design: .rounded, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
@@ -356,11 +421,11 @@ extension LiveActivityTarget {
 #if DEBUG
 extension LiveActivityTarget {
     /// Sample states for the gallery and previews: 2 h finished + 31 min running, day started 5 h ago, planned end 5 h from now.
-    static func sample(paused: Bool = false, kind: SegmentKind = .work, planned: Bool = true, accentHex: String? = nil, now: Date = .now) -> LiveActivityTarget {
+    static func sample(paused: Bool = false, kind: SegmentKind = .work, planned: Bool = true, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil, now: Date = .now) -> LiveActivityTarget {
         let start = paused ? now.addingTimeInterval(-300) : now.addingTimeInterval(-1_860)
         return LiveActivityTarget(kind: kind, startedAt: start, pausedAt: paused ? start : nil, workedSeconds: 7_200 + (paused ? 1_860 : 0),
                                   plannedSeconds: planned ? 28_800 : nil, plannedEnd: planned ? now.addingTimeInterval(5 * 3600) : nil,
-                                  dayStart: planned ? now.addingTimeInterval(-3 * 3600 - 1_860 - 1_800) : nil, accentHex: accentHex)
+                                  dayStart: planned ? now.addingTimeInterval(-3 * 3600 - 1_860 - 1_800) : nil, accentHex: accentHex, iconStyle: iconStyle)
     }
 }
 

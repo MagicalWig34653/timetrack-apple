@@ -90,6 +90,8 @@ struct MainView: View {
                         }
                     }
                 }
+                // UX3: start/stop and the running clock on every tab.
+                .tabViewBottomAccessory(isEnabled: model.today != nil) { NowBar() }
             }
         }
         // A module switched off while its screen is open falls back to "Heute".
@@ -133,13 +135,16 @@ struct SectionView: View {
     let section: AppSection
 
     var body: some View {
-        switch section {
-        case .today: TodayView()
-        case .time: TimeView()
-        case .calendar: CalendarScreen()
-        case .vacation: VacationView()
-        case .settings: SettingsView()
+        Group {
+            switch section {
+            case .today: TodayView()
+            case .time: TimeView()
+            case .calendar: CalendarScreen()
+            case .vacation: VacationView()
+            case .more: MoreView()
+            }
         }
+        .ttSyncStatusLine() // UX3: shown only while actions wait or the server is unreachable
     }
 }
 

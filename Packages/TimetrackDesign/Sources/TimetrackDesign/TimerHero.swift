@@ -78,7 +78,8 @@ public struct TimerHero<Actions: View>: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                             .contentTransition(.numericText())
-                            .accessibilityLabel(Text(verbatim: clock))
+                            // UX3 (F26): spoken to the minute, so VoiceOver does not re-read the clock every second.
+                            .accessibilityLabel(Text(verbatim: DurationFormat.spoken(RunningTimerDisplay(startedAt: startedAt).elapsedSeconds(at: context.date))))
                     }
                     KindBadge(kind)
                 } else {

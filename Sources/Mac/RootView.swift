@@ -57,6 +57,7 @@ struct MainView: View {
             case .vacation: VacationScreen()
             }
         }
+        .ttSyncStatusLine() // UX3: only while actions wait or the server is unreachable
         .toolbar { ToolbarItem(placement: .primaryAction) { TimerToolbarButton() } }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }

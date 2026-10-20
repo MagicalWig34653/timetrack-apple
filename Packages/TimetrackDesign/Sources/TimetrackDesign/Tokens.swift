@@ -81,10 +81,11 @@ public enum TT {
     public static let kindWork = Color(light: 0x0284C7, dark: 0x38BDF8)
     public static let kindTravel = Color(light: 0xD97706, dark: 0xFBBF24)
     public static let kindSchool = Color(light: 0x7C3AED, dark: 0xA78BFA)
-    public static let kindVacation = Color(light: 0x0369A1, dark: 0x7DD3FC)
+    /// UX3: own hues for absences. Vacation was sky like work, "other" violet like school (PWA parity, but confusable in calendar and list).
+    public static let kindVacation = Color(light: 0x047857, dark: 0x34D399)
     public static let kindSick = Color(light: 0xE11D48, dark: 0xFB7185)
     public static let kindExcused = Color(light: 0x0F766E, dark: 0x5EEAD4)
-    public static let kindOther = Color(light: 0x6D28D9, dark: 0xC4B5FD)
+    public static let kindOther = Color(light: 0x475569, dark: 0xCBD5E1)
     public static let kindHoliday = Color(light: 0xB45309, dark: 0xFCD34D)
 
     // Metrics

@@ -13,9 +13,16 @@ struct TimetrackProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TimetrackEntry>) -> Void) {
-        // The apps reload this timeline after every change; the periodic refresh only drops yesterday's totals after midnight
-        // and lets the "Aktualisiert um" note appear when the apps have not written for a while.
-        completion(Timeline(entries: [current()], policy: .after(.now.addingTimeInterval(15 * 60))))
+        // The apps reload this timeline after every change. While a timer runs, one entry per minute moves the "Gearbeitet" figure on
+        // (h:mm, no ticking seconds); the final refresh drops yesterday's totals after midnight and lets the "Aktualisiert um" note appear.
+        let first = current()
+        var entries = [first]
+        if first.runningSince != nil {
+            let now = first.date
+            let nextMinute = Calendar.current.nextDate(after: now, matching: DateComponents(second: 0), matchingPolicy: .nextTime) ?? now.addingTimeInterval(60)
+            entries += (0..<15).map { TimetrackEntry(date: nextMinute.addingTimeInterval(Double($0) * 60), snapshot: first.snapshot) }
+        }
+        completion(Timeline(entries: entries, policy: .after(max(entries.last?.date ?? .now, .now.addingTimeInterval(15 * 60)))))
     }
 
     private func current() -> TimetrackEntry { TimetrackEntry(date: .now, snapshot: store.read()) }

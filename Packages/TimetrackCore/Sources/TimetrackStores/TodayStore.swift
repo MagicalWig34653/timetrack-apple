@@ -57,6 +57,9 @@ public final class TodayStore {
         return base.applying(pending)
     }
 
+    /// UX3: delivery state for the status line (nothing when all is well).
+    public var syncStatus: SyncStatus { SyncStatus(pending: pending.count, networkError: error?.isNetworkError == true) }
+
     public var timeZone: TimeZone { calendar.timeZone }
     public var todayLabel: LocalDay { calendar.day(for: .now) }
 

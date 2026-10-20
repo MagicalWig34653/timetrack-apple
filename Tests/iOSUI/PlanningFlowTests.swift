@@ -145,7 +145,7 @@ final class PlanningFlowTests: XCTestCase {
         sleep(1)
         shot("vacation")
         // S2: the vacation settings sheet is reached from Einstellungen › Urlaubsanspruch (no longer from the Urlaub tab).
-        open("Einstellungen", "settings")
+        app.openSettings()
         XCTAssertTrue(el("settings.vacation").waitForExistence(timeout: 10))
         el("settings.vacation").tap()
         XCTAssertTrue(el("settings.save").waitForExistence(timeout: 5))

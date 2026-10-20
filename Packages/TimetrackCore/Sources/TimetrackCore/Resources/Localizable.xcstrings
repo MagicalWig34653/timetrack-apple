@@ -211,7 +211,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Es läuft kein Zeitabschnitt."
+            "value": "Es läuft kein Timer."
           }
         }
       }
@@ -313,7 +313,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Der Zeitabschnitt überschneidet sich mit einem anderen."
+            "value": "Der Eintrag überschneidet sich mit einem anderen."
           }
         }
       }
@@ -333,7 +333,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Es läuft bereits ein Zeitabschnitt."
+            "value": "Es läuft bereits ein Timer."
           }
         }
       }

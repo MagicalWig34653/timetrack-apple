@@ -12,17 +12,15 @@ struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.watchSender) private var watchSender
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @Environment(\.ttTheme) private var theme
     @State private var confirmingServerChange = false
     @State private var watchStatus: WatchHandoffResult?
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
-                accountCard
+                AccountCard()
                 appearanceGroup
                 workGroup
-                automationGroup
                 devicesGroup
                 technicalGroup
                 sessionActions
@@ -46,25 +44,12 @@ struct SettingsView: View {
         }
     }
 
-    /// Work and planning: work model versions, vacation entitlement.
+    /// Work and planning: work model versions, vacation entitlement. (UX3: reminders and automation moved to "Mehr".)
     private var workGroup: some View {
         FormSection("Arbeit") {
             SettingsLinkRow(title: "workmodel.title", symbol: "calendar.badge.clock", id: "settings.workmodel") { WorkModelsScreen() }
             if model.isEnabled(.planning) {
                 VacationEntitlementRow()
-                SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
-            }
-            SettingsLinkRow(title: "Überstunden-Hinweise", symbol: "clock.badge.exclamationmark", id: "settings.overwork") { OverworkSettingsView() } // OT1
-        }
-    }
-
-    /// What the app does on its own or with other apps: device calendars, location automation, Focus filter.
-    private var automationGroup: some View {
-        FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
-            SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
-            if model.isEnabled(.automation) { // L2/F2: hidden when the automation module is off (account or server-wide)
-                SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
-                SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
             }
         }
     }
@@ -106,7 +91,31 @@ struct SettingsView: View {
         }
     }
 
-    @ViewBuilder private var accountCard: some View {
+    static func statusKey(_ result: WatchHandoffResult) -> LocalizedStringKey {
+        switch result {
+        case .notPaired: "settings.watch.status.not_paired"
+        case .notSignedIn: "settings.watch.status.not_signed_in"
+        case .queuedUnreachable: "settings.watch.status.unreachable"
+        case .sent: "settings.watch.status.sent"
+        case .failed: "settings.watch.status.failed"
+        }
+    }
+
+    private static func statusSymbol(_ result: WatchHandoffResult) -> String {
+        switch result {
+        case .sent: "checkmark.circle"
+        case .queuedUnreachable: "clock"
+        case .notPaired, .notSignedIn, .failed: "exclamationmark.circle"
+        }
+    }
+}
+
+/// Name and handle of the signed-in account (top of "Mehr" and of the settings).
+struct AccountCard: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.ttTheme) private var theme
+
+    var body: some View {
         if let account = model.account {
             Card {
                 HStack(spacing: TT.Space.l) {
@@ -124,24 +133,6 @@ struct SettingsView: View {
                 }
                 .accessibilityElement(children: .combine)
             }
-        }
-    }
-
-    static func statusKey(_ result: WatchHandoffResult) -> LocalizedStringKey {
-        switch result {
-        case .notPaired: "settings.watch.status.not_paired"
-        case .notSignedIn: "settings.watch.status.not_signed_in"
-        case .queuedUnreachable: "settings.watch.status.unreachable"
-        case .sent: "settings.watch.status.sent"
-        case .failed: "settings.watch.status.failed"
-        }
-    }
-
-    private static func statusSymbol(_ result: WatchHandoffResult) -> String {
-        switch result {
-        case .sent: "checkmark.circle"
-        case .queuedUnreachable: "clock"
-        case .notPaired, .notSignedIn, .failed: "exclamationmark.circle"
         }
     }
 }

@@ -16,7 +16,7 @@ final class ParityFlowTests: XCTestCase {
 
     /// S2: the vacation settings sheet is reached from Einstellungen › Urlaubsanspruch.
     private func openVacationSettings() {
-        open("Einstellungen", "settings")
+        app.openSettings()
         scrollTo(el("settings.vacation"))
         el("settings.vacation").tap()
     }
@@ -73,7 +73,7 @@ final class ParityFlowTests: XCTestCase {
         shot("vacation-after")
 
         // Settings: work models.
-        open("Einstellungen", "settings")
+        app.openSettings()
         let row = el("settings.workmodel")
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         shot("settings")

@@ -36,7 +36,7 @@ private struct TodayContent: View {
                     HStack(alignment: .top, spacing: TT.Space.xl) {
                         VStack(spacing: TT.Space.l) {
                             TimerCard(store: store)
-                            DayStats(store: store)
+                            DayStandingCard(store: store)
                             QuickAbsenceRow()
                         }
                         .frame(maxWidth: 440)
@@ -47,7 +47,7 @@ private struct TodayContent: View {
                     }
                 } else {
                     TimerCard(store: store)
-                    DayStats(store: store)
+                    DayStandingCard(store: store)
                     QuickAbsenceRow()
                     hints
                     TodaySegments(store: store, zone: model.dayCalendar.timeZone)
@@ -107,47 +107,6 @@ private struct TimerCard: View {
                 .controlSize(.large)
                 .accessibilityIdentifier("today.start")
             }
-        }
-    }
-}
-
-private struct DayStats: View {
-    let store: TodayStore
-    @Environment(\.dynamicTypeSize) private var typeSize
-
-    var body: some View {
-        let day = store.day
-        let done = (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0)
-        let target = day?.targetSeconds ?? 0
-        let progress = target > 0 ? Double(done) / Double(target) : 0
-        VStack(spacing: TT.Space.m) {
-            Card {
-                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
-                layout {
-                    ProgressRing(progress: progress, lineWidth: 12) {
-                        Text(verbatim: target > 0 ? "\(Int((progress * 100).rounded())) %" : "–")
-                            .font(TTFont.statSmall).foregroundStyle(TT.textPrimary)
-                    }
-                    .frame(width: 104, height: 104)
-                    VStack(alignment: .leading, spacing: TT.Space.xs) {
-                        Text("today.done").font(TTFont.label).foregroundStyle(TT.textSecondary)
-                        Text(verbatim: DurationFormat.hoursMinutes(done))
-                            .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
-                            .lineLimit(1).minimumScaleFactor(0.6)
-                        Text("today.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                        // One "vorläufig" indicator for the whole screen (day or balance); the tiles below stay quiet.
-                        if day?.provisional == true || store.account?.provisional == true { StatusChip("common.provisional", tone: .neutral).padding(.top, 2) }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityElement(children: .combine)
-            }
-            let tiles = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(spacing: TT.Space.m)) : AnyLayout(HStackLayout(spacing: TT.Space.m))
-            tiles {
-                StatTile("today.delta", value: DurationFormat.signed(day?.deltaSeconds ?? 0), tone: deltaTone(day?.deltaSeconds ?? 0), symbol: "plusminus")
-                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0), symbol: "clock.arrow.circlepath")
-            }
-            .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

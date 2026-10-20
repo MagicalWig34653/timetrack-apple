@@ -20,8 +20,7 @@ final class AutomationFlowTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
-        let tab = app.tabBars.buttons["Einstellungen"]
-        if tab.exists { tab.tap() } else { el("sidebar.settings").tap() }
+        app.openMore()
         XCTAssertTrue(el("settings.automation").waitForExistence(timeout: 10))
         el("settings.automation").tap()
         XCTAssertTrue(el("automation.master").waitForExistence(timeout: 10))

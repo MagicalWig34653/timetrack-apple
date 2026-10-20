@@ -20,8 +20,7 @@ final class AccountAccentTests: XCTestCase {
         sleep(2)
         shot("\(prefix)-today")
 
-        let tab = app.tabBars.buttons["Einstellungen"]
-        if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.settings"].firstMatch.tap() }
+        app.openSettings()
         let row = app.buttons["settings.appearance"]
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         row.tap()

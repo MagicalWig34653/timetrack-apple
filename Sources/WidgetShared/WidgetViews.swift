@@ -89,7 +89,7 @@ private struct StaleNote: View {
     var body: some View {
         if entry.isStale, let updated = entry.snapshot?.updatedAt {
             wtext("w.updated \(updated.widgetClock(in: entry.zone))")
-                .font(.system(size: 10)).foregroundStyle(TT.textTertiary).lineLimit(1)
+                .font(.caption2).foregroundStyle(TT.textTertiary).lineLimit(1)
         }
     }
 }
@@ -106,23 +106,25 @@ private struct SignedOutWidget: View {
 
 private func hoursMinutes(_ seconds: Int) -> String { DurationFormat.hoursMinutes(seconds) }
 
-/// Finished time of today. While a timer runs this ticks (the pseudo start date moves back by the finished seconds), otherwise it is static.
+/// Time worked today as h:mm (UX3: the "Dauern immer h:mm" rule; a second ticking number next to the live timer was noise).
+/// While a timer runs, the provider hands out one entry per minute, so the figure moves on without ticking seconds.
 private struct TodayTotalText: View {
     let entry: TimetrackEntry
 
     var body: some View {
         if let total = entry.todaySeconds {
-            if let since = entry.runningSince {
-                Text(timerInterval: since.addingTimeInterval(-Double(total))...Date.distantFuture, pauseTime: nil, countsDown: false, showsHours: true)
-                    .monospacedDigit()
-            } else {
-                Text(verbatim: hoursMinutes(total))
-            }
+            Text(verbatim: hoursMinutes(total + runningSeconds))
         } else if let since = entry.runningSince {
-            LiveTimerText(since: since)
+            Text(verbatim: hoursMinutes(Int(max(0, entry.date.timeIntervalSince(since)))))
         } else {
             Text(verbatim: "–")
         }
+    }
+
+    /// Seconds of the running segment at the moment this entry is rendered for.
+    private var runningSeconds: Int {
+        guard let since = entry.runningSince else { return 0 }
+        return Int(max(0, entry.date.timeIntervalSince(since)))
     }
 }
 

@@ -32,7 +32,7 @@ final class SmokeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Urlaubskonto"].waitForExistence(timeout: 10))
         shot("vacation")
 
-        open(app, "Einstellungen", "settings")
+        app.openSettings()
         XCTAssertTrue(app.buttons["settings.sign_out"].waitForExistence(timeout: 5))
         shot("settings")
     }

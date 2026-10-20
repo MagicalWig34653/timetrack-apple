@@ -172,7 +172,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erfasst"
+            "value": "Gearbeitet"
           }
         }
       }
@@ -205,7 +205,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kein Zeitabschnitt läuft"
+            "value": "Kein Timer läuft"
           }
         }
       }
@@ -216,7 +216,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Zeitabschnitte heute"
+            "value": "Einträge heute"
           }
         }
       }

@@ -24,8 +24,7 @@ final class AppearanceShotTests: XCTestCase {
         shot("\(prefix)-today-running")
         app.buttons["today.stop"].tap()
 
-        let tab = app.tabBars.buttons["Einstellungen"]
-        if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.settings"].firstMatch.tap() }
+        app.openSettings()
         let row = app.buttons["settings.appearance"]
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         sleep(1)

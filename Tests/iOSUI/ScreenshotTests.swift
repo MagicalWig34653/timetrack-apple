@@ -47,7 +47,7 @@ final class ScreenshotTests: XCTestCase {
         app.swipeUp()
         shot("\(prefix)-vacation-scrolled")
 
-        open(app, "Einstellungen", "settings")
+        app.openSettings()
         XCTAssertTrue(app.buttons["settings.sign_out"].waitForExistence(timeout: 5))
         sleep(1)
         shot("\(prefix)-settings")

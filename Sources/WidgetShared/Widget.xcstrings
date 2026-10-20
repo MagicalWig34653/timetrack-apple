@@ -19,7 +19,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erfasst"
+            "value": "Gearbeitet"
           }
         }
       }
@@ -305,7 +305,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Noch keine Abschnitte"
+            "value": "Noch keine Einträge"
           }
         }
       }
@@ -371,7 +371,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heute erfasst"
+            "value": "Einträge heute"
           }
         }
       }

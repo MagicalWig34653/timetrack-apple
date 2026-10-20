@@ -19,8 +19,7 @@ final class SettingsShotTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-appearance.scheme", env["TT_SHOT_SCHEME"] ?? "system"]
         app.launch()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
-        let tab = app.tabBars.buttons["Einstellungen"]
-        if tab.exists { tab.tap() } else { el("sidebar.settings").tap() }
+        app.openSettings()
         XCTAssertTrue(el("settings.sign_out").waitForExistence(timeout: 10))
         sleep(2) // lets the about section load the server info
         shot("settings-0")

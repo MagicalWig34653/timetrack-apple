@@ -68,7 +68,7 @@ import Testing
         } catch let error as TimetrackError {
             #expect(error == .api(status: 409, code: "timer_already_running", message: "läuft schon"))
             #expect(error.knownCode == .timerAlreadyRunning)
-            #expect(error.germanDescription == "Es läuft bereits ein Zeitabschnitt.")
+            #expect(error.germanDescription == "Es läuft bereits ein Timer.")
         }
     }
 

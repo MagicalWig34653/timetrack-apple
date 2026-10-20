@@ -1,0 +1,237 @@
+{
+  "sourceLanguage": "de",
+  "version": "1.0",
+  "strings": {
+    "ux3.now.kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art wählen"
+          }
+        }
+      }
+    },
+    "ux3.now.open_today": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet Heute"
+          }
+        }
+      }
+    },
+    "ux3.now.running %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, läuft seit %@"
+          }
+        }
+      }
+    },
+    "ux3.now.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten"
+          }
+        }
+      }
+    },
+    "ux3.now.start_kind %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ starten"
+          }
+        }
+      }
+    },
+    "ux3.now.stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stoppen"
+          }
+        }
+      }
+    },
+    "ux3.provisional.explain": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Tag ist noch nicht abgeschlossen. Pausen und Rundung können sich noch ändern."
+          }
+        }
+      }
+    },
+    "ux3.provisional.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erklärt, was vorläufig bedeutet"
+          }
+        }
+      }
+    },
+    "ux3.standing.no_target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute kein Soll"
+          }
+        }
+      }
+    },
+    "ux3.standing.not_started %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll heute %@"
+          }
+        }
+      }
+    },
+    "ux3.standing.over %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@ · %@ darüber"
+          }
+        }
+      }
+    },
+    "ux3.standing.reached %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@ erreicht"
+          }
+        }
+      }
+    },
+    "ux3.standing.remaining %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@ · noch %@"
+          }
+        }
+      }
+    },
+    "ux3.sync.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline. Änderungen werden später gesendet."
+          }
+        }
+      }
+    },
+    "ux3.sync.offline_pending %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline · %lld warten auf Senden"
+          }
+        }
+      }
+    },
+    "ux3.sync.sending %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gesendet · %lld"
+          }
+        }
+      }
+    },
+    "ux3.terms.balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Mehr- und Minderzeit insgesamt: plus heißt, du hast Zeit gut."
+          }
+        }
+      }
+    },
+    "ux3.terms.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begriffe erklären"
+          }
+        }
+      }
+    },
+    "ux3.terms.provisional": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Tag ist noch nicht abgeschlossen. Pausen und Rundung können sich noch ändern."
+          }
+        }
+      }
+    },
+    "ux3.terms.target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die geplante Arbeitszeit dieses Tages laut Arbeitsmodell."
+          }
+        }
+      }
+    },
+    "ux3.terms.worked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Arbeitszeit heute, nach Pausen und Rundung. Schulgutschriften zählen mit."
+          }
+        }
+      }
+    }
+  }
+}

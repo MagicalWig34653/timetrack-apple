@@ -123,7 +123,7 @@ enum QuickAction: String {
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case today, time, calendar, vacation, settings
+    case today, time, calendar, vacation, more
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
@@ -135,7 +135,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .time: "sidebar.time"
         case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
-        case .settings: "sidebar.settings"
+        case .more: "sidebar.more"
         }
     }
 
@@ -145,17 +145,17 @@ enum AppSection: String, CaseIterable, Identifiable {
         switch self {
         case .today, .time: .capture
         case .calendar, .vacation: .planning
-        case .settings: .app
+        case .more: .app
         }
     }
 
     var symbol: String {
         switch self {
-        case .today: "sun.max"
-        case .time: "calendar.day.timeline.left"
+        case .today: "clock" // UX1 F02: "sun.max" read as weather
+        case .time: "list.bullet.rectangle"
         case .calendar: "calendar"
         case .vacation: "beach.umbrella"
-        case .settings: "gearshape"
+        case .more: "ellipsis.circle"
         }
     }
 }

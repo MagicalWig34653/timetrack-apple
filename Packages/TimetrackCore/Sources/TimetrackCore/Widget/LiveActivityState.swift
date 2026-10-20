@@ -58,9 +58,12 @@ extension LiveActivityTarget {
         let running = snapshot?.isRunning == true && snapshot?.startedAt != nil
         let sameDay = snapshot?.todaySeconds(at: now) != nil
         let worked = sameDay ? (snapshot?.todaySeconds ?? 0) : 0
-        let planned = sameDay ? snapshot.flatMap { $0.plannedSeconds ?? ($0.targetSeconds.flatMap { $0 > 0 ? $0 : nil }) } : nil
-        let plannedEnd = sameDay ? snapshot?.plannedEnd : nil
-        let dayStart = sameDay ? snapshot?.firstStart : nil
+        // UX3: a trip is not part of the workday: no day bar, no planned end, no estimate while the kind is "Fahrt".
+        let kindShown = running ? snapshot?.kind : PauseMarker.current(pause, running: running, at: now)?.kind
+        let workday = sameDay && kindShown != .travel
+        let planned = workday ? snapshot.flatMap { $0.plannedSeconds ?? ($0.targetSeconds.flatMap { $0 > 0 ? $0 : nil }) } : nil
+        let plannedEnd = workday ? snapshot?.plannedEnd : nil
+        let dayStart = workday ? snapshot?.firstStart : nil
         let accent = snapshot?.accentHex
         if running, let snapshot, let startedAt = snapshot.startedAt {
             return LiveActivityTarget(kind: snapshot.kind, startedAt: startedAt, workedSeconds: worked, plannedSeconds: planned,

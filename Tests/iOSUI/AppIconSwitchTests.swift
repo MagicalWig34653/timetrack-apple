@@ -23,8 +23,7 @@ final class AppIconSwitchTests: XCTestCase {
         }
 
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
-        let tab = app.tabBars.buttons["Einstellungen"]
-        if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.settings"].firstMatch.tap() }
+        app.openSettings()
         let row = app.buttons["settings.appearance"]
         XCTAssertTrue(row.waitForExistence(timeout: 5))
         row.tap()

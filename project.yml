@@ -24,6 +24,7 @@ targets:
     sources:
       - Sources/Mac
       - Sources/Planning # A10: absences, calendar, vacation settings (shared with iOS)
+      - Sources/Common # UX3: day standing card, sync status line, shared strings (UX3 table)
       - Sources/Settings # N1b: work model editor, vacation figures, about section (shared with iOS)
       - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
@@ -68,6 +69,7 @@ targets:
       - Sources/Location # L2: location automation (region monitoring, shortcuts)
       - Sources/Focus # F2: Focus filter, notifications, explainer page
       - Sources/Planning # A10
+      - Sources/Common # UX3: day standing card, sync status line, shared strings (UX3 table)
       - Sources/Settings # N1b
       - Sources/Calendar # E1: EventKit device calendars (iOS only; macOS does not use it yet)
       - Sources/Week # N1a: week overview, week planner, vacation planner (iOS only)

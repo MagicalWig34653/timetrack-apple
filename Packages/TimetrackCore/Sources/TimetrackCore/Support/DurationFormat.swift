@@ -21,6 +21,12 @@ public enum DurationFormat {
         return "\(value / 3600):\(String(format: "%02d", value % 3600 / 60)):\(String(format: "%02d", value % 60))"
     }
 
+    /// For VoiceOver: whole minutes spoken in words ("1 Stunde, 2 Minuten", locale aware). Changes once a minute, not every second.
+    public static func spoken(_ seconds: Int, locale: Locale = .current) -> String {
+        let minutes = max(0, seconds) / 60
+        return Duration.seconds(minutes * 60).formatted(.units(allowed: [.hours, .minutes], width: .wide, zeroValueUnits: .hide).locale(locale))
+    }
+
     /// Parses "7:42", "-0:18", "+1:05" or a bare minute count ("45"). Decimal hours are rejected deliberately.
     public static func parse(_ input: String) -> Int? {
         let text = input.trimmingCharacters(in: .whitespaces)

@@ -2190,6 +2190,61 @@
         }
       }
     },
+    "la.icon.briefcase": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Köfferchen"
+          }
+        }
+      }
+    },
+    "la.icon.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animiertes Symbol in der Live Activity, solange Arbeit läuft. Die Live Activity zeigt etwa ein Bild pro Sekunde (die Uhr tickt selbst, ohne zusätzliche Updates); die Vorschau hier läuft schneller. Mit „Bewegung reduzieren“, bei Pause und im Always-On-Display bleibt das Symbol ruhig. Gilt nur auf diesem Gerät."
+          }
+        }
+      }
+    },
+    "la.icon.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus"
+          }
+        }
+      }
+    },
+    "la.icon.shovel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schaufeln"
+          }
+        }
+      }
+    },
+    "la.icon.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Activity: Symbol"
+          }
+        }
+      }
+    },
     "mark.excused": {
       "extractionState": "manual",
       "localizations": {

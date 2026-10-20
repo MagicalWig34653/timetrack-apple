@@ -1,0 +1,721 @@
+{
+  "sourceLanguage": "de",
+  "version": "1.0",
+  "strings": {
+    "hub.cov.complete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vollständig"
+          }
+        }
+      }
+    },
+    "hub.cov.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts zu planen"
+          }
+        }
+      }
+    },
+    "hub.cov.partial.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag offen"
+          }
+        }
+      }
+    },
+    "hub.cov.partial.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Tage offen"
+          }
+        }
+      }
+    },
+    "hub.cov.unplanned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht geplant"
+          }
+        }
+      }
+    },
+    "hub.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Plan ist nur eine Absicht und bucht keine Zeit. Tippe auf eine Woche, um sie zu planen."
+          }
+        }
+      }
+    },
+    "hub.menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung"
+          }
+        }
+      }
+    },
+    "hub.menu.shares": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigaben"
+          }
+        }
+      }
+    },
+    "hub.menu.weeks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende Wochen"
+          }
+        }
+      }
+    },
+    "hub.more": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere Planung"
+          }
+        }
+      }
+    },
+    "hub.row.blocked.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Tag Feiertag oder Abwesenheit"
+          }
+        }
+      }
+    },
+    "hub.row.blocked.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Tage Feiertag oder Abwesenheit"
+          }
+        }
+      }
+    },
+    "hub.row.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht geladen"
+          }
+        }
+      }
+    },
+    "hub.row.kw": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KW %d"
+          }
+        }
+      }
+    },
+    "hub.row.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant %@ von %@"
+          }
+        }
+      }
+    },
+    "hub.row.this_week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "hub.shares": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigaben"
+          }
+        }
+      }
+    },
+    "hub.shares_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan, tatsächliche Zeiten oder Urlaub mit anderen Konten teilen oder deren Freigaben ansehen."
+          }
+        }
+      }
+    },
+    "hub.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitszeitplanung"
+          }
+        }
+      }
+    },
+    "hub.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Planung ist auf diesem Server oder für dieses Konto nicht verfügbar."
+          }
+        }
+      }
+    },
+    "hub.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub planen"
+          }
+        }
+      }
+    },
+    "hub.vacation_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brückentage und günstige Zeiträume vorschlagen lassen."
+          }
+        }
+      }
+    },
+    "hub.weeks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kommende Wochen"
+          }
+        }
+      }
+    },
+    "hub.weeks_open.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Woche offen"
+          }
+        }
+      }
+    },
+    "hub.weeks_open.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Wochen offen"
+          }
+        }
+      }
+    },
+    "share.create": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigabe anlegen"
+          }
+        }
+      }
+    },
+    "share.created": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigabe angelegt."
+          }
+        }
+      }
+    },
+    "share.error.handle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib einen Kontonamen an."
+          }
+        }
+      }
+    },
+    "share.error.scope": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle mindestens einen Umfang, sonst wird nichts geteilt."
+          }
+        }
+      }
+    },
+    "share.error.self": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du kannst nichts an dein eigenes Konto freigeben."
+          }
+        }
+      }
+    },
+    "share.in_empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niemand teilt derzeit etwas mit dir."
+          }
+        }
+      }
+    },
+    "share.in_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur lesen. Angezeigt wird genau das, was der Server für dich freigibt."
+          }
+        }
+      }
+    },
+    "share.in_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit mir geteilt"
+          }
+        }
+      }
+    },
+    "share.never_outgoing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigaben sind nur lesbar, standardmäßig ist nichts geteilt und du kannst sie jederzeit widerrufen."
+          }
+        }
+      }
+    },
+    "share.never_text": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notizen, Orte, Krankheits- und Freistellungstage sowie Unterlagen und Bescheinigungen."
+          }
+        }
+      }
+    },
+    "share.never_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das wird nie geteilt"
+          }
+        }
+      }
+    },
+    "share.new_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Freigabe"
+          }
+        }
+      }
+    },
+    "share.out_empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du teilst derzeit nichts."
+          }
+        }
+      }
+    },
+    "share.out_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Freigaben"
+          }
+        }
+      }
+    },
+    "share.recipient": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontoname der Person"
+          }
+        }
+      }
+    },
+    "share.recipient_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Name, mit dem sich die Person bei dieser Instanz anmeldet."
+          }
+        }
+      }
+    },
+    "share.revoke": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widerrufen"
+          }
+        }
+      }
+    },
+    "share.revoke_confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigabe für %@ widerrufen?"
+          }
+        }
+      }
+    },
+    "share.revoke_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Widerruf wirkt sofort."
+          }
+        }
+      }
+    },
+    "share.scope.actual": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatsächliche Zeiten"
+          }
+        }
+      }
+    },
+    "share.scope.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planung"
+          }
+        }
+      }
+    },
+    "share.scope.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub"
+          }
+        }
+      }
+    },
+    "share.scope_text.actual": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur bewerteter Beginn, bewertetes Ende und Dauer an Tagen mit Arbeitszeit, keine Orte, Notizen oder Einzelabschnitte."
+          }
+        }
+      }
+    },
+    "share.scope_text.plan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die geplante Arbeitsform je Tag (Büro, Homeoffice, Kunde, Schule, frei), ohne Notizen."
+          }
+        }
+      }
+    },
+    "share.scope_text.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur genehmigter oder genommener Urlaub als Zeiträume. Geplanter oder nur beantragter Urlaub, Krankheit und Freistellungen werden nie gezeigt."
+          }
+        }
+      }
+    },
+    "share.scopes": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was darf die Person sehen?"
+          }
+        }
+      }
+    },
+    "share.since": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "seit %@"
+          }
+        }
+      }
+    },
+    "share.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigaben"
+          }
+        }
+      }
+    },
+    "share.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigaben sind auf diesem Server oder für dieses Konto nicht verfügbar."
+          }
+        }
+      }
+    },
+    "share.view.break": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Min. Pause"
+          }
+        }
+      }
+    },
+    "share.view.duration": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Arbeitszeit"
+          }
+        }
+      }
+    },
+    "share.view.from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von"
+          }
+        }
+      }
+    },
+    "share.view.gone": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Freigabe wurde widerrufen oder ist nicht mehr verfügbar."
+          }
+        }
+      }
+    },
+    "share.view.load": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anzeigen"
+          }
+        }
+      }
+    },
+    "share.view.no_times": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Zeiten"
+          }
+        }
+      }
+    },
+    "share.view.none_in_range": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im gewählten Zeitraum nichts freigegeben oder eingetragen."
+          }
+        }
+      }
+    },
+    "share.view.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für diesen Zeitraum wird nichts angezeigt."
+          }
+        }
+      }
+    },
+    "share.view.range_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte wähle einen gültigen Zeitraum (Ende nicht vor Beginn)."
+          }
+        }
+      }
+    },
+    "share.view.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigabe von %@"
+          }
+        }
+      }
+    },
+    "share.view.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bis"
+          }
+        }
+      }
+    }
+  }
+}

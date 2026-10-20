@@ -33,6 +33,10 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case weekDayInvalid = "week_day_invalid"
     case planTimeInvalid = "plan_time_invalid"
     case planBreakInvalid = "plan_break_invalid"
+    /// Plan shares (PL1): unknown recipient (404), second share to the same account (409), share to oneself (400).
+    case recipientNotFound = "recipient_not_found"
+    case shareExists = "share_exists"
+    case cannotShareWithSelf = "cannot_share_with_self"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

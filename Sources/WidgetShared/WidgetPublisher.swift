@@ -25,7 +25,7 @@ enum WidgetPublisher {
         // A running timer ends any pause (resumed in the app or elsewhere); otherwise a pause marker keeps a paused activity.
         let markers = PauseMarkerStore()
         if snapshot.isRunning { markers.clear() }
-        await TimerLiveActivity.sync(target: .desired(snapshot: snapshot, pause: markers.read()), source: source)
+        await TimerLiveActivity.sync(target: .desired(snapshot: snapshot, pause: markers.read(), iconStyle: LiveActivityIconStore().read()), source: source)
         #endif
     }
 

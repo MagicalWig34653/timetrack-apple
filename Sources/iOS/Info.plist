@@ -41,6 +41,11 @@
 	<string>Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>TTFramesShovel.ttf</string>
+		<string>TTFramesBriefcase.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

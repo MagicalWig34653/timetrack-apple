@@ -54,7 +54,7 @@ public struct PauseMarkerStore: Sendable {
 extension LiveActivityTarget {
     /// What the activity should show for the current snapshot: running timer, a paused timer (marker) or nothing.
     /// Totals and the plan only count on the day they were written for.
-    public static func desired(snapshot: WidgetSnapshot?, pause: PauseMarker?, now: Date = .now) -> LiveActivityTarget? {
+    public static func desired(snapshot: WidgetSnapshot?, pause: PauseMarker?, iconStyle: LiveActivityIconStyle = .off, now: Date = .now) -> LiveActivityTarget? {
         let running = snapshot?.isRunning == true && snapshot?.startedAt != nil
         let sameDay = snapshot?.todaySeconds(at: now) != nil
         let worked = sameDay ? (snapshot?.todaySeconds ?? 0) : 0
@@ -65,13 +65,14 @@ extension LiveActivityTarget {
         let plannedEnd = workday ? snapshot?.plannedEnd : nil
         let dayStart = workday ? snapshot?.firstStart : nil
         let accent = snapshot?.accentHex
+        let icon: LiveActivityIconStyle? = iconStyle.isAnimated ? iconStyle : nil
         if running, let snapshot, let startedAt = snapshot.startedAt {
             return LiveActivityTarget(kind: snapshot.kind, startedAt: startedAt, workedSeconds: worked, plannedSeconds: planned,
-                                      plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent)
+                                      plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent, iconStyle: icon)
         }
         if let marker = PauseMarker.current(pause, running: running, at: now) {
             return LiveActivityTarget(kind: marker.kind, startedAt: marker.pausedAt, pausedAt: marker.pausedAt, workedSeconds: worked,
-                                      plannedSeconds: planned, plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent)
+                                      plannedSeconds: planned, plannedEnd: plannedEnd, dayStart: dayStart, accentHex: accent, iconStyle: icon)
         }
         return nil
     }

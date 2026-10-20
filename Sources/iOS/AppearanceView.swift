@@ -1,4 +1,5 @@
 import SwiftUI
+import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
@@ -13,6 +14,7 @@ struct AppearanceView: View {
                     AppIconPickerSection()
                 }
                 HapticsSection()
+                LiveActivityIconSection()
             }
             .padding(.horizontal, TT.Space.l)
             .padding(.vertical, TT.Space.s)
@@ -41,6 +43,32 @@ private struct HapticsSection: View {
                 Button("haptics.try") { TTHaptics.play(.success) }
                     .buttonStyle(.ttSecondary)
                     .accessibilityIdentifier("appearance.haptics.try")
+            }
+            .padding(TT.Space.m)
+        }
+    }
+}
+
+/// LA4 "Live Activity": the animated work icon. Local to this device (App Group, read by the Live Activity too).
+struct LiveActivityIconSection: View {
+    @State private var style = LiveActivityIconStore().read()
+
+    var body: some View {
+        FormSection("la.icon.title", footer: "la.icon.footer") {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                Picker("la.icon.title", selection: $style) {
+                    Text("la.icon.off").tag(LiveActivityIconStyle.off)
+                    Text("la.icon.briefcase").tag(LiveActivityIconStyle.briefcase)
+                    Text("la.icon.shovel").tag(LiveActivityIconStyle.shovel)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .accessibilityIdentifier("appearance.la.icon")
+                .onChange(of: style) {
+                    LiveActivityIconStore().write(style)
+                    Task { await TimerLiveActivity.reconcileFromSnapshot(source: "settings") } // an open activity switches at once
+                }
+                LiveIconPreview(style: style)
             }
             .padding(TT.Space.m)
         }

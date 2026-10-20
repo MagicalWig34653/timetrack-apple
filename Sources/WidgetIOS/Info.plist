@@ -25,5 +25,10 @@
 	</dict>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>TTFramesShovel.ttf</string>
+		<string>TTFramesBriefcase.ttf</string>
+	</array>
 </dict>
 </plist>

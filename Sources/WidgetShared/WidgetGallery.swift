@@ -17,6 +17,8 @@ struct WidgetGallery: View {
     static var pausedSample: Bool { ProcessInfo.processInfo.environment["TT_DEV_LA_PAUSED"] == "1" }
     static var noPlanSample: Bool { ProcessInfo.processInfo.environment["TT_DEV_LA_NOPLAN"] == "1" }
     static var accentSample: String? { ProcessInfo.processInfo.environment["TT_DEV_LA_ACCENT"] }
+    /// LA4: `TT_DEV_LA_ICON=shovel|briefcase`.
+    static var iconSample: LiveActivityIconStyle? { ProcessInfo.processInfo.environment["TT_DEV_LA_ICON"].flatMap(LiveActivityIconStyle.init(rawValue:)) }
 
     @Environment(\.colorScheme) private var scheme
 
@@ -27,7 +29,7 @@ struct WidgetGallery: View {
         case "stale":
             { var sample = TimetrackEntry.sample(running: false); let old = sample.date.addingTimeInterval(-3 * 3600)
               sample = TimetrackEntry(date: sample.date, snapshot: sample.snapshot.map { var copy = $0; copy.updatedAt = old; return copy }); return sample }()
-        default: .sample(running: true, kind: .travel)
+        default: .sample(running: true, kind: Self.iconSample == nil ? .travel : .work)
         }
     }
 
@@ -52,9 +54,9 @@ struct WidgetGallery: View {
                 Text(verbatim: "Live Activity / Dynamic Island").font(.subheadline.bold()).foregroundStyle(TT.textSecondary)
                 #if os(iOS)
                 if ProcessInfo.processInfo.environment["TT_DEV_LA_WATCH"] == "1" {
-                    LiveActivityWatchPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
+                    LiveActivityWatchPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample))
                 } else {
-                    LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample))
+                    LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample))
                 }
                 #endif
             }

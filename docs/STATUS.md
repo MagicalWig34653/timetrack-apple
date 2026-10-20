@@ -91,3 +91,5 @@ Wegwerf-Backend für lokale Läufe: `scripts/seed-throwaway.py` (synthetische Da
 | `docs/ICONS.md` | App-Symbole und Akzent-Varianten |
 | `docs/handoffs/` | Übergaben A1, A3–A10 (A6b–A6d), E1, H1, W1 (A2 und die Backend-Seite liegen im Backend-Repo); Commit-Hashes darin sind seit der Historienbereinigung ungültig |
 | `docs/screenshots/` | Simulator-Aufnahmen der Sichtprüfungen (synthetische Daten) |
+
+- **LA4 (20.10.2026, Branch `la4-animated-icon`, nicht gemergt):** Animiertes Arbeits-Symbol der Live Activity (Aus/Köfferchen/Schaufeln, Standard Aus) per Pose-Schrift über `Text(timerInterval:)`, ein Bild pro Sekunde, ohne Updates; echte Activity-Darstellung am Gerät ungeprüft. Details und Grenzen: `docs/handoffs/LA4.md`.

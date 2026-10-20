@@ -16,6 +16,7 @@
 		06D674907DEC9A1604862D3C /* TimerIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */; };
 		0804C1E8F63FD4C1AEADD27C /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		088D157283A97F53FE808FE1 /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
+		0935F767B5AFE8E97B3CFF57 /* TTFramesBriefcase.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0108BB7E5631AD3CCD0059D4 /* TTFramesBriefcase.ttf */; };
 		0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E24BBA312CA476B29515F081 /* ScreenshotTests.swift */; };
 		09731A1E6B40C1779A07A540 /* TimetrackBars.icon in Resources */ = {isa = PBXBuildFile; fileRef = 0859D2EE9711528A95BE57B4 /* TimetrackBars.icon */; };
 		09837904BA12DD3609C27C30 /* TimetrackHourglass.icon in Resources */ = {isa = PBXBuildFile; fileRef = C2ACE9C3D67570713F02692D /* TimetrackHourglass.icon */; };
@@ -145,6 +146,7 @@
 		A3482430E86BC604BD3A6099 /* FocusNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B761C2EA9067E60DEF3A5F52 /* FocusNotifications.swift */; };
 		A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46440267C56A837E5719850 /* PlanningShared.swift */; };
 		A4895B951818FA56A9B32BAD /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10F94BC7DC26E230FC2EF77F /* RootView.swift */; };
+		A69C7F41729091821CFACB67 /* TTFramesShovel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9208B3BB661ECEAD30D53874 /* TTFramesShovel.ttf */; };
 		A7CD34A36039B93AC3F99306 /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75B194F88E2A859DB0A105E /* SettingsRows.swift */; };
 		A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */; };
 		AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829AB0BC0EA6FA97BA015CB8 /* PlanSheets.swift */; };
@@ -153,6 +155,7 @@
 		ADC09ED5A8D474F6D13DE527 /* AdaptiveShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD01AD93CEB86333CE929433 /* AdaptiveShotTests.swift */; };
 		ADCD599E9DF61F9DBA0647A9 /* AboutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48532679BA93CAFBAFCAE3DA /* AboutSection.swift */; };
 		AEE8A40E0BFD6D8C2CBE10A3 /* WorkModelViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA7E11FA68CBF10F5C0D9E7 /* WorkModelViews.swift */; };
+		AEF6AA7CA2263018A043BF71 /* TTFramesBriefcase.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0108BB7E5631AD3CCD0059D4 /* TTFramesBriefcase.ttf */; };
 		AF65F3440AC015F904519C17 /* VacationReminderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */; };
 		B20B99F29F5067426CBFBB25 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB3DFF54A49CFF428D635AD /* WidgetBridge.swift */; };
 		B469FA4F96199AC22D41F102 /* NewPlaceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A31FA3C9AA134A414F010ED /* NewPlaceSheet.swift */; };
@@ -183,6 +186,7 @@
 		DA08AB1F30635F5944F657B7 /* TimetrackCheck.icon in Resources */ = {isa = PBXBuildFile; fileRef = 094ED82C8094FCBF9DE1C0FE /* TimetrackCheck.icon */; };
 		DAD4ADDB89B359CFC8D4DC82 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 2A3825443FEE6077D9C30FB9 /* TimetrackDesign */; };
 		DFED65697CF812F2EC352519 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D3F7BE9453F3BC452D436D /* MainView.swift */; };
+		E33FB3AA71183B019E872495 /* TTFramesShovel.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9208B3BB661ECEAD30D53874 /* TTFramesShovel.ttf */; };
 		E413DFDF380467B041048E50 /* AppIconSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC7CF52E0F14BA34747F0A4 /* AppIconSettingsSection.swift */; };
 		E4BC6FA66ED02E539E1BFF63 /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
 		E5EAAF4577FE699C819CF884 /* LaunchTrace.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE1DE866570CFDDF38E1863 /* LaunchTrace.swift */; };
@@ -299,6 +303,7 @@
 /* Begin PBXFileReference section */
 		00034D02ECB5AFAE00E8D16D /* IconCatalog.generated.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconCatalog.generated.swift; sourceTree = "<group>"; };
 		00C3B7A31037D7334ED12DD1 /* TimetrackGreen.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackGreen.icon; sourceTree = "<group>"; };
+		0108BB7E5631AD3CCD0059D4 /* TTFramesBriefcase.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = TTFramesBriefcase.ttf; sourceTree = "<group>"; };
 		0130CA5EF5402B99A1417ECF /* LeaveStopActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaveStopActions.swift; sourceTree = "<group>"; };
 		0460EDC2CEE74D3D22F4AF2D /* TimetrackMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimetrackMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		04AB666CFC135DC93A7790FE /* TimerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerLiveActivity.swift; sourceTree = "<group>"; };
@@ -385,6 +390,7 @@
 		8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
 		8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderCenter.swift; sourceTree = "<group>"; };
 		903169299B6759FC886D6148 /* TimetrackDesign */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TimetrackDesign; path = Packages/TimetrackDesign; sourceTree = SOURCE_ROOT; };
+		9208B3BB661ECEAD30D53874 /* TTFramesShovel.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = TTFramesShovel.ttf; sourceTree = "<group>"; };
 		9499107E72D8186A6CCD94FD /* TimetrackIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TimetrackIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		959AFEE5849B8A93B6D010B1 /* TimetrackWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackWidget.swift; sourceTree = "<group>"; };
 		9681420E6F893816773EC783 /* CalendarEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEnvironment.swift; sourceTree = "<group>"; };
@@ -596,6 +602,7 @@
 			children = (
 				8B17FBB09DAF42A512A74843 /* Calendar */,
 				E0EF8867B25CEC4F91A8329D /* Focus */,
+				FAA542F35AA78C2352FE1DBE /* Fonts */,
 				1B8B10849A718A2F94EAEC61 /* Icons */,
 				FFC091571A1035DEFBD92A24 /* iOS */,
 				6FC5DBA0AC8271B57359805C /* iOSUI */,
@@ -786,6 +793,16 @@
 				6AFED35FEDDDCA6FF903C27A /* TimetrackWidgetMac.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FAA542F35AA78C2352FE1DBE /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				0108BB7E5631AD3CCD0059D4 /* TTFramesBriefcase.ttf */,
+				9208B3BB661ECEAD30D53874 /* TTFramesShovel.ttf */,
+			);
+			name = Fonts;
+			path = Sources/Fonts;
 			sourceTree = "<group>";
 		};
 		FE581AF938F99A4A268E9DCC /* Planning */ = {
@@ -1090,6 +1107,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0935F767B5AFE8E97B3CFF57 /* TTFramesBriefcase.ttf in Resources */,
+				E33FB3AA71183B019E872495 /* TTFramesShovel.ttf in Resources */,
 				3C33E1AE608DB3AF63B9BF3C /* Widget.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1110,6 +1129,8 @@
 				7683A523BE6234E723B8E3D8 /* Assets.xcassets in Resources */,
 				7906651B5C78D5CCA016B095 /* IconPreviews.xcassets in Resources */,
 				828137061B385FD65C835D56 /* Localizable.xcstrings in Resources */,
+				AEF6AA7CA2263018A043BF71 /* TTFramesBriefcase.ttf in Resources */,
+				A69C7F41729091821CFACB67 /* TTFramesShovel.ttf in Resources */,
 				09731A1E6B40C1779A07A540 /* TimetrackBars.icon in Resources */,
 				DA08AB1F30635F5944F657B7 /* TimetrackCheck.icon in Resources */,
 				2BE1B6C97FEA9377FC870DCB /* TimetrackClockDark.icon in Resources */,

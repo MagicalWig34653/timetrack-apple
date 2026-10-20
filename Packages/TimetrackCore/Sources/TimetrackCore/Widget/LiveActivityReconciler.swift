@@ -21,9 +21,11 @@ public struct LiveActivityTarget: Sendable, Codable, Equatable, Hashable {
     public var dayStart: Date?
     /// Account accent (`#RRGGBB`); nil = default blue.
     public var accentHex: String?
+    /// LA4: animated work icon chosen in the settings; nil (older states) = off.
+    public var iconStyle: LiveActivityIconStyle?
 
     public init(kind: SegmentKind, startedAt: Date, pausedAt: Date? = nil, workedSeconds: Int = 0, plannedSeconds: Int? = nil,
-                plannedEnd: Date? = nil, dayStart: Date? = nil, accentHex: String? = nil) {
+                plannedEnd: Date? = nil, dayStart: Date? = nil, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil) {
         self.kind = kind
         self.startedAt = startedAt
         self.pausedAt = pausedAt
@@ -32,6 +34,7 @@ public struct LiveActivityTarget: Sendable, Codable, Equatable, Hashable {
         self.plannedEnd = plannedEnd
         self.dayStart = dayStart
         self.accentHex = accentHex
+        self.iconStyle = iconStyle
     }
 
     public var isPaused: Bool { pausedAt != nil }

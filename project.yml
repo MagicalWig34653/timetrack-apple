@@ -64,6 +64,8 @@ targets:
     platform: iOS
     deploymentTarget: "27.0"
     sources:
+      - path: Sources/Fonts # LA4: animation-frame fonts (ticking Text(timerInterval:) digits are the poses)
+        buildPhase: resources
       - Sources/iOS
       - Sources/Location # L2: location automation (region monitoring, shortcuts)
       - Sources/Focus # F2: Focus filter, notifications, explainer page
@@ -148,6 +150,7 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         NSSupportsLiveActivities: true # A7
+        UIAppFonts: [TTFramesShovel.ttf, TTFramesBriefcase.ttf] # LA4
         # L2: location automation. Region monitoring needs no `location` background mode; only the app-refresh task is registered.
         NSLocationWhenInUseUsageDescription: Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.
         NSLocationAlwaysAndWhenInUseUsageDescription: Mit „Immer“ kann iOS Timetrack beim Betreten und Verlassen deiner Orte kurz wecken, damit Ankunft und Abfahrt erkannt werden. Die App fragt den Standort nicht laufend ab; gemeldet werden nur Ort und Uhrzeit.
@@ -240,6 +243,8 @@ targets:
     sources:
       - Sources/WidgetIOS
       - Sources/WidgetShared
+      - path: Sources/Fonts # LA4: animation-frame fonts (ticking Text(timerInterval:) digits are the poses)
+        buildPhase: resources
     dependencies:
       - package: TimetrackCore
         product: TimetrackCore
@@ -259,6 +264,7 @@ targets:
     info:
       path: Sources/WidgetIOS/Info.plist
       properties:
+        UIAppFonts: [TTFramesShovel.ttf, TTFramesBriefcase.ttf] # LA4
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
         NSSupportsLiveActivities: true

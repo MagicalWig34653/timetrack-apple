@@ -28,8 +28,8 @@ Belege: Apple-Dokumentation „Displaying live data with Live Activities“ (Abs
 - Debug: `TT_DEV_LA_ICON=shovel|briefcase` (Galerie), `TT_DEV_LA_ICON_PAGE=1`, `TT_DEV_APPEARANCE_PAGE=1`.
 
 ## Prüfung
-- `swift test --build-system native` (TimetrackCore): 471 Tests bestanden (davon 9 neu in `LiveActivityIconTests`: Standard, Frame-Ziffer, Pause, Auswahl nur Arbeit, Store, Dekodierung, Update statt Neustart).
-- Builds unsigniert: siehe Abschlussmeldung (iOS inkl. Widget, Watch).
+- `swift test --build-system native` (TimetrackCore): 484 Tests bestanden (nach Merge von main) (davon 9 neu in `LiveActivityIconTests`: Standard, Frame-Ziffer, Pause, Auswahl nur Arbeit, Store, Dekodierung, Update statt Neustart).
+- Builds unsigniert: TimetrackIOS (inkl. Widget) und TimetrackWatch nach Merge von main (Build 23): BUILD SUCCEEDED.
 - Screenshots (klein): `docs/screenshots/la4-shovel-live.png`, `la4-briefcase-live.png`, `la4-settings.png`, `la4-frames.png` (alle zehn Posen).
 
 ## Checkliste auf dem Gerät

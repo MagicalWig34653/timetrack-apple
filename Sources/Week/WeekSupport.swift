@@ -56,42 +56,6 @@ extension PlanBlockedBy {
 /// Weekday plus date, e.g. "Mo., 26. Okt.".
 func weekDayTitle(_ day: LocalDay, calendar: DayCalendar) -> String { dayTitle(day, calendar: calendar) }
 
-/// Week navigation bar shared by overview and planner: KW, date range, previous/next, jump to this week.
-struct WeekNavigator: View {
-    let weekNumber: Int
-    let monday: LocalDay
-    let sunday: LocalDay
-    let calendar: DayCalendar
-    let isCurrent: Bool
-    let previous: () -> Void
-    let next: () -> Void
-    let current: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-        HStack(spacing: TT.Space.s) {
-            Button { TTHaptics.play(.softTap); previous() } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44) }
-                .accessibilityLabel(W.t("nav.previous")).accessibilityIdentifier("week.previous")
-            Spacer(minLength: 0)
-            VStack(spacing: 2) {
-                Text(verbatim: W.s("nav.kw", weekNumber)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary).accessibilityIdentifier("week.title")
-                Text(verbatim: weekRangeText(start: monday, end: sunday, calendar: calendar)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                    .lineLimit(1).minimumScaleFactor(0.7)
-            }
-            Spacer(minLength: 0)
-            Button { TTHaptics.play(.softTap); next() } label: { Image(systemName: "chevron.right").frame(width: 44, height: 44) }
-                .accessibilityLabel(W.t("nav.next")).accessibilityIdentifier("week.next")
-        }
-        .buttonStyle(.borderless)
-        if !isCurrent {
-            Button { current() } label: { W.t("nav.this_week").frame(minHeight: 44) }
-                .buttonStyle(.borderless).font(TTFont.meta).accessibilityIdentifier("week.current")
-                .frame(maxWidth: .infinity)
-        }
-        }
-    }
-}
-
 struct SummaryTile: View {
     let title: String
     let value: String

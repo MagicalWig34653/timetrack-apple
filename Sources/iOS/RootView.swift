@@ -136,7 +136,6 @@ struct SectionView: View {
         switch section {
         case .today: TodayView()
         case .time: TimeView()
-        case .calendar: CalendarScreen()
         case .vacation: VacationView()
         case .settings: SettingsView()
         }

@@ -76,6 +76,13 @@ public final class TimeListStore {
         await load()
     }
 
+    /// Opens the week that contains `day` (the "Zeit" screen follows its anchor day). A no-op reload is skipped.
+    public func open(week day: LocalDay) async {
+        guard let monday = LocalDays.mondayOfWeek(containing: day), monday != weekStart else { return }
+        weekStart = monday
+        await load()
+    }
+
     public func goToCurrentWeek(now: Date = .now) async {
         let today = calendar.day(for: now)
         weekStart = LocalDays.mondayOfWeek(containing: today) ?? today

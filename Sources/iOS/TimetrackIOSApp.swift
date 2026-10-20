@@ -40,6 +40,7 @@ struct TimetrackIOSApp: App {
                 .vacationReminderSync(model) // R3: local reminders to submit planned vacation
                 .environment(\.watchSender, watchSender)
                 .ttAppearance()
+                .frameMeter() // Z2: DEBUG-only frame-time overlay for UI tests
                 .task { await watchSender.start() }
                 .onChange(of: model.isEnabled(.automation)) { AutomationRuntime.shared.moduleEnabled = model.isEnabled(.automation); Task { await AutomationRuntime.shared.replan(force: true) } }
                 .onChange(of: scenePhase) {
@@ -123,17 +124,16 @@ enum QuickAction: String {
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case today, time, calendar, vacation, settings
+    case today, time, vacation, settings
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
-    var requiredModule: ModuleKey? { self == .vacation || self == .calendar ? .planning : nil }
+    var requiredModule: ModuleKey? { self == .vacation ? .planning : nil }
 
     var titleKey: LocalizedStringKey {
         switch self {
         case .today: "sidebar.today"
         case .time: "sidebar.time"
-        case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
         case .settings: "sidebar.settings"
         }
@@ -144,7 +144,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     var group: Group {
         switch self {
         case .today, .time: .capture
-        case .calendar, .vacation: .planning
+        case .vacation: .planning
         case .settings: .app
         }
     }
@@ -152,8 +152,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .today: "sun.max"
-        case .time: "calendar.day.timeline.left"
-        case .calendar: "calendar"
+        case .time: "calendar"
         case .vacation: "beach.umbrella"
         case .settings: "gearshape"
         }

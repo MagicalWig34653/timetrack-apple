@@ -133,22 +133,24 @@ struct TimeHub: View {
                     Text(Z2.s("zoom.month")).tag(TimeZoom.month)
                     Text(Z2.s("zoom.week")).tag(TimeZoom.week)
                 }
-                .pickerStyle(.segmented).frame(width: 190)
+                .pickerStyle(.segmented).frame(width: 150)
                 .accessibilityIdentifier("time.zoom")
             }
         }
         ToolbarItemGroup(placement: .topBarTrailing) {
-            if planEnabled {
+            Button { goToToday() } label: { Text("calendar.today") }.accessibilityIdentifier("time.today")
+            if planEnabled || (calendar != nil && zoom == .month) {
                 Menu {
-                    Button { planningArea = true } label: { Label(PA.s("hub.title"), systemImage: "calendar.badge.clock") }
-                        .accessibilityIdentifier("time.planning_area")
+                    if let calendar, zoom == .month {
+                        Button { calendar.beginRange(at: focus.day) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
+                            .accessibilityIdentifier("calendar.range")
+                    }
+                    if planEnabled {
+                        Button { planningArea = true } label: { Label(PA.s("hub.title"), systemImage: "calendar.badge.clock") }
+                            .accessibilityIdentifier("time.planning_area")
+                    }
                 } label: { Label(Z2.s("more.label"), systemImage: "ellipsis.circle") }
                     .accessibilityIdentifier("time.more")
-            }
-            Button { goToToday() } label: { Text("calendar.today") }.accessibilityIdentifier("time.today")
-            if let calendar, zoom == .month {
-                Button { calendar.beginRange(at: focus.day) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
-                    .accessibilityIdentifier("calendar.range")
             }
             Button { editor = EditorRequest(segment: nil, day: focus.day); touchedDay = focus.day } label: { Label("command.new_entry", systemImage: "plus") }
                 .accessibilityIdentifier("time.new")

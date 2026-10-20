@@ -237,6 +237,16 @@ Arbeit = Himmelblau, Fahrt = Bernstein, Schule = Violett (`[D]`), Urlaub = Himme
 4. Welches Wort gilt: „Zeitabschnitt“, „Eintrag“ oder „Zeitraum“ (F04)?
 5. Soll es ein kurzes Onboarding geben, und soll ein Standardserver vorbelegt sein (F34/F35)? Das berührt die Entscheidung über Selbsthoster versus Hosting-Angebot.
 
+### Entscheidungen des Nutzers (20.10.2026)
+
+- F30 Haptik: Stufe „Dezent“ gefällt, bleibt Standard.
+- Frage 1: Urlaub darf Teil des Kalenders werden (Variante A: Bereich „Planung“).
+- Frage 2: Krank/Urlaub-Schnellaktionen dürfen auf „Heute“ bleiben, aber nur, wenn sie sonst nirgends schnell erreichbar sind.
+- Frage 3: Differenz am Tagesbeginn darf ausgeblendet werden, wenn es besser aussieht.
+- Frage 4: Wortwahl liegt beim Entwickler (einheitlich festlegen und in einem Glossar dokumentieren).
+- Frage 5: Vorerst kein Onboarding, aber als Konzept dokumentieren.
+- UX2: Variante A (Heute-zentriert) wird umgesetzt.
+
 ## 8. Nicht geprüft / Risiken dieser Analyse
 
 - Alle Gerätethemen (Haptik, echte Live Activity, Dynamic Island, VoiceOver, Fokus/Automatik) stehen nur auf Basis von Handoffs und Code; sie könnten besser oder schlechter sein.

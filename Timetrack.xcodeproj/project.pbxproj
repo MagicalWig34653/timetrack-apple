@@ -147,6 +147,7 @@
 		91072A71DC15FAD1BB67143F /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
 		9138C7BDD813C4E6F854B8A3 /* LocationIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CD0513317393D3CB5C87EE /* LocationIntents.swift */; };
 		929402AD847AD1E15005297F /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
+		93E1BABAC7C79B32FA183BF7 /* TimePolishShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3C3ECA98BB99EF568CE7C1 /* TimePolishShotTests.swift */; };
 		9427A0DD14A8B2BD1CCF75E4 /* WeekPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4CCDCEC47454447400107A /* WeekPlannerView.swift */; };
 		95B03206FF919F46DD6C7247 /* CalendarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */; };
 		974DAB34ED6D5150EC3AB851 /* TimerControlRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE23C37A37C9E12F463E83FD /* TimerControlRunner.swift */; };
@@ -397,6 +398,7 @@
 		685A74B00410FFC1950578FD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6889DC9B2C11ACD574AEE593 /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
 		6AFED35FEDDDCA6FF903C27A /* TimetrackWidgetMac.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TimetrackWidgetMac.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C3C3ECA98BB99EF568CE7C1 /* TimePolishShotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimePolishShotTests.swift; sourceTree = "<group>"; };
 		6D226EEF4AA248813E2E5245 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
 		6DC7CF52E0F14BA34747F0A4 /* AppIconSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconSettingsSection.swift; sourceTree = "<group>"; };
 		703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeTests.swift; sourceTree = "<group>"; };
@@ -618,6 +620,7 @@
 				2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */,
 				703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */,
 				673DD3F5DA3A19CD40620537 /* TimeCalendarTests.swift */,
+				6C3C3ECA98BB99EF568CE7C1 /* TimePolishShotTests.swift */,
 				063404462ED7AFBF099CDC1D /* TodayButtonsTests.swift */,
 				E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */,
 				A26EC5EFE411EDA7F5D3BD1E /* VacationV3Tests.swift */,
@@ -1388,6 +1391,7 @@
 				221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */,
 				A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */,
 				1DDB2CA107A46D28573487E6 /* TimeCalendarTests.swift in Sources */,
+				93E1BABAC7C79B32FA183BF7 /* TimePolishShotTests.swift in Sources */,
 				99F3E3509C85A93432F9C75B /* TodayButtonsTests.swift in Sources */,
 				AF65F3440AC015F904519C17 /* VacationReminderTests.swift in Sources */,
 				D5B68985AACA36CBD71D2C0B /* VacationV3Tests.swift in Sources */,

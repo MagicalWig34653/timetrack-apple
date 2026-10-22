@@ -56,7 +56,7 @@ final class TimeCalendarTests: XCTestCase {
         try launch(zoom: "month")
         open("Zeit", "time")
         XCTAssertTrue(el("calendar.title").waitForExistence(timeout: 10))
-        XCTAssertTrue(el("day.vacation").waitForExistence(timeout: 10), "details of the selected day show without opening a sheet")
+        XCTAssertTrue(el("day.actions").waitForExistence(timeout: 10), "details of the selected day show without opening a sheet")
         XCTAssertTrue(el("day.entries").exists || el("day.entries.empty").exists, "the recorded entries of the day are part of the details")
         sleep(1)
         shot("month")

@@ -86,9 +86,10 @@ struct WeekDayList: View {
                     SkeletonList(rows: 3).listRowBackground(Color.clear).listRowInsets(.init()).listRowSeparator(.hidden)
                 }
                 ForEach(store.days) { day in
+                    let compactEmpty = day.isPlainEmpty
                     Section {
                         // One ForEach with stable unique ids per section (no static row next to it): keeps the List diff consistent.
-                        ForEach(day.timeRows) { row in
+                        ForEach(compactEmpty ? [] : day.timeRows) { row in
                             switch row {
                             case .empty:
                                 EmptyDayRow(day: day).listRowInsets(.init()).listRowBackground(TT.surface)
@@ -105,7 +106,7 @@ struct WeekDayList: View {
                             }
                         }
                     } header: {
-                        DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now), isSelected: day.date == selected,
+                        DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now), isFuture: day.date > store.calendar.day(for: .now), isSelected: day.date == selected, isEmpty: compactEmpty,
                                   plan: week?.week?.days.first { $0.date == day.date }, canAct: canAct, actions: actions)
                     }
                     .id(day.date)
@@ -114,6 +115,7 @@ struct WeekDayList: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .listSectionSpacing(TT.Space.s)
+            .contentMargins(.top, TT.Space.xs, for: .scrollContent)
             // Data refreshes must not compete with row animations (A9: crash in the collection view's batch update).
             .transaction(value: store.days) { $0.animation = nil }
             .refreshable { await store.load(); await week?.load(); TTHaptics.play(.softTap) }
@@ -145,7 +147,7 @@ struct WeekSummaryCard: View {
                     Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.5)
                     Text("time.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
                     if !typeSize.isAccessibilitySize { Spacer() }
-                    if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
+                    if target > 0 { weekChip(done: done, target: target) }
                 }
                 .accessibilityElement(children: .combine)
                 if expanded, let loaded = week?.week {
@@ -154,8 +156,16 @@ struct WeekSummaryCard: View {
                 } else if expanded, week?.isUnavailable == true {
                     HintBanner("wk.week.unavailable")
                 }
-                HStack(spacing: TT.Space.m) {
-                    Button { withAnimation(reduceMotion ? nil : .smooth(duration: 0.3)) { expanded.toggle() } } label: {
+                ViewThatFits(in: .horizontal) { footer(spacing: TT.Space.m, vertical: false); footer(spacing: TT.Space.xs, vertical: true) }
+            }
+        }
+    }
+
+    @ViewBuilder private func footer(spacing: CGFloat, vertical: Bool) -> some View {
+        let layout = vertical ? AnyLayout(VStackLayout(alignment: .leading, spacing: spacing)) : AnyLayout(HStackLayout(spacing: spacing))
+        layout {
+            Group {
+                Button { withAnimation(reduceMotion ? nil : .smooth(duration: 0.3)) { expanded.toggle() } } label: {
                         HStack(spacing: 4) {
                             Z2.t(expanded ? "balance.hide" : "balance.show")
                             Image(systemName: "chevron.down").rotationEffect(.degrees(expanded ? 180 : 0)).imageScale(.small)
@@ -169,9 +179,28 @@ struct WeekSummaryCard: View {
                         Button(action: startPlanning) { Label(W.s("segment.plan"), systemImage: "calendar.badge.checkmark").frame(minHeight: 44) }
                             .buttonStyle(.borderless).font(TTFont.meta).accessibilityIdentifier("week.plan")
                     }
-                }
             }
         }
+    }
+}
+
+extension WeekSummaryCard {
+    /// F10: a week that is not over yet is not "behind": show what is left in a neutral tone; only a finished week warns.
+    @ViewBuilder fileprivate func weekChip(done: Int, target: Int) -> some View {
+        let over = store.weekEnd < store.calendar.day(for: .now)
+        if over || done >= target {
+            StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target))
+        } else {
+            StatusChip(verbatim: Z2.s("week.open_left \(DurationFormat.hoursMinutes(target - done))"), tone: .neutral)
+        }
+    }
+}
+
+extension DayEvaluation {
+    /// No entries and no mark: shown as one compact line in the header instead of a card.
+    var isPlainEmpty: Bool {
+        guard timeRows.count == 1, case .empty = timeRows[0] else { return false }
+        return mark == nil || mark == .unmarked || mark == .unknown
     }
 }
 
@@ -198,7 +227,9 @@ struct DayHeader: View {
     let day: DayEvaluation
     let calendar: DayCalendar
     let isToday: Bool
+    let isFuture: Bool
     let isSelected: Bool
+    let isEmpty: Bool
     let plan: TimeWeekDay?
     let canAct: Bool
     let actions: DayActions
@@ -214,14 +245,18 @@ struct DayHeader: View {
                     if isToday { StatusChip("time.today", tone: .accent) }
                 }
                 if let line = planLine { Text(verbatim: line).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
+                if isEmpty { Text(Z2.s("day.empty")).font(TTFont.meta).foregroundStyle(TT.textTertiary) }
                 if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
             }
             if !typeSize.isAccessibilitySize { Spacer(minLength: TT.Space.xs) }
-            if day.targetSeconds > 0 || done > 0 {
+            if isFuture || (isEmpty && done == 0 && isToday) {
+                if day.targetSeconds > 0 { Text(Z2.s("day.target_only \(DurationFormat.hoursMinutes(day.targetSeconds))")).font(TTFont.numeralSmall).foregroundStyle(TT.textTertiary) }
+            } else if day.targetSeconds > 0 || done > 0 {
                 VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
                     Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
                         .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
-                    if day.deltaSeconds != 0 {
+                    // F10: today is still running, so only finished days show a (warning) balance.
+                    if day.deltaSeconds != 0 && !isToday {
                         Text(verbatim: DurationFormat.signed(day.deltaSeconds)).font(TTFont.numeralSmall.weight(.semibold))
                             .foregroundStyle(day.deltaSeconds < 0 ? TT.warning : TT.success)
                     }

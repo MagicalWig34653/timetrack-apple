@@ -36,7 +36,8 @@ struct WeekPlannerView: View {
         .ttScreenBackground()
         .scrollDismissesKeyboard(.interactively)
         .safeAreaInset(edge: .bottom) { saveBar }
-        .task { if store.week == nil && !store.isLoading { await store.load() } }
+        // Re-runs when a load ends without a result (superseded by a week hand-over), so the planner is never left blank.
+        .task(id: store.isLoading) { if store.week == nil && !store.isLoading && store.error == nil && !store.isUnavailable { await store.load() } }
         .refreshable { if !store.isDirty { await store.load() } }
     }
 

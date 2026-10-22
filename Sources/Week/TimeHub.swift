@@ -74,7 +74,8 @@ struct TimeHub: View {
             ZoomHeader(title: headerTitle, subtitle: headerSubtitle, opensPicker: zoom == .month, picker: $picker, previous: { step(-1) }, next: { step(1) },
                        pickerContent: { calendar.map { store in MonthPicker(store: store) { picker = false; jump(to: store.visibleKey) } } })
                 .padding(.horizontal, TT.Space.l)
-            if let calendar, zoom == .month, calendar.isRangeMode { rangeBar(calendar).padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.s) }
+                .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            if let calendar, zoom == .month, calendar.isRangeMode { rangeBar(calendar).padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s) }
             content
         }
         .ttScreenBackground()
@@ -85,10 +86,17 @@ struct TimeHub: View {
                 .presentationDetents([.fraction(0.75), .large])
         }
         .sheet(item: $voiding, onDismiss: refreshAfterEdit) { segment in VoidSheet(store: timeList, segment: segment) }
-        .navigationDestination(isPresented: $planningArea) { PlanningHubScreen() }
         .environment(\.openPlanWeek) { monday in
             planningArea = false
             planStoreOpen(monday)
+        }
+        .navigationDestination(isPresented: $planningArea) {
+            // Pushed screens do not inherit the environment of this view, so the hand-over is attached to the destination itself.
+            PlanningHubScreen().environment(\.openPlanWeek) { monday in
+                planningArea = false
+                // Let the pop of the planning area finish first; switching the zoom in the same transaction left the planner blank.
+                Task { try? await Task.sleep(for: .milliseconds(450)); planStoreOpen(monday) }
+            }
         }
         .modifier(CalendarSheets(calendar: calendar, absenceRequest: $absenceRequest, sheet: $sheet))
         .alert(W.s("leave.title"), isPresented: Binding(get: { pendingNavigation != nil }, set: { if !$0 { pendingNavigation = nil } })) {
@@ -186,6 +194,10 @@ struct TimeHub: View {
     }
 
     private func grid(_ calendar: CalendarStore) -> some View {
+        gridBody(calendar).dynamicTypeSize(...DynamicTypeSize.xxxLarge) // fixed row heights: the grid is capped, the details below scale
+    }
+
+    private func gridBody(_ calendar: CalendarStore) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Text("calendar.week_short").frame(width: 26).accessibilityHidden(true)
@@ -206,7 +218,6 @@ struct TimeHub: View {
                                onEdit: { editor = EditorRequest(segment: $0, day: focus.day); touchedDay = focus.day },
                                onVoid: { voiding = $0; touchedDay = focus.day })
                 }
-                if !wide { Legend() }
             }
             .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
             .frame(maxWidth: wide ? .infinity : TT.contentWidth, alignment: .leading)
@@ -240,6 +251,7 @@ struct TimeHub: View {
                     TTHaptics.play(.selection)
                     withAnimation(animation) { focus.select(day) }
                 }
+                .dynamicTypeSize(...DynamicTypeSize.xxxLarge) // seven columns cannot grow with accessibility sizes
                 .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.xs)
                 WeekDayList(store: timeList, week: weekStore, selected: focus.day, canPlan: planStore != nil, canAct: calendar != nil,
                             startPlanning: { navigate { withAnimation(animation) { focus.isPlanning = true } } },
@@ -262,7 +274,11 @@ struct TimeHub: View {
         Card(padding: TT.Space.m) {
             VStack(alignment: .leading, spacing: TT.Space.s) {
                 if let range = calendar.chosenRange {
-                    Text("calendar.range.chosen \(PlanFormat.range(range.start, range.end, calendar: calendar.calendar))").font(TTFont.label)
+                    if calendar.rangeEnd == nil {
+                        Text(Z2.s("range.pick_end \(PlanFormat.shortDay(range.start, calendar: calendar.calendar))")).font(TTFont.label)
+                    } else {
+                        Text("calendar.range.chosen \(PlanFormat.range(range.start, range.end, calendar: calendar.calendar))").font(TTFont.label)
+                    }
                 } else {
                     Text("calendar.range.hint").font(TTFont.label)
                 }

@@ -24,6 +24,28 @@
         }
       }
     },
+    "day.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Einträge"
+          }
+        }
+      }
+    },
+    "day.target_only %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@"
+          }
+        }
+      }
+    },
     "more.label": {
       "extractionState": "manual",
       "localizations": {
@@ -53,6 +75,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wochenplanung"
+          }
+        }
+      }
+    },
+    "range.pick_end %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start: %@ · Tippe jetzt das Ende"
+          }
+        }
+      }
+    },
+    "week.open_left %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "noch %@ offen"
           }
         }
       }

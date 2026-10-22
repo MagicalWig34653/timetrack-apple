@@ -1002,6 +1002,17 @@
         }
       }
     },
+    "calendar.day_actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintragen oder abwesend melden"
+          }
+        }
+      }
+    },
     "calendar.document_line %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1030,7 +1041,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Soll %1$@, bewertet %2$@"
+            "value": "Soll %1$@ · Ist %2$@"
           }
         }
       }
@@ -1130,6 +1141,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schulferien"
+          }
+        }
+      }
+    },
+    "calendar.target_only %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@"
           }
         }
       }

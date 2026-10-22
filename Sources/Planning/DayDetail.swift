@@ -47,8 +47,12 @@ struct DayDetail<Entries: View>: View {
     @ViewBuilder private var evaluation: some View {
         if let detail = store.detail, detail.date == day {
             HStack {
+                if day > store.today {
+                    Text("calendar.target_only \(DurationFormat.hoursMinutes(detail.targetSeconds))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                } else {
                 Text("calendar.evaluation_text \(DurationFormat.hoursMinutes(detail.targetSeconds)) \(DurationFormat.hoursMinutes(detail.evaluatedWorkSeconds + detail.creditSeconds))")
                     .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                }
                 Spacer()
                 if let mark = detail.mark, mark != .unmarked, mark != .unknown { StatusChip(markKeyPlan(mark), tone: .neutral) }
             }
@@ -144,20 +148,23 @@ struct DayDetail<Entries: View>: View {
         }
     }
 
+    /// F14: the actions of the day are one menu button (the chips took a quarter of the screen and cut "Freigestellt"); the "+" of the
+    /// week zoom offers the same entries.
     private var actions: some View {
-        let columns = [GridItem(.adaptive(minimum: 104), spacing: TT.Space.s)]
-        return LazyVGrid(columns: columns, spacing: TT.Space.s) {
-            ForEach(AbsenceKind.selectable, id: \.self) { kind in
-                Button { absenceRequest = AbsenceRequest(kind: kind, start: day, end: day) } label: { Label(kind.shortKey, systemImage: kind.ttSymbol).lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity) }
-                    .buttonStyle(.ttSecondary).accessibilityLabel(Text(kind.actionKey)).accessibilityIdentifier("day.\(kind.rawValue)")
-            }
-            Button { sheet = .customDay(day) } label: { Label("plan.short.custom_day", systemImage: "flag").lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity) }
-                .buttonStyle(.ttSecondary).accessibilityIdentifier("day.custom")
+        Menu {
             if model.timeList != nil {
-                Button { sheet = .manualEntry(day) } label: { Label("plan.short.segment", systemImage: "clock.badge.plus").lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity) }
-                    .buttonStyle(.ttSecondary).accessibilityIdentifier("day.segment")
+                Button { sheet = .manualEntry(day) } label: { Label("plan.short.segment", systemImage: "clock.badge.plus") }.accessibilityIdentifier("day.segment")
             }
+            ForEach(AbsenceKind.selectable, id: \.self) { kind in
+                Button { absenceRequest = AbsenceRequest(kind: kind, start: day, end: day) } label: { Label(kind.actionKey, systemImage: kind.ttSymbol) }
+                    .accessibilityIdentifier("day.\(kind.rawValue)")
+            }
+            Button { sheet = .customDay(day) } label: { Label("plan.short.custom_day", systemImage: "flag") }.accessibilityIdentifier("day.custom")
+        } label: {
+            Label("calendar.day_actions", systemImage: "plus.circle.fill").frame(maxWidth: .infinity, minHeight: 44)
         }
+        .buttonStyle(.ttSecondary)
+        .accessibilityIdentifier("day.actions")
     }
 }
 

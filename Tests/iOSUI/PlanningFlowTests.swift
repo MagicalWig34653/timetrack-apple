@@ -63,10 +63,10 @@ final class PlanningFlowTests: XCTestCase {
 
         // 2) Sick day with pending sick note via the day sheet.
         el("day.\(day(3))").tap()
-        XCTAssertTrue(el("day.sick").waitForExistence(timeout: 5))
+        XCTAssertTrue(el("day.actions").waitForExistence(timeout: 5))
         sleep(1)
         shot("daysheet")
-        el("day.sick").tap()
+        chooseDayAction("day.sick")
         XCTAssertTrue(el("absence.document").waitForExistence(timeout: 5))
         el("absence.document").tap()
         app.buttons["Noch einzureichen"].firstMatch.tap()
@@ -78,7 +78,7 @@ final class PlanningFlowTests: XCTestCase {
         XCTAssertTrue(el("day.\(day(3))").label.contains("Krank"), "cell label: \(el("day.\(day(3))").label)")
 
         // 3) Sick note set to submitted through the context menu of the row in the day detail.
-        if !el("day.sick").exists { el("day.\(day(3))").tap() }
+        if !el("day.actions").exists { el("day.\(day(3))").tap() }
         let row = el("absence.row")
         if row.waitForExistence(timeout: 5) {
             row.press(forDuration: 1.0)
@@ -91,8 +91,8 @@ final class PlanningFlowTests: XCTestCase {
 
         // 4) Custom day.
         el("day.\(day(4))").tap()
-        XCTAssertTrue(el("day.custom").waitForExistence(timeout: 5))
-        el("day.custom").tap()
+        XCTAssertTrue(el("day.actions").waitForExistence(timeout: 5))
+        chooseDayAction("day.custom")
         let name = app.textFields["Bezeichnung"].firstMatch
         XCTAssertTrue(name.waitForExistence(timeout: 5))
         name.tap()
@@ -132,8 +132,8 @@ final class PlanningFlowTests: XCTestCase {
         // 6) Re-create one vacation so the Urlaub tab has data, then look at it.
         if !el("day.\(day(7))").exists { app.buttons["calendar.next"].tap() }
         el("day.\(day(7))").tap()
-        XCTAssertTrue(el("day.vacation").waitForExistence(timeout: 5))
-        el("day.vacation").tap()
+        XCTAssertTrue(el("day.actions").waitForExistence(timeout: 5))
+        chooseDayAction("day.vacation")
         XCTAssertTrue(el("absence.save").waitForExistence(timeout: 5))
         el("absence.save").tap()
         XCTAssertTrue(el("absence.save").waitForNonExistence(timeout: 10))
@@ -152,6 +152,13 @@ final class PlanningFlowTests: XCTestCase {
         sleep(1)
         shot("vacation-settings")
         el("settings.done").tap()
+    }
+
+    /// Z3: the day's actions are one menu ("Eintragen oder abwesend melden").
+    private func chooseDayAction(_ id: String) {
+        el("day.actions").tap()
+        XCTAssertTrue(el(id).waitForExistence(timeout: 5))
+        el(id).tap()
     }
 
     private func open(_ title: String, _ id: String) {

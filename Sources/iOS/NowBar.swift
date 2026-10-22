@@ -31,7 +31,9 @@ private struct NowBarContent: View {
         Group {
             if let running = store.running { runningBar(running) } else { idleBar }
         }
-        .padding(.horizontal, TT.Space.m)
+        // H1: breathing room around the capsule/stop button (it used to touch the bar's edge).
+        .padding(.horizontal, TT.Space.l)
+        .padding(.vertical, TT.Space.xs)
         .frame(maxWidth: .infinity, minHeight: 44)
         .background { if reduceTransparency { Capsule().fill(TT.glassFallback) } }
         .overlay { if reduceTransparency { Capsule().strokeBorder(TT.cardBorder, lineWidth: 1) } }

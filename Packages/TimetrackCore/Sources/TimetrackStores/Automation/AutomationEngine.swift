@@ -148,7 +148,13 @@ public actor AutomationEngine {
 
     @discardableResult
     public func shortcutLeft(_ placeId: UUID) async -> AutomationOutcome {
-        await leave(placeId, at: now(), trigger: .shortcutLeave)
+        let outcome = await leave(placeId, at: now(), trigger: .shortcutLeave, explicit: true)
+        // The user's own automation is the evidence of leaving: no wait and no location check, the timer is handled right away
+        // (stopped in "Direkt", asked in "Vorschlag"). Without a running timer this is a harmless no-op. If the timer state
+        // cannot be read (offline, nothing cached), the leave stays pending and the next wake-up finishes it.
+        guard leaveStop != nil, let pending = state.pendingLeaves[placeId.uuidString] else { return outcome }
+        if let handled = await checkLeave(pending, fix: nil, immediate: true) { return handled }
+        return AutomationOutcome(decision: .leaveScheduled, placeName: outcome.placeName, mode: outcome.mode, dwellMinutes: nil)
     }
 
     /// Called when the system reports which regions currently contain the device (launch, after restart). A visit that
@@ -239,14 +245,14 @@ public actor AutomationEngine {
         return AutomationOutcome(decision: result.decision, placeName: place.name, mode: place.mode, dwellMinutes: Int((filter.dwell(for: place) / 60).rounded(.up)))
     }
 
-    private func leave(_ placeId: UUID, at time: Date, trigger: LogTrigger) async -> AutomationOutcome {
+    private func leave(_ placeId: UUID, at time: Date, trigger: LogTrigger, explicit: Bool = false) async -> AutomationOutcome {
         guard let place = state.place(placeId) else { return AutomationOutcome(decision: .unknownPlace) }
         var runtime = state.runtime[placeId.uuidString] ?? PlaceRuntimeState()
         let result = ArrivalFilter(config: state.config, makeID: makeID).exit(&runtime, place: place, at: time)
         state.runtime[placeId.uuidString] = runtime
         await apply(result, place: place, trigger: trigger)
         if leaveStop != nil {
-            let planned = LeaveStopFilter(config: state.config).schedule(place: place, leftAt: time, exit: result, eventId: makeID())
+            let planned = LeaveStopFilter(config: state.config).schedule(place: place, leftAt: time, exit: result, eventId: makeID(), explicit: explicit)
             if let leave = planned.leave { state.pendingLeaves[placeId.uuidString] = leave }
             if let decision = planned.decision {
                 appendLog(placeName: place.name, trigger: trigger, decision: decision, confidence: nil,
@@ -261,7 +267,7 @@ public actor AutomationEngine {
 
     /// Final check of one leave: back inside, timer idle or restarted -> nothing; otherwise stop (direct) or ask (suggestion).
     /// The leave is taken out of the state while the platform acts, so a second `evaluate()` cannot handle it twice.
-    private func checkLeave(_ leave: PendingLeave, fix: LocationFix?) async -> AutomationOutcome? {
+    private func checkLeave(_ leave: PendingLeave, fix: LocationFix?, immediate: Bool = false) async -> AutomationOutcome? {
         guard let leaveStop, state.pendingLeaves[leave.placeId.uuidString] == leave else { return nil }
         guard let place = state.place(leave.placeId) else {
             state.pendingLeaves.removeValue(forKey: leave.placeId.uuidString)
@@ -270,9 +276,10 @@ public actor AutomationEngine {
         }
         state.pendingLeaves.removeValue(forKey: leave.placeId.uuidString)
         let filter = LeaveStopFilter(config: state.config)
-        let verification = PresenceVerification.from(fix: fix, place: place)
+        // `immediate` (Shortcuts departure): treated as due, presence is not re-checked.
+        let verification = immediate ? PresenceVerification.unavailable : PresenceVerification.from(fix: fix, place: place)
         let timer = (verification == .outside || verification == .unavailable) ? await leaveStop.observeTimer() : TimerObservation.unknown
-        var check = filter.check(leave, place: place, now: now(), verification: verification, timer: timer)
+        var check = filter.check(leave, place: place, now: immediate ? max(now(), leave.dueAt) : now(), verification: verification, timer: timer)
         var detail: String?
         let clock = LeaveStopFilter.clockText(leave.leftAt)
         switch check.action {

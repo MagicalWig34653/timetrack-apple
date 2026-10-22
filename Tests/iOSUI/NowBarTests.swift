@@ -43,12 +43,20 @@ final class NowBarTests: XCTestCase {
         // The bar follows to other tabs.
         app.tabBars.buttons["Mehr"].tap()
         XCTAssertTrue(el("nowbar.stop").exists)
-        // Tapping the clock side opens "Heute", where the timer card shows the running timer too.
+        // Tapping the clock side opens "Heute". H1: there the timer card is the only start/stop control, the bar is gone.
         el("nowbar.open").tap()
         XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
-        el("nowbar.stop").tap()
-        XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
+        XCTAssertFalse(el("nowbar.stop").exists, "no second stop control on Heute")
+        XCTAssertGreaterThanOrEqual(app.buttons["today.stop"].frame.height, 44)
+        shot("h1-today-running")
+        app.buttons["today.stop"].tap()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 10))
+        XCTAssertFalse(el("nowbar.start").exists, "no second start control on Heute")
+        XCTAssertGreaterThanOrEqual(app.buttons["today.start"].frame.height, 44)
+        shot("h1-today-idle")
+        // Back on another tab the bar is there again.
+        app.tabBars.buttons["Zeit"].tap()
+        XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
     }
 
     func testMoreCollectsSettingsAutomationAndReminders() {

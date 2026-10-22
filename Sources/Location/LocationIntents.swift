@@ -64,7 +64,15 @@ enum AutomationDialog {
         case .confirmedOnExit:
             return outcome.mode == .direct ? "Abfahrt von \(name) erfasst. Der Aufenthalt wird gebucht." : "Abfahrt von \(name) erfasst. Der Aufenthalt wird als Vorschlag angelegt."
         case .passBy: return "Abfahrt von \(name) vor Ablauf der Wartezeit: nichts gebucht."
-        case .noArrival: return "Für \(name) war keine Ankunft erfasst."
+        // Departure handled right away (H1): the running timer, if any, was stopped, offered or left alone.
+        case .leaveStopped: return "Abfahrt von \(name) erfasst. Der Timer wurde gestoppt."
+        case .leaveStopQueued: return "Abfahrt von \(name) erfasst. Der Stopp wartet auf eine Verbindung."
+        case .leaveOffered: return "Abfahrt von \(name) erfasst. Du bekommst die Nachfrage „Timer stoppen?“."
+        case .leaveNoTimer: return "Abfahrt von \(name) erfasst. Es läuft kein Timer."
+        case .leaveHandledByServer: return "Abfahrt von \(name) erfasst. Das Ende schlägt der Server vor."
+        case .leaveTimerRestarted: return "Abfahrt von \(name) erfasst. Der Timer wurde danach neu gestartet und läuft weiter."
+        case .leaveScheduled: return "Abfahrt von \(name) erfasst. Der Timer wird beim nächsten Abgleich geprüft."
+        case .noArrival: return "Abfahrt von \(name) erfasst. Es wurde nichts gestoppt (Stopp beim Verlassen oder Automatik aus)."
         case .unknownPlace: return "Dieser Ort ist in Timetrack nicht bekannt. Bitte die App öffnen."
         default: return "Fertig."
         }

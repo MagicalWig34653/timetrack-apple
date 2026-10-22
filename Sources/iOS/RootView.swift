@@ -90,8 +90,9 @@ struct MainView: View {
                         }
                     }
                 }
-                // UX3: start/stop and the running clock on every tab.
-                .tabViewBottomAccessory(isEnabled: model.today != nil) { NowBar() }
+                // UX3: start/stop and the running clock on every tab except "Heute" (H1): there the timer card is the one
+                // primary start/stop control, so the bar would only double it.
+                .tabViewBottomAccessory(isEnabled: model.today != nil && ui.selection != .today) { NowBar() }
             }
         }
         // A module switched off while its screen is open falls back to "Heute".

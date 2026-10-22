@@ -395,7 +395,7 @@ enum AutomationLogText {
         case .confirmed: text = "Aufenthalt bestätigt (\(confidence(entry.confidence)))"
         case .confirmedOnExit: text = "Aufenthalt beim Verlassen bestätigt (\(confidence(entry.confidence)))"
         case .departureQueued: text = "Abfahrt vorgemerkt"
-        case .noArrival: text = "Ignoriert: keine Ankunft vorgemerkt"
+        case .noArrival: text = "Kein Besuch vorgemerkt, nichts an den Server gemeldet (ein laufender Timer wird trotzdem geprüft)"
         case .sent: text = "Gesendet: \(result(entry.detail))"
         case .sendFailed: text = "Server nicht erreichbar, wird später gesendet"
         case .dropped: text = "Vom Server abgelehnt: \(entry.detail ?? "")"

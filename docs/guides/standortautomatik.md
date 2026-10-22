@@ -55,6 +55,8 @@ Wichtig: Wenn du beide Wege für denselben Ort einschaltest, erkennt Timetrack d
 
 Ohne Standortzugriff kann die App den Aufenthalt nach der Wartezeit nicht selbst prüfen: Dann gilt der Auslöser der Kurzbefehle als Beleg.
 
+**Abfahrt per Kurzbefehl stoppt den Timer sofort.** Meldet der Kurzbefehl „Verlassen“, wird ein laufender Timer beendet, auch wenn du ihn von Hand gestartet hast; die Endzeit ist der Zeitpunkt der Meldung. Es gibt keine Wartezeit und keine Standortprüfung (der Auslöser ist der Beleg). Der Ort muss Automatik „Direkt“ haben (bei „Vorschlag“ fragt eine Mitteilung „Timer stoppen?“, bei „Aus“ passiert nichts) und „Beim Verlassen stoppen“ muss an sein. Läuft kein Timer, passiert nichts.
+
 ## Grenzen
 
 - Bezeichnungen in der Kurzbefehle-App können je nach iOS-Version abweichen.

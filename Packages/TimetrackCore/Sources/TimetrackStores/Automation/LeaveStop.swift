@@ -67,17 +67,21 @@ public struct LeaveStopFilter: Sendable {
     public func wait(for place: AutomationPlace) -> TimeInterval { TimeInterval(config.leaveWaitMinutes) * 60 }
 
     /// Called after the arrival filter handled an exit. Returns the leave to wait for, or the reason there is none (nil: silent).
-    public func schedule(place: AutomationPlace, leftAt: Date, exit: FilterResult, eventId: UUID) -> (leave: PendingLeave?, decision: AutomationDecision?) {
+    ///
+    /// `explicit`: the departure was reported by the user's own Shortcuts automation ("Wenn ich gehe"). That is evidence of a real
+    /// departure, so the pass-by heuristics (short stay, exit before the arrival was due) do not apply.
+    public func schedule(place: AutomationPlace, leftAt: Date, exit: FilterResult, eventId: UUID, explicit: Bool = false) -> (leave: PendingLeave?, decision: AutomationDecision?) {
         guard config.enabled, config.stopsOnLeave(place) else { return (nil, nil) }
         switch exit.decision {
         case .noArrival, .departureQueued, .confirmedOnExit: break
+        case .passBy where explicit: break
         default: return (nil, nil) // pass-by or anything else: no stay, nothing to stop
         }
         // A stay shorter than the dwell time is a pass-by even if the arrival was never booked (cooldown, entry missed).
         let dwell = max(TimeInterval(config.dwellMinutes) * 60, TimeInterval(place.confirmAfterSeconds))
-        if let stay = exit.stay, stay < dwell { return (nil, .leaveStayTooShort) }
+        if !explicit, let stay = exit.stay, stay < dwell { return (nil, .leaveStayTooShort) }
         let leave = PendingLeave(placeId: place.id, leftAt: leftAt, dueAt: leftAt.addingTimeInterval(wait(for: place)), eventId: eventId,
-                                 visitReported: exit.decision != .noArrival)
+                                 visitReported: exit.decision != .noArrival && exit.decision != .passBy)
         return (leave, .leaveScheduled)
     }
 

@@ -4,20 +4,33 @@ import TimetrackDesign
 import TimetrackStores
 
 /// Everything about one day plus direct actions (absences, plan, custom day, time entry).
-struct DayDetail: View {
+struct DayDetail<Entries: View>: View {
     let store: CalendarStore
     let day: LocalDay
     @Binding var absenceRequest: AbsenceRequest?
     @Binding var sheet: PlanSheet?
     var showTitle = true
+    /// Z2: the day's recorded entries (iOS "Zeit" screen); the Mac calendar passes nothing.
+    @ViewBuilder let entries: Entries
     @Environment(AppModel.self) private var model
     @State private var cancelling: Absence?
+
+    init(store: CalendarStore, day: LocalDay, absenceRequest: Binding<AbsenceRequest?>, sheet: Binding<PlanSheet?>, showTitle: Bool = true,
+         @ViewBuilder entries: () -> Entries) {
+        self.store = store
+        self.day = day
+        self._absenceRequest = absenceRequest
+        self._sheet = sheet
+        self.showTitle = showTitle
+        self.entries = entries()
+    }
 
     var body: some View {
         let info = store.info(for: day)
         VStack(alignment: .leading, spacing: TT.Space.m) {
             if showTitle { Text(verbatim: PlanFormat.longDay(day, calendar: store.calendar)).font(TTFont.sectionTitle).foregroundStyle(TT.textPrimary).accessibilityAddTraits(.isHeader) }
             evaluation
+            entries
             if !info.holidays.isEmpty || !info.schoolHolidays.isEmpty { holidays(info) }
             if !info.absences.isEmpty { absences(info) }
             planRow(info)
@@ -145,5 +158,11 @@ struct DayDetail: View {
                     .buttonStyle(.ttSecondary).accessibilityIdentifier("day.segment")
             }
         }
+    }
+}
+
+extension DayDetail where Entries == EmptyView {
+    init(store: CalendarStore, day: LocalDay, absenceRequest: Binding<AbsenceRequest?>, sheet: Binding<PlanSheet?>, showTitle: Bool = true) {
+        self.init(store: store, day: day, absenceRequest: absenceRequest, sheet: sheet, showTitle: showTitle) { EmptyView() }
     }
 }

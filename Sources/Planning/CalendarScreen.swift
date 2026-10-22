@@ -3,7 +3,8 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// The "Kalender" tab: month grid with holidays, absences and plan; day detail as sheet (iPhone) or right-hand panel (iPad/Mac).
+#if os(macOS)
+/// The Mac "Kalender" screen (on iOS/iPadOS the calendar is the month zoom of the "Zeit" screen, Z2): month grid with holidays, absences and plan; day detail as sheet (iPhone) or right-hand panel (iPad/Mac).
 struct CalendarScreen: View {
     @Environment(AppModel.self) private var model
 
@@ -29,7 +30,6 @@ private struct CalendarContent: View {
     @State private var sheet: PlanSheet?
     @State private var picker = false
     @State private var pagingEdge: Edge = .trailing
-    @State private var planningWeek = false
 
     private var wide: Bool { planningIsWide(sizeClass) }
     private var actions: AbsenceEditorActions { AbsenceEditorActions(calendar: store) }
@@ -65,26 +65,15 @@ private struct CalendarContent: View {
         .onChange(of: store.absences) { syncDeviceCalendar() }
         .onChange(of: deviceCalendar?.preferences) { syncDeviceCalendar() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button { TTHaptics.play(.softTap); pagingEdge = store.firstOfMonth < store.today ? .trailing : .leading; Task { await store.goToToday(); await store.select(store.today) } } label: { Text("calendar.today") }.accessibilityIdentifier("calendar.today")
                 Menu {
-                    #if os(iOS)
-                    if model.isEnabled(.planning) {
-                        Button { planningWeek = true } label: { Label(W.s("segment.plan"), systemImage: "calendar.badge.checkmark") }.accessibilityIdentifier("calendar.plan_week")
-                    }
-                    #endif
                     Button { store.beginRange(at: focusDay) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
                 } label: { Label("plan.add", systemImage: "plus") }
                     .accessibilityIdentifier("calendar.add")
             }
         }
-        #if os(iOS)
-        .navigationDestination(isPresented: $planningWeek) { WeekPlannerScreen() } // Sources/Week is iOS only (N1a)
-        #endif
         .absenceEditor($absenceRequest, actions: actions)
         .sheet(item: $sheet) { sheet in PlanSheetHost(sheet: sheet, store: store) }
     }
@@ -212,7 +201,9 @@ private struct CalendarContent: View {
     }
 }
 
-private struct MonthPicker: View {
+#endif
+
+struct MonthPicker: View {
     let store: CalendarStore
     let done: () -> Void
     @State private var year = 0
@@ -241,7 +232,7 @@ private struct MonthPicker: View {
     }
 }
 
-private struct Legend: View {
+struct Legend: View {
     var body: some View {
         let items: [(String, Color, LocalizedStringKey)] = [
             ("beach.umbrella.fill", TT.kindVacation, "absence.vacation"), ("cross.case.fill", TT.kindSick, "absence.sick"),
@@ -261,6 +252,7 @@ private struct Legend: View {
     }
 }
 
+#if os(macOS)
 // MARK: - Grid
 
 private struct MonthGrid: View {
@@ -359,3 +351,4 @@ private struct DayCell: View {
         return parts.joined(separator: ", ")
     }
 }
+#endif

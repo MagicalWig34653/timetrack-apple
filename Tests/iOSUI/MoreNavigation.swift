@@ -9,8 +9,13 @@ extension XCUIApplication {
 
     /// "Mehr" › "Einstellungen": the S2 settings pages (account, appearance, work, info, sign-out).
     func openSettings() {
-        openMore()
         let row = descendants(matching: .any)["more.settings"].firstMatch
+        openMore()
+        // "Mehr" keeps its navigation stack while another tab is shown: pop back to its root when a settings page is still pushed.
+        for _ in 0..<4 where !row.waitForExistence(timeout: 2) {
+            guard navigationBars.buttons.firstMatch.exists else { break }
+            navigationBars.buttons.firstMatch.tap()
+        }
         _ = row.waitForExistence(timeout: 10)
         row.tap()
     }

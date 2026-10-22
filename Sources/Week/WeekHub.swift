@@ -64,69 +64,55 @@ final class WeekStoreCache {
     }
 }
 
-/// Week details pushed from the "Zeit" tab: the read-only week overview of the week the list shows. Planning is reachable from here
-/// (and from the calendar's menu), not as a competing segment of the time list.
-struct WeekDetailScreen: View {
-    let day: LocalDay
-    @Environment(AppModel.self) private var model
-    @State private var planning = false
-
-    var body: some View {
-        Group {
-            if let client = model.apiClient {
-                let store = WeekStoreCache.shared.weekStore(client, calendar: model.dayCalendar)
-                WeekOverviewView(store: store, planningEnabled: model.isEnabled(.planning)) { planning = true }
-                    .task { await store.go(to: day) }
-            }
-        }
-        .navigationTitle(W.s("detail.title"))
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
-        .toolbar {
-            if model.isEnabled(.planning) {
-                ToolbarItem(placement: .primaryAction) {
-                    Button { planning = true } label: { Label(W.s("segment.plan"), systemImage: "calendar.badge.checkmark") }
-                        .accessibilityIdentifier("week.plan")
-                }
-            }
-        }
-        .navigationDestination(isPresented: $planning) { WeekPlannerScreen() }
-    }
-}
-
-/// The week planner as a pushed screen (calendar menu, week details, planning area). `monday` opens that week; the menu leads to the
-/// planning area (coming weeks, vacation planner, shares) and is left out when the screen is pushed from there.
+/// The week planner as a pushed screen with its own week navigation. Used on macOS (planning area) and where a planner is opened without
+/// the "Zeit" screen; on iOS/iPadOS the planner is the editing mode of the week zoom (Z2) and the area hands the week over to it.
 struct WeekPlannerScreen: View {
     var monday: LocalDay?
-    var showsAreaMenu = true
     @Environment(AppModel.self) private var model
+    @State private var pendingShift: Int?
 
     var body: some View {
         Group {
             if let client = model.apiClient {
                 let cache = WeekStoreCache.shared
-                let planStore = cache.planStore(client, calendar: model.dayCalendar)
-                WeekPlannerView(store: planStore, overview: cache.weekStore(client, calendar: model.dayCalendar))
-                    .task {
-                        if let monday, planStore.monday != LocalDays.mondayOfWeek(containing: monday) { await planStore.open(monday: monday) }
+                let store = cache.planStore(client, calendar: model.dayCalendar)
+                VStack(spacing: 0) {
+                    WeekNavigator(weekNumber: store.weekNumber, monday: store.monday, sunday: store.sunday, calendar: store.calendar,
+                                  isCurrent: store.monday == store.currentMonday,
+                                  previous: { requestShift(store, -1) }, next: { requestShift(store, 1) }, current: { requestOpen(store, store.currentMonday) })
+                        .padding(.horizontal, TT.Space.l)
+                    WeekPlannerView(store: store, overview: cache.weekStore(client, calendar: model.dayCalendar))
+                }
+                .task { if let monday, store.monday != LocalDays.mondayOfWeek(containing: monday) { await store.open(monday: monday) } }
+                .alert(W.s("leave.title"), isPresented: Binding(get: { pendingShift != nil }, set: { if !$0 { pendingShift = nil } })) {
+                    Button(W.s("leave.discard"), role: .destructive) {
+                        if let shift = pendingShift { store.discard(); Task { await store.shiftWeeks(shift) } }
+                        pendingShift = nil
                     }
+                    Button(W.s("leave.keep"), role: .cancel) { pendingShift = nil }
+                } message: { W.t("leave.message") }
             }
         }
         .navigationTitle(W.s("segment.plan"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .toolbar {
-            if showsAreaMenu && model.isEnabled(.planning) {
-                ToolbarItem(placement: .primaryAction) {
-                    Menu {
-                        NavigationLink { PlanningHubScreen() } label: { Label(PA.s("hub.menu.weeks"), systemImage: "calendar.badge.clock") }
-                        NavigationLink { SharingScreen() } label: { Label(PA.s("hub.menu.shares"), systemImage: "person.2") }
-                    } label: { Label(PA.s("hub.menu"), systemImage: "ellipsis.circle") }
-                        .accessibilityIdentifier("week.plan.menu")
-                }
-            }
-        }
+    }
+
+    private func requestShift(_ store: WeekPlanStore, _ count: Int) {
+        if store.isDirty { pendingShift = count } else { Task { await store.shiftWeeks(count) } }
+    }
+
+    private func requestOpen(_ store: WeekPlanStore, _ target: LocalDay) {
+        if store.isDirty { pendingShift = (LocalDays.daysBetween(store.monday, target) ?? 0) / 7 } else { Task { await store.open(monday: target) } }
+    }
+}
+
+/// Z2 (iOS): the "Zeit" screen takes over opening a week in the planner, so the planning area does not push a second planner.
+private struct OpenPlanWeekKey: EnvironmentKey { static let defaultValue: (@MainActor (LocalDay) -> Void)? = nil }
+extension EnvironmentValues {
+    var openPlanWeek: (@MainActor (LocalDay) -> Void)? {
+        get { self[OpenPlanWeekKey.self] }
+        set { self[OpenPlanWeekKey.self] = newValue }
     }
 }

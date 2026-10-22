@@ -4,12 +4,12 @@ import TimetrackDesign
 import TimetrackStores
 
 /// Week planner: a rough plan per day (mode, begin, end, break), saved in one call. A plan never books time.
+/// Z2: the editing mode of the week zoom of the "Zeit" screen. Week navigation and the guard for unsaved changes live in that screen.
 struct WeekPlannerView: View {
     let store: WeekPlanStore
     let overview: WeekStore
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.dynamicTypeSize) private var typeSize
-    @State private var pendingShift: Int?
     @State private var notice: String?
 
     private var wide: Bool { sizeClass == .regular && !typeSize.isAccessibilitySize }
@@ -17,9 +17,6 @@ struct WeekPlannerView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
-                WeekNavigator(weekNumber: store.weekNumber, monday: store.monday, sunday: store.sunday, calendar: store.calendar,
-                              isCurrent: store.monday == store.currentMonday,
-                              previous: { requestShift(-1) }, next: { requestShift(1) }, current: { requestOpen(store.currentMonday) })
                 if let error = store.error { WeekErrorBanner(error: error) { Task { await store.load() } } }
                 if let notice { HintBanner(LocalizedStringKey(notice)) }
                 if store.isUnavailable {
@@ -41,24 +38,6 @@ struct WeekPlannerView: View {
         .safeAreaInset(edge: .bottom) { saveBar }
         .task { if store.week == nil && !store.isLoading { await store.load() } }
         .refreshable { if !store.isDirty { await store.load() } }
-        .alert(W.s("leave.title"), isPresented: Binding(get: { pendingShift != nil }, set: { if !$0 { pendingShift = nil } })) {
-            Button(W.s("leave.discard"), role: .destructive) {
-                if let shift = pendingShift { store.discard(); Task { await store.shiftWeeks(shift) } }
-                pendingShift = nil
-            }
-            Button(W.s("leave.keep"), role: .cancel) { pendingShift = nil }
-        } message: { W.t("leave.message") }
-    }
-
-    private func requestShift(_ count: Int) {
-        if store.isDirty { pendingShift = count } else { Task { await store.shiftWeeks(count) } }
-    }
-
-    private func requestOpen(_ monday: LocalDay) {
-        if store.isDirty {
-            let weeks = (LocalDays.daysBetween(store.monday, monday) ?? 0) / 7
-            pendingShift = weeks
-        } else { Task { await store.open(monday: monday) } }
     }
 
     // MARK: Total

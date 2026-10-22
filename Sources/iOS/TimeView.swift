@@ -3,15 +3,15 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// The "Zeit" tab (Z1): one screen per week. Week navigation and total once at the top, the days with their entries below
-/// (each day header carries its own Ist/Soll). The week overview (Zeitkonto, plan comparison, averages) is a drill-down, not a second list.
+/// The "Zeit" tab (Z2): one screen for time. Month and week are zoom levels of the same view (`TimeHub`), the week planner is its editing
+/// mode; the sheets to create, correct and void entries (below) are shared by all of them.
 struct TimeView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         Group {
             if let store = model.timeList {
-                TimeContent(store: store)
+                TimeHub(timeList: store, calendar: model.calendar)
             } else {
                 ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
             }
@@ -21,188 +21,13 @@ struct TimeView: View {
     }
 }
 
-private struct EditorRequest: Identifiable {
+struct EditorRequest: Identifiable {
     let id = UUID()
     let segment: Segment?
     let day: LocalDay
 }
 
-private struct TimeContent: View {
-    let store: TimeListStore
-    @State private var editor: EditorRequest?
-    @State private var voiding: Segment?
-    @Environment(\.horizontalSizeClass) private var sizeClass
-
-    var body: some View {
-        dayList
-            .frame(maxWidth: sizeClass == .regular ? 760 : .infinity)
-            .frame(maxWidth: .infinity)
-        .ttScreenBackground()
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) } label: { Label("command.new_entry", systemImage: "plus") }
-                    .accessibilityIdentifier("time.new")
-            }
-        }
-        .sheet(item: $editor) { request in
-            SegmentEditor(store: store, segment: request.segment, day: request.day)
-                .presentationDetents([.fraction(0.75), .large])
-        }
-        .sheet(item: $voiding) { segment in
-            VoidSheet(store: store, segment: segment)
-        }
-    }
-
-    private var dayList: some View {
-        List {
-            WeekHeader(store: store)
-                .listRowBackground(Color.clear).listRowInsets(.init(top: 0, leading: 0, bottom: 4, trailing: 0)).listRowSeparator(.hidden)
-            if let error = store.error {
-                ErrorBannerView(error: error) { Task { await store.load() } }
-                    .listRowBackground(Color.clear).listRowSeparator(.hidden)
-            }
-            if store.days.isEmpty && store.isLoading {
-                SkeletonList(rows: 3).listRowBackground(Color.clear).listRowInsets(.init()).listRowSeparator(.hidden)
-            }
-            ForEach(store.days) { day in
-                Section {
-                    // One ForEach with stable unique ids per section (no static row next to it): keeps the List diff consistent.
-                    ForEach(day.timeRows) { row in
-                        switch row {
-                        case .empty:
-                            EmptyDayRow(day: day)
-                                .listRowInsets(.init()).listRowBackground(TT.surface)
-                        case .segment(let segment, _):
-                            SegmentRow(segment: segment, zone: store.calendar.timeZone)
-                                .onTapGesture { editor = EditorRequest(segment: segment, day: day.date) }
-                                .listRowInsets(.init()).listRowBackground(TT.surface)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    Button("time.void") { voiding = segment }.tint(.red)
-                                    Button("time.edit") { editor = EditorRequest(segment: segment, day: day.date) }.tint(.accentColor)
-                                }
-                                .accessibilityAction(named: Text("time.edit")) { editor = EditorRequest(segment: segment, day: day.date) }
-                                .accessibilityAction(named: Text("time.void")) { voiding = segment }
-                        }
-                    }
-                } header: {
-                    DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
-                        editor = EditorRequest(segment: nil, day: day.date)
-                    }
-                }
-            }
-        }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
-        .listSectionSpacing(TT.Space.s)
-        // Data refreshes must not compete with row animations (A9: crash in the collection view's batch update).
-        .transaction(value: store.days) { $0.animation = nil }
-        .task { await store.load() }
-        .refreshable { await store.load(); TTHaptics.play(.softTap) }
-    }
-}
-
-/// Week navigation + total with progress against the week's target.
-private struct WeekHeader: View {
-    let store: TimeListStore
-    @Environment(\.dynamicTypeSize) private var typeSize
-
-    var body: some View {
-        let done = store.weekEvaluatedSeconds
-        let target = store.weekTargetSeconds
-        Card {
-            VStack(alignment: .leading, spacing: TT.Space.m) {
-                HStack(spacing: TT.Space.s) {
-                    Button { TTHaptics.play(.softTap); Task { await store.shiftWeeks(-1) } } label: { Image(systemName: "chevron.left").frame(width: 36, height: 36) }
-                        .accessibilityLabel(Text("time.previous_week"))
-                    Spacer(minLength: 0)
-                    VStack(spacing: 2) {
-                        Text(verbatim: weekRangeText(start: store.weekStart, end: store.weekEnd, calendar: store.calendar))
-                            .font(TTFont.cardTitle).foregroundStyle(TT.textPrimary).multilineTextAlignment(.center)
-                            .lineLimit(2).minimumScaleFactor(0.7)
-                        Button("time.this_week") { TTHaptics.play(.softTap); Task { await store.goToCurrentWeek() } }.font(TTFont.meta)
-                    }
-                    Spacer(minLength: 0)
-                    Button { TTHaptics.play(.softTap); Task { await store.shiftWeeks(1) } } label: { Image(systemName: "chevron.right").frame(width: 36, height: 36) }
-                        .accessibilityLabel(Text("time.next_week"))
-                }
-                .buttonStyle(.borderless)
-                ProgressBar(progress: target > 0 ? Double(done) / Double(target) : 0)
-                let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
-                layout {
-                    Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.stat).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.5)
-                    Text("time.of_target \(DurationFormat.hoursMinutes(target))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                    if !typeSize.isAccessibilitySize { Spacer() }
-                    if target > 0 { StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target)) }
-                }
-                .accessibilityElement(children: .combine)
-                NavigationLink { WeekDetailScreen(day: store.weekStart) } label: {
-                    HStack { W.t("detail.link"); Spacer() }
-                        .font(TTFont.meta).foregroundStyle(TT.textSecondary).contentShape(.rect)
-                }
-                .buttonStyle(.plain).accessibilityIdentifier("time.week_details")
-            }
-        }
-    }
-}
-
-private struct EmptyDayRow: View {
-    let day: DayEvaluation
-
-    var body: some View {
-        HStack(spacing: TT.Space.m) {
-            if let mark = day.mark, mark != .unmarked, mark != .unknown {
-                KindGlyph(symbol: markSymbol(mark), tint: markTint(mark))
-                Text(markKey(mark)).font(TTFont.body).foregroundStyle(TT.textPrimary)
-            } else {
-                Text("time.no_entries").font(TTFont.body).foregroundStyle(TT.textTertiary)
-            }
-            Spacer()
-        }
-        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
-        .accessibilityElement(children: .combine)
-    }
-}
-
-private struct DayHeader: View {
-    let day: DayEvaluation
-    let calendar: DayCalendar
-    let isToday: Bool
-    let add: () -> Void
-    @Environment(\.dynamicTypeSize) private var typeSize
-
-    var body: some View {
-        let done = day.evaluatedWorkSeconds + day.creditSeconds
-        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .center, spacing: TT.Space.s))
-        layout {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
-                    Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                    if isToday { StatusChip("time.today", tone: .accent) }
-                }
-                if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
-            }
-            if !typeSize.isAccessibilitySize { Spacer(minLength: TT.Space.xs) }
-            if day.targetSeconds > 0 || done > 0 {
-                VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
-                    Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
-                        .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
-                    if day.deltaSeconds != 0 {
-                        Text(verbatim: DurationFormat.signed(day.deltaSeconds)).font(TTFont.numeralSmall.weight(.semibold))
-                            .foregroundStyle(day.deltaSeconds < 0 ? TT.warning : TT.success)
-                    }
-                }
-            }
-            Button(action: add) { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical) }
-                .buttonStyle(.borderless)
-                .accessibilityLabel(Text("time.add_to_day \(dayTitle(day.date, calendar: calendar))"))
-        }
-        .textCase(nil)
-        .padding(.vertical, 2)
-    }
-}
-
-private struct SegmentEditor: View {
+struct SegmentEditor: View {
     let store: TimeListStore
     let segment: Segment?
     let day: LocalDay
@@ -301,7 +126,7 @@ private struct SegmentEditor: View {
     }
 }
 
-private struct VoidSheet: View {
+struct VoidSheet: View {
     let store: TimeListStore
     let segment: Segment
     @Environment(\.dismiss) private var dismiss

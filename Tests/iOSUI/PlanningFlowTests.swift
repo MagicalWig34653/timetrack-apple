@@ -1,6 +1,6 @@
 import XCTest
 
-/// A10: creates a vacation range, a sick day with a pending sick note, a custom day; edits and cancels them in the Kalender tab
+/// A10: creates a vacation range, a sick day with a pending sick note, a custom day; edits and cancels them in the month zoom of the Zeit tab
 /// and stores screenshots in TT_SHOT_DIR (prefix TT_SHOT_PREFIX). Needs the throwaway server environment; skipped otherwise.
 final class PlanningFlowTests: XCTestCase {
     private var app: XCUIApplication!
@@ -24,12 +24,12 @@ final class PlanningFlowTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "month"]
         app.launch()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
         shot("today")
 
-        open("Kalender", "calendar")
+        open("Zeit", "time") // Z2: the calendar is the month zoom of the Zeit screen
         XCTAssertTrue(el("calendar.title").waitForExistence(timeout: 10))
         sleep(1)
         shot("calendar-month")

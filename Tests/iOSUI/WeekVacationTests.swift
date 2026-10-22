@@ -16,7 +16,7 @@ final class WeekVacationTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "week"]
         if let size = env["TT_TEXT_SIZE"] { app.launchArguments += ["-UIPreferredContentSizeCategoryName", size] }
         if let scheme = env["TT_SHOT_SCHEME"] { app.launchArguments += ["-appearance.scheme", scheme] }
         app.launch()
@@ -33,12 +33,13 @@ final class WeekVacationTests: XCTestCase {
         try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(prefix)-\(name).png"))
     }
 
-    /// Z1: week details are a drill-down of the time list; the planner is pushed from the details.
+    /// Z2: the week balance unfolds inside the week header of the Zeit screen (week zoom).
     private func openWeekDetails() {
         XCTAssertTrue(el("time.week_details").waitForExistence(timeout: 15))
         el("time.week_details").tap()
     }
 
+    /// Z2: the week planner is the editing mode of the week zoom.
     private func openPlanner() {
         let button = el("week.plan")
         XCTAssertTrue(button.waitForExistence(timeout: 10))
@@ -61,10 +62,11 @@ final class WeekVacationTests: XCTestCase {
         XCTAssertTrue(el("week.summary").waitForExistence(timeout: 15))
         sleep(1)
         shot("week-overview")
-        // Previous week keeps working (navigation, reload).
-        el("week.previous").tap()
-        XCTAssertTrue(el("week.current").waitForExistence(timeout: 10))
-        el("week.current").tap()
+        // Previous week keeps working (navigation, reload); "Heute" returns.
+        el("calendar.prev").tap()
+        sleep(1)
+        el("time.today").tap()
+        sleep(1)
 
         openPlanner()
         XCTAssertTrue(el("plan.standard").waitForExistence(timeout: 15))
@@ -81,8 +83,7 @@ final class WeekVacationTests: XCTestCase {
         shot("planner-standard")
 
         // Leaving with unsaved changes asks first; "Weiter bearbeiten" keeps the draft.
-        for _ in 0..<8 where !el("week.next").isHittable { app.swipeDown() }
-        el("week.next").tap()
+        el("calendar.next").tap()
         XCTAssertTrue(app.buttons["Weiter bearbeiten"].waitForExistence(timeout: 5))
         shot("planner-leave-dialog")
         app.buttons["Weiter bearbeiten"].tap()
@@ -93,10 +94,10 @@ final class WeekVacationTests: XCTestCase {
         XCTAssertEqual(el("plan.dirty_state").label, "Alles gespeichert")
         shot("planner-saved")
 
-        // Overview now shows the plan next to actual time.
-        app.navigationBars.buttons.element(boundBy: 0).tap() // back to the week details
-        XCTAssertTrue(el("week.summary").waitForExistence(timeout: 15))
-        el("week.next").tap()
+        // Back to the list: the plan sits next to the actual time of each day.
+        el("week.plan.done").tap()
+        XCTAssertTrue(el("time.week_details").waitForExistence(timeout: 15))
+        el("calendar.next").tap()
         sleep(2)
         shot("week-overview-planned")
     }

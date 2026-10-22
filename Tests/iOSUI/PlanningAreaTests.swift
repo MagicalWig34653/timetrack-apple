@@ -16,7 +16,7 @@ final class PlanningAreaTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "month"]
         if let scheme = env["TT_SHOT_SCHEME"] { app.launchArguments += ["-appearance.scheme", scheme] }
         app.launch()
         XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
@@ -27,23 +27,19 @@ final class PlanningAreaTests: XCTestCase {
         try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: dir).appendingPathComponent("\(prefix)-\(name).png"))
     }
 
-    /// Time tab -> week details -> planner -> area menu entry `title`.
-    private func openFromPlannerMenu(_ title: String) {
+    /// Zeit screen -> "Mehr" menu -> planning area (Z2: a fixed entry of the Zeit screen, no longer a menu inside the planner).
+    private func openPlanningArea() {
         let tab = app.tabBars.buttons["Zeit"]
         if tab.exists { tab.tap() } else { el("sidebar.time").tap() }
-        XCTAssertTrue(el("time.week_details").waitForExistence(timeout: 15))
-        el("time.week_details").tap()
-        XCTAssertTrue(el("week.plan").waitForExistence(timeout: 10))
-        el("week.plan").tap()
-        XCTAssertTrue(el("week.plan.menu").waitForExistence(timeout: 10))
-        el("week.plan.menu").tap()
-        XCTAssertTrue(app.buttons[title].waitForExistence(timeout: 5))
-        app.buttons[title].tap()
+        XCTAssertTrue(el("time.more").waitForExistence(timeout: 15))
+        el("time.more").tap()
+        XCTAssertTrue(el("time.planning_area").waitForExistence(timeout: 5))
+        el("time.planning_area").tap()
     }
 
     func testComingWeeksOpenThePlanner() throws {
         try launch()
-        openFromPlannerMenu("Kommende Wochen")
+        openPlanningArea()
         XCTAssertTrue(el("planning.shares").waitForExistence(timeout: 15))
         sleep(2)
         shot("weeks")
@@ -51,14 +47,16 @@ final class PlanningAreaTests: XCTestCase {
         let rows = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'planning.week.'"))
         XCTAssertGreaterThanOrEqual(rows.count, 4)
         rows.element(boundBy: 1).tap()
+        // Z2: the week opens in the planning mode of the Zeit screen (no second planner screen is pushed).
         XCTAssertTrue(el("plan.standard").waitForExistence(timeout: 15))
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        XCTAssertTrue(el("planning.shares").waitForExistence(timeout: 10))
+        XCTAssertTrue(el("week.plan.done").waitForExistence(timeout: 10))
     }
 
     func testSharesCreateToggleRevokeAndIncomingView() throws {
         try launch()
-        openFromPlannerMenu("Freigaben")
+        openPlanningArea()
+        XCTAssertTrue(el("planning.shares").waitForExistence(timeout: 15))
+        el("planning.shares").tap()
         XCTAssertTrue(el("share.create").waitForExistence(timeout: 15))
         XCTAssertTrue(el("share.out.empty").exists)
         // Incoming share from "ben" is listed.

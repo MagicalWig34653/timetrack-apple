@@ -47,6 +47,7 @@ struct PlanningHubView: View {
     let horizon: PlanHorizonStore
     let planner: WeekPlanStore
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.openPlanWeek) private var openPlanWeek
     @State private var openedWeek: LocalDay?
     @State private var pendingWeek: LocalDay?
 
@@ -68,18 +69,23 @@ struct PlanningHubView: View {
         .ttScreenBackground()
         .task { await horizon.load() }
         .refreshable { await horizon.load() }
-        .navigationDestination(item: $openedWeek) { monday in WeekPlannerScreen(monday: monday, showsAreaMenu: false) }
+        .navigationDestination(item: $openedWeek) { monday in WeekPlannerScreen(monday: monday) }
         .alert(W.s("leave.title"), isPresented: Binding(get: { pendingWeek != nil }, set: { if !$0 { pendingWeek = nil } })) {
             Button(W.s("leave.discard"), role: .destructive) {
-                if let target = pendingWeek { planner.discard(); openedWeek = target }
+                if let target = pendingWeek { planner.discard(); show(target) }
                 pendingWeek = nil
             }
             Button(W.s("leave.keep"), role: .cancel) { pendingWeek = nil }
         } message: { W.t("leave.message") }
     }
 
+    /// iOS: the week opens in the planning mode of the Zeit screen; elsewhere (Mac) it is pushed as a planner screen.
+    private func show(_ monday: LocalDay) {
+        if let openPlanWeek { openPlanWeek(monday) } else { openedWeek = monday }
+    }
+
     private func open(_ monday: LocalDay) {
-        if planner.isDirty && planner.monday != monday { pendingWeek = monday } else { openedWeek = monday }
+        if planner.isDirty && planner.monday != monday { pendingWeek = monday } else { show(monday) }
     }
 
     // MARK: Coming weeks

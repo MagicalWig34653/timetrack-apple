@@ -164,7 +164,7 @@ private func body(_ request: URLRequest?) -> [String: Any] {
         #expect(store.info(for: "2026-10-20").plan?.mode == .office)
         #expect(store.info(for: "2026-10-31").holidays.first?.name == "Reformationstag")
         #expect(store.info(for: "2026-10-22").absences.isEmpty)
-        #expect(transport.requests(matching: "GET /api/v1/absences").last?.url?.query == "from=2026-09-28&to=2026-11-01")
+        #expect(transport.requests(matching: "GET /api/v1/absences").first?.url?.query == "from=2026-09-28&to=2026-11-08") // Z2: the visible month is fetched first, always as six rows
     }
 
     @Test func monthNavigationAcrossYears() async {

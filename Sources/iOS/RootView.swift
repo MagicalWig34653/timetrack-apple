@@ -93,6 +93,7 @@ struct MainView: View {
                 // UX3/H2: start/stop and the running clock on every tab including "Heute"; the bar is the single start/stop
                 // control on iPhone (the Heute card keeps the clock and the kind choice but no second button).
                 .tabViewBottomAccessory(isEnabled: model.today != nil) { NowBar() }
+                .modifier(StopToast())
             }
         }
         // A module switched off while its screen is open falls back to "Heute".

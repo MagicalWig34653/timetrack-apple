@@ -11,6 +11,11 @@ public final class TodayStore {
     public private(set) var day: DayEvaluation?
     public private(set) var account: TimeAccount?
     public private(set) var segments: [Segment] = []
+    /// H3: context for the "Jetzt" sheet and the top of "Heute". Both are optional extras: a failed read leaves them as they were.
+    /// Planned end of today (plan day), and the account's places by id (names for the running entry).
+    public private(set) var plannedEnd: Date?
+    public private(set) var places: [UUID: Place] = [:]
+    private var contextDay: LocalDay?
     public private(set) var isLoading = false
     /// When the last successful load finished (widgets publish a fresh "updated" time from it).
     public private(set) var lastLoaded: Date?
@@ -57,6 +62,15 @@ public final class TodayStore {
         return base.applying(pending)
     }
 
+    /// H3: live outlook of the day (worked incl. the running entry, remaining, expected end, break status) at `now`.
+    public func outlook(now: Date = .now) -> DayOutlook {
+        DayOutlook(now: now, running: running, segments: segments, doneAtLoad: (day?.evaluatedWorkSeconds ?? 0) + (day?.creditSeconds ?? 0),
+                   loadedAt: lastLoaded, targetSeconds: day?.targetSeconds ?? 0, plannedEnd: plannedEnd)
+    }
+
+    /// H3: the place of the running entry by name, when the entry has one and the account's places are known.
+    public var runningPlace: Place? { running?.placeId.flatMap { places[$0] } }
+
     /// UX3: delivery state for the status line (nothing when all is well).
     public var syncStatus: SyncStatus { SyncStatus(pending: pending.count, networkError: error?.isNetworkError == true) }
 
@@ -99,6 +113,18 @@ public final class TodayStore {
             return
         }
         await drainQueue(reload: deferAccount)
+        await loadContext(day: today)
+    }
+
+    /// H3: planned end of today and the place names; read once per day, silently (not part of the day's numbers).
+    private func loadContext(day: LocalDay) async {
+        guard contextDay != day else { return }
+        let planned = try? await client.listPlanDays(from: day, to: day)
+        let placeList = try? await client.listPlaces()
+        if let planned { plannedEnd = PlannedDay(plan: planned.first { $0.date == day }, zone: calendar.timeZone).end }
+        if let placeList { places = Dictionary(placeList.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }) }
+        if planned != nil, placeList != nil { contextDay = day }
+        changed()
     }
 
     private func apply(running timerValue: Segment?, day dayValue: DayEvaluation, account accountValue: TimeAccount?) {
@@ -168,6 +194,22 @@ public final class TodayStore {
             self.error = .cancelled
         }
         return false
+    }
+
+    /// H3: moves the start of the running entry by `minutes` earlier (negative: later), never into the future. Needs the server.
+    @discardableResult
+    public func shiftRunningStart(byMinutes minutes: Int, now: Date = .now) async -> Bool {
+        guard let segment = running else { return false }
+        let target = min(now, segment.startedAt.addingTimeInterval(TimeInterval(-minutes * 60)))
+        return await correctRunning(SegmentCorrection(startedAt: target, reason: "Korrektur im laufenden Eintrag"))
+    }
+
+    /// H3: "start at a custom time" = start now, then move the beginning back (two honest steps with existing endpoints).
+    /// If the correction is refused (e.g. an overlap) the timer keeps running from now and the error is shown.
+    public func start(kind: SegmentKind, since: Date, now: Date = .now) async {
+        await start(kind: kind)
+        guard running != nil, since < now.addingTimeInterval(-60) else { return }
+        await correctRunning(SegmentCorrection(startedAt: since, reason: "Korrektur im laufenden Eintrag"))
     }
 
     /// One attempt; unreachable server (transport error, 5xx, 429) stores the action with the same event id instead of failing.

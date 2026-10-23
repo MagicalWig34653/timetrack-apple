@@ -18,6 +18,11 @@ func ux3String(_ key: String.LocalizationValue) -> String { String(localized: ke
 /// Replaces ring percentage + "Erfasst" + "Differenz" tile, which said the same thing three times (UX1 F07).
 struct DayStandingCard: View {
     let store: TodayStore
+    /// H3: also show the expected end, the break status and open review items (iPhone "Heute" and the "Jetzt" sheet).
+    var showsOutlook = false
+    /// H3: the sheet shows the card without the time account tile and without the term explainer.
+    var showsBalance = true
+    @Environment(AppModel.self) private var model
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var explaining = false
 
@@ -55,14 +60,32 @@ struct DayStandingCard: View {
                             .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
                             .lineLimit(1).minimumScaleFactor(0.6)
                         standingLine(standing)
+                        if showsOutlook { outlookBlock }
                         if day?.provisional == true || store.account?.provisional == true { ProvisionalChip() }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityElement(children: .combine)
             }
-            StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0), symbol: "clock.arrow.circlepath")
-                .accessibilityIdentifier("today.balance")
+            if showsBalance {
+                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0), symbol: "clock.arrow.circlepath")
+                    .accessibilityIdentifier("today.balance")
+            }
+        }
+    }
+
+    /// H3: expected end, break status, day mark and entries that need a look; refreshed every 30 s (live while a timer runs).
+    @ViewBuilder private var outlookBlock: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            VStack(alignment: .leading, spacing: TT.Space.xs) {
+                DayOutlookLines(outlook: store.outlook(now: context.date), zone: model.dayCalendar.timeZone)
+                    .padding(.top, TT.Space.xs)
+                let review = store.segments.filter(\.needsReview).count
+                if review > 0 {
+                    StatusChip(verbatim: String(localized: "h3.review \(review)", table: "UX3"), tone: .warning, symbol: "exclamationmark.circle")
+                        .padding(.top, 2).accessibilityIdentifier("today.review")
+                }
+            }
         }
     }
 

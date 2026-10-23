@@ -60,7 +60,7 @@ final class NowBarTests: XCTestCase {
         XCTAssertFalse(app.buttons["today.start"].exists, "no second start control on the Heute card")
         XCTAssertTrue(el("nowbar.kind").exists, "kind choice reachable in the bar")
         XCTAssertGreaterThanOrEqual(el("nowbar.start").frame.height, 44)
-        shot("h2-today-idle")
+        shot("h3-today-idle")
         el("nowbar.open").tap()
         XCTAssertTrue(el("nowsheet.start").waitForExistence(timeout: 10), "idle sheet with start")
         shot("h2-sheet-idle")
@@ -70,21 +70,44 @@ final class NowBarTests: XCTestCase {
         XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
     }
 
-    /// H2: the kind chosen on the Heute card is what the bar's start uses (shared "ios.lastKind").
-    func testKindChosenOnTodayCardIsUsedByBarStart() throws {
+    /// H3: the kind chosen in the "Jetzt" sheet is what the bar's start uses (shared "ios.lastKind"); the Heute card has no kind buttons on iPhone.
+    func testKindChosenInSheetIsUsedByBarStart() throws {
         if el("nowbar.stop").waitForExistence(timeout: 3) { el("nowbar.stop").tap() }
         app.tabBars.buttons["Heute"].tap()
-        let travel = app.buttons["Fahrt"].firstMatch
-        XCTAssertTrue(travel.waitForExistence(timeout: 10), "kind selector on the Heute card")
-        travel.tap()
+        XCTAssertTrue(el("today.clock").waitForExistence(timeout: 10), "the first section of Heute is the clock card")
+        XCTAssertFalse(app.buttons["Fahrt"].firstMatch.exists, "no kind buttons on the Heute card (iPhone)")
+        el("nowbar.open").tap()
+        XCTAssertTrue(el("nowsheet.start").waitForExistence(timeout: 10))
+        app.buttons["Fahrt"].firstMatch.tap()
+        el("nowsheet.done").tap()
         XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 5))
         el("nowbar.start").tap()
         if !el("nowbar.stop").waitForExistence(timeout: 8) { throw XCTSkip("seed data overlaps the current time") }
-        shot("h2-today-running-travel")
+        shot("h3-today-running-travel")
         XCTAssertTrue(app.staticTexts["Fahrt"].firstMatch.exists, "the running segment has the chosen kind")
         el("nowbar.stop").tap()
         XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
+        el("nowbar.open").tap()
+        XCTAssertTrue(el("nowsheet.start").waitForExistence(timeout: 10))
         app.buttons["Arbeit"].firstMatch.tap() // restore the default choice
+        el("nowsheet.done").tap()
+    }
+
+    /// H3: start at a head start and shift the start in the running sheet; the bar's controls keep clear space (>= 44 pt targets, drawn smaller).
+    func testSheetQuickActions() throws {
+        if el("nowbar.stop").waitForExistence(timeout: 3) { el("nowbar.stop").tap() }
+        el("nowbar.open").tap()
+        XCTAssertTrue(el("nowsheet.head15").waitForExistence(timeout: 10))
+        el("nowsheet.head15").tap()
+        if !el("nowsheet.stop").waitForExistence(timeout: 8) { throw XCTSkip("seed data overlaps the current time") }
+        XCTAssertTrue(el("nowsheet.pause").exists)
+        XCTAssertTrue(el("outlook.break").waitForExistence(timeout: 5) || el("nowsheet.context").exists)
+        el("nowsheet.earlier5").tap()
+        XCTAssertTrue(el("nowsheet.context").waitForExistence(timeout: 5))
+        XCTAssertFalse(el("nowsheet.save").exists, "no pending change after a quick step")
+        el("nowsheet.pause").tap()
+        XCTAssertTrue(el("nowsheet.pause_since").waitForExistence(timeout: 10), "after Pause the sheet shows the gap and offers Weiter")
+        el("nowsheet.done").tap()
     }
 
     func testMoreCollectsSettingsAutomationAndReminders() {

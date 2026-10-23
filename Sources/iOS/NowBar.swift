@@ -19,6 +19,10 @@ private struct NowBarContent: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.ttTheme) private var theme
     @AppStorage("ios.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+    /// H3: height the system gives the capsule (measured), so the buttons nest concentrically inside its rounded ends.
+    @State private var barHeight: CGFloat = 48
+    /// Visual height of the start capsule and the stop circle; the touch target stays 44 pt (frame), the drawn shape is smaller.
+    @ScaledMetric(relativeTo: .body) private var controlHeight: CGFloat = 34
     /// H2: tapping the bar opens the "Jetzt" sheet (like the Apple Music mini player opens the full player).
     @State private var showSheet = false
 
@@ -27,15 +31,20 @@ private struct NowBarContent: View {
     }
 
     private var inline: Bool { placement == .inline }
+    private var visual: CGFloat { min(controlHeight, max(24, barHeight - 12)) }
+    /// Gap between the drawn control and the capsule edge: equal above, below and at the trailing end (concentric nesting).
+    private var inset: CGFloat { max(5, (barHeight - visual) / 2) }
 
     var body: some View {
         Group {
             if let running = store.running { runningBar(running) } else { idleBar }
         }
-        // H1: breathing room around the capsule/stop button (it used to touch the bar's edge).
-        .padding(.horizontal, TT.Space.l)
-        .padding(.vertical, TT.Space.xs)
-        .frame(maxWidth: .infinity, minHeight: 44)
+        // H3: the system capsule has fully rounded ends (radius = height / 2). Text starts further in than the controls, which sit
+        // `inset` from the top, bottom and trailing edge, so inner and outer curvature are concentric.
+        .padding(.leading, barHeight / 2 - 4)
+        .padding(.trailing, inset)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { if $0 > 20 { barHeight = $0 } }
         .background { if reduceTransparency { Capsule().fill(TT.glassFallback) } }
         .overlay { if reduceTransparency { Capsule().strokeBorder(TT.cardBorder, lineWidth: 1) } }
         .animation(.smooth(duration: 0.25), value: store.running?.id)
@@ -74,9 +83,11 @@ private struct NowBarContent: View {
             .accessibilityHint(ux3("ux3.now.details"))
             .accessibilityIdentifier("nowbar.open")
             Button { Task { await store.stop() } } label: {
-                Image(systemName: "stop.fill").font(.body.weight(.semibold)).foregroundStyle(.white)
-                    .frame(width: 44, height: 44).background(TT.dangerFill, in: .circle)
+                Image(systemName: "stop.fill").font(.subheadline.weight(.semibold)).foregroundStyle(.white)
+                    .frame(width: visual, height: visual).background(TT.dangerFill, in: .circle)
+                    .frame(width: 44, height: 44).contentShape(.rect)
             }
+            .padding(.trailing, -(44 - visual) / 2)
             .buttonStyle(.plain)
             .accessibilityLabel(ux3("ux3.now.stop"))
             .accessibilityIdentifier("nowbar.stop")
@@ -119,9 +130,10 @@ private struct NowBarContent: View {
                     if !inline { ux3("ux3.now.start") }
                 }
                 .font(TTFont.label.weight(.semibold))
-                .padding(.horizontal, TT.Space.l).frame(minWidth: 44, minHeight: 44)
+                .padding(.horizontal, TT.Space.l).frame(minWidth: 44, minHeight: visual)
                 .foregroundStyle(theme.onAccent)
                 .background(theme.accent, in: .capsule)
+                .frame(minHeight: 44).contentShape(.rect)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(ux3("ux3.now.start_kind \(kindName(kind))"))
@@ -136,4 +148,58 @@ private struct NowBarContent: View {
         case .school: String(localized: "kind.school")
         }
     }
+}
+
+/// H3: after a timer ended (bar, sheet, watch, Live Activity) a small banner offers "Weiter" for a few seconds. There is no "undo" of a stop
+/// (the server has no reopen command); "Weiter" starts a new entry of the same kind, so the time in between stays an honest gap.
+struct StopToast: ViewModifier {
+    @Environment(AppModel.self) private var model
+    @State private var previous: Segment?
+    @State private var shown: Segment?
+    @State private var shownSeconds = 0
+    @State private var hideTask: Task<Void, Never>?
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .top) {
+                if let shown, let store = model.today {
+                    HStack(spacing: TT.Space.m) {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(TT.success).accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 0) {
+                            ux3("h3.toast.stopped").font(TTFont.label).foregroundStyle(TT.textPrimary)
+                            Text(verbatim: "\(shown.kind.plainName) · \(DurationFormat.hoursMinutes(shownSeconds))")
+                                .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        }
+                        Spacer(minLength: TT.Space.s)
+                        Button { dismissToast(); Task { await store.start(kind: shown.kind) } } label: {
+                            ux3("h3.toast.continue").font(TTFont.label.weight(.semibold)).frame(minHeight: 44).padding(.horizontal, TT.Space.s)
+                        }
+                        .accessibilityIdentifier("toast.continue")
+                    }
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.xs)
+                    .background(.regularMaterial, in: .capsule)
+                    .overlay { Capsule().strokeBorder(TT.cardBorder, lineWidth: 1) }
+                    .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+                    .padding(.horizontal, TT.Space.l).padding(.top, TT.Space.xs)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("toast.stopped")
+                }
+            }
+            .animation(.smooth(duration: 0.3), value: shown?.id)
+            .onChange(of: model.today?.running) { old, new in
+                if let new { previous = new; if shown != nil { dismissToast() }; return }
+                guard let ended = old ?? previous else { return }
+                previous = nil
+                shownSeconds = max(0, Int(Date.now.timeIntervalSince(ended.startedAt)))
+                shown = ended
+                hideTask?.cancel()
+                hideTask = Task {
+                    try? await Task.sleep(for: .seconds(7))
+                    if !Task.isCancelled { shown = nil }
+                }
+            }
+    }
+
+    private func dismissToast() { hideTask?.cancel(); shown = nil }
 }

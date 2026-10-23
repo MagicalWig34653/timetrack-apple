@@ -11,7 +11,10 @@ struct TimeView: View {
     var body: some View {
         Group {
             if let store = model.timeList {
-                TimeHub(timeList: store, calendar: model.calendar)
+                VStack(spacing: 0) {
+                    ReviewBanner() // Q1: entries that need a look, tappable
+                    TimeHub(timeList: store, calendar: model.calendar)
+                }
             } else {
                 ScrollView { SkeletonList(rows: 3).padding(TT.Space.l) }.ttScreenBackground()
             }
@@ -31,6 +34,9 @@ struct SegmentEditor: View {
     let store: TimeListStore
     let segment: Segment?
     let day: LocalDay
+    /// Q1 (review flow): prefill for an entry without an end, and a prefilled reason for the history.
+    var endDefault: Date?
+    var reasonDefault: String?
     @Environment(\.dismiss) private var dismiss
 
     @State private var kind: SegmentKind = .work
@@ -98,6 +104,8 @@ struct SegmentEditor: View {
             start = segment.startedAt
             end = segment.endedAt ?? segment.startedAt.addingTimeInterval(3600)
             hasEnd = segment.endedAt != nil
+            if segment.endedAt == nil, let endDefault { hasEnd = true; end = endDefault }
+            if let reasonDefault, reason.isEmpty { reason = reasonDefault }
             note = segment.note ?? ""
         } else {
             start = store.calendar.instant(day: day, hour: 8, minute: 0) ?? .now

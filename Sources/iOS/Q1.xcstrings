@@ -1,0 +1,215 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "q1.action.accept %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende um %@ Uhr übernehmen"
+          }
+        }
+      }
+    },
+    "q1.action.adjust": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anpassen"
+          }
+        }
+      }
+    },
+    "q1.action.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passt so"
+          }
+        }
+      }
+    },
+    "q1.action.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag löschen"
+          }
+        }
+      }
+    },
+    "q1.action.set_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende eintragen"
+          }
+        }
+      }
+    },
+    "q1.action.still_running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft noch"
+          }
+        }
+      }
+    },
+    "q1.banner.subtitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippen, um Grund und Korrektur zu sehen"
+          }
+        }
+      }
+    },
+    "q1.editor.reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Prüfung angepasst"
+          }
+        }
+      }
+    },
+    "q1.reason.end_missing.detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik hat diesen Eintrag gestartet, aber nie ein Ende erhalten. Er läuft noch oder wurde vergessen."
+          }
+        }
+      }
+    },
+    "q1.reason.end_missing.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende fehlt"
+          }
+        }
+      }
+    },
+    "q1.reason.marked.detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Eintrag wurde von der Automatik angelegt und ist als „bitte prüfen“ markiert, obwohl er inzwischen ein Ende hat."
+          }
+        }
+      }
+    },
+    "q1.reason.marked.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von der Automatik markiert"
+          }
+        }
+      }
+    },
+    "q1.reason.proposed.detail %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik hat diesen Eintrag gestartet, aber kein Ende erhalten. Sie schlägt %@ Uhr als Ende vor."
+          }
+        }
+      }
+    },
+    "q1.reason.proposed.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende fehlt – Vorschlag der Automatik"
+          }
+        }
+      }
+    },
+    "q1.review.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts zu prüfen"
+          }
+        }
+      }
+    },
+    "q1.review.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik markiert einen Eintrag, wenn sie ihn gestartet hat und das Ende nie gemeldet wurde. Mit „Passt so“ oder einer Korrektur verschwindet er aus dieser Liste (auf diesem Gerät)."
+          }
+        }
+      }
+    },
+    "q1.review.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die Liste mit Grund und Möglichkeiten zur Korrektur"
+          }
+        }
+      }
+    },
+    "q1.review.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Einträge brauchen einen Blick von dir. Timetrack ändert nichts von selbst."
+          }
+        }
+      }
+    },
+    "q1.review.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu prüfen"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

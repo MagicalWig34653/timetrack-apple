@@ -26,7 +26,7 @@ enum TimerControlRunner {
         if let snapshot = plan.snapshot { snapshots.write(snapshot) }
         if let queued = plan.queued { await queue.enqueue(queued) }
         WidgetPublisher.reloadAll()
-        await TimerLiveActivity.sync(target: LiveActivityTarget.desired(snapshot: snapshots.read(), pause: markers.read(), iconStyle: LiveActivityIconStore().read()), source: "intent")
+        await TimerLiveActivity.sync(target: LiveActivityTarget.desired(snapshot: snapshots.read(), pause: markers.read(), iconStyle: LiveActivityIconStore().read(), tintStyle: LiveActivityTintStore().read()), source: "intent")
 
         guard plan.queued != nil,
               let client = await AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(timeout: 8)).optimisticClient() else { return }

@@ -2267,6 +2267,61 @@
         }
       }
     },
+    "la.tint.colorful": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Farbig"
+          }
+        }
+      }
+    },
+    "la.tint.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tönung der Live Activity auf dem Sperrbildschirm und in der Smart Stack der Apple Watch. „Dezent“ ist dunkel mit nur einem Hauch der Farbe, „Farbig“ färbt die Karte stärker, „Grau“ kommt ganz ohne Farbe aus. Gilt nur auf diesem Gerät."
+          }
+        }
+      }
+    },
+    "la.tint.neutral": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grau"
+          }
+        }
+      }
+    },
+    "la.tint.subtle": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dezent"
+          }
+        }
+      }
+    },
+    "la.tint.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Activity: Hintergrund"
+          }
+        }
+      }
+    },
     "mark.excused": {
       "extractionState": "manual",
       "localizations": {

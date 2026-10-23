@@ -23,9 +23,12 @@ public struct LiveActivityTarget: Sendable, Codable, Equatable, Hashable {
     public var accentHex: String?
     /// LA4: animated work icon chosen in the settings; nil (older states) = off.
     public var iconStyle: LiveActivityIconStyle?
+    /// Q1: card tint chosen in the settings; nil (older states) = subtle default. Only non-default values are stored.
+    public var tintStyle: LiveActivityTintStyle?
 
     public init(kind: SegmentKind, startedAt: Date, pausedAt: Date? = nil, workedSeconds: Int = 0, plannedSeconds: Int? = nil,
-                plannedEnd: Date? = nil, dayStart: Date? = nil, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil) {
+                plannedEnd: Date? = nil, dayStart: Date? = nil, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil, tintStyle: LiveActivityTintStyle? = nil) {
+        self.tintStyle = tintStyle
         self.kind = kind
         self.startedAt = startedAt
         self.pausedAt = pausedAt

@@ -20,6 +20,9 @@ struct WidgetGallery: View {
     /// LA4: `TT_DEV_LA_ICON=shovel|briefcase`.
     static var iconSample: LiveActivityIconStyle? { ProcessInfo.processInfo.environment["TT_DEV_LA_ICON"].flatMap(LiveActivityIconStyle.init(rawValue:)) }
 
+    /// Q1: `TT_DEV_LA_TINT=subtle|colorful|neutral`.
+    static var tintSample: LiveActivityTintStyle? { ProcessInfo.processInfo.environment["TT_DEV_LA_TINT"].flatMap(LiveActivityTintStyle.init(rawValue:)) }
+
     @Environment(\.colorScheme) private var scheme
 
     private var entry: TimetrackEntry {
@@ -54,9 +57,9 @@ struct WidgetGallery: View {
                 Text(verbatim: "Live Activity / Dynamic Island").font(.subheadline.bold()).foregroundStyle(TT.textSecondary)
                 #if os(iOS)
                 if ProcessInfo.processInfo.environment["TT_DEV_LA_WATCH"] == "1" {
-                    LiveActivityWatchPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample))
+                    LiveActivityWatchPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample, tintStyle: Self.tintSample))
                 } else {
-                    LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample))
+                    LiveActivityPreview(state: .sample(paused: Self.pausedSample, kind: entry.kind, planned: !Self.noPlanSample, accentHex: Self.accentSample, iconStyle: Self.iconSample, tintStyle: Self.tintSample))
                 }
                 #endif
             }

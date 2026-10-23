@@ -15,6 +15,7 @@ struct AppearanceView: View {
                 }
                 HapticsSection()
                 LiveActivityIconSection()
+                LiveActivityTintSection()
             }
             .padding(.horizontal, TT.Space.l)
             .padding(.vertical, TT.Space.s)
@@ -71,6 +72,29 @@ struct LiveActivityIconSection: View {
                 LiveIconPreview(style: style)
             }
             .padding(TT.Space.m)
+        }
+    }
+}
+
+/// Q1 "Live Activity: Hintergrund": how strongly the card (Lock Screen and Apple Watch Smart Stack) is tinted. Local to this device.
+struct LiveActivityTintSection: View {
+    @State private var style = LiveActivityTintStore().read()
+
+    var body: some View {
+        FormSection("la.tint.title", footer: "la.tint.footer") {
+            Picker("la.tint.title", selection: $style) {
+                Text("la.tint.subtle").tag(LiveActivityTintStyle.subtle)
+                Text("la.tint.colorful").tag(LiveActivityTintStyle.colorful)
+                Text("la.tint.neutral").tag(LiveActivityTintStyle.neutral)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(TT.Space.m)
+            .accessibilityIdentifier("appearance.la.tint")
+            .onChange(of: style) {
+                LiveActivityTintStore().write(style)
+                Task { await TimerLiveActivity.reconcileFromSnapshot(source: "settings") } // an open activity switches at once
+            }
         }
     }
 }

@@ -80,11 +80,7 @@ struct DayStandingCard: View {
             VStack(alignment: .leading, spacing: TT.Space.xs) {
                 DayOutlookLines(outlook: store.outlook(now: context.date), zone: model.dayCalendar.timeZone)
                     .padding(.top, TT.Space.xs)
-                let review = store.segments.filter(\.needsReview).count
-                if review > 0 {
-                    StatusChip(verbatim: String(localized: "h3.review \(review)", table: "UX3"), tone: .warning, symbol: "exclamationmark.circle")
-                        .padding(.top, 2).accessibilityIdentifier("today.review")
-                }
+                ReviewChip(todaysFlagged: store.segments.filter(\.needsReview).count)
             }
         }
     }

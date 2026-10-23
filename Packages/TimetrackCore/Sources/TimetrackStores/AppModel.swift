@@ -23,6 +23,8 @@ public final class AppModel {
     public private(set) var workModel: WorkModel?
     public private(set) var today: TodayStore?
     public private(set) var timeList: TimeListStore?
+    /// Q1: entries that need a look ("n zu prüfen").
+    public private(set) var review: ReviewStore?
     /// Created only while the `planning` module is on.
     public private(set) var planning: PlanningStore?
     public private(set) var calendar: CalendarStore?
@@ -263,6 +265,9 @@ public final class AppModel {
         let timeListStore = TimeListStore(client: client, calendar: calendar)
         todayStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         timeListStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        let reviewStore = ReviewStore(client: client, calendar: calendar)
+        reviewStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        review = reviewStore
         today = todayStore
         timeList = timeListStore
         makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
@@ -322,6 +327,7 @@ public final class AppModel {
         account = nil
         today = nil
         timeList = nil
+        review = nil
         planning = nil
         calendar = nil
         workModel = nil

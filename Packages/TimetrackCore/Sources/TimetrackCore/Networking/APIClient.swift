@@ -242,6 +242,21 @@ public actor APIClient: PreferencesService {
 
     public func currentTimer() async throws -> Segment? { try await get("/time/timer") }
 
+    // MARK: - Time suggestions (Q1)
+
+    /// Open suggestions. Reading also lets the backend notice an automation segment left open over midnight (flag + end suggestion).
+    public func listTimeSuggestions() async throws -> [TimeSuggestion] { try await get("/time/suggestions") }
+
+    /// Applies a suggestion once (an "end" suggestion closes its segment); the times may be overridden. A second call is 409.
+    public func acceptTimeSuggestion(id: UUID, startedAt: Date? = nil, endedAt: Date? = nil) async throws -> Segment {
+        struct Body: Encodable { let startedAt: Date?; let endedAt: Date? }
+        return try await send(.post, "/time/suggestions/\(id.uuidString.lowercased())/accept", body: Body(startedAt: startedAt, endedAt: endedAt))
+    }
+
+    public func rejectTimeSuggestion(id: UUID) async throws {
+        try await sendVoid(.post, "/time/suggestions/\(id.uuidString.lowercased())/reject")
+    }
+
     public func startTimer(clientEventId: UUID, kind: SegmentKind? = nil, placeId: UUID? = nil) async throws -> Segment {
         struct Body: Encodable { let clientEventId: UUID; let kind: SegmentKind?; let placeId: UUID? }
         return try await send(.post, "/time/timer/start", body: Body(clientEventId: clientEventId, kind: kind, placeId: placeId))

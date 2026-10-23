@@ -418,15 +418,16 @@ private extension LiveActivitySmall {
 }
 
 extension LiveActivityTarget {
-    /// LA3: Lock Screen background. More opaque than LA2 (0.18): darker accent in dark mode, stronger accent in light mode, so text stays readable.
+    /// Card background (Lock Screen and Smart Stack). Q1: the default is a dark, low-saturation graphite with a hint of the account
+    /// colour (`LiveActivityTint`); LA3's stronger tint is the "Farbig" choice. The colour maths lives in the core and is tested there.
     var backgroundTint: Color {
         let accent = UIColor(theme.accent)
+        let style = activeTintStyle
         return Color(uiColor: UIColor { traits in
             var hue: CGFloat = 0, sat: CGFloat = 0, bri: CGFloat = 0, alpha: CGFloat = 0
             accent.getHue(&hue, saturation: &sat, brightness: &bri, alpha: &alpha)
-            return traits.userInterfaceStyle == .dark
-                ? UIColor(hue: hue, saturation: sat, brightness: bri * 0.38, alpha: 0.9)
-                : UIColor(hue: hue, saturation: sat * 0.45, brightness: min(1, bri + 0.1), alpha: 0.78)
+            let tint = LiveActivityTint.color(style: style, hue: hue, saturation: sat, brightness: bri, dark: traits.userInterfaceStyle == .dark)
+            return UIColor(hue: tint.hue, saturation: tint.saturation, brightness: tint.brightness, alpha: tint.alpha)
         })
     }
 }
@@ -434,11 +435,11 @@ extension LiveActivityTarget {
 #if DEBUG
 extension LiveActivityTarget {
     /// Sample states for the gallery and previews: 2 h finished + 31 min running, day started 5 h ago, planned end 5 h from now.
-    static func sample(paused: Bool = false, kind: SegmentKind = .work, planned: Bool = true, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil, now: Date = .now) -> LiveActivityTarget {
+    static func sample(paused: Bool = false, kind: SegmentKind = .work, planned: Bool = true, accentHex: String? = nil, iconStyle: LiveActivityIconStyle? = nil, tintStyle: LiveActivityTintStyle? = nil, now: Date = .now) -> LiveActivityTarget {
         let start = paused ? now.addingTimeInterval(-300) : now.addingTimeInterval(-1_860)
         return LiveActivityTarget(kind: kind, startedAt: start, pausedAt: paused ? start : nil, workedSeconds: 7_200 + (paused ? 1_860 : 0),
                                   plannedSeconds: planned ? 28_800 : nil, plannedEnd: planned ? now.addingTimeInterval(5 * 3600) : nil,
-                                  dayStart: planned ? now.addingTimeInterval(-3 * 3600 - 1_860 - 1_800) : nil, accentHex: accentHex, iconStyle: iconStyle)
+                                  dayStart: planned ? now.addingTimeInterval(-3 * 3600 - 1_860 - 1_800) : nil, accentHex: accentHex, iconStyle: iconStyle, tintStyle: tintStyle)
     }
 }
 

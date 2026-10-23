@@ -57,7 +57,8 @@ struct TimetrackLiveActivity: Widget {
             .widgetURL(WidgetLinks.today)
         }
         // LA1: the paired watch mirrors the activity in its Smart Stack with this layout (buttons run on the iPhone).
-        .supplementalActivityFamilies([.small])
+        // LA5: declare both families as in Apple's WidgetKit documentation (.medium = iPhone/iPad Lock Screen, .small = watch Smart Stack).
+        .supplementalActivityFamilies([.small, .medium])
     }
 }
 
@@ -69,7 +70,8 @@ private struct LiveActivityContent: View {
     var body: some View {
         switch family {
         case .small: LiveActivitySmall(state: state)
-        default: LiveActivityBanner(state: state)
+        case .medium: LiveActivityBanner(state: state)
+        @unknown default: LiveActivityBanner(state: state)
         }
     }
 }

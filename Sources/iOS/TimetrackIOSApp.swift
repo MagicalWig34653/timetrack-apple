@@ -48,6 +48,12 @@ struct TimetrackIOSApp: App {
                     AutomationRuntime.shared.foregrounded()
                     Task { await TimerLiveActivity.reconcileFromSnapshot() } // F4: a Live Activity that could not be requested in the background starts now
                     Task { await FocusEnvironment.retryPending() } // F3
+                    #if DEBUG
+                    // LA5: TT_DEV_LA_FORCE=1 starts a sample activity without a session (paired-simulator check of the Smart Stack).
+                    if ProcessInfo.processInfo.environment["TT_DEV_LA_FORCE"] != nil {
+                        Task { try? await Task.sleep(for: .seconds(3)); await TimerLiveActivity.sync(target: .sample(), source: "dev") }
+                    }
+                    #endif
                     if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                 }
                 .onChange(of: model.phase) { old, _ in

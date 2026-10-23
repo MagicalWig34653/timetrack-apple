@@ -367,14 +367,12 @@ struct LiveActivitySmall: View {
             }
             .font(.system(.caption2, design: .rounded, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
             // The clock is fixed-size (a timer text otherwise truncates instead of scaling); `ViewThatFits` picks the largest size that fits beside the buttons.
-            ViewThatFits(in: .horizontal) {
-                ForEach([26.0, 22.0, 19.0, 16.0], id: \.self) { size in
-                    HStack(spacing: 6) {
-                        LiveWorkedClock(state: state).font(.system(size: size, weight: .bold, design: .rounded)).lineLimit(1).fixedSize()
-                        Spacer(minLength: 2)
-                        smallButtons(theme)
-                    }
-                }
+            // LA5: no `ViewThatFits`/`fixedSize`/Dynamic Type cap any more. Those LA3 constructs were never confirmed on a watch
+            // (the last confirmed layout is LA2); this uses only what LA2 rendered: a scaled title font with `minimumScaleFactor`.
+            HStack(spacing: 6) {
+                LiveWorkedClock(state: state).font(.system(.title3, design: .rounded, weight: .bold)).lineLimit(1).minimumScaleFactor(0.5)
+                Spacer(minLength: 2)
+                smallButtons(theme)
             }
             if state.plannedSeconds != nil {
                 VStack(alignment: .leading, spacing: 3) {
@@ -383,8 +381,7 @@ struct LiveActivitySmall: View {
                 }
             }
         }
-        .dynamicTypeSize(...DynamicTypeSize.large)
-        .padding(.horizontal, 14).padding(.vertical, 8)
+        .padding(.horizontal, 12).padding(.vertical, 8)
     }
 }
 

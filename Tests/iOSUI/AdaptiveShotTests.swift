@@ -20,7 +20,7 @@ final class AdaptiveShotTests: XCTestCase {
         for (orientation, label) in [(UIDeviceOrientation.landscapeLeft, "land"), (.portrait, "port")] {
             XCUIDevice.shared.orientation = orientation
             app.launch()
-            XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+            XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
             sleep(2)
             for section in ["today", "time", "vacation", "settings"] {
                 let sidebar = el("sidebar.\(section)")

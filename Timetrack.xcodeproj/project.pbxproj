@@ -173,6 +173,7 @@
 		AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829AB0BC0EA6FA97BA015CB8 /* PlanSheets.swift */; };
 		AB2757DFA7A1DAA43FF12A55 /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E299FCCA25A9EAA2930CF1A /* WidgetGallery.swift */; };
 		AB57FC1AA74170E40E3BE0DB /* TimetrackViolet.icon in Resources */ = {isa = PBXBuildFile; fileRef = 0D29AC2C4B5B0241209EC37C /* TimetrackViolet.icon */; };
+		AC3E143F3D070F28237F67E8 /* NowBarLargeTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F6ED87EE6346157550ADA8 /* NowBarLargeTypeTests.swift */; };
 		ADC09ED5A8D474F6D13DE527 /* AdaptiveShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD01AD93CEB86333CE929433 /* AdaptiveShotTests.swift */; };
 		ADCD599E9DF61F9DBA0647A9 /* AboutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48532679BA93CAFBAFCAE3DA /* AboutSection.swift */; };
 		AEE8A40E0BFD6D8C2CBE10A3 /* WorkModelViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA7E11FA68CBF10F5C0D9E7 /* WorkModelViews.swift */; };
@@ -183,6 +184,7 @@
 		B469FA4F96199AC22D41F102 /* NewPlaceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A31FA3C9AA134A414F010ED /* NewPlaceSheet.swift */; };
 		B82DB5EDA8396818C6F6D31B /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
 		B99817312B3946FFF46592DD /* AbsenceEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F2B113E432CCEAB8720173 /* AbsenceEditor.swift */; };
+		BA80B8EC771061FE17CD876E /* NowSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBDB5FFA498857C613DC9CB /* NowSheet.swift */; };
 		BB12A8529D259B67BA7648D2 /* VacationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107B571DCC7A09FAC53B31E7 /* VacationScreen.swift */; };
 		BBBD475C39E3DEC072CE9260 /* ComplicationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FD72ECC0D1BDFB75745274 /* ComplicationView.swift */; };
 		BC7261F513418BDB9A185210 /* WeekHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B187FA479E187BC190C6E8F /* WeekHub.swift */; };
@@ -444,6 +446,7 @@
 		A448879BF3FEF42E40CD7E8A /* TimetrackPersonal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackPersonal.entitlements; sourceTree = "<group>"; };
 		A57B3E3F601DC94B9F783CE4 /* TimetrackWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackWatchApp.swift; sourceTree = "<group>"; };
 		A5E79FEC5BB00D7A2FE860D9 /* TimetrackPink.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackPink.icon; sourceTree = "<group>"; };
+		A6F6ED87EE6346157550ADA8 /* NowBarLargeTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowBarLargeTypeTests.swift; sourceTree = "<group>"; };
 		A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Widget.xcstrings; sourceTree = "<group>"; };
 		ACE1DE866570CFDDF38E1863 /* LaunchTrace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchTrace.swift; sourceTree = "<group>"; };
 		B0498DABC31FF9913799DE85 /* IconPreviews.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = IconPreviews.xcassets; sourceTree = "<group>"; };
@@ -504,6 +507,7 @@
 		F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarScreen.swift; sourceTree = "<group>"; };
 		FA5AAE907118B638C7B34FA5 /* AutomationRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationRuntime.swift; sourceTree = "<group>"; };
 		FAC6D0420BF1C7598C65F025 /* TimetrackTimer.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackTimer.icon; sourceTree = "<group>"; };
+		FEBDB5FFA498857C613DC9CB /* NowSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -627,6 +631,7 @@
 				21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */,
 				521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */,
 				6CCCCFA3BE5F6455EA695589 /* MoreNavigation.swift */,
+				A6F6ED87EE6346157550ADA8 /* NowBarLargeTypeTests.swift */,
 				512629B01D497703C711B949 /* NowBarTests.swift */,
 				1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */,
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
@@ -907,6 +912,7 @@
 				DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */,
 				4095C5DF2594C470A3C65131 /* MoreView.swift */,
 				3736596C876A3E5D1E8C3F0B /* NowBar.swift */,
+				FEBDB5FFA498857C613DC9CB /* NowSheet.swift */,
 				10DEE4BE7051A858A40C724C /* RootView.swift */,
 				B75B194F88E2A859DB0A105E /* SettingsRows.swift */,
 				D664773736598F0B0415370D /* SettingsSubpages.swift */,
@@ -1365,6 +1371,7 @@
 				7C7B9F4A7C59DCE53324DBF0 /* MoreView.swift in Sources */,
 				B469FA4F96199AC22D41F102 /* NewPlaceSheet.swift in Sources */,
 				7346105DF68356831D614916 /* NowBar.swift in Sources */,
+				BA80B8EC771061FE17CD876E /* NowSheet.swift in Sources */,
 				F009EF3BCB7E602DEB9B6E93 /* OverworkScheduler.swift in Sources */,
 				2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */,
 				AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */,
@@ -1419,6 +1426,7 @@
 				540F7CEDD1A0819445FA6740 /* CalendarIntegrationTests.swift in Sources */,
 				1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */,
 				801AB62BA6D81DF863EA905C /* MoreNavigation.swift in Sources */,
+				AC3E143F3D070F28237F67E8 /* NowBarLargeTypeTests.swift in Sources */,
 				79C2B9294AD3048F5681AD87 /* NowBarTests.swift in Sources */,
 				0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */,
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
@@ -1530,7 +1538,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1816,7 +1824,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_NS_ASSERTIONS = NO;

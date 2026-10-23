@@ -2,6 +2,17 @@
   "sourceLanguage": "de",
   "version": "1.0",
   "strings": {
+    "ux3.now.details": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details und Korrektur öffnen"
+          }
+        }
+      }
+    },
     "ux3.now.kind": {
       "extractionState": "manual",
       "localizations": {
@@ -86,6 +97,83 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erklärt, was vorläufig bedeutet"
+          }
+        }
+      }
+    },
+    "ux3.sheet.details": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laufender Eintrag"
+          }
+        }
+      }
+    },
+    "ux3.sheet.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "ux3.sheet.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notiz"
+          }
+        }
+      }
+    },
+    "ux3.sheet.reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur im laufenden Eintrag"
+          }
+        }
+      }
+    },
+    "ux3.sheet.save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Änderung sichern"
+          }
+        }
+      }
+    },
+    "ux3.sheet.start_time": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn"
+          }
+        }
+      }
+    },
+    "ux3.sheet.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt"
           }
         }
       }

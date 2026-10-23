@@ -16,14 +16,14 @@ final class ScreenshotTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
 
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         sleep(1)
         shot("\(prefix)-today-idle")
         app.swipeUp()
         shot("\(prefix)-today-scrolled")
         app.swipeDown()
-        app.buttons["today.start"].tap()
-        XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
+        app.startControl.tap()
+        XCTAssertTrue(app.stopControl.waitForExistence(timeout: 10))
         sleep(2)
         shot("\(prefix)-today-running")
 
@@ -56,7 +56,7 @@ final class ScreenshotTests: XCTestCase {
 
         // leave the throwaway server without a running timer
         open(app, "Heute", "today")
-        if app.buttons["today.stop"].waitForExistence(timeout: 5) { app.buttons["today.stop"].tap() }
+        if app.stopControl.waitForExistence(timeout: 5) { app.stopControl.tap() }
     }
 
     private func open(_ app: XCUIApplication, _ title: String, _ id: String) {

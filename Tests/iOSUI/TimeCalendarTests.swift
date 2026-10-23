@@ -20,7 +20,7 @@ final class TimeCalendarTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", zoom]
         if let scheme = env["TT_SHOT_SCHEME"] { app.launchArguments += ["-appearance.scheme", scheme] }
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
     }
 
     private func open(_ title: String, _ id: String) {
@@ -123,7 +123,7 @@ final class TimeCalendarTests: XCTestCase {
         app.launchEnvironment["TT_DEV_FRAMEMETER"] = "1"
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "month"]
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         if baseline { open("Kalender", "calendar") } else { open("Zeit", "time") }
         XCTAssertTrue(el("calendar.title").waitForExistence(timeout: 15))
         sleep(3)

@@ -1,6 +1,6 @@
 import XCTest
 
-/// UX3: the "Jetzt" bar above the tab bar (start/stop on every tab) and the "Mehr" tab. Needs a THROWAWAY backend
+/// UX3: the "Jetzt" bar above the tab bar (start/stop on every tab including Heute) and the "Mehr" tab. Needs a THROWAWAY backend
 /// (TT_DEV_SERVER / TT_DEV_COOKIE as in SmokeTests); skipped otherwise. iPhone only: on iPad the sidebar footer takes this role.
 final class NowBarTests: XCTestCase {
     private var app: XCUIApplication!
@@ -15,7 +15,7 @@ final class NowBarTests: XCTestCase {
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20) || app.buttons["today.stop"].exists)
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20) || app.stopControl.exists)
         try XCTSkipIf(app.tabBars.buttons["Mehr"].exists == false, "compact layout only")
     }
 
@@ -43,20 +43,48 @@ final class NowBarTests: XCTestCase {
         // The bar follows to other tabs.
         app.tabBars.buttons["Mehr"].tap()
         XCTAssertTrue(el("nowbar.stop").exists)
-        // Tapping the clock side opens "Heute". H1: there the timer card is the only start/stop control, the bar is gone.
+        // H2: tapping the clock side opens the "Jetzt" sheet (mini-player style) with start time and note.
         el("nowbar.open").tap()
-        XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
-        XCTAssertFalse(el("nowbar.stop").exists, "no second stop control on Heute")
-        XCTAssertGreaterThanOrEqual(app.buttons["today.stop"].frame.height, 44)
-        shot("h1-today-running")
-        app.buttons["today.stop"].tap()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 10))
-        XCTAssertFalse(el("nowbar.start").exists, "no second start control on Heute")
-        XCTAssertGreaterThanOrEqual(app.buttons["today.start"].frame.height, 44)
-        shot("h1-today-idle")
-        // Back on another tab the bar is there again.
+        XCTAssertTrue(el("nowsheet.stop").waitForExistence(timeout: 10), "sheet with stop")
+        XCTAssertTrue(el("nowsheet.start_time").exists)
+        XCTAssertTrue(el("nowsheet.note").exists)
+        shot("h2-sheet-running")
+        el("nowsheet.done").tap()
+        app.tabBars.buttons["Heute"].tap()
+        XCTAssertTrue(el("nowbar.stop").waitForExistence(timeout: 10), "bar still shown on Heute")
+        XCTAssertFalse(app.buttons["today.stop"].exists, "no second stop control on the Heute card")
+        XCTAssertGreaterThanOrEqual(el("nowbar.stop").frame.height, 44)
+        shot("h2-today-running")
+        el("nowbar.stop").tap()
+        XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["today.start"].exists, "no second start control on the Heute card")
+        XCTAssertTrue(el("nowbar.kind").exists, "kind choice reachable in the bar")
+        XCTAssertGreaterThanOrEqual(el("nowbar.start").frame.height, 44)
+        shot("h2-today-idle")
+        el("nowbar.open").tap()
+        XCTAssertTrue(el("nowsheet.start").waitForExistence(timeout: 10), "idle sheet with start")
+        shot("h2-sheet-idle")
+        el("nowsheet.done").tap()
+        // Back on another tab the bar is still there.
         app.tabBars.buttons["Zeit"].tap()
         XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
+    }
+
+    /// H2: the kind chosen on the Heute card is what the bar's start uses (shared "ios.lastKind").
+    func testKindChosenOnTodayCardIsUsedByBarStart() throws {
+        if el("nowbar.stop").waitForExistence(timeout: 3) { el("nowbar.stop").tap() }
+        app.tabBars.buttons["Heute"].tap()
+        let travel = app.buttons["Fahrt"].firstMatch
+        XCTAssertTrue(travel.waitForExistence(timeout: 10), "kind selector on the Heute card")
+        travel.tap()
+        XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 5))
+        el("nowbar.start").tap()
+        if !el("nowbar.stop").waitForExistence(timeout: 8) { throw XCTSkip("seed data overlaps the current time") }
+        shot("h2-today-running-travel")
+        XCTAssertTrue(app.staticTexts["Fahrt"].firstMatch.exists, "the running segment has the chosen kind")
+        el("nowbar.stop").tap()
+        XCTAssertTrue(el("nowbar.start").waitForExistence(timeout: 10))
+        app.buttons["Arbeit"].firstMatch.tap() // restore the default choice
     }
 
     func testMoreCollectsSettingsAutomationAndReminders() {

@@ -28,16 +28,54 @@ final class MockTransport: HTTPTransport, SessionCookieJar, @unchecked Sendable 
         lock.withLock { requests.filter { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" == key } }
     }
 
+    /// H4: one-shot barrier for the NEXT request of `key`: the answer is decided when the request arrives but delivered only after
+    /// `release()`, i.e. a slow response that overtakes later requests (stale read).
+    final class Gate: @unchecked Sendable {
+        private let lock = NSLock()
+        private var open = false
+        private var waiters: [CheckedContinuation<Void, Never>] = []
+
+        func wait() async {
+            await withCheckedContinuation { continuation in
+                let resumeNow = lock.withLock { () -> Bool in
+                    if open { return true }
+                    waiters.append(continuation)
+                    return false
+                }
+                if resumeNow { continuation.resume() }
+            }
+        }
+
+        func release() {
+            let pending = lock.withLock { () -> [CheckedContinuation<Void, Never>] in
+                open = true
+                defer { waiters = [] }
+                return waiters
+            }
+            pending.forEach { $0.resume() }
+        }
+    }
+
+    private var holds: [String: [Gate]] = [:]
+
+    func hold(_ key: String) -> Gate {
+        let gate = Gate()
+        lock.withLock { holds[key, default: []].append(gate) }
+        return gate
+    }
+
     func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         if let delay { try await Task.sleep(for: delay) }
+        let key = "\(request.httpMethod ?? "") \(request.url?.path ?? "")"
+        let gate: Gate? = lock.withLock { holds[key]?.isEmpty == false ? holds[key]!.removeFirst() : nil }
         let reply: Reply? = lock.withLock {
             requests.append(request)
-            let key = "\(request.httpMethod ?? "") \(request.url?.path ?? "")"
             guard var queue = replies[key], !queue.isEmpty else { return nil }
             let first = queue.removeFirst()
             replies[key] = queue.isEmpty ? [first] : queue // the last reply repeats
             return first
         }
+        await gate?.wait()
         guard let reply else { return (Data(#"{"error":{"code":"not_found","message":"unmocked"}}"#.utf8), response(request, 404)) }
         if let error = reply.error { throw URLError(error) }
         return (Data(reply.body.utf8), response(request, reply.status))

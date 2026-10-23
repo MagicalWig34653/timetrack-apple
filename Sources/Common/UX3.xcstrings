@@ -2,6 +2,424 @@
   "sourceLanguage": "de",
   "version": "1.0",
   "strings": {
+    "h3.break.due %@ %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause in %@ fällig (%lld Min nach 6 Std. Arbeit)"
+          }
+        }
+      }
+    },
+    "h3.break.missing %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause fehlt: %lld Min vorgesehen, bisher %@"
+          }
+        }
+      }
+    },
+    "h3.break.taken %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausen heute: %@"
+          }
+        }
+      }
+    },
+    "h3.continue_kind %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter: %@"
+          }
+        }
+      }
+    },
+    "h3.end.estimated %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feierabend etwa %@, wenn der Timer weiterläuft"
+          }
+        }
+      }
+    },
+    "h3.end.planned %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feierabend laut Plan %@"
+          }
+        }
+      }
+    },
+    "h3.idle_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starte unten in der Leiste oder tippe hier."
+          }
+        }
+      }
+    },
+    "h3.kind.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art"
+          }
+        }
+      }
+    },
+    "h3.not_running": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Timer läuft"
+          }
+        }
+      }
+    },
+    "h3.pause": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        }
+      }
+    },
+    "h3.pause.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beendet den Timer. Danach kannst du mit Weiter fortfahren; die Zeit dazwischen bleibt eine Lücke."
+          }
+        }
+      }
+    },
+    "h3.pause_since %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause seit %@"
+          }
+        }
+      }
+    },
+    "h3.pause_since_for %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause seit %@ · %@"
+          }
+        }
+      }
+    },
+    "h3.recent": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute auch verwendet"
+          }
+        }
+      }
+    },
+    "h3.review %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld zu prüfen"
+          }
+        }
+      }
+    },
+    "h3.since %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "seit %@"
+          }
+        }
+      }
+    },
+    "h3.start.at": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn um"
+          }
+        }
+      }
+    },
+    "h3.start.earlier %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Min früher"
+          }
+        }
+      }
+    },
+    "h3.start.go": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab dann starten"
+          }
+        }
+      }
+    },
+    "h3.start.later_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit Vorlauf starten"
+          }
+        }
+      }
+    },
+    "h3.start.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jetzt"
+          }
+        }
+      }
+    },
+    "h3.start.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn"
+          }
+        }
+      }
+    },
+    "h3.timeline.now": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jetzt"
+          }
+        }
+      }
+    },
+    "h3.timeline.spoken %lld %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute %lld Einträge, erster Beginn %@"
+          }
+        }
+      }
+    },
+    "h3.timeline.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute im Überblick"
+          }
+        }
+      }
+    },
+    "h3.toast.continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiter"
+          }
+        }
+      }
+    },
+    "h3.toast.stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer beendet"
+          }
+        }
+      }
+    },
+    "h4.continue %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortführen: %@, zuletzt bis %@"
+          }
+        }
+      }
+    },
+    "h4.continue.choose %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der letzte Eintrag endete vor %@. Wie weitermachen?"
+          }
+        }
+      }
+    },
+    "h4.continue.fresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neu starten (Lücke bleibt Pause)"
+          }
+        }
+      }
+    },
+    "h4.continue.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet den letzten Eintrag von heute wieder; wenn der Server das nicht kann, beginnt ein neuer Eintrag ab jetzt."
+          }
+        }
+      }
+    },
+    "h4.continue.menu": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzten Eintrag fortführen"
+          }
+        }
+      }
+    },
+    "h4.continue.with_gap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortführen (Lücke zählt mit)"
+          }
+        }
+      }
+    },
+    "h4.gap.other %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lücke von %@ wird zum Eintrag gezählt."
+          }
+        }
+      }
+    },
+    "h4.gap.work %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lücke von %@ wird als Arbeitszeit gezählt."
+          }
+        }
+      }
+    },
+    "h4.notice.queued": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gesendet, sobald der Server erreichbar ist."
+          }
+        }
+      }
+    },
+    "h4.notice.reopened": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag wieder geöffnet, die Lücke zählt mit."
+          }
+        }
+      }
+    },
+    "h4.notice.started_new": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Eintrag ab jetzt, die Lücke bleibt eine Pause. Der Server kann Einträge nicht wieder öffnen."
+          }
+        }
+      }
+    },
     "ux3.now.details": {
       "extractionState": "manual",
       "localizations": {
@@ -317,303 +735,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deine Arbeitszeit heute, nach Pausen und Rundung. Schulgutschriften zählen mit."
-          }
-        }
-      }
-    },
-    "h3.end.planned %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feierabend laut Plan %@"
-          }
-        }
-      }
-    },
-    "h3.end.estimated %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Feierabend etwa %@, wenn der Timer weiterläuft"
-          }
-        }
-      }
-    },
-    "h3.break.taken %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pausen heute: %@"
-          }
-        }
-      }
-    },
-    "h3.break.due %@ %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause in %@ fällig (%lld Min nach 6 Std. Arbeit)"
-          }
-        }
-      }
-    },
-    "h3.break.missing %lld %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause fehlt: %lld Min vorgesehen, bisher %@"
-          }
-        }
-      }
-    },
-    "h3.review %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld zu prüfen"
-          }
-        }
-      }
-    },
-    "h3.timeline.spoken %lld %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute %lld Einträge, erster Beginn %@"
-          }
-        }
-      }
-    },
-    "h3.timeline.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute im Überblick"
-          }
-        }
-      }
-    },
-    "h3.timeline.now": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "jetzt"
-          }
-        }
-      }
-    },
-    "h3.since %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "seit %@"
-          }
-        }
-      }
-    },
-    "h3.pause": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause"
-          }
-        }
-      }
-    },
-    "h3.pause.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beendet den Timer. Danach kannst du mit Weiter fortfahren; die Zeit dazwischen bleibt eine Lücke."
-          }
-        }
-      }
-    },
-    "h3.start.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beginn"
-          }
-        }
-      }
-    },
-    "h3.start.earlier %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld Min früher"
-          }
-        }
-      }
-    },
-    "h3.start.now": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jetzt"
-          }
-        }
-      }
-    },
-    "h3.kind.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Art"
-          }
-        }
-      }
-    },
-    "h3.start.later_title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit Vorlauf starten"
-          }
-        }
-      }
-    },
-    "h3.start.at": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beginn um"
-          }
-        }
-      }
-    },
-    "h3.start.go": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ab dann starten"
-          }
-        }
-      }
-    },
-    "h3.recent": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute auch verwendet"
-          }
-        }
-      }
-    },
-    "h3.continue_kind %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weiter: %@"
-          }
-        }
-      }
-    },
-    "h3.pause_since %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause seit %@"
-          }
-        }
-      }
-    },
-    "h3.pause_since_for %@ %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause seit %@ · %@"
-          }
-        }
-      }
-    },
-    "h3.not_running": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Timer läuft"
-          }
-        }
-      }
-    },
-    "h3.idle_hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starte unten in der Leiste oder tippe hier."
-          }
-        }
-      }
-    },
-    "h3.toast.stopped": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timer beendet"
-          }
-        }
-      }
-    },
-    "h3.toast.continue": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weiter"
           }
         }
       }

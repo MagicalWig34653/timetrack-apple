@@ -76,6 +76,10 @@ public struct TodayDisplay: Equatable, Sendable {
                 result.isRunning = true
                 result.kind = kind
                 result.startedAt = action.queuedAt
+            case .resume(let target):
+                result.isRunning = true
+                result.kind = target.kind
+                result.startedAt = action.queuedAt
             case .stop:
                 if result.isRunning, let start = result.startedAt {
                     result.doneSeconds += LiveActivityTarget.wholeSeconds(action.queuedAt.timeIntervalSince(start))

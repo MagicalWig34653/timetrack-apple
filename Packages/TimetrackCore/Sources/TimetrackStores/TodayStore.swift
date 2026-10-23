@@ -32,6 +32,10 @@ public final class TodayStore {
     /// Last cached display state (App Group snapshot), shown until live data arrives.
     private var cachedSnapshot: WidgetSnapshot?
 
+    /// H4: counts own timer actions (begin and end of each). A load whose answer was read before the latest action reached the server
+    /// would show the timer as it was before that action (a started timer "stops" when returning to Heute); such answers are discarded.
+    private var actionEpoch = 0
+
     private let client: APIClient
     private let calendar: DayCalendar
     private let queue: TimerActionQueue?
@@ -82,11 +86,13 @@ public final class TodayStore {
         isLoading = true
         defer { isLoading = false }
         let today = calendar.day(for: .now)
+        let epoch = actionEpoch
         do {
             if deferAccount {
                 async let timer = client.currentTimer()
                 async let evaluation = client.getDay(today)
                 let (timerValue, dayValue) = try await (timer, evaluation)
+                guard epoch == actionEpoch else { return }
                 apply(running: timerValue, day: dayValue, account: account)
                 // Timer and day are on screen now; the balance follows without delaying them.
                 error = nil
@@ -99,6 +105,7 @@ public final class TodayStore {
                 async let evaluation = client.getDay(today)
                 async let balance = client.getTimeAccount(asOf: today)
                 let (timerValue, dayValue, accountValue) = try await (timer, evaluation, balance)
+                guard epoch == actionEpoch else { return }
                 apply(running: timerValue, day: dayValue, account: accountValue)
             }
             error = nil
@@ -137,7 +144,9 @@ public final class TodayStore {
     /// Sends queued actions (after a successful load, i.e. the server is reachable). Reloads once when something was delivered.
     public func drainQueue(reload: Bool = true) async {
         guard let queue, await queue.count > 0 else { return }
+        actionEpoch += 1
         let result = await queue.drain(client: client)
+        actionEpoch += 1
         pending = await queue.pending
         changed()
         if result.delivered > 0, reload {
@@ -148,6 +157,8 @@ public final class TodayStore {
     }
 
     public func start(kind: SegmentKind = .work) async {
+        actionEpoch += 1
+        defer { actionEpoch += 1 }
         let eventId = UUID()
         let client = client
         if let queue {
@@ -162,7 +173,58 @@ public final class TodayStore {
         }
     }
 
+    /// H4: what "Fortführen" did, for an honest message ("Eintrag wieder geöffnet" / "Neuer Eintrag ab jetzt, die Lücke bleibt Pause" / "wird gesendet").
+    public enum ContinueNotice: Sendable, Equatable { case reopened, startedNew, queued }
+    public private(set) var continueNotice: ContinueNotice?
+    public func clearContinueNotice() { continueNotice = nil }
+
+    /// H4: the most recent finished entry of today that can be continued (nothing runs, nothing waits in the queue, kind is startable).
+    public var continuableSegment: Segment? {
+        guard running == nil, !pending.contains(where: { if case .stop = $0.command { false } else { true } }) else { return nil }
+        return segments.filter { !$0.voided && $0.endedAt != nil && SegmentKind.selectable.contains($0.kind) }
+            .max { ($0.endedAt ?? .distantPast) < ($1.endedAt ?? .distantPast) }
+    }
+
+    /// H4: gaps longer than this get two explicit options in the UI ("Fortführen (Lücke zählt mit)" / "Neu starten (Lücke bleibt Pause)").
+    public static let longContinueGap: TimeInterval = 15 * 60
+
+    /// H4: how long ago the continuable entry ended. Reopening counts this gap as time of the entry (server rule since contract 0.27.0).
+    public func continueGap(now: Date = .now) -> TimeInterval? {
+        continuableSegment?.endedAt.map { max(0, now.timeIntervalSince($0)) }
+    }
+
+    /// H4: continues `continuableSegment`: reopens it (`endedAt: null`); a server that cannot or will not reopen gets a new segment of the same
+    /// kind/place/note from now instead (the gap stays a pause). Unreachable server: queued like start/stop.
+    @discardableResult
+    public func continueLast(startNew: Bool = false) async -> Bool {
+        guard let segment = continuableSegment else { return false }
+        actionEpoch += 1
+        defer { actionEpoch += 1 }
+        continueNotice = nil
+        let target = QueuedTimerAction.ContinueTarget(segment)
+        let eventId = UUID()
+        let client = client
+        let attempt: () async throws -> Void = {
+            let result = try await TimerActionQueue.resume(target, client: client, clientEventId: eventId, startNewOnly: startNew)
+            self.running = result.segment
+            self.continueNotice = result.mode == .reopened ? .reopened : .startedNew
+        }
+        if let queue {
+            await performQueued(.init(id: eventId, command: startNew ? .start(target.kind) : .resume(target), queuedAt: .now, placeId: startNew ? target.placeId : nil), queue: queue, success: .timerStarted, attempt)
+            if pending.contains(where: { $0.id == eventId }) { continueNotice = .queued }
+            return running != nil || continueNotice == .queued
+        }
+        await perform(success: .timerStarted) {
+            let result = try await retryOnNetworkError { try await TimerActionQueue.resume(target, client: client, clientEventId: eventId, startNewOnly: startNew) }
+            self.running = result.segment
+            self.continueNotice = result.mode == .reopened ? .reopened : .startedNew
+        }
+        return running != nil
+    }
+
     public func stop() async {
+        actionEpoch += 1
+        defer { actionEpoch += 1 }
         let eventId = UUID()
         let client = client
         if let queue {
@@ -182,6 +244,8 @@ public final class TodayStore {
     @discardableResult
     public func correctRunning(_ correction: SegmentCorrection) async -> Bool {
         guard let segment = running else { return false }
+        actionEpoch += 1
+        defer { actionEpoch += 1 }
         let client = client
         do {
             _ = try await client.correctSegment(id: segment.id, correction, ifMatchVersion: segment.version)

@@ -139,6 +139,21 @@ private struct NowBarContent: View {
             .accessibilityLabel(ux3("ux3.now.start_kind \(kindName(kind))"))
             .accessibilityIdentifier("nowbar.start")
         }
+        // H4: long press on the idle bar offers to continue the last entry of today.
+        .contextMenu {
+            if let segment = store.continuableSegment, let ended = segment.endedAt {
+                let at = ended.formatted(Date.FormatStyle(timeZone: store.timeZone).hour().minute())
+                let long = Date.now.timeIntervalSince(ended) > TodayStore.longContinueGap
+                Button { Task { await store.continueLast() } } label: {
+                    Label(long ? ux3String("h4.continue.with_gap") : ux3String("h4.continue \(segment.kind.plainName) \(at)"), systemImage: "arrow.uturn.forward")
+                }
+                if long {
+                    Button { Task { await store.continueLast(startNew: true) } } label: {
+                        Label(ux3String("h4.continue.fresh"), systemImage: "play")
+                    }
+                }
+            }
+        }
     }
 
     private func kindName(_ kind: SegmentKind) -> String {

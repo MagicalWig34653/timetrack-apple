@@ -71,7 +71,9 @@ extension WidgetSnapshot {
         var result = self
         result.updatedAt = action.queuedAt
         switch action.command {
-        case .start(let kind):
+        case .start, .resume:
+            let kind: SegmentKind
+            if case .resume(let target) = action.command { kind = target.kind } else if case .start(let value) = action.command { kind = value } else { kind = .work }
             result.isRunning = true
             result.kind = kind
             result.startedAt = action.queuedAt

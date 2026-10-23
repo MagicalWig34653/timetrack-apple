@@ -36,6 +36,7 @@ struct NowSheet: View {
             ScrollView {
                 VStack(spacing: TT.Space.l) {
                     if let running = store.running { runningContent(running) } else { idleContent }
+                    if store.running != nil { ContinueNotice(store: store) }
                     if let error = store.error { ErrorBannerView(error: error) { store.error = nil } }
                     dayBlock
                     timelineBlock
@@ -177,6 +178,8 @@ struct NowSheet: View {
             }
             .buttonStyle(.ttPrimary).controlSize(.large)
             .accessibilityIdentifier("nowsheet.start")
+            ContinueButton(store: store)
+            ContinueNotice(store: store)
 
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 ux3("h3.kind.title").font(TTFont.meta).foregroundStyle(TT.textSecondary)

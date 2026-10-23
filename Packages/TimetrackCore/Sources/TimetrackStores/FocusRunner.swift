@@ -249,6 +249,7 @@ public struct FocusRunner: Sendable {
             if let pending = await queue?.pending.last {
                 switch pending.command {
                 case .start(let kind): return FocusTimerState(running: true, kind: kind, startedByFocus: state.queuedStartEventId == pending.id)
+                case .resume(let target): return FocusTimerState(running: true, kind: target.kind, startedByFocus: false)
                 case .stop: return .idle
                 }
             }

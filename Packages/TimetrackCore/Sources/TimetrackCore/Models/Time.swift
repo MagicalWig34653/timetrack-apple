@@ -88,13 +88,37 @@ public struct SegmentCorrection: Codable, Sendable, Hashable {
     public var kind: SegmentKind?
     public var note: String?
     public var reason: String
+    /// H4: sends `endedAt: null` (reopen the segment, i.e. continue it). Needs backend support (contract bump); servers without it reject the request.
+    public var reopen: Bool
 
-    public init(startedAt: Date? = nil, endedAt: Date? = nil, kind: SegmentKind? = nil, note: String? = nil, reason: String) {
+    public init(startedAt: Date? = nil, endedAt: Date? = nil, kind: SegmentKind? = nil, note: String? = nil, reason: String, reopen: Bool = false) {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.kind = kind
         self.note = note
         self.reason = reason
+        self.reopen = reopen
+    }
+
+    private enum CodingKeys: String, CodingKey { case startedAt, endedAt, kind, note, reason }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        startedAt = try c.decodeIfPresent(Date.self, forKey: .startedAt)
+        endedAt = try c.decodeIfPresent(Date.self, forKey: .endedAt)
+        kind = try c.decodeIfPresent(SegmentKind.self, forKey: .kind)
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+        reason = try c.decode(String.self, forKey: .reason)
+        reopen = false
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(startedAt, forKey: .startedAt)
+        if reopen { try c.encodeNil(forKey: .endedAt) } else { try c.encodeIfPresent(endedAt, forKey: .endedAt) }
+        try c.encodeIfPresent(kind, forKey: .kind)
+        try c.encodeIfPresent(note, forKey: .note)
+        try c.encode(reason, forKey: .reason)
     }
 }
 

@@ -96,6 +96,7 @@
 		56D2B9931A45D34C7740D856 /* MenuBarContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B35ED7860A36405405B0711 /* MenuBarContent.swift */; };
 		584C3B406C337511A67E331B /* TimetrackProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */; };
 		58A0E8B2EB31981A504312B4 /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
+		59EAFBE4C2F2122E57147C64 /* ContinueLastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */; };
 		5BCF283FF6DA81A919024588 /* Z2.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A8BD17D1D30165B37BD0647 /* Z2.xcstrings */; };
 		5D9B9C20637004A003D445CB /* CalendarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */; };
 		5F7D515F275726A8B1C02DD0 /* ComplicationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FD72ECC0D1BDFB75745274 /* ComplicationView.swift */; };
@@ -148,6 +149,7 @@
 		8404724EEBCA85512B15917D /* DeviceEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D38CCC85F93C994D8FC6E35 /* DeviceEvents.swift */; };
 		840FBEA7782724833B2A4CA6 /* VacationReminderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */; };
 		8656DBB1DB476691EBE8FD5F /* TimetrackProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */; };
+		8BE867D0DC8D5506F81AA592 /* ContinueSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 451CE16C9FA64453DF24215B /* ContinueSupport.swift */; };
 		8E79B55E54A49104CB2ADC34 /* DayDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52D0F9CF21A4E4FE73E0851 /* DayDetail.swift */; };
 		8F41B5D0FCCF4300D9183896 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 475340F7A75B311BA614F62B /* TimetrackDesign */; };
 		8F4F857DF63F1B96A87B1D85 /* DayOutlookViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D426D4F5526E88C9CB569F /* DayOutlookViews.swift */; };
@@ -233,6 +235,7 @@
 		EB04C4EF93BF5AB64C1FD5E5 /* VoidSegmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0714180ED72A5FF957695CC5 /* VoidSegmentTests.swift */; };
 		EB51FF887BA2E3FA4EC8CD5C /* WorkModelViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA7E11FA68CBF10F5C0D9E7 /* WorkModelViews.swift */; };
 		EC404B9243C5C5FAEFFDD980 /* TimetrackMonogramC.icon in Resources */ = {isa = PBXBuildFile; fileRef = C7DF70C9AD2D133E1571E445 /* TimetrackMonogramC.icon */; };
+		EC8C74B50730A5CA4661E84F /* RunningTimerSurvivesNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D004903E693BE7FCB8A86C /* RunningTimerSurvivesNavigationTests.swift */; };
 		ED52BD1346D78AD51B2333D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73F39B90E98816E491A9DAA /* SettingsView.swift */; };
 		EF51C3F714BFCAD75351173D /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		F009EF3BCB7E602DEB9B6E93 /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
@@ -364,6 +367,7 @@
 		1B187FA479E187BC190C6E8F /* WeekHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekHub.swift; sourceTree = "<group>"; };
 		1BB3DFF54A49CFF428D635AD /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		1C33A6670711590FC8267A79 /* TimetrackWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackWidget.entitlements; sourceTree = "<group>"; };
+		1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinueLastTests.swift; sourceTree = "<group>"; };
 		1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverworkNotificationTests.swift; sourceTree = "<group>"; };
 		1F442DC8CEE0B6566997C9AE /* TimerIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerIntents.swift; sourceTree = "<group>"; };
 		20F6CD08AEBBEA531E9C333B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -389,6 +393,7 @@
 		4095C5DF2594C470A3C65131 /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		43E08357964E18B82C99CDE5 /* WidgetPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPublisher.swift; sourceTree = "<group>"; };
 		43ED479EF914202229D38394 /* TimetrackCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TimetrackCore; path = Packages/TimetrackCore; sourceTree = SOURCE_ROOT; };
+		451CE16C9FA64453DF24215B /* ContinueSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinueSupport.swift; sourceTree = "<group>"; };
 		45BBA98930EA7F814FC99E21 /* TimetrackDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackDebug.entitlements; sourceTree = "<group>"; };
 		45D426D4F5526E88C9CB569F /* DayOutlookViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayOutlookViews.swift; sourceTree = "<group>"; };
 		47B4077A601B4FCC66694F86 /* TimetrackOrange.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackOrange.icon; sourceTree = "<group>"; };
@@ -510,6 +515,7 @@
 		EF3020493852D34BCE225751 /* WeekZoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekZoom.swift; sourceTree = "<group>"; };
 		EF9AA59F7A893666CBE8FA97 /* TimetrackMonogramT.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackMonogramT.icon; sourceTree = "<group>"; };
 		F133A559F1596CF467BF722A /* TimetrackWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimetrackWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1D004903E693BE7FCB8A86C /* RunningTimerSurvivesNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunningTimerSurvivesNavigationTests.swift; sourceTree = "<group>"; };
 		F2C1348A5C4F090840B1A121 /* VacationPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationPlannerView.swift; sourceTree = "<group>"; };
 		F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarScreen.swift; sourceTree = "<group>"; };
 		FA5AAE907118B638C7B34FA5 /* AutomationRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationRuntime.swift; sourceTree = "<group>"; };
@@ -636,6 +642,7 @@
 				81BD0D73D00301B634764623 /* AppIconSwitchTests.swift */,
 				CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */,
 				21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */,
+				1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */,
 				521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */,
 				D8725765AFF6EDE5CAF09B9E /* H3ShotTests.swift */,
 				6CCCCFA3BE5F6455EA695589 /* MoreNavigation.swift */,
@@ -645,6 +652,7 @@
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
 				BD7B29F2240005F50DA9A037 /* PlanningAreaTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
+				F1D004903E693BE7FCB8A86C /* RunningTimerSurvivesNavigationTests.swift */,
 				E24BBA312CA476B29515F081 /* ScreenshotTests.swift */,
 				2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */,
 				703E8448D5AC9FE1130AC6B0 /* SmokeTests.swift */,
@@ -913,6 +921,7 @@
 				7A6E8EEB9A124779C6977A95 /* AppearanceView.swift */,
 				6DC7CF52E0F14BA34747F0A4 /* AppIconSettingsSection.swift */,
 				57A2F77CF1674E4E12728A62 /* Assets.xcassets */,
+				451CE16C9FA64453DF24215B /* ContinueSupport.swift */,
 				35F6FBAEB436FC29D5E36E45 /* Formatters.swift */,
 				DB635DB727B1C03ADC6258AB /* FrameMeter.swift */,
 				00034D02ECB5AFAE00E8D16D /* IconCatalog.generated.swift */,
@@ -1364,6 +1373,7 @@
 				5D9B9C20637004A003D445CB /* CalendarScreen.swift in Sources */,
 				3D79385F6489C0A63390405C /* CalendarSettingsView.swift in Sources */,
 				8216F25A878503520E814CB1 /* CalendarWriteDemo.swift in Sources */,
+				8BE867D0DC8D5506F81AA592 /* ContinueSupport.swift in Sources */,
 				801B22C2374BCC7A42BF0DE4 /* DayDetail.swift in Sources */,
 				8F4F857DF63F1B96A87B1D85 /* DayOutlookViews.swift in Sources */,
 				8404724EEBCA85512B15917D /* DeviceEvents.swift in Sources */,
@@ -1437,6 +1447,7 @@
 				32E5D9A4FB08865626415A86 /* AppearanceShotTests.swift in Sources */,
 				0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */,
 				540F7CEDD1A0819445FA6740 /* CalendarIntegrationTests.swift in Sources */,
+				59EAFBE4C2F2122E57147C64 /* ContinueLastTests.swift in Sources */,
 				1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */,
 				4114985EE705769FC54341D8 /* H3ShotTests.swift in Sources */,
 				801AB62BA6D81DF863EA905C /* MoreNavigation.swift in Sources */,
@@ -1446,6 +1457,7 @@
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
 				CD270BC6F0BF891C34083444 /* PlanningAreaTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
+				EC8C74B50730A5CA4661E84F /* RunningTimerSurvivesNavigationTests.swift in Sources */,
 				0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */,
 				221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */,
 				A9B06F04E9CB5767E9F1056E /* SmokeTests.swift in Sources */,
@@ -1552,7 +1564,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1838,7 +1850,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_NS_ASSERTIONS = NO;

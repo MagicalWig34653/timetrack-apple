@@ -38,6 +38,8 @@ private struct TodayContent: View {
                     HStack(alignment: .top, spacing: TT.Space.xl) {
                         VStack(spacing: TT.Space.l) {
                             TimerCard(store: store, onOpen: { showSheet = true })
+                            ContinueButton(store: store)
+                            ContinueNotice(store: store)
                             DayStandingCard(store: store, showsOutlook: true)
                             QuickAbsenceRow()
                         }
@@ -49,6 +51,8 @@ private struct TodayContent: View {
                     }
                 } else {
                     TimerCard(store: store, onOpen: { showSheet = true })
+                    ContinueButton(store: store)
+                    ContinueNotice(store: store)
                     DayStandingCard(store: store, showsOutlook: true)
                     QuickAbsenceRow()
                     hints

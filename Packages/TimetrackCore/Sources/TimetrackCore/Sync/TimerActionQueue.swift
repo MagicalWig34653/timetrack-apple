@@ -6,6 +6,21 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     public enum Command: Codable, Sendable, Equatable {
         case start(SegmentKind)
         case stop
+        /// H4: continue a finished segment (reopen it); `ContinueTarget` carries what a fallback start needs.
+        case resume(ContinueTarget)
+    }
+
+    /// The finished segment a "Fortführen" continues. Reopen is tried first; if the server refuses, a new segment of the same kind/place/note starts.
+    public struct ContinueTarget: Codable, Sendable, Equatable {
+        public let segmentId: UUID
+        public let version: Int
+        public let kind: SegmentKind
+        public let placeId: UUID?
+        public let note: String?
+        public init(segmentId: UUID, version: Int, kind: SegmentKind, placeId: UUID?, note: String?) {
+            self.segmentId = segmentId; self.version = version; self.kind = kind; self.placeId = placeId; self.note = note
+        }
+        public init(_ segment: Segment) { self.init(segmentId: segment.id, version: segment.version, kind: segment.kind, placeId: segment.placeId, note: segment.note) }
     }
 
     public let id: UUID
@@ -80,7 +95,7 @@ public actor TimerActionQueue {
 
     private static func sameKind(_ a: QueuedTimerAction.Command, _ b: QueuedTimerAction.Command) -> Bool {
         switch (a, b) {
-        case (.start, .start), (.stop, .stop): true
+        case (.start, .start), (.stop, .stop), (.start, .resume), (.resume, .start), (.resume, .resume): true
         default: false
         }
     }
@@ -130,12 +145,35 @@ public actor TimerActionQueue {
             if late, segment.startedAt > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
                 _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(startedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestartet"), ifMatchVersion: segment.version)
             }
+        case .resume(let target):
+            _ = try await Self.resume(target, client: client, clientEventId: action.id)
         case .stop:
             let segment = try await client.stopTimer(clientEventId: action.id)
             if late, let end = segment.endedAt, end > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
                 _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(endedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestoppt"), ifMatchVersion: segment.version)
             }
         }
+    }
+
+    /// How a continue ended: the segment was reopened, or (server without/rejecting reopen) a new segment was started.
+    public enum ResumeMode: Sendable, Equatable { case reopened, startedNew }
+
+    /// Tries to reopen (`endedAt: null`); on a refusal that means "not supported / not allowed" starts a new segment of the same kind
+    /// and place from now. Network errors and 5xx/429 propagate (the caller queues).
+    public static func resume(_ target: QueuedTimerAction.ContinueTarget, client: APIClient, clientEventId: UUID, startNewOnly: Bool = false) async throws -> (segment: Segment, mode: ResumeMode) {
+        if !startNewOnly { do {
+            let segment = try await client.correctSegment(id: target.segmentId, SegmentCorrection(reason: "Timer fortgesetzt", reopen: true), ifMatchVersion: target.version)
+            if segment.endedAt == nil { return (segment, .reopened) }
+            // A server that ignores the unknown null silently answers a closed segment: treat as unsupported.
+        } catch let error as TimetrackError {
+            let status = error.status ?? 0
+            if error.isNetworkError || error == .cancelled || error.isUnauthorized || status >= 500 || status == 429 { throw error }
+        } }
+        let started = try await client.startTimer(clientEventId: clientEventId, kind: target.kind, placeId: target.placeId)
+        if let note = target.note, !note.isEmpty {
+            _ = try? await client.correctSegment(id: started.id, SegmentCorrection(note: note, reason: "Notiz übernommen"), ifMatchVersion: started.version)
+        }
+        return (started, .startedNew)
     }
 
     private func persist() {

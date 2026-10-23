@@ -6,6 +6,7 @@ Festgelegt vom Entwickler (Nutzerentscheidung: Wortwahl liegt beim Entwickler, e
 | --- | --- | --- |
 | **Eintrag** | Ein Zeitraum mit Art, Beginn und Ende (Backend: Segment). Mehrzahl „Einträge“. Der laufende Eintrag heißt „Timer“. | Zeitabschnitt, Abschnitt, Segment |
 | **Timer** | Der gerade laufende Eintrag („Kein Timer läuft“, „Timer starten“). | Stoppuhr, „Zeitabschnitt läuft“ |
+| **Fortführen** | Den letzten beendeten Eintrag von heute wieder öffnen, sodass die Zeit ohne Lücke weiterläuft („Fortführen: Arbeit, zuletzt bis 12:03“). Kann der Server das nicht, beginnt ein neuer Eintrag ab jetzt und die Lücke bleibt eine Pause; die App sagt, was passiert ist. Unterschied zu „Weiter“ (Toast nach Stopp, Pause beenden): „Weiter“ legt immer einen neuen Eintrag an. | wiederaufnehmen, fortsetzen, Rückgängig (für Stopp) |
 | **Art** | Arbeit, Fahrt, Schule. | Typ, Kategorie |
 | **Abwesenheit** | Urlaub, Krank, Freigestellt, Sonstiges. „Eintrag“ meint nie eine Abwesenheit. | Eintrag (für Abwesenheit) |
 | **Gearbeitet** | Arbeitszeit des Tages nach Pausen und Rundung, inklusive Schulgutschrift (Backend: evaluated + credit). Format immer h:mm. | Erfasst, bewertet (nur in Erklärungen) |

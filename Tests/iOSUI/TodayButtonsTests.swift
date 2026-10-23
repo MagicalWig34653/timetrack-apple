@@ -16,7 +16,7 @@ final class TodayButtonsTests: XCTestCase {
         if let size = env["TT_TEXT_SIZE"] { app.launchArguments += ["-UIPreferredContentSizeCategoryName", size] }
         app.launch()
 
-        let start = app.buttons["today.start"]
+        let start = app.startControl
         XCTAssertTrue(start.waitForExistence(timeout: 20))
         sleep(1)
         shot("\(prefix)-today-top")

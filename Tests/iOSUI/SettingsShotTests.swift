@@ -18,7 +18,7 @@ final class SettingsShotTests: XCTestCase {
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-appearance.scheme", env["TT_SHOT_SCHEME"] ?? "system"]
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         app.openSettings()
         XCTAssertTrue(el("settings.sign_out").waitForExistence(timeout: 10))
         sleep(2) // lets the about section load the server info

@@ -21,7 +21,7 @@ final class VacationV3Tests: XCTestCase {
         // start every run without a remembered selection
         app.launchArguments += ["-vacation.absenceListOptions.v1", ""]
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
     }
 
     private func shot(_ name: String) {
@@ -65,7 +65,7 @@ final class VacationV3Tests: XCTestCase {
         app.terminate()
         app.launchArguments = app.launchArguments.filter { $0 != "-vacation.absenceListOptions.v1" && $0 != "" }
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         openVacation()
         XCTAssertTrue(el("absence.filter.reset").waitForExistence(timeout: 5), "selection survives a relaunch")
 

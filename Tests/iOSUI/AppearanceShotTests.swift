@@ -15,14 +15,14 @@ final class AppearanceShotTests: XCTestCase {
                                "-appearance.accent", env["TT_SHOT_ACCENT"] ?? "blue", "-appearance.scheme", env["TT_SHOT_SCHEME"] ?? "system"]
         app.launch()
 
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         sleep(1)
         shot("\(prefix)-today")
-        app.buttons["today.start"].tap()
-        XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
+        app.startControl.tap()
+        XCTAssertTrue(app.stopControl.waitForExistence(timeout: 10))
         sleep(2)
         shot("\(prefix)-today-running")
-        app.buttons["today.stop"].tap()
+        app.stopControl.tap()
 
         app.openSettings()
         let row = app.buttons["settings.appearance"]

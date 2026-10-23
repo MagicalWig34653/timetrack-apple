@@ -20,3 +20,9 @@ extension XCUIApplication {
         row.tap()
     }
 }
+
+extension XCUIApplication {
+    /// H2: the one start control: the "Jetzt" bar on iPhone, the Heute card where the bar is absent (iPad).
+    var startControl: XCUIElement { buttons.matching(NSPredicate(format: "identifier IN {'nowbar.start','today.start'}")).firstMatch }
+    var stopControl: XCUIElement { buttons.matching(NSPredicate(format: "identifier IN {'nowbar.stop','today.stop'}")).firstMatch }
+}

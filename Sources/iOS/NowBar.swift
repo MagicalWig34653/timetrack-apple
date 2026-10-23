@@ -15,11 +15,12 @@ struct NowBar: View {
 
 private struct NowBarContent: View {
     let store: TodayStore
-    @Environment(UIState.self) private var ui
-    @Environment(\.tabViewBottomAccessoryPlacement) private var placement
+        @Environment(\.tabViewBottomAccessoryPlacement) private var placement
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.ttTheme) private var theme
     @AppStorage("ios.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+    /// H2: tapping the bar opens the "Jetzt" sheet (like the Apple Music mini player opens the full player).
+    @State private var showSheet = false
 
     private var kind: SegmentKind {
         SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work
@@ -38,14 +39,15 @@ private struct NowBarContent: View {
         .background { if reduceTransparency { Capsule().fill(TT.glassFallback) } }
         .overlay { if reduceTransparency { Capsule().strokeBorder(TT.cardBorder, lineWidth: 1) } }
         .animation(.smooth(duration: 0.25), value: store.running?.id)
+        .sheet(isPresented: $showSheet) { NowSheet(store: store) }
     }
 
     // MARK: Running
 
     private func runningBar(_ running: Segment) -> some View {
         HStack(spacing: TT.Space.s) {
-            // Tapping the left part opens "Heute", where the day is.
-            Button { ui.selection = .today } label: {
+            // Tapping the left part opens the sheet with the big clock, kind, start time and note.
+            Button { showSheet = true } label: {
                 HStack(spacing: TT.Space.s) {
                     LiveDot(color: running.kind.ttTint)
                     TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -69,7 +71,7 @@ private struct NowBarContent: View {
             .buttonStyle(.plain)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(spokenRunning(running))
-            .accessibilityHint(ux3("ux3.now.open_today"))
+            .accessibilityHint(ux3("ux3.now.details"))
             .accessibilityIdentifier("nowbar.open")
             Button { Task { await store.stop() } } label: {
                 Image(systemName: "stop.fill").font(.body.weight(.semibold)).foregroundStyle(.white)
@@ -107,7 +109,10 @@ private struct NowBarContent: View {
             .accessibilityLabel(ux3("ux3.now.kind"))
             .accessibilityValue(Text(kind.ttTitle))
             .accessibilityIdentifier("nowbar.kind")
-            Spacer(minLength: 0)
+            Button { showSheet = true } label: { Color.clear.frame(minHeight: 44).contentShape(.rect) }
+                .buttonStyle(.plain)
+                .accessibilityLabel(ux3("ux3.now.details"))
+                .accessibilityIdentifier("nowbar.open")
             Button { Task { await store.start(kind: kind) } } label: {
                 HStack(spacing: TT.Space.xs) {
                     Image(systemName: "play.fill")

@@ -12,13 +12,13 @@ final class SmokeTests: XCTestCase {
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
         app.launch()
 
-        let start = app.buttons["today.start"]
+        let start = app.startControl
         XCTAssertTrue(start.waitForExistence(timeout: 20))
         start.tap()
-        XCTAssertTrue(app.buttons["today.stop"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.stopControl.waitForExistence(timeout: 10))
         shot("running")
-        app.buttons["today.stop"].tap()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 10))
+        app.stopControl.tap()
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 10))
 
         open(app, "Zeit", "time")
         XCTAssertTrue(app.buttons["time.new"].waitForExistence(timeout: 10))

@@ -22,7 +22,7 @@ final class AppIconSwitchTests: XCTestCase {
             return false
         }
 
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         app.openSettings()
         let row = app.buttons["settings.appearance"]
         XCTAssertTrue(row.waitForExistence(timeout: 5))

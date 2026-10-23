@@ -18,7 +18,7 @@ final class VoidSegmentTests: XCTestCase {
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         let tab = app.tabBars.buttons["Zeit"]
         if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.time"].firstMatch.tap() }
         XCTAssertTrue(app.buttons["time.new"].waitForExistence(timeout: 10))

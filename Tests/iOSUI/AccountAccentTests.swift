@@ -16,7 +16,7 @@ final class AccountAccentTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
 
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         sleep(2)
         shot("\(prefix)-today")
 

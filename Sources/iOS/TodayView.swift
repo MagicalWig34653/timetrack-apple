@@ -81,7 +81,12 @@ private struct TodayContent: View {
 
 private struct TimerCard: View {
     let store: TodayStore
+    /// H2: on iPhone (compact) the "Jetzt" bar above the tab bar is the single start/stop control on every tab,
+    /// including Heute. Where the bar is absent (iPad sidebar layout, regular width) the card keeps its own button.
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @AppStorage("ios.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
+
+    private var cardHasButton: Bool { sizeClass == .regular }
 
     private var kind: Binding<SegmentKind> {
         Binding(get: { SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work },
@@ -92,20 +97,25 @@ private struct TimerCard: View {
         TimerHero(startedAt: store.running?.startedAt, kind: store.running?.kind ?? kind.wrappedValue,
                   idleTitle: "today.not_running", idleSubtitle: "today.idle_hint", runningCaption: "today.running") {
             if store.running != nil {
-                Button { Task { await store.stop() } } label: {
-                    Label("today.stop", systemImage: "stop.fill")
+                if cardHasButton {
+                    Button { Task { await store.stop() } } label: {
+                        Label("today.stop", systemImage: "stop.fill")
+                    }
+                    .buttonStyle(.ttDanger)
+                    .controlSize(.large)
+                    .accessibilityIdentifier("today.stop")
                 }
-                .buttonStyle(.ttDanger)
-                .controlSize(.large)
-                .accessibilityIdentifier("today.stop")
             } else {
+                // The kind choice stays on the card; the bar's start uses the same stored choice ("ios.lastKind").
                 KindSelector(selection: kind)
-                Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
-                    Label("today.start", systemImage: "play.fill")
+                if cardHasButton {
+                    Button { Task { await store.start(kind: kind.wrappedValue) } } label: {
+                        Label("today.start", systemImage: "play.fill")
+                    }
+                    .buttonStyle(.ttPrimary)
+                    .controlSize(.large)
+                    .accessibilityIdentifier("today.start")
                 }
-                .buttonStyle(.ttPrimary)
-                .controlSize(.large)
-                .accessibilityIdentifier("today.start")
             }
         }
     }

@@ -40,7 +40,7 @@ final class ParityFlowTests: XCTestCase {
         if let glow = env["TT_SHOT_GLOW"] { arguments += ["-appearance.glow", glow] }
         app.launchArguments = arguments
         app.launch()
-        XCTAssertTrue(app.buttons["today.start"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         shot("today")
 
         // Vacation: tiles and the entitlement edit.

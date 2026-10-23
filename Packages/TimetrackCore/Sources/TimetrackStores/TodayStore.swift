@@ -152,6 +152,24 @@ public final class TodayStore {
         }
     }
 
+    /// H2: corrects the running segment (start time, kind, note) from the "Jetzt" sheet. Needs the server; returns true on success.
+    @discardableResult
+    public func correctRunning(_ correction: SegmentCorrection) async -> Bool {
+        guard let segment = running else { return false }
+        let client = client
+        do {
+            _ = try await client.correctSegment(id: segment.id, correction, ifMatchVersion: segment.version)
+            onOutcome?(.saved)
+            await load(deferAccount: true)
+            return true
+        } catch let thrown as TimetrackError {
+            if thrown != .cancelled { onOutcome?(.failed); error = thrown }
+        } catch {
+            self.error = .cancelled
+        }
+        return false
+    }
+
     /// One attempt; unreachable server (transport error, 5xx, 429) stores the action with the same event id instead of failing.
     private func performQueued(_ action: QueuedTimerAction, queue: TimerActionQueue, success: StoreOutcome, _ attempt: () async throws -> Void) async {
         // Earlier queued actions go first, otherwise the order of the user's presses would be lost.

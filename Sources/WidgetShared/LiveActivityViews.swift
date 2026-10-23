@@ -333,69 +333,85 @@ struct IslandMinimal: View {
     var body: some View { IslandCompactLeading(state: state) }
 }
 
-/// LA3: round icon button for the Smart Stack. A fixed 34 pt circle with a translucent, tinted fill and a hairline highlight
-/// (glass look without `.buttonStyle(.glass)`, whose intrinsic insets and 44 pt minimum height pushed the content up in LA2).
+/// LA6: round icon button for the Smart Stack. 32 pt circle (tap target a little larger than the drawn circle), neutral translucent
+/// fill for Pause/Weiter and a solid danger fill for Stopp. The glass look is a translucent fill plus a hairline, not `.buttonStyle(.glass)`
+/// (whose intrinsic insets and 44 pt minimum height pushed the content up in LA2). Always-On: outline only, no fill.
 private struct SmartStackButtonLabel: View {
     let symbol: String
     let fill: Color
+    let dimmed: Bool
+    var diameter: CGFloat = 30
 
     var body: some View {
-        Image(systemName: symbol).font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
-            .frame(width: 34, height: 34)
-            .background(fill.opacity(0.85), in: .circle)
-            .overlay { Circle().strokeBorder(.white.opacity(0.28), lineWidth: 0.75) }
+        Image(systemName: symbol).font(.system(size: diameter * 0.42, weight: .bold)).foregroundStyle(.white.opacity(dimmed ? 0.7 : 1))
+            .frame(width: diameter, height: diameter)
+            .background(dimmed ? Color.clear : fill, in: .circle)
+            .overlay { Circle().strokeBorder(.white.opacity(dimmed ? 0.35 : 0.22), lineWidth: 0.75) }
+            .padding(1)
             .contentShape(.circle)
     }
 }
 
-/// Smart Stack on the paired watch (`supplementalActivityFamilies([.small])`): the system mirrors the activity and runs the
+/// Smart Stack on the paired watch (`supplementalActivityFamilies([.small, .medium])`): the system mirrors the activity and runs the
 /// intents on the iPhone.
 ///
-/// LA3 cause analysis of the LA2 layout: four stacked rows (clock, bar, label, button row) with `.glass` buttons of at least 44 pt
-/// summed to roughly 130 pt, while the Smart Stack card leaves about 90 to 100 pt. The stack compressed the text rows first,
-/// so the buttons seemed to push everything up. Now three compact rows with a fixed total height: status line, clock with the two
-/// round buttons on the same line, bar with one label line. Dynamic Type is capped so the rows never grow past the card.
+/// LA6 redesign. Measured on a 49 mm watch the card is only about 175 x 73 pt (not the 100 pt assumed in LA3), so the previous
+/// four-part stack (status line, clock + buttons, bar, caption) had no room and its content sat on the card edge. Now: inner padding of
+/// 12 / 8 pt, row 1 clock (leading, 22 pt rounded, monospaced digits) and two 32 pt buttons, row 2 a slim 4 pt bar with rounded caps,
+/// row 3 one caption line (kind symbol and state on the left, Feierabend on the right, 11 pt). Fixed point sizes (no Dynamic Type
+/// growth) keep the content inside a fixed-height card. Only constructs LA2 used (scaled font, plain stacks); no `ViewThatFits`/`fixedSize`.
 struct LiveActivitySmall: View {
     let state: LiveActivityTarget
+    @Environment(\.isLuminanceReduced) private var dimmed
 
     var body: some View {
+        // `Text(timerInterval:)` truncates instead of shrinking, so the clock size is picked from the card width (three tiers) rather than scaled.
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let tier: (clock: CGFloat, button: CGFloat) = width >= 170 ? (22, 30) : (width >= 150 ? (19, 28) : (17, 26))
+            content(clock: tier.clock, button: tier.button, showsState: width >= 150)
+                .frame(width: width, height: proxy.size.height, alignment: .center)
+        }
+    }
+
+    private func content(clock: CGFloat, button: CGFloat, showsState: Bool) -> some View {
         let theme = state.theme
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 4) {
-                LiveKindIcon(state: state, size: 14, badge: false)
-                state.stateTitle
-            }
-            .font(.system(.caption2, design: .rounded, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
-            // The clock is fixed-size (a timer text otherwise truncates instead of scaling); `ViewThatFits` picks the largest size that fits beside the buttons.
-            // LA5: no `ViewThatFits`/`fixedSize`/Dynamic Type cap any more. Those LA3 constructs were never confirmed on a watch
-            // (the last confirmed layout is LA2); this uses only what LA2 rendered: a scaled title font with `minimumScaleFactor`.
+        return VStack(alignment: .leading, spacing: 3) {
             HStack(spacing: 6) {
-                LiveWorkedClock(state: state).font(.system(.title3, design: .rounded, weight: .bold)).lineLimit(1).minimumScaleFactor(0.5)
+                LiveWorkedClock(state: state)
+                    .font(.system(size: clock, weight: .semibold, design: .rounded)).foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
                 Spacer(minLength: 2)
-                smallButtons(theme)
+                smallButtons(theme, diameter: button)
             }
             if state.plannedSeconds != nil {
-                VStack(alignment: .leading, spacing: 3) {
-                    LiveProgress(state: state)
-                    LiveEndLabel(state: state).font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
-                }
+                LiveProgress(state: state)
+                    .frame(height: 4).clipShape(.capsule)
             }
+            HStack(spacing: 4) {
+                LiveKindIcon(state: state, size: 12, badge: false).font(.system(size: 11, weight: .semibold))
+                if showsState { state.stateTitle }
+                Spacer(minLength: 4)
+                if state.plannedSeconds != nil { LiveEndLabel(state: state) }
+            }
+            .font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.88))
+            .lineLimit(1).minimumScaleFactor(0.75)
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
     }
 }
 
 private extension LiveActivitySmall {
-    @ViewBuilder func smallButtons(_ theme: TTTheme) -> some View {
-        HStack(spacing: 6) {
+    @ViewBuilder func smallButtons(_ theme: TTTheme, diameter: CGFloat) -> some View {
+        HStack(spacing: 4) {
             if state.isPaused {
-                Button(intent: WidgetResumeTimerIntent()) { SmartStackButtonLabel(symbol: "play.fill", fill: theme.accent) }
+                Button(intent: WidgetResumeTimerIntent()) { SmartStackButtonLabel(symbol: "play.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter) }
                     .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.resume", table: "Widget")))
             } else {
-                Button(intent: WidgetPauseTimerIntent()) { SmartStackButtonLabel(symbol: "pause.fill", fill: theme.accent) }
+                Button(intent: WidgetPauseTimerIntent()) { SmartStackButtonLabel(symbol: "pause.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter) }
                     .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.pause", table: "Widget")))
             }
-            Button(intent: WidgetStopTimerIntent()) { SmartStackButtonLabel(symbol: "stop.fill", fill: TT.dangerFill) }
+            Button(intent: WidgetStopTimerIntent()) { SmartStackButtonLabel(symbol: "stop.fill", fill: TT.dangerFill.opacity(0.92), dimmed: dimmed, diameter: diameter) }
                 .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.stop", table: "Widget")))
         }
     }
@@ -457,26 +473,36 @@ struct LiveActivityPreview: View {
     }
 }
 
-/// Smart Stack card approximations for 41 / 45 / 49 mm (usable widths about 162 / 184 / 198 pt, height up to 100 pt) and Dynamic Type.
+/// Smart Stack card approximations. LA6: the real card measured about 175 x 73 pt on a 49 mm watch (screenshot of Build 36), so the
+/// cards here are that size (41 mm and 45 mm scaled by screen width), plus a taller card, large Dynamic Type, Always-On and `.medium`.
+/// The system draws the card itself (material tinted with `backgroundTint`); the gallery fakes it with the tint over mid grey.
 struct LiveActivityWatchPreview: View {
     let state: LiveActivityTarget
 
-    private func card(_ title: String, _ width: CGFloat, _ size: DynamicTypeSize = .large) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(verbatim: title).font(.caption2).foregroundStyle(.secondary)
+    private func card(_ title: String, _ width: CGFloat, _ height: CGFloat = 73, size: DynamicTypeSize = .large, dimmed: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(verbatim: "\(title) (\(Int(width)) x \(Int(height)))").font(.caption2).foregroundStyle(.secondary)
             LiveActivitySmall(state: state)
                 .environment(\.dynamicTypeSize, size)
-                .frame(width: width, height: 100, alignment: .top)
-                .background(Color(white: 0.14), in: .rect(cornerRadius: 22))
+                .environment(\.isLuminanceReduced, dimmed)
+                .frame(width: width, height: height, alignment: .top)
+                .background(dimmed ? AnyShapeStyle(Color.black) : AnyShapeStyle(state.backgroundTint), in: .rect(cornerRadius: 22))
+                .background(Color(white: 0.34), in: .rect(cornerRadius: 22))
                 .clipShape(.rect(cornerRadius: 22))
-                .overlay { RoundedRectangle(cornerRadius: 22).strokeBorder(.white.opacity(0.15)) }
         }
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            card("41 mm", 162); card("45 mm", 184); card("49 mm", 198)
-            card("41 mm, Accessibility 3", 162, .accessibility3); card("45 mm, xSmall", 184, .xSmall)
+        VStack(alignment: .leading, spacing: 8) {
+            card("49 mm", 175); card("45 mm", 160); card("41 mm", 148, 68)
+            card("49 mm, tall", 175, 100)
+            card("49 mm, Accessibility 3", 175, size: .accessibility3); card("41 mm, xSmall", 148, 68, size: .xSmall)
+            card("49 mm, Always-On", 175, dimmed: true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: ".medium (Banner)").font(.caption2).foregroundStyle(.secondary)
+                LiveActivityBanner(state: state).frame(width: 198)
+                    .background(state.backgroundTint, in: .rect(cornerRadius: 22)).background(Color(white: 0.34), in: .rect(cornerRadius: 22))
+            }
         }
         .environment(\.colorScheme, .dark)
     }

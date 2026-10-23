@@ -30,7 +30,10 @@ struct MainView: View {
     @Environment(UIState.self) private var ui
 
     private func items(planning: Bool) -> [SidebarItem] {
-        SidebarItem.allCases.filter { $0.isPlanning == planning && ($0.requiredModule.map(model.isEnabled) ?? true) }
+        SidebarItem.allCases.filter {
+            $0.isPlanning == planning && ($0.requiredModule.map(model.isEnabled) ?? true)
+                && ($0 != .activity || MacCompanion.shared.activity.settings.enabled || !MacCompanion.shared.activity.log.isEmpty)
+        }
     }
 
     var body: some View {
@@ -57,6 +60,7 @@ struct MainView: View {
             case .calendar: CalendarScreen()
             case .vacation: VacationScreen()
             case .reports: NavigationStack { ReportsScreen(week: ui.reportsWeek) }
+            case .activity: ActivityView()
             }
         }
         .ttSyncStatusLine() // UX3: only while actions wait or the server is unreachable
@@ -68,6 +72,7 @@ struct MainView: View {
         }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: model.isEnabled(.reports)) { if !model.isEnabled(.reports), ui.selection == .reports { ui.selection = .today } }
+        .onReceive(NotificationCenter.default.publisher(for: .ttTimerChangedExternally)) { _ in Task { await model.today?.load() } }
         .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }
     }
 
@@ -118,7 +123,7 @@ private struct TimerToolbarButton: View {
             } else {
                 Button {
                     let kind = SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work
-                    Task { await today.start(kind: kind) }
+                    Task { await startRecordingKind(kind, in: today) }
                 } label: { Label("command.start", systemImage: "play.fill") }
                     .help(Text("command.start"))
                 if let offer = today.continueOffer {

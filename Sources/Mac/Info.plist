@@ -23,5 +23,11 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Timetrack zeigt Termine der von dir gewählten Kalender im Tag als Kontext. Die Termine bleiben auf diesem Mac. Schreiben tut Timetrack nur, wenn du es in den Einstellungen einschaltest, und nur in den eigenen Kalender „Timetrack“.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Mit dem Standort erkennt Timetrack, wenn dein Mac einen deiner Orte (zum Beispiel „Büro“) betritt oder verlässt. Der Standort bleibt auf dem Mac; gemeldet werden nur Ort und Uhrzeit.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.</string>
 </dict>
 </plist>

@@ -29,6 +29,11 @@ targets:
       - Sources/Week # PL1: week planner, week overview, vacation planner, planning area (shared with iOS)
       - Sources/Reports # BH1: Berichtsheft (shared with iOS)
       - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
+      - Sources/Location/LocationService.swift # M2: CoreLocation layer (region monitoring) shared with iOS
+      # M2: EventKit device calendars (E1/E2 code shared with iOS; the demo pages stay iOS only)
+      - Sources/Calendar/CalendarEnvironment.swift
+      - Sources/Calendar/EventKitProvider.swift
+      - Sources/Calendar/CalendarSettingsView.swift
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
         buildPhase: resources
@@ -62,6 +67,10 @@ targets:
         # Plain http is allowed only for local networking (development servers on localhost / the LAN).
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        # M2: places automation on the Mac (CoreLocation region monitoring). The text is shown in the system permission dialog.
+        NSLocationUsageDescription: Mit dem Standort erkennt Timetrack, wenn dein Mac einen deiner Orte (zum Beispiel „Büro“) betritt oder verlässt. Der Standort bleibt auf dem Mac; gemeldet werden nur Ort und Uhrzeit.
+        NSLocationWhenInUseUsageDescription: Timetrack nutzt deinen Standort, um Orte anzulegen und eine Ankunft nach der Wartezeit zu prüfen.
+        NSCalendarsFullAccessUsageDescription: Timetrack zeigt Termine der von dir gewählten Kalender im Tag als Kontext. Die Termine bleiben auf diesem Mac. Schreiben tut Timetrack nur, wenn du es in den Einstellungen einschaltest, und nur in den eigenen Kalender „Timetrack“.
   TimetrackIOS:
     type: application
     platform: iOS

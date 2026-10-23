@@ -5,6 +5,14 @@ import TimetrackStores
 
 /// Settings window (⌘,): native toolbar tabs General, Appearance, Work and About; grouped forms instead of card pages.
 struct SettingsView: View {
+    /// Debug bisect aid: `TT_DEV_TABS=m` shows only the named new tabs (m, a, t). Always on in release builds.
+    private func tabOn(_ letter: String) -> Bool {
+        #if DEBUG
+        if let only = ProcessInfo.processInfo.environment["TT_DEV_TABS"] { return only.contains(letter) }
+        #endif
+        return true
+    }
+
     var body: some View {
         TabView {
             GeneralSettingsView()
@@ -13,10 +21,18 @@ struct SettingsView: View {
                 .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
             WorkSettingsView()
                 .tabItem { Label(AD.s("settings.work"), systemImage: "briefcase") }
+            if tabOn("m") { MenuBarSettingsView()
+                .tabItem { Label("Menüleiste", systemImage: "menubar.rectangle") } }
+            if tabOn("a") { MacAutomationSettingsView()
+                .tabItem { Label("Automatik", systemImage: "location.circle") } }
+            if tabOn("t") { ActivitySettingsView()
+                .tabItem { Label("Aktivität", systemImage: "square.stack.3d.up") } }
+            CalendarSettingsView()
+                .tabItem { Label("Kalender", systemImage: "calendar") }
             AboutSettingsView()
                 .tabItem { Label("settings.about", systemImage: "info.circle") }
         }
-        .frame(width: 580, height: 560)
+        .frame(width: 640, height: 600)
     }
 }
 

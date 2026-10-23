@@ -2,7 +2,9 @@ import SwiftUI
 import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// Settings > "Kalender": permission flow and, per calendar, off / read / read+write. Read shows events as context in the day view;
 /// read+write additionally writes planned vacation and sick days (optionally plan days) as all-day events. Everything stays on this device.
@@ -27,13 +29,19 @@ struct CalendarSettingsView: View {
         }
         .ttScreenBackground()
         .navigationTitle("Kalender")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .onChange(of: scenePhase) { if scenePhase == .active { store?.refresh() } } // the user may have changed the permission in iOS Settings
         .task { store?.refresh() }
     }
 
     private func openSystemSettings() {
+        #if canImport(UIKit)
         if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        #else
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") { openURL(url) }
+        #endif
     }
 }
 

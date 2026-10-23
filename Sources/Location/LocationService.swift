@@ -40,8 +40,10 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        #if os(iOS)
         manager.pausesLocationUpdatesAutomatically = true
         manager.activityType = .other
+        #endif
     }
 
     // MARK: - Status and permission
@@ -52,7 +54,9 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         case .notDetermined: permission = .notDetermined
         case .restricted: permission = .restricted
         case .denied: permission = .denied
+        #if os(iOS)
         case .authorizedWhenInUse: permission = .whenInUse
+        #endif
         case .authorizedAlways: permission = .always
         @unknown default: permission = .denied
         }
@@ -81,6 +85,8 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         let wanted: [String: AutomationPlace] = allowed ? Dictionary(plan.monitored.map { (Self.prefix + $0.id.uuidString, $0) }, uniquingKeysWith: { first, _ in first }) : [:]
         Self.logger.info("apply: enabled=\(enabled) allowed=\(allowed) auth=\(self.manager.authorizationStatus.rawValue) planned=\(wanted.count)")
         pendingPlan = wanted
+        #if os(iOS)
+        // M2: significant changes and visits do not exist on macOS (region monitoring and the Mac's own re-plan on launch are enough there).
         if allowed {
             manager.startMonitoringSignificantLocationChanges()
             manager.startMonitoringVisits()
@@ -88,6 +94,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
             manager.stopMonitoringSignificantLocationChanges()
             manager.stopMonitoringVisits()
         }
+        #endif
         if applyTask == nil {
             // Serialised: a second apply while one runs is picked up by the loop below.
             applyTask = Task { [weak self] in
@@ -167,8 +174,16 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
 
     nonisolated func currentFix() async -> LocationFix? { await oneShot() }
 
+    private var isAuthorizedForFix: Bool {
+        #if os(iOS)
+        manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse
+        #else
+        manager.authorizationStatus == .authorizedAlways
+        #endif
+    }
+
     private func oneShot() async -> LocationFix? {
-        guard manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse else { return nil }
+        guard isAuthorizedForFix else { return nil }
         return await withCheckedContinuation { continuation in
             oneShotWaiters.append(continuation)
             if oneShotWaiters.count == 1 {
@@ -214,9 +229,11 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationFixPro
         Task { @MainActor in self.finishOneShot(nil) }
     }
 
+    #if os(iOS)
     nonisolated func locationManager(_ manager: CLLocationManager, didVisit visit: CLVisit) {
         Task { @MainActor in self.onWake?(.visit) }
     }
+    #endif
 
 
     private nonisolated static func placeID(_ identifier: String) -> UUID? {

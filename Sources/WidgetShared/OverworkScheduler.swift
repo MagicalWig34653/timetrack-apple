@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import Foundation
 import TimetrackCore
 import UserNotifications
@@ -9,7 +9,13 @@ enum NotificationPermission {
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
 
-    static func isGranted(_ status: UNAuthorizationStatus) -> Bool { [.authorized, .provisional, .ephemeral].contains(status) }
+    static func isGranted(_ status: UNAuthorizationStatus) -> Bool {
+        #if os(iOS)
+        [.authorized, .provisional, .ephemeral].contains(status)
+        #else
+        [.authorized, .provisional].contains(status) // no App Clips on the Mac
+        #endif
+    }
 
     /// Asks the system only while the decision is open (first activation); returns the resulting status.
     static func requestIfNeeded() async -> UNAuthorizationStatus {

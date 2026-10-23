@@ -11,7 +11,7 @@ import UIKit
 @MainActor
 final class AutomationRuntime {
     static let shared = AutomationRuntime()
-    static let refreshTaskIdentifier = "de.linolaske.timetrack.automation.refresh"
+    nonisolated static let refreshTaskIdentifier = "de.linolaske.timetrack.automation.refresh"
     private static let moduleKey = "automation.moduleEnabled"
 
     let engine: AutomationEngine
@@ -71,10 +71,7 @@ final class AutomationRuntime {
     func start() {
         guard !started else { return }
         started = true
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTaskIdentifier, using: nil) { task in
-            guard let task = task as? BGAppRefreshTask else { return }
-            Self.shared.runRefresh(task)
-        }
+        Self.registerRefreshTask()
         service.onWake = { [weak self] wake in Task { await self?.handle(wake) } }
         service.onStatusChange = { [weak self] status in
             self?.store?.status = status
@@ -88,6 +85,22 @@ final class AutomationRuntime {
         #if DEBUG
         runSimulatedRegionScript()
         #endif
+    }
+
+    /// Registers the launch handler. This must be `nonisolated`: a closure formed in a `@MainActor` context inherits that
+    /// isolation, and BackgroundTasks calls it on a background queue, where the Swift 6 runtime isolation check traps
+    /// (`_dispatch_assert_queue_fail`, builds 26 and 31). The handler hops to the main actor explicitly instead.
+    private nonisolated static func registerRefreshTask() {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: refreshTaskIdentifier, using: nil) { task in
+            guard let task = task as? BGAppRefreshTask else { return }
+            let completion = BackgroundTaskCompletion(task)
+            task.expirationHandler = { completion.expire() }
+            let work = Task { @MainActor in
+                await Self.shared.runRefresh()
+                completion.finish(success: !Task.isCancelled)
+            }
+            completion.attach(work)
+        }
     }
 
     #if DEBUG
@@ -212,13 +225,9 @@ final class AutomationRuntime {
         }
     }
 
-    private func runRefresh(_ task: BGAppRefreshTask) {
-        let work = Task {
-            await engine.evaluate()
-            await scheduleChecks()
-            task.setTaskCompleted(success: true)
-        }
-        task.expirationHandler = { work.cancel() }
+    private func runRefresh() async {
+        await engine.evaluate()
+        await scheduleChecks()
     }
 }
 

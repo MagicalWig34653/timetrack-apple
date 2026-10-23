@@ -96,19 +96,36 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        [.banner, .list]
+    // Both delegate methods use the completion-handler form and call the handler on the main thread. The `async` form is
+    // bridged so that the handler runs wherever the method returns (a background executor); that ends in UIKit's
+    // `_updateSnapshotAndStateRestorationWithAction`, which asserts the main thread (NSInternalInconsistencyException,
+    // build 26). Marking the `async` methods `@MainActor` instead does not compile (non-Sendable UN parameters).
+    // The handler is called exactly once, after the work finished.
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+                                            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        nonisolated(unsafe) let completionHandler = completionHandler
+        DispatchQueue.main.async { completionHandler([.banner, .list]) }
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        let info = response.notification.request.content.userInfo
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+                                            withCompletionHandler completionHandler: @escaping () -> Void) {
+        nonisolated(unsafe) let completionHandler = completionHandler
+        nonisolated(unsafe) let info = response.notification.request.content.userInfo
+        let action = response.actionIdentifier
+        Task {
+            await Self.handle(action: action, info: info)
+            await MainActor.run { completionHandler() }
+        }
+    }
+
+    static func handle(action: String, info: [AnyHashable: Any]) async {
         if let vacationID = info[VacationReminderCenter.absenceKey] as? String { // R3: vacation reminder tap opens the Urlaub tab
             let start = (info[VacationReminderCenter.startKey] as? String) ?? ""
             await MainActor.run { VacationReminderCenter.shared.handleTap(absenceID: vacationID, startDate: start) }
             return
         }
         if info[LeaveStopNotification.eventKey] != nil { // L4: answer to the leave question
-            await LeaveStopNotification.answer(action: response.actionIdentifier, info: info)
+            await LeaveStopNotification.answer(action: action, info: info)
             return
         }
         guard let text = info["configuration"] as? String, let data = Data(base64Encoded: text),
@@ -116,7 +133,6 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
         // The stamp of the question makes repeated taps and answers to a superseded question harmless (see `FocusRunner.confirm*`).
         let sequence = (info["sequence"] as? NSNumber)?.int64Value
         let eventId = (info["eventId"] as? String).flatMap(UUID.init(uuidString:)) ?? UUID()
-        let action = response.actionIdentifier
         guard action == FocusNotificationID.startAction || action == FocusNotificationID.stopAction else {
             return // "Nicht jetzt" / "Weiterlaufen lassen" / tapping the banner: nothing to do
         }

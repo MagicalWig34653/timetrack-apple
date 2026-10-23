@@ -100,12 +100,14 @@ enum FocusEnvironment {
     static func registerBackgroundRetry() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: retryTaskIdentifier, using: nil) { task in
             guard let refresh = task as? BGAppRefreshTask else { return }
-            nonisolated(unsafe) let task = refresh // BGTask is documented as callable from any queue
+            // Not actor-isolated on purpose: BackgroundTasks calls this on a background queue (see AutomationRuntime.registerRefreshTask).
+            let completion = BackgroundTaskCompletion(refresh, onExpire: { scheduleRetry() })
+            refresh.expirationHandler = { completion.expire() }
             let work = Task {
                 let result = await retryPending()
-                task.setTaskCompleted(success: (result?.remaining ?? 0) == 0)
+                completion.finish(success: (result?.remaining ?? 0) == 0)
             }
-            task.expirationHandler = { work.cancel(); scheduleRetry() }
+            completion.attach(work)
         }
     }
 

@@ -34,6 +34,7 @@ struct TimeHub: View {
     @State private var sheet: PlanSheet?
     @State private var picker = false
     @State private var planningArea = false
+    @State private var reportsWeek: ReportWeekRef?
     @State private var pendingNavigation: PendingNavigation?
     @Namespace private var selectionSpace
 
@@ -57,6 +58,7 @@ struct TimeHub: View {
     private var wide: Bool { sizeClass == .regular }
     private var animation: Animation { Z2Motion.spring(reduceMotion: reduceMotion) }
     private var planEnabled: Bool { model.isEnabled(.planning) && model.apiClient != nil }
+    private var reportsEnabled: Bool { model.isEnabled(.reports) && model.apiClient != nil }
     private var zoom: TimeZoom { calendar == nil ? .week : focus.zoom }
     private var today: LocalDay { timeList.calendar.day(for: .now) }
     private var weekStore: WeekStore? { model.apiClient.map { WeekStoreCache.shared.weekStore($0, calendar: model.dayCalendar) } }
@@ -90,6 +92,7 @@ struct TimeHub: View {
             planningArea = false
             planStoreOpen(monday)
         }
+        .navigationDestination(item: $reportsWeek) { week in ReportsScreen(week: week) }
         .navigationDestination(isPresented: $planningArea) {
             // Pushed screens do not inherit the environment of this view, so the hand-over is attached to the destination itself.
             PlanningHubScreen().environment(\.openPlanWeek) { monday in
@@ -147,11 +150,15 @@ struct TimeHub: View {
         }
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button { goToToday() } label: { Text("calendar.today") }.accessibilityIdentifier("time.today")
-            if planEnabled || (calendar != nil && zoom == .month) {
+            if planEnabled || reportsEnabled || (calendar != nil && zoom == .month) {
                 Menu {
                     if let calendar, zoom == .month {
                         Button { calendar.beginRange(at: focus.day) } label: { Label("plan.action.range", systemImage: "calendar.day.timeline.leading") }
                             .accessibilityIdentifier("calendar.range")
+                    }
+                    if reportsEnabled {
+                        Button { reportsWeek = ReportWeekRef(containing: focus.zoom == .week ? focus.weekStart : focus.day) } label: { Label(BH.s("entry.link"), systemImage: "book.closed") }
+                            .accessibilityIdentifier("time.reports")
                     }
                     if planEnabled {
                         Button { planningArea = true } label: { Label(PA.s("hub.title"), systemImage: "calendar.badge.clock") }

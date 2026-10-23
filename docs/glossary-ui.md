@@ -15,7 +15,10 @@ Festgelegt vom Entwickler (Nutzerentscheidung: Wortwahl liegt beim Entwickler, e
 | **Zeitkonto** | Mehr- und Minderzeit insgesamt; plus heißt Guthaben. | Saldo, Überstundenkonto |
 | **vorläufig** | Der Tag ist nicht abgeschlossen; Pausen und Rundung können sich noch ändern. Per Tipp erklärt. | unvollständig, ungültig |
 | **Feierabend** | Geplantes Ende des Arbeitstags (Live Activity). | Planende |
-| **Mehr** | Sammelbereich (Berichtsheft, Auswertung und Export, Freigaben, Erinnerungen, Automatik, Einstellungen). | Einstellungen (als Tabname) |
+| **Mehr** | Sammelbereich (Berichtsheft unter „Ausbildung“, Auswertung und Export, Freigaben, Erinnerungen, Automatik, Einstellungen). | Einstellungen (als Tabname) |
+| **Berichtsheft** | Wochenbericht der Ausbildung (BH1): pro Woche Einträge mit Lernfeld, Zeit und Notizen; Status der Woche „Entwurf“/„Erledigt“ (nur Markierung). „Berichtszeit“ ist die Summe der Einträge und nicht „Gearbeitet“. Aktion „Für IHK-Portal kopieren“. | Bericht (allein), Tätigkeitsnachweis |
+| **Lernfeld** | Eigene Liste des Kontos (Nummer optional, Name); Einträge behalten den Namen als Momentaufnahme. | Fach, Kategorie |
+| **Quellen** | Notizen und Dateien einer Berichtswoche als Material; nie geteilt. | Anhänge (die gehören zu Abwesenheiten) |
 | **Im Web** | Bereich, den es nur in der Web-App gibt; Zeile öffnet sie im Browser. | – |
 
 Farben der Abwesenheiten (UX3): Urlaub smaragdgrün, Krank rose, Freigestellt teal, Sonstiges schiefergrau, Feiertag amber; Arten: Arbeit sky, Fahrt amber, Schule violett. Farbe ist nie die einzige Information (Symbol und Name stehen daneben).

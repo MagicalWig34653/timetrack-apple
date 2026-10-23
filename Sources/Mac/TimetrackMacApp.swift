@@ -61,6 +61,8 @@ final class UIState {
     var timeCommand: TimeCommand?
     var timeCommandSerial = 0
     var inspectorVisible = true
+    /// BH1: week the Berichtsheft opens on (set by "Berichtsheft für diese Woche" in the Zeit screen; nil = current week).
+    var reportsWeek: ReportWeekRef?
     /// H5: "Fortführen" with a long gap asks first (window-wide dialog, so the menu command works from every screen).
     var continueChoice = false
 
@@ -72,11 +74,17 @@ final class UIState {
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case today, time, planning, calendar, vacation
+    case today, time, planning, calendar, vacation, reports
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
-    var requiredModule: ModuleKey? { self == .planning || self == .calendar || self == .vacation ? .planning : nil }
+    var requiredModule: ModuleKey? {
+        switch self {
+        case .planning, .calendar, .vacation: .planning
+        case .reports: .reports
+        case .today, .time: nil
+        }
+    }
 
     var titleKey: LocalizedStringKey {
         switch self {
@@ -85,6 +93,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .planning: "sidebar.planning"
         case .calendar: "sidebar.calendar"
         case .vacation: "sidebar.vacation"
+        case .reports: "sidebar.reports"
         }
     }
 
@@ -98,6 +107,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .planning: "calendar.badge.checkmark"
         case .calendar: "calendar"
         case .vacation: "beach.umbrella"
+        case .reports: "book.closed"
         }
     }
 }

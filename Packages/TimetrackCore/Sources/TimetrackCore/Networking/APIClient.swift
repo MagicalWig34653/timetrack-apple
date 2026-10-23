@@ -352,6 +352,62 @@ public actor APIClient: PreferencesService {
         try await get("/vacation/suggestions", query: query.queryItems)
     }
 
+    // MARK: - Berichtsheft (BH1, module `reports`)
+
+    public func listLearningFields() async throws -> [LearningField] { try await get("/reports/learning-fields") }
+
+    /// 409 `learning_field_exists` when the name is taken.
+    public func createLearningField(_ input: LearningFieldInput) async throws -> LearningField { try await send(.post, "/reports/learning-fields", body: input) }
+
+    public func updateLearningField(id: UUID, _ input: LearningFieldInput) async throws -> LearningField {
+        try await send(.put, "/reports/learning-fields/\(id.uuidString.lowercased())", body: input)
+    }
+
+    /// Existing entries keep their name snapshot.
+    public func deleteLearningField(id: UUID) async throws { try await sendVoid(.delete, "/reports/learning-fields/\(id.uuidString.lowercased())") }
+
+    public func getReportWeek(_ ref: ReportWeekRef) async throws -> ReportWeek { try await get("/reports/weeks/\(ref.year)/\(ref.week)") }
+
+    public func putReportWeekStatus(_ ref: ReportWeekRef, status: ReportStatus) async throws -> ReportWeek {
+        struct Body: Encodable { let status: ReportStatus }
+        return try await send(.put, "/reports/weeks/\(ref.year)/\(ref.week)", body: Body(status: status))
+    }
+
+    /// Copyable plain text in the standard format (`text/plain; charset=utf-8`).
+    public func getReportWeekText(_ ref: ReportWeekRef) async throws -> String {
+        let data = try await perform(.get, "/reports/weeks/\(ref.year)/\(ref.week)/text", headers: ["Accept": "text/plain"])
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    public func createReportEntry(_ input: ReportEntryInput) async throws -> ReportEntry { try await send(.post, "/reports/entries", body: input) }
+
+    /// `If-Match` carries the entry's `version`; 412 `stale_version` when it changed elsewhere.
+    public func updateReportEntry(id: UUID, _ input: ReportEntryInput, ifMatchVersion: Int) async throws -> ReportEntry {
+        try await send(.put, "/reports/entries/\(id.uuidString.lowercased())", body: input, headers: ["If-Match": String(ifMatchVersion)])
+    }
+
+    public func deleteReportEntry(id: UUID) async throws { try await sendVoid(.delete, "/reports/entries/\(id.uuidString.lowercased())") }
+
+    public func listReportSources(_ ref: ReportWeekRef) async throws -> [ReportSource] {
+        try await get("/reports/sources", query: [URLQueryItem(name: "year", value: String(ref.year)), URLQueryItem(name: "week", value: String(ref.week))])
+    }
+
+    public func createReportSource(_ input: ReportSourceInput) async throws -> ReportSource { try await send(.post, "/reports/sources", body: input) }
+
+    public func deleteReportSource(id: UUID) async throws { try await sendVoid(.delete, "/reports/sources/\(id.uuidString.lowercased())") }
+
+    /// `POST /files` (multipart, field `file`). 413 `file_too_large` and 415 `unsupported_type` come back as API errors.
+    public func uploadFile(name: String, contentType: String, data: Data) async throws -> FileMeta {
+        let boundary = "tt-\(UUID().uuidString)"
+        var body = Data()
+        let safeName = name.replacingOccurrences(of: "\"", with: "_").replacingOccurrences(of: "\r", with: "_").replacingOccurrences(of: "\n", with: "_")
+        body.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"file\"; filename=\"\(safeName)\"\r\nContent-Type: \(contentType)\r\n\r\n".utf8))
+        body.append(data)
+        body.append(Data("\r\n--\(boundary)--\r\n".utf8))
+        let answer = try await perform(.post, "/files", body: body, headers: ["Content-Type": "multipart/form-data; boundary=\(boundary)"])
+        return try decode(FileMeta.self, from: answer)
+    }
+
     // MARK: - Evaluation and account
 
     /// One-call week overview (core feature, no module needed).

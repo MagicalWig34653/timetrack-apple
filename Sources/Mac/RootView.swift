@@ -56,6 +56,7 @@ struct MainView: View {
             case .planning: NavigationStack { PlanningHubScreen() }
             case .calendar: CalendarScreen()
             case .vacation: VacationScreen()
+            case .reports: NavigationStack { ReportsScreen(week: ui.reportsWeek) }
             }
         }
         .ttSyncStatusLine() // UX3: only while actions wait or the server is unreachable
@@ -66,6 +67,7 @@ struct MainView: View {
             Button(role: .cancel) {} label: { Text("common.cancel") }
         }
         // A module switched off while its screen is open falls back to "Heute".
+        .onChange(of: model.isEnabled(.reports)) { if !model.isEnabled(.reports), ui.selection == .reports { ui.selection = .today } }
         .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }
     }
 

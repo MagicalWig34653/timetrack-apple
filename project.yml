@@ -27,6 +27,7 @@ targets:
       - Sources/Common # UX3: day standing card, sync status line, shared strings (UX3 table)
       - Sources/Settings # N1b: work model editor, vacation figures, about section (shared with iOS)
       - Sources/Week # PL1: week planner, week overview, vacation planner, planning area (shared with iOS)
+      - Sources/Reports # BH1: Berichtsheft (shared with iOS)
       - Sources/WidgetShared # A7: snapshot publisher and widget views (debug gallery)
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
@@ -76,6 +77,7 @@ targets:
       - Sources/Settings # N1b
       - Sources/Calendar # E1: EventKit device calendars (iOS only; macOS does not use it yet)
       - Sources/Week # N1a: week overview, week planner, vacation planner; PL1: planning area (shared with macOS)
+      - Sources/Reports # BH1: Berichtsheft (shared with macOS)
       - Sources/Reminders # R3: local reminders to submit planned vacation, OT1 overwork notifications (iOS only)
       - Sources/WidgetShared # A7: snapshot publisher, widget intents, Live Activity, debug gallery
       # A6b: primary + alternate Icon Composer icons. See docs/ICONS.md.

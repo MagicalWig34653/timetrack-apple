@@ -75,6 +75,19 @@ public final class AppModel {
 
     // MARK: - Lifecycle
 
+    /// HG1: entry point of the root view's `.task`. That task starts again whenever the scene's root view is created anew (scene
+    /// reconnect), and `restore()` would first switch to `.restoring` and tear down the whole signed-in UI (tab hierarchy, every
+    /// store) only to build it again. A model that is already signed in (or restricted) keeps its state; a signed-out or offline one
+    /// retries; two runs never overlap.
+    public func restoreIfNeeded() async {
+        guard phase != .signedIn, phase != .recoveryRestricted, !restoreInFlight else { return }
+        restoreInFlight = true
+        defer { restoreInFlight = false }
+        await restore()
+    }
+
+    private var restoreInFlight = false
+
     public func restore() async {
         if let fastLaunch { return await restoreFast(fastLaunch) }
         phase = .restoring

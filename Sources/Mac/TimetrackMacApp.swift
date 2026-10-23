@@ -27,7 +27,7 @@ struct TimetrackMacApp: App {
                 .ttAppearance()
                 .debugSettingsOpener()
                 .task {
-                    await model.restore()
+                    await model.restoreIfNeeded() // HG1: no teardown of an already signed-in UI when this task runs again
                     #if DEBUG
                     await DebugSnapshots.run(model: model, ui: ui)
                     #endif

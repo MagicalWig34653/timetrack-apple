@@ -29,6 +29,8 @@ public enum AutomationSecretKey {
     public static let deviceToken = "automation-device-token"
     public static let deviceTokenId = "automation-device-token-id"
     public static let deviceId = "automation-device-id"
+    /// Written by this app only, so they are safe to cache in memory (`CachedSecretStore`).
+    public static let all: Set<String> = [deviceToken, deviceTokenId, deviceId]
 }
 
 /// State of the "Standortautomatik" page: places and their modes (server), device token, settings and log (device).

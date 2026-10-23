@@ -17,6 +17,8 @@ final class AutomationRuntime {
     let engine: AutomationEngine
     let service: LocationService
     let secrets: SecretStore
+    /// HG1: the same object as `secrets`; `start()` warms it off the main thread so main-actor reads never query the Keychain.
+    private let cachedSecrets: CachedSecretStore
     private(set) var store: AutomationStore?
     private var checkTask: Task<Void, Never>?
     private var started = false
@@ -26,10 +28,14 @@ final class AutomationRuntime {
     private init() {
         #if targetEnvironment(simulator)
         // Unsigned simulator builds have no Keychain access; UserDefaults stand in (never used on a device).
-        let secrets: SecretStore = SimulatorSecretStore()
+        let base: SecretStore = SimulatorSecretStore()
         #else
-        let secrets: SecretStore = KeychainSecretStore()
+        let base: SecretStore = KeychainSecretStore()
         #endif
+        // HG1: a synchronous Keychain query (XPC to securityd) on the main actor showed up in a runloop hang report.
+        let cached = CachedSecretStore(base, cachedKeys: AutomationSecretKey.all)
+        let secrets: SecretStore = cached
+        cachedSecrets = cached
         let service = LocationService()
         self.secrets = secrets
         self.service = service
@@ -71,6 +77,8 @@ final class AutomationRuntime {
     func start() {
         guard !started else { return }
         started = true
+        let warm = cachedSecrets
+        Task.detached(priority: .utility) { warm.prefetch() } // HG1: Keychain reads off the main thread
         Self.registerRefreshTask()
         service.onWake = { [weak self] wake in Task { await self?.handle(wake) } }
         service.onStatusChange = { [weak self] status in

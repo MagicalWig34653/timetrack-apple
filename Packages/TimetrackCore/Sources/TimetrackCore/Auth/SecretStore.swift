@@ -24,6 +24,49 @@ public final class InMemorySecretStore: SecretStore, @unchecked Sendable {
     public func delete(_ key: String) { lock.withLock { values[key] = nil } }
 }
 
+/// HG1: `SecItemCopyMatching` is a synchronous XPC round trip to securityd (seen on the main thread in a runloop hang report).
+/// This wrapper answers reads of the listed keys from memory once they were read or written, and can `prefetch` them on a
+/// background thread, so main-actor code (stores, `body`) never waits for the Keychain. Only for keys that this process alone
+/// writes (not the session keys that the widget, intents and the watch handoff also touch). Other keys pass straight through.
+public final class CachedSecretStore: SecretStore, @unchecked Sendable {
+    private let base: SecretStore
+    private let cachedKeys: Set<String>
+    private let lock = NSLock()
+    /// `.some(nil)` caches "no such item" as well.
+    private var cache: [String: String?] = [:]
+
+    public init(_ base: SecretStore, cachedKeys: Set<String>) {
+        self.base = base
+        self.cachedKeys = cachedKeys
+    }
+
+    public func read(_ key: String) -> String? {
+        guard cachedKeys.contains(key) else { return base.read(key) }
+        if let hit = lock.withLock({ cache[key] }) { return hit }
+        let value = base.read(key) // outside the lock: the query may block
+        return lock.withLock {
+            if let existing = cache[key] { return existing } // a write or another read won the race
+            cache[key] = .some(value)
+            return value
+        }
+    }
+
+    public func write(_ value: String, for key: String) {
+        base.write(value, for: key)
+        if cachedKeys.contains(key) { lock.withLock { cache[key] = .some(value) } }
+    }
+
+    public func delete(_ key: String) {
+        base.delete(key)
+        if cachedKeys.contains(key) { lock.withLock { cache[key] = .some(nil) } }
+    }
+
+    /// Reads the cached keys from the base store; call off the main thread.
+    public func prefetch() {
+        for key in cachedKeys.sorted() { _ = read(key) }
+    }
+}
+
 /// Generic-password Keychain items. Values are never logged.
 public struct KeychainSecretStore: SecretStore {
     private let service: String

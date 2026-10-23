@@ -67,7 +67,7 @@ struct TimetrackIOSApp: App {
                     }
                 }
                 .task {
-                    await model.restore()
+                    await model.restoreIfNeeded() // HG1: no teardown of an already signed-in UI when this task runs again
                     #if DEBUG
                     // Simulator/UI-test convenience: TT_DEV_SERVER + TT_DEV_COOKIE (a throwaway server's tt_session) sign in without typing.
                     let env = ProcessInfo.processInfo.environment

@@ -132,4 +132,62 @@ import Testing
         #expect(store.continueGap(now: ended.addingTimeInterval(-5)) == 0)
         #expect(25 * 60 > TodayStore.longContinueGap && 10 * 60 < TodayStore.longContinueGap)
     }
+
+    // MARK: H5 - shared by Mac, Watch and the intents
+
+    @Test func offerDescribesKindEndAndLongGap() async throws {
+        let (_, store) = await prepare()
+        let offer = try #require(store.continueOffer)
+        #expect(offer.kind == .school)
+        #expect(offer.isLongGap(now: offer.endedAt.addingTimeInterval(10 * 60)) == false)
+        #expect(offer.isLongGap(now: offer.endedAt.addingTimeInterval(16 * 60)) == true)
+        #expect(offer.gap(now: offer.endedAt.addingTimeInterval(-9)) == 0)
+    }
+
+    @Test func offerIsGoneWhileSomethingRuns() async {
+        let transport = MockTransport()
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        transport.enqueue("GET /api/v1/time/account", body: Fixtures.accountBalanceJSON)
+        transport.enqueue("GET /api/v1/time/days/\(calendar.day(for: .now))", body: idleDay())
+        let store = TodayStore(client: Fixtures.client(transport), calendar: calendar)
+        await store.load()
+        #expect(store.continueOffer == nil)
+    }
+
+    @Test func oneShotCommandReopensTheLastEntry() async throws {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/time/timer", body: "null")
+        transport.enqueue("GET /api/v1/time/days/\(calendar.day(for: .now))", body: idleDay())
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", body: reopenedJSON())
+        let outcome = try await TimerCommand.continueLast(client: Fixtures.client(transport), today: calendar.day(for: .now))
+        guard case .continued(let segment, let mode) = outcome else { Issue.record("unexpected \(outcome)"); return }
+        #expect(mode == .reopened && segment.isRunning)
+        #expect(transport.requests(matching: "POST /api/v1/time/timer/start").isEmpty)
+    }
+
+    @Test func oneShotCommandFallsBackToANewEntry() async throws {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/time/timer", body: "null")
+        transport.enqueue("GET /api/v1/time/days/\(calendar.day(for: .now))", body: idleDay())
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: 405, body: #"{"error":{"code":"not_found","message":"x"}}"#)
+        transport.enqueue("POST /api/v1/time/timer/start", body: Fixtures.segmentJSON)
+        transport.enqueue("PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222", body: Fixtures.segmentJSON)
+        let outcome = try await TimerCommand.continueLast(client: Fixtures.client(transport), today: calendar.day(for: .now))
+        guard case .continued(_, let mode) = outcome else { Issue.record("unexpected \(outcome)"); return }
+        #expect(mode == .startedNew)
+    }
+
+    @Test func oneShotCommandReportsRunningTimerAndEmptyDay() async throws {
+        let running = MockTransport()
+        running.enqueue("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        let first = try await TimerCommand.continueLast(client: Fixtures.client(running), today: calendar.day(for: .now))
+        guard case .alreadyRunning = first else { Issue.record("expected alreadyRunning"); return }
+        #expect(running.requests(matching: "PATCH").isEmpty)
+
+        let empty = MockTransport()
+        empty.enqueue("GET /api/v1/time/timer", body: "null")
+        empty.enqueue("GET /api/v1/time/days/\(calendar.day(for: .now))", body: Fixtures.dayJSON.replacingOccurrences(of: "\"segments\":[\(Fixtures.segmentJSON)]", with: "\"segments\":[]"))
+        let second = try await TimerCommand.continueLast(client: Fixtures.client(empty), today: calendar.day(for: .now))
+        #expect(second == .nothingToContinue)
+    }
 }

@@ -16,8 +16,9 @@ final class ContinueLastTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
         XCTAssertTrue(app.startControl.waitForExistence(timeout: 20) || app.stopControl.exists)
-        try XCTSkipIf(app.tabBars.buttons["Mehr"].exists == false, "compact layout only")
     }
+
+    private var isCompact: Bool { app.tabBars.buttons["Mehr"].exists }
 
     private func el(_ id: String) -> XCUIElement { app.descendants(matching: .any)[id].firstMatch }
 
@@ -38,6 +39,7 @@ final class ContinueLastTests: XCTestCase {
     }
 
     func testContinueFromHeuteAndFromTheSheet() throws {
+        try XCTSkipIf(!isCompact, "compact layout only")
         try recordShortEntry()
         app.tabBars.buttons["Heute"].tap()
         let button = el("continue.last")
@@ -61,5 +63,25 @@ final class ContinueLastTests: XCTestCase {
         el("continue.last").tap()
         XCTAssertTrue(el("nowsheet.stop").waitForExistence(timeout: 10))
         el("nowsheet.stop").tap()
+    }
+
+    /// H5: iPad has no "Jetzt" bar; the Heute card carries start/stop and the continue button.
+    func testContinueOnIPad() throws {
+        try XCTSkipIf(app.tabBars.buttons["Mehr"].exists, "regular layout only (iPad)")
+        if app.stopControl.exists { app.stopControl.tap() }
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 10))
+        app.startControl.tap()
+        XCTAssertTrue(app.stopControl.waitForExistence(timeout: 8))
+        sleep(2)
+        app.stopControl.tap()
+        XCTAssertTrue(app.startControl.waitForExistence(timeout: 10))
+        let button = el("continue.last")
+        XCTAssertTrue(button.waitForExistence(timeout: 10), "idle Heute offers to continue")
+        shot("h5-continue-ipad")
+        button.tap()
+        XCTAssertTrue(app.stopControl.waitForExistence(timeout: 10))
+        XCTAssertTrue(el("continue.notice").waitForExistence(timeout: 5))
+        shot("h5-continue-ipad-running")
+        app.stopControl.tap()
     }
 }

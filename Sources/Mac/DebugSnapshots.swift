@@ -11,6 +11,7 @@ enum DebugSnapshots {
         let env = ProcessInfo.processInfo.environment
         guard let directory = env["TT_DEV_SNAPSHOT_DIR"], let server = env["TT_DEV_SERVER"], let cookie = env["TT_DEV_COOKIE"] else { return }
         if model.phase != .signedIn { await model.signInWithSessionCookie(serverInput: server, cookie: cookie) }
+        if env["TT_DEV_CONTINUE"] == "1" { await continuePictures(model: model, ui: ui, directory: directory); NSApp.terminate(nil); return }
         if let size = env["TT_DEV_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2,
            let window = NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil }) {
             window.setContentSize(NSSize(width: size[0], height: size[1]))
@@ -30,6 +31,25 @@ enum DebugSnapshots {
         }
         await settingsPictures(directory: directory)
         NSApp.terminate(nil)
+    }
+
+    /// H5: with the seeded entries of today, pictures of "Heute" with the continue offer, the menu bar panel, and after continuing.
+    private static func continuePictures(model: AppModel, ui: UIState, directory: String) async {
+        ui.selection = .today
+        guard let today = model.today else { return }
+        if today.running != nil { await today.stop() }
+        try? await Task.sleep(for: .seconds(2))
+        picture(NSApp.windows.first(where: { $0.isVisible && $0.contentView != nil })?.contentView, name: "mac-h5-continue-idle", directory: directory)
+        let panel = NSHostingView(rootView: MenuBarContent().environment(model).ttAppearance())
+        panel.frame = NSRect(x: 0, y: 0, width: 280, height: 260)
+        panel.layoutSubtreeIfNeeded()
+        picture(panel, name: "mac-h5-continue-menubar", directory: directory)
+    }
+
+    private static func picture(_ view: NSView?, name: String, directory: String) {
+        guard let view, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+        view.cacheDisplay(in: view.bounds, to: rep)
+        if let png = rep.representation(using: .png, properties: [:]) { try? png.write(to: URL(fileURLWithPath: directory).appendingPathComponent("\(name).png")) }
     }
 
     /// One picture per tab of the settings window (light and dark); tabs are switched through the window toolbar items.

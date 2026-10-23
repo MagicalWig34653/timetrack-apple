@@ -17,6 +17,15 @@ extension SegmentKind {
         }
     }
 
+    /// Plain localized name for interpolation into other strings (same as `plainName` on iOS/macOS, H5).
+    var plainName: String {
+        switch self {
+        case .work, .unknown: String(localized: "kind.work")
+        case .travel: String(localized: "kind.travel")
+        case .school: String(localized: "kind.school")
+        }
+    }
+
     var symbol: String {
         switch self {
         case .work, .unknown: "briefcase"

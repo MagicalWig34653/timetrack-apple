@@ -101,6 +101,9 @@ private struct TimerCard: View {
                 Button { Task { await store.start(kind: kind.wrappedValue) } } label: { Label("today.start", systemImage: "play.fill") }
                     .buttonStyle(.ttPrimary).controlSize(.large)
                     .accessibilityIdentifier("today.start")
+                // H5: same offer as on the iPhone (reopen the last finished entry of today; long gap asks).
+                ContinueButton(store: store)
+                ContinueNotice(store: store)
             }
         }
     }

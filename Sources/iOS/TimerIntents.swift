@@ -3,37 +3,6 @@ import Foundation
 import TimetrackCore
 import TimetrackStores
 
-/// Shortcuts/Siri access. The intents run in the app process and use the session stored in the Keychain; they never
-/// show UI and never keep credentials of their own.
-enum IntentSession {
-    static func client() async throws -> APIClient {
-        let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport())
-        switch await auth.restore() {
-        case .signedIn(let context):
-            guard !context.session.recovery else { throw IntentError.signedOut }
-            return context.client
-        case .signedOut: throw IntentError.signedOut
-        case .offline: throw IntentError.offline
-        }
-    }
-
-    static func zone(client: APIClient) async -> TimeZone {
-        (try? await client.listWorkModels())?.current()?.timeZone ?? TimeZone(identifier: "Europe/Berlin") ?? .current
-    }
-}
-
-enum IntentError: Error, CustomLocalizedStringResourceConvertible {
-    case signedOut, offline, failed(String)
-
-    var localizedStringResource: LocalizedStringResource {
-        switch self {
-        case .signedOut: "Bitte zuerst in der Timetrack-App anmelden."
-        case .offline: "Der Server ist nicht erreichbar."
-        case .failed(let text): "\(text)"
-        }
-    }
-}
-
 struct StartTimerIntent: AppIntent {
     static let title: LocalizedStringResource = "Timer starten"
     static let description = IntentDescription("Startet einen Arbeitszeitabschnitt in Timetrack.")
@@ -90,6 +59,9 @@ struct TimetrackShortcuts: AppShortcutsProvider {
                     shortTitle: "Timer starten", systemImageName: "play.fill")
         AppShortcut(intent: StopTimerIntent(), phrases: ["Stoppe den Timer in \(.applicationName)", "Timer stoppen in \(.applicationName)"],
                     shortTitle: "Timer stoppen", systemImageName: "stop.fill")
+        // H5: reopens the last finished entry of today (Shortcuts, Siri, Action Button).
+        AppShortcut(intent: ContinueTimerIntent(), phrases: ["Führe den Timer in \(.applicationName) fort", "Letzten Timer fortführen in \(.applicationName)"],
+                    shortTitle: "Timer fortführen", systemImageName: "arrow.uturn.forward")
         // L2: one shortcut per place (Siri/Shortcuts expand the place parameter from `PlaceEntityQuery`).
         AppShortcut(intent: ArriveAtPlaceIntent(), phrases: ["Ankunft in \(\.$place) erfassen mit \(.applicationName)", "Ich bin in \(\.$place) angekommen mit \(.applicationName)"],
                     shortTitle: "Ankunft erfassen", systemImageName: "mappin.and.ellipse")

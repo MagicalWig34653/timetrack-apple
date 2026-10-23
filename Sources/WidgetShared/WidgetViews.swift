@@ -67,6 +67,30 @@ private struct TimerActionButton: View {
     }
 }
 
+/// H5: secondary pill "Fortführen" next to Start (idle, a finished entry exists today). Interactive on iOS only, like Start/Stopp.
+private struct ContinueActionButton: View {
+    let entry: TimetrackEntry
+    let theme: TTTheme
+
+    var body: some View {
+        #if os(iOS)
+        if entry.continuableKind != nil {
+            Button(intent: WidgetContinueTimerIntent()) {
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.uturn.forward").imageScale(.small)
+                    wtext("w.continue").lineLimit(1)
+                }
+                .font(.system(.footnote, design: .rounded, weight: .semibold))
+                .foregroundStyle(TT.textPrimary)
+                .padding(.horizontal, 12).padding(.vertical, 7)
+                .background(TT.textPrimary.opacity(0.1), in: .capsule)
+            }
+            .buttonStyle(.plain)
+        }
+        #endif
+    }
+}
+
 private struct KindLabel: View {
     let kind: SegmentKind
     var live = false
@@ -250,7 +274,7 @@ struct MediumContent: View {
                             wtext("w.idle").font(.system(.footnote, weight: .semibold)).foregroundStyle(TT.textSecondary)
                             DayRing(entry: entry, lineWidth: 7).frame(maxWidth: .infinity, maxHeight: 76)
                             Spacer(minLength: 2)
-                            HStack { TimerActionButton(running: false, theme: entry.theme); Spacer(minLength: 0) }
+                            HStack(spacing: 6) { TimerActionButton(running: false, theme: entry.theme, compact: entry.continuableKind != nil); ContinueActionButton(entry: entry, theme: entry.theme); Spacer(minLength: 0) }
                         }
                     }
                 }

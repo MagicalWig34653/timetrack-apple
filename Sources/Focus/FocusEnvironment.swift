@@ -198,8 +198,8 @@ final class DebugFocusBackend: FocusTimerBackend, @unchecked Sendable {
             }
             var segment: Segment?
             switch outcome {
-            case .started(let value), .alreadyRunning(let value), .stopped(let value): segment = value
-            case .notRunning: segment = nil
+            case .started(let value), .alreadyRunning(let value), .stopped(let value), .continued(let value, _): segment = value
+            case .notRunning, .nothingToContinue: segment = nil
             }
             guard let segment else { return (Data(#"{"error":{"code":"no_running_timer","message":"x"}}"#.utf8), response(request, 409)) }
             return (try JSONCoding.makeEncoder().encode(segment), response(request, 200))

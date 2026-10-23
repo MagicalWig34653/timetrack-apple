@@ -59,7 +59,12 @@ struct MainView: View {
             }
         }
         .ttSyncStatusLine() // UX3: only while actions wait or the server is unreachable
-        .toolbar { ToolbarItem(placement: .primaryAction) { TimerToolbarButton() } }
+        .toolbar { ToolbarItemGroup(placement: .primaryAction) { TimerToolbarButton() } }
+        .confirmationDialog(ux3String("h4.continue.choose \(DurationFormat.hoursMinutes(Int(model.today?.continueGap() ?? 0)))"), isPresented: $ui.continueChoice, titleVisibility: .visible) {
+            Button(ux3String("h4.continue.with_gap")) { Task { await model.today?.continueLast() } }
+            Button(ux3String("h4.continue.fresh")) { Task { await model.today?.continueLast(startNew: true) } }
+            Button(role: .cancel) {} label: { Text("common.cancel") }
+        }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }
     }
@@ -100,6 +105,7 @@ private struct SidebarFooter: View {
 /// Window toolbar button: start (last used kind) or stop, on every screen.
 private struct TimerToolbarButton: View {
     @Environment(AppModel.self) private var model
+    @Environment(UIState.self) private var ui
     @AppStorage("mac.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
 
     var body: some View {
@@ -113,6 +119,11 @@ private struct TimerToolbarButton: View {
                     Task { await today.start(kind: kind) }
                 } label: { Label("command.start", systemImage: "play.fill") }
                     .help(Text("command.start"))
+                if let offer = today.continueOffer {
+                    Button { Task { await continueLastTimer(model, ui) } } label: { Label(ux3String("h4.continue.menu"), systemImage: "arrow.uturn.forward") }
+                        .help(Text(ux3String("h4.continue \(offer.kind.plainName) \(offer.endedAt.formatted(Date.FormatStyle(timeZone: model.dayCalendar.timeZone).hour().minute()))")))
+                        .accessibilityIdentifier("toolbar.continue")
+                }
             }
         }
     }

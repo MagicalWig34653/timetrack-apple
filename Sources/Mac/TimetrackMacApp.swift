@@ -61,6 +61,8 @@ final class UIState {
     var timeCommand: TimeCommand?
     var timeCommandSerial = 0
     var inspectorVisible = true
+    /// H5: "Fortführen" with a long gap asks first (window-wide dialog, so the menu command works from every screen).
+    var continueChoice = false
 
     func send(_ command: TimeCommand) {
         selection = .time

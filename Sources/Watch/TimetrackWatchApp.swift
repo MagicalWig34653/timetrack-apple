@@ -63,10 +63,10 @@ struct TimetrackWatchApp: App {
                        let url = try? AuthService.normalizeServerURL(server) {
                         await model.adoptHandedOverSession(server: url, cookie: cookie)
                     }
-                    // Simulator convenience: TT_DEV_ACTION=start|stop presses the button once (no touch input via simctl).
+                    // Simulator convenience: TT_DEV_ACTION=start|stop|continue presses the button once (no touch input via simctl).
                     if let action = env["TT_DEV_ACTION"] {
                         try? await Task.sleep(for: .seconds(2.5))
-                        if action == "start" { await model.today?.start(kind: .travel) } else if action == "stop" { await model.today?.stop() }
+                        if action == "start" { await model.today?.start(kind: .travel) } else if action == "stop" { await model.today?.stop() } else if action == "continue" { await model.today?.continueLast() }
                     }
                     #endif
                 }

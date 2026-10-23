@@ -24,6 +24,39 @@
         }
       }
     },
+    "w.continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortführen"
+          }
+        }
+      }
+    },
+    "w.control.continue.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Führt den zuletzt beendeten Eintrag von heute fort; die Lücke zählt mit."
+          }
+        }
+      }
+    },
+    "w.control.continue.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer fortführen"
+          }
+        }
+      }
+    },
     "w.control.description": {
       "extractionState": "manual",
       "localizations": {
@@ -119,6 +152,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aus · Heute %@"
+          }
+        }
+      }
+    },
+    "w.intent.continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzten Timer fortführen"
           }
         }
       }

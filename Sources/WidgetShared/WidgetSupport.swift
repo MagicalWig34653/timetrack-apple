@@ -22,6 +22,11 @@ struct TimetrackEntry: TimelineEntry {
     var zone: TimeZone { snapshot.flatMap { TimeZone(identifier: $0.timeZone) } ?? .current }
     /// The account accent written by the app (default blue when absent); derivation as in the app.
     var theme: TTTheme { TTTheme(accentHex: snapshot?.accentHex) }
+    /// H5: kind of the last finished entry of today while idle (the snapshot knows no ids; the intent looks the entry up itself).
+    var continuableKind: SegmentKind? {
+        guard runningSince == nil, snapshot != nil, !isStale else { return nil }
+        return segments.last { $0.endedAt != nil && SegmentKind.selectable.contains($0.kind) }?.kind
+    }
     var isStale: Bool { snapshot?.isStale(at: date) ?? false }
 
     /// 0...1 progress of the finished time against the target; nil without a target.

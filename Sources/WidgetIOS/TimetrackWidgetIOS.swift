@@ -113,12 +113,28 @@ struct TimerControl: ControlWidget {
     }
 }
 
+/// H5: Control Center / Lock Screen / Action Button: reopen the last finished entry of today. Runs in the app's process (needs the server).
+struct ContinueTimerControl: ControlWidget {
+    static let kind = "de.linolaske.timetrack.control.continue"
+
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: Self.kind) {
+            ControlWidgetButton(action: WidgetContinueTimerIntent()) {
+                Label { wtext("w.continue") } icon: { Image(systemName: "arrow.uturn.forward") }
+            }
+        }
+        .displayName(LocalizedStringResource("w.control.continue.title", table: "Widget"))
+        .description(LocalizedStringResource("w.control.continue.description", table: "Widget"))
+    }
+}
+
 @main
 struct TimetrackWidgetIOSBundle: WidgetBundle {
     var body: some Widget {
         TimetrackHomeWidget()
         TimetrackLiveActivity()
         TimerControl()
+        ContinueTimerControl()
     }
 }
 

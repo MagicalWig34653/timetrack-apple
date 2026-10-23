@@ -63,6 +63,7 @@ struct MenuBarContent: View {
             }
             Button { Task { await today.stop() } } label: { Label("command.stop", systemImage: "stop.fill").frame(maxWidth: .infinity) }
                 .buttonStyle(.ttDanger).controlSize(.large)
+            ContinueNotice(store: today)
         } else {
             Text("today.not_running").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
             Picker("", selection: Binding(get: { kind }, set: { lastKindRaw = $0.rawValue })) {
@@ -71,6 +72,30 @@ struct MenuBarContent: View {
             .pickerStyle(.segmented).labelsHidden()
             Button { Task { await today.start(kind: kind) } } label: { Label("command.start", systemImage: "play.fill").frame(maxWidth: .infinity) }
                 .buttonStyle(.ttPrimary).controlSize(.large)
+            continueActions(today)
+            ContinueNotice(store: today)
+        }
+    }
+
+    /// H5: "Fortführen" in the menu bar panel. No dialog inside the panel: with a long gap both outcomes are shown as buttons.
+    @ViewBuilder private func continueActions(_ today: TodayStore) -> some View {
+        if let offer = today.continueOffer {
+            let until = offer.endedAt.clockText(in: model.dayCalendar.timeZone)
+            TimelineView(.periodic(from: .now, by: 30)) { context in
+                VStack(alignment: .leading, spacing: TT.Space.xs) {
+                    if offer.isLongGap(now: context.date) {
+                        Button { Task { await today.continueLast() } } label: { Label(ux3String("h4.continue.with_gap"), systemImage: "arrow.uturn.forward").frame(maxWidth: .infinity) }
+                            .buttonStyle(.ttSecondary).accessibilityIdentifier("menubar.continue")
+                        Button { Task { await today.continueLast(startNew: true) } } label: { Label(ux3String("h4.continue.fresh"), systemImage: "play").frame(maxWidth: .infinity) }
+                            .buttonStyle(.ttSecondary).accessibilityIdentifier("menubar.continue.fresh")
+                    } else {
+                        Button { Task { await today.continueLast() } } label: {
+                            Label(ux3String("h4.continue \(offer.kind.plainName) \(until)"), systemImage: "arrow.uturn.forward").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.ttSecondary).accessibilityIdentifier("menubar.continue")
+                    }
+                }
+            }
         }
     }
 

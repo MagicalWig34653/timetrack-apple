@@ -178,6 +178,7 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - Sources/Watch
+      - path: Sources/Common/UX3.xcstrings # H5: "Fortführen" wording shared with iOS/macOS (UX3 table)
       # A6b: primary Icon Composer icon.
       - path: Icons/TimetrackPrimary.icon
         buildPhase: resources

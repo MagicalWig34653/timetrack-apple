@@ -34,6 +34,8 @@ enum WidgetIntentError: Error, CustomLocalizedStringResourceConvertible {
 
 enum WidgetTimerAction {
     case start, stop
+    /// H5: reopen the last finished entry of today (fallback: new entry from now), like "Fortführen" in the app. Needs the server (no queue).
+    case continueLast
 
     /// Runs the command against the API, then refreshes the snapshot, widgets and Live Activity.
     static func perform(_ action: WidgetTimerAction) async throws {
@@ -42,6 +44,9 @@ enum WidgetTimerAction {
             switch action {
             case .start: _ = try await TimerCommand.start(client: client)
             case .stop: _ = try await TimerCommand.stop(client: client)
+            case .continueLast:
+                let zone = WidgetSnapshotStore().read().flatMap { TimeZone(identifier: $0.timeZone) } ?? TimeZone(identifier: "Europe/Berlin") ?? .current
+                _ = try await TimerCommand.continueLast(client: client, today: DayCalendar(timeZone: zone).day(for: .now))
             }
         } catch let error as TimetrackError {
             throw WidgetIntentError.failed(error.germanDescription)
@@ -58,6 +63,17 @@ struct WidgetStartTimerIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         try await WidgetTimerAction.perform(.start)
+        return .result()
+    }
+}
+
+/// H5: "Fortführen" button of the Home Screen widget (idle) and the Control Center button.
+struct WidgetContinueTimerIntent: LiveActivityIntent {
+    static let title = LocalizedStringResource("w.intent.continue", table: "Widget")
+    static let isDiscoverable = false
+
+    func perform() async throws -> some IntentResult {
+        try await WidgetTimerAction.perform(.continueLast)
         return .result()
     }
 }

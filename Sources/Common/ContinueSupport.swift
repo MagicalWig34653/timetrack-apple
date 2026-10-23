@@ -3,7 +3,7 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// H4: "Fortführen: Arbeit, zuletzt bis 12:03" – continues the most recent finished entry of today (reopen, or a new entry from now when
+/// H4/H5: "Fortführen: Arbeit, zuletzt bis 12:03" (iPhone, iPad, Mac) – continues the most recent finished entry of today (reopen, or a new entry from now when
 /// the server cannot reopen). Shown only while idle and when such an entry exists.
 struct ContinueButton: View {
     let store: TodayStore

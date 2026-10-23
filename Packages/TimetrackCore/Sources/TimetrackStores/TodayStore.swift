@@ -181,12 +181,16 @@ public final class TodayStore {
     /// H4: the most recent finished entry of today that can be continued (nothing runs, nothing waits in the queue, kind is startable).
     public var continuableSegment: Segment? {
         guard running == nil, !pending.contains(where: { if case .stop = $0.command { false } else { true } }) else { return nil }
-        return segments.filter { !$0.voided && $0.endedAt != nil && SegmentKind.selectable.contains($0.kind) }
-            .max { ($0.endedAt ?? .distantPast) < ($1.endedAt ?? .distantPast) }
+        return TimerCommand.continuable(in: segments)
+    }
+
+    /// H5: what every platform shows for "Fortführen" (kind, end of the entry, gap). Nil when nothing can be continued.
+    public var continueOffer: ContinueOffer? {
+        continuableSegment.flatMap { ContinueOffer(segment: $0) }
     }
 
     /// H4: gaps longer than this get two explicit options in the UI ("Fortführen (Lücke zählt mit)" / "Neu starten (Lücke bleibt Pause)").
-    public static let longContinueGap: TimeInterval = 15 * 60
+    public static let longContinueGap: TimeInterval = ContinueOffer.longGap
 
     /// H4: how long ago the continuable entry ended. Reopening counts this gap as time of the entry (server rule since contract 0.27.0).
     public func continueGap(now: Date = .now) -> TimeInterval? {
@@ -322,4 +326,21 @@ public final class TodayStore {
         await load()
         if let failure { error = failure }
     }
+}
+
+/// H5: UI-agnostic description of the "Fortführen" offer, so iPhone, iPad, Mac and Watch decide identically when to ask about the gap.
+public struct ContinueOffer: Sendable, Equatable {
+    public let segmentId: UUID
+    public let kind: SegmentKind
+    public let endedAt: Date
+
+    public init?(segment: Segment) {
+        guard let ended = segment.endedAt else { return nil }
+        self.segmentId = segment.id; self.kind = segment.kind; self.endedAt = ended
+    }
+
+    public func gap(now: Date = .now) -> TimeInterval { max(0, now.timeIntervalSince(endedAt)) }
+    /// Longer than `TodayStore.longContinueGap`: the user chooses between "Fortführen (Lücke zählt mit)" and "Neu starten".
+    public func isLongGap(now: Date = .now) -> Bool { gap(now: now) > Self.longGap }
+    public static let longGap: TimeInterval = 15 * 60
 }

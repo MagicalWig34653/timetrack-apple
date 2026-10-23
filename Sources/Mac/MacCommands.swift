@@ -30,6 +30,13 @@ struct TimetrackCommands: Commands {
             .keyboardShortcut("t", modifiers: [.command, .option])
             .disabled(model.today == nil)
 
+            // H5: reopens the last finished entry of today (like "Fortführen" on iPhone); a long gap asks first.
+            Button(ux3String("h4.continue.menu")) {
+                Task { @MainActor in await continueLastTimer(model, ui) }
+            }
+            .keyboardShortcut("c", modifiers: [.command, .option])
+            .disabled(model.today?.continueOffer == nil)
+
             Divider()
 
             Button("time.previous_week") { ui.send(.previousWeek) }
@@ -72,4 +79,13 @@ struct TimetrackCommands: Commands {
 func toggleTimer(_ model: AppModel) async {
     guard let today = model.today else { return }
     if today.running == nil { await today.start() } else { await today.stop() }
+}
+
+/// H5: menu command, toolbar button and menu bar item. Short gap: continue at once; gap > 15 min: the window asks
+/// ("Fortführen (Lücke zählt mit)" / "Neu starten (Lücke bleibt Pause)") instead of counting a long break as work silently.
+@MainActor
+func continueLastTimer(_ model: AppModel, _ ui: UIState) async {
+    guard let today = model.today, let offer = today.continueOffer else { return }
+    if offer.isLongGap() { ui.continueChoice = true; return }
+    await today.continueLast()
 }

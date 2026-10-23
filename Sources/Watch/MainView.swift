@@ -51,8 +51,10 @@ private struct TodayScreen: View {
     var body: some View {
         TodayContent(display: store.display, status: status, actions: TimerActions(
             start: { kind in Task { await store.start(kind: kind) } },
-            stop: { Task { await store.stop() } }
-        ), zone: model.dayCalendar.timeZone)
+            stop: { Task { await store.stop() } },
+            continueLast: { startNew in Task { await store.continueLast(startNew: startNew) } }
+        ), zone: model.dayCalendar.timeZone, continueOffer: store.continueOffer, continueNotice: store.continueNotice,
+        clearContinueNotice: { store.clearContinueNotice() })
         // The accent is part of the complication's snapshot.
         .onChange(of: model.appearance.local) { TimetrackWatchApp.publish(model) }
         // 401 while in use: the session ended; ask for a new hand-over instead of showing a raw error.
@@ -65,6 +67,8 @@ private struct TodayScreen: View {
 struct TimerActions {
     let start: (SegmentKind) -> Void
     let stop: () -> Void
+    /// H5: reopen the last finished entry of today (`startNew`: a new entry from now, the gap stays a pause).
+    let continueLast: (_ startNew: Bool) -> Void
 }
 
 /// The whole screen as a function of `TodayDisplay`: the same view draws cached, queued and live state.
@@ -73,12 +77,17 @@ struct TodayContent: View {
     let status: TodayStatus
     let actions: TimerActions?
     var zone: TimeZone = TimeZone(identifier: "Europe/Berlin") ?? .current
+    /// H5: "Fortführen" offer (idle, a finished entry exists today); nil for the cached first frame.
+    var continueOffer: ContinueOffer?
+    var continueNotice: TodayStore.ContinueNotice?
+    var clearContinueNotice: () -> Void = {}
 
     var body: some View {
         let _ = LaunchTrace.mark(display.source == .live ? "content.live" : "content.first")
         ScrollView {
             VStack(spacing: 10) {
                 TimerSection(display: display, actions: actions)
+                ContinueSection(offer: display.isRunning ? nil : continueOffer, notice: continueNotice, zone: zone, actions: actions, clear: clearContinueNotice)
                 StatusLine(status: status, updatedAt: display.updatedAt, zone: zone)
                 SummarySection(display: display)
                 SegmentsSection(segments: display.segments, zone: zone)
@@ -160,6 +169,52 @@ private struct TimerSection: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(actions == nil)
                 .accessibilityIdentifier("watch.start")
+            }
+        }
+    }
+}
+
+/// H5: "Fortführen: Arbeit, zuletzt bis 10:03" below Start. Gap > 15 min: a dialog asks whether the gap counts as work time.
+private struct ContinueSection: View {
+    let offer: ContinueOffer?
+    let notice: TodayStore.ContinueNotice?
+    let zone: TimeZone
+    let actions: TimerActions?
+    let clear: () -> Void
+    @State private var choosing = false
+
+    var body: some View {
+        VStack(spacing: 4) {
+            if let offer {
+                let until = offer.endedAt.clockText(in: zone)
+                Button { if offer.isLongGap() { choosing = true } else { actions?.continueLast(false) } } label: {
+                    Label { Text(LocalizedStringResource("h4.continue \(offer.kind.plainName) \(until)", table: "UX3")).font(.footnote).lineLimit(3) } icon: { Image(systemName: "arrow.uturn.forward") }
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .disabled(actions == nil)
+                .accessibilityHint(Text(LocalizedStringResource("h4.continue.hint", table: "UX3")))
+                .accessibilityIdentifier("watch.continue")
+                .confirmationDialog(Text(LocalizedStringResource("h4.continue.choose \(DurationFormat.hoursMinutes(Int(offer.gap())))", table: "UX3")), isPresented: $choosing, titleVisibility: .visible) {
+                    Button(String(localized: "h4.continue.with_gap", table: "UX3")) { actions?.continueLast(false) }
+                    Button(String(localized: "h4.continue.fresh", table: "UX3")) { actions?.continueLast(true) }
+                    Button(role: .cancel) {} label: { Text("common.cancel") }
+                }
+            }
+            if let notice {
+                Group {
+                    switch notice {
+                    case .reopened: Text(LocalizedStringResource("h4.notice.reopened", table: "UX3"))
+                    case .startedNew: Text(LocalizedStringResource("h4.notice.started_new", table: "UX3"))
+                    case .queued: Text(LocalizedStringResource("h4.notice.queued", table: "UX3"))
+                    }
+                }
+                .font(.caption2).foregroundStyle(TT.textSecondary).frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("watch.continue.notice")
+                .task(id: notice) {
+                    try? await Task.sleep(for: .seconds(notice == .startedNew ? 12 : 6))
+                    if !Task.isCancelled { clear() }
+                }
             }
         }
     }

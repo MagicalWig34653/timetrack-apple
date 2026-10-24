@@ -7,11 +7,13 @@ import TimetrackStores
 /// have natively yet (they open the web app), reminders, automation and the settings themselves. The S2 settings pages stay as they are.
 struct MoreView: View {
     @Environment(AppModel.self) private var model
+    @State private var showReview = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 AccountCard()
+                reviewGroup
                 evaluationGroup
                 reportsGroup
                 webAreas
@@ -25,6 +27,24 @@ struct MoreView: View {
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.more")
+        .sheet(isPresented: $showReview) { ReviewSheet() }
+    }
+
+    /// SG1: what waits for a decision (suggestions of the automation, flagged entries) and the bin of cancelled entries.
+    private var reviewGroup: some View {
+        let count = model.review?.count ?? 0
+        return FormSection("Prüfen und Storniert", footer: "Vorschläge der Automatik und Einträge, die einen Blick brauchen. Nichts wird ohne dein Zutun gebucht. Stornierte Einträge kannst du wiederherstellen oder endgültig löschen.") {
+            SettingsActionRow(title: "Zu prüfen", symbol: "checklist", id: "more.review") { showReview = true }
+                .overlay(alignment: .trailing) {
+                    if count > 0 {
+                        Text(verbatim: "\(count)").font(TTFont.meta.weight(.semibold)).foregroundStyle(.white)
+                            .padding(.horizontal, 7).padding(.vertical, 2).background(TT.warning, in: .capsule)
+                            .padding(.trailing, 36).accessibilityHidden(true)
+                    }
+                }
+                .accessibilityValue(count > 0 ? Text(verbatim: SG1.s("sg1.badge.label \(count)")) : Text(verbatim: ""))
+            SettingsLinkRow(title: "Storniert", symbol: "trash", id: "more.cancelled") { CancelledScreen() }
+        }
     }
 
     /// WM2: charts of the time account, target vs. worked, kinds, absences and breaks.

@@ -25,6 +25,8 @@ public final class AppModel {
     public private(set) var timeList: TimeListStore?
     /// Q1: entries that need a look ("n zu prüfen").
     public private(set) var review: ReviewStore?
+    /// SG1: the "Storniert" bin.
+    public private(set) var cancelled: CancelledStore?
     /// Created only while the `planning` module is on.
     public private(set) var planning: PlanningStore?
     public private(set) var calendar: CalendarStore?
@@ -268,6 +270,9 @@ public final class AppModel {
         let reviewStore = ReviewStore(client: client, calendar: calendar)
         reviewStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         review = reviewStore
+        let cancelledStore = CancelledStore(client: client)
+        cancelledStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
+        cancelled = cancelledStore
         today = todayStore
         timeList = timeListStore
         makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
@@ -328,6 +333,7 @@ public final class AppModel {
         today = nil
         timeList = nil
         review = nil
+        cancelled = nil
         planning = nil
         calendar = nil
         workModel = nil

@@ -86,7 +86,7 @@ final class UIState {
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case today, time, statistics, planning, calendar, vacation, reports, activity
+    case today, time, statistics, planning, calendar, vacation, reports, activity, suggestions, cancelled
     var id: String { rawValue }
 
     /// Module that must be on for this entry; `nil` = core feature that is always available.
@@ -94,7 +94,7 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         switch self {
         case .planning, .calendar, .vacation: .planning
         case .reports: .reports
-        case .today, .time, .statistics, .activity: nil
+        case .today, .time, .statistics, .activity, .suggestions, .cancelled: nil
         }
     }
 
@@ -108,6 +108,8 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .vacation: "sidebar.vacation"
         case .reports: "sidebar.reports"
         case .activity: "Aktivität"
+        case .suggestions: "Zu prüfen" // SG1
+        case .cancelled: "Storniert" // SG1
         }
     }
 
@@ -124,6 +126,8 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .vacation: "beach.umbrella"
         case .reports: "book.closed"
         case .activity: "square.stack.3d.up"
+        case .suggestions: "checklist"
+        case .cancelled: "trash"
         }
     }
 }

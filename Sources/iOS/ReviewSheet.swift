@@ -6,37 +6,6 @@ import TimetrackStores
 // Q1: the list behind "n zu prüfen". Each entry says why it needs a look, in plain German, and offers the fix actions:
 // accept the automation's proposal / confirm ("Passt so"), adjust (editor) or delete. Strings live in `Q1.xcstrings`.
 
-enum Q1 {
-    static func s(_ key: String.LocalizationValue) -> String { String(localized: key, table: "Q1") }
-    static func t(_ key: LocalizedStringKey) -> Text { Text(key, tableName: "Q1") }
-}
-
-extension ReviewReason {
-    var titleKey: LocalizedStringKey {
-        switch self {
-        case .endMissingProposed: "q1.reason.proposed.title"
-        case .endMissing: "q1.reason.end_missing.title"
-        case .markedByAutomation: "q1.reason.marked.title"
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .endMissingProposed, .endMissing: "clock.badge.exclamationmark"
-        case .markedByAutomation: "exclamationmark.circle"
-        }
-    }
-
-    /// The plain-language explanation; `zone` formats the proposed end in the work model's time zone.
-    func detail(zone: TimeZone) -> String {
-        switch self {
-        case .endMissingProposed(let end): Q1.s("q1.reason.proposed.detail \(end.clockText(in: zone))")
-        case .endMissing: Q1.s("q1.reason.end_missing.detail")
-        case .markedByAutomation: Q1.s("q1.reason.marked.detail")
-        }
-    }
-}
-
 struct ReviewSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
@@ -56,9 +25,12 @@ struct ReviewSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: TT.Space.l) {
                     if let review = model.review {
+                        // SG1: automation suggestions first (a decision each), then the flagged entries (Q1).
+                        SuggestionsSection(review: review)
                         if review.items.isEmpty {
-                            if review.hasLoaded { empty } else { SkeletonList(rows: 2) }
+                            if review.hasLoaded { if review.suggestions.isEmpty { empty } } else { SkeletonList(rows: 2) }
                         } else {
+                            if !review.suggestions.isEmpty { Eyebrow(verbatim: SG1.s("sg1.section.entries")).accessibilityAddTraits(.isHeader) }
                             Q1.t("q1.review.intro").font(TTFont.body).foregroundStyle(TT.textSecondary)
                             ForEach(review.items) { item in card(item, review: review) }
                             Q1.t("q1.review.footer").font(TTFont.meta).foregroundStyle(TT.textTertiary)
@@ -97,7 +69,8 @@ struct ReviewSheet: View {
     private var empty: some View {
         VStack(spacing: TT.Space.s) {
             Image(systemName: "checkmark.circle").font(.largeTitle).foregroundStyle(TT.success).accessibilityHidden(true)
-            Q1.t("q1.review.empty").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+            SG1.t("sg1.empty.title").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+            SG1.t("sg1.empty.message").font(TTFont.meta).foregroundStyle(TT.textSecondary).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity).padding(.vertical, TT.Space.xxl)
     }

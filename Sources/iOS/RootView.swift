@@ -45,6 +45,7 @@ struct MainView: View {
     @Environment(AppModel.self) private var model
     @Environment(UIState.self) private var ui
     @Environment(\.horizontalSizeClass) private var sizeClass
+    @Environment(\.scenePhase) private var scenePhase
 
     private var sections: [AppSection] {
         AppSection.allCases.filter { section in section.requiredModule.map(model.isEnabled) ?? true }
@@ -79,6 +80,7 @@ struct MainView: View {
                     .background { TTBackdrop() }
                     .navigationTitle("Timetrack")
                     .safeAreaInset(edge: .bottom) { SidebarFooter() }
+                    .task { await model.review?.load() }
                 } detail: {
                     NavigationStack { SectionView(section: ui.selection) }
                 }
@@ -88,6 +90,7 @@ struct MainView: View {
                         Tab(section.titleKey, systemImage: section.symbol, value: section) {
                             NavigationStack { SectionView(section: section) }
                         }
+                        .badge(section.reviewBadge(count: model.review?.count ?? 0))
                     }
                 }
                 // UX3/H2: start/stop and the running clock on every tab including "Heute"; the bar is the single start/stop
@@ -98,12 +101,16 @@ struct MainView: View {
         }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: sections) { if !sections.contains(ui.selection) { ui.selection = .today } }
+        // SG1: the badge on "Heute" and "Mehr" needs the count from the first moment, not only after the chip or banner appeared.
+        .task { await model.review?.load() }
+        .onChange(of: scenePhase) { if scenePhase == .active { Task { await model.review?.load() } } }
     }
 }
 
 extension MainView {
     fileprivate func sidebarRow(_ section: AppSection) -> some View {
         Label(section.titleKey, systemImage: section.symbol)
+            .badge(section.reviewBadge(count: model.review?.count ?? 0))
             .tag(section)
             .accessibilityIdentifier("sidebar.\(section.rawValue)")
             .hoverEffect(.highlight) // pointer

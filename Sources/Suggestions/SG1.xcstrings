@@ -1,0 +1,931 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "sg1.about.entry %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betrifft: %@ ab %@ Uhr"
+          }
+        }
+      }
+    },
+    "sg1.action.accept.end %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende um %@ Uhr übernehmen"
+          }
+        }
+      }
+    },
+    "sg1.action.accept.start %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn um %@ Uhr übernehmen"
+          }
+        }
+      }
+    },
+    "sg1.action.accept_all %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle übernehmen (%lld)"
+          }
+        }
+      }
+    },
+    "sg1.action.adjust": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anpassen"
+          }
+        }
+      }
+    },
+    "sg1.action.reject": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ablehnen"
+          }
+        }
+      }
+    },
+    "sg1.action.reject_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle ablehnen"
+          }
+        }
+      }
+    },
+    "sg1.adjust.accept": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übernehmen"
+          }
+        }
+      }
+    },
+    "sg1.adjust.cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbrechen"
+          }
+        }
+      }
+    },
+    "sg1.adjust.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende"
+          }
+        }
+      }
+    },
+    "sg1.adjust.footer.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Ende muss nach dem Beginn des Eintrags liegen."
+          }
+        }
+      }
+    },
+    "sg1.adjust.footer.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Ende läuft der Timer ab dem Beginn weiter."
+          }
+        }
+      }
+    },
+    "sg1.adjust.has_end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit Ende (abgeschlossener Eintrag)"
+          }
+        }
+      }
+    },
+    "sg1.adjust.invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Zeiten dürfen nicht in der Zukunft liegen, und das Ende muss nach dem Beginn liegen."
+          }
+        }
+      }
+    },
+    "sg1.adjust.nav": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anpassen"
+          }
+        }
+      }
+    },
+    "sg1.adjust.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn"
+          }
+        }
+      }
+    },
+    "sg1.adjust.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschlag anpassen"
+          }
+        }
+      }
+    },
+    "sg1.badge.label %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld zu prüfen"
+          }
+        }
+      }
+    },
+    "sg1.bulk.accept.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jeder Vorschlag wird mit der vorgeschlagenen Zeit gebucht. Was sich nicht buchen lässt, bleibt stehen."
+          }
+        }
+      }
+    },
+    "sg1.bulk.accept.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Vorschläge übernehmen?"
+          }
+        }
+      }
+    },
+    "sg1.bulk.reject.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es wird nichts gebucht. Die Vorschläge verschwinden."
+          }
+        }
+      }
+    },
+    "sg1.bulk.reject.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle Vorschläge ablehnen?"
+          }
+        }
+      }
+    },
+    "sg1.bulk.rejected %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Vorschläge abgelehnt."
+          }
+        }
+      }
+    },
+    "sg1.bulk.result %lld %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld übernommen, %2$lld nicht möglich."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.empty.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stornierte Einträge erscheinen hier, bis du sie wiederherstellst oder endgültig löschst."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts storniert"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.group": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.group.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stornierte Einträge zählen nicht zur Arbeitszeit. Du kannst sie wiederherstellen oder endgültig löschen."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.hint.restore %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag %@ wiederherstellen"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stornierte Einträge zählen nicht zur Arbeitszeit. Hier kannst du sie wiederherstellen oder endgültig löschen."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.load_more": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere laden"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.no_reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Angabe eines Grundes"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.on %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storniert am %@"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.purge": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endgültig löschen …"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.purge_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle endgültig löschen …"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.purge_selected %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswahl endgültig löschen (%lld) …"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.purged %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Einträge endgültig gelöscht."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.reason %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grund: %@"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.restore": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.restore_failed.changed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Eintrag wurde inzwischen geändert. Die Liste ist wieder aktuell."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.restore_failed.overlap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen nicht möglich: Die Zeit überschneidet sich mit einem anderen Eintrag. Passe den anderen Eintrag an oder lösche diesen endgültig."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.restore_failed.timer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen nicht möglich: Es läuft bereits ein Timer. Beende ihn zuerst."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.restored": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eintrag wiederhergestellt."
+          }
+        }
+      }
+    },
+    "sg1.cancelled.row": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storniert"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.select": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswählen"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.select_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle auswählen"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.select_done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.select_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswahl aufheben"
+          }
+        }
+      }
+    },
+    "sg1.cancelled.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storniert"
+          }
+        }
+      }
+    },
+    "sg1.empty.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn die Automatik etwas vorschlägt, erscheint es hier. Gebucht wird erst, wenn du es übernimmst."
+          }
+        }
+      }
+    },
+    "sg1.empty.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts zu prüfen"
+          }
+        }
+      }
+    },
+    "sg1.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik schlägt vor, was gebucht werden könnte. Nichts wird gebucht, bevor du es übernimmst."
+          }
+        }
+      }
+    },
+    "sg1.kind.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende vorgeschlagen"
+          }
+        }
+      }
+    },
+    "sg1.kind.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn vorgeschlagen"
+          }
+        }
+      }
+    },
+    "sg1.kind.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschlag"
+          }
+        }
+      }
+    },
+    "sg1.more.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschläge der Automatik und Einträge, die einen Blick brauchen. Nichts wird ohne dein Zutun gebucht."
+          }
+        }
+      }
+    },
+    "sg1.more.group": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatik"
+          }
+        }
+      }
+    },
+    "sg1.more.row": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu prüfen"
+          }
+        }
+      }
+    },
+    "sg1.purge.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endgültig löschen"
+          }
+        }
+      }
+    },
+    "sg1.purge.counting": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zähle, was gelöscht würde …"
+          }
+        }
+      }
+    },
+    "sg1.purge.entries %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge: %lld"
+          }
+        }
+      }
+    },
+    "sg1.purge.heading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das wird unwiderruflich gelöscht:"
+          }
+        }
+      }
+    },
+    "sg1.purge.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es gibt nichts zu löschen."
+          }
+        }
+      }
+    },
+    "sg1.purge.revisions %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrekturen: %lld"
+          }
+        }
+      }
+    },
+    "sg1.purge.suggestions %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschläge: %lld"
+          }
+        }
+      }
+    },
+    "sg1.purge.timer_events %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer-Ergebnisse: %lld"
+          }
+        }
+      }
+    },
+    "sg1.purge.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endgültig löschen"
+          }
+        }
+      }
+    },
+    "sg1.purge.type_prompt %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tippe zur Bestätigung „%@“."
+          }
+        }
+      }
+    },
+    "sg1.purge.unreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Anzahl konnte nicht gelesen werden. Versuche es noch einmal."
+          }
+        }
+      }
+    },
+    "sg1.purge.warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das lässt sich nicht rückgängig machen. Es bleibt keine Spur der Zeiten, auch nicht in Exporten."
+          }
+        }
+      }
+    },
+    "sg1.purge.word": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÖSCHEN"
+          }
+        }
+      }
+    },
+    "sg1.reason.end": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik schlägt ein Ende vor."
+          }
+        }
+      }
+    },
+    "sg1.reason.end.place %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast „%@“ verlassen."
+          }
+        }
+      }
+    },
+    "sg1.reason.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Automatik schlägt einen Beginn vor."
+          }
+        }
+      }
+    },
+    "sg1.reason.start.place %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du bist bei „%@“ angekommen."
+          }
+        }
+      }
+    },
+    "sg1.reason.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Vorschlag kann in dieser App-Version nicht übernommen werden."
+          }
+        }
+      }
+    },
+    "sg1.review.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu prüfen"
+          }
+        }
+      }
+    },
+    "sg1.section.entries": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einträge prüfen"
+          }
+        }
+      }
+    },
+    "sg1.section.suggestions": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschläge"
+          }
+        }
+      }
+    },
+    "sg1.when.end %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ende um %@ Uhr"
+          }
+        }
+      }
+    },
+    "sg1.when.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Zeitvorschlag"
+          }
+        }
+      }
+    },
+    "sg1.when.start %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beginn um %@ Uhr"
+          }
+        }
+      }
+    },
+    "sg1.purge.headline %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Eintrag wird endgültig gelöscht"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Einträge werden endgültig gelöscht"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

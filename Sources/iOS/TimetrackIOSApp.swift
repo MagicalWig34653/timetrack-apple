@@ -159,6 +159,11 @@ enum AppSection: String, CaseIterable, Identifiable {
         }
     }
 
+    /// SG1: badge for what waits for a decision ("n zu prüfen"): on "Heute" (chip), "Zeit" (banner) and "Mehr" (the list); 0 shows none.
+    func reviewBadge(count: Int) -> Int {
+        (self == .today || self == .time || self == .more) ? count : 0
+    }
+
     var symbol: String {
         switch self {
         case .today: "clock" // UX1 F02: "sun.max" read as weather

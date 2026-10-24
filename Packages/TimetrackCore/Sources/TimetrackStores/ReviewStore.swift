@@ -8,6 +8,8 @@ import TimetrackCore
 @Observable
 public final class ReviewStore {
     public private(set) var items: [ReviewItem] = []
+    /// SG1: open suggestions that are not part of a flagged entry (arrival/departure proposals of the place automation).
+    public private(set) var suggestions: [SuggestionEntry] = []
     public private(set) var isLoading = false
     public private(set) var hasLoaded = false
     public var error: TimetrackError?
@@ -26,7 +28,8 @@ public final class ReviewStore {
         self.dismissals = dismissals
     }
 
-    public var count: Int { items.count }
+    /// Everything that needs the user's decision: flagged entries plus open suggestions ("n zu prüfen").
+    public var count: Int { items.count + suggestions.count }
 
     /// Reads the flagged segments of the last weeks and the open suggestions. A failed read keeps the last list.
     @discardableResult
@@ -42,8 +45,14 @@ public final class ReviewStore {
             let suggestions = (try? await client.listTimeSuggestions()) ?? []
             let segments = try await client.listSegments(from: from, to: to)
             guard generation == loadGeneration else { return segments }
-            let fresh = ReviewList.items(segments: segments, suggestions: suggestions, dismissed: dismissals.read(), calendar: calendar)
+            let dismissed = dismissals.read()
+            let fresh = ReviewList.items(segments: segments, suggestions: suggestions, dismissed: dismissed, calendar: calendar)
             if fresh != items { items = fresh }
+            // An end proposal for an entry the user already dealt with (or that is listed above with it) is not asked again.
+            let consumed = Set(fresh.compactMap { $0.suggestion?.id })
+                .union(suggestions.filter { $0.type == .end && $0.segmentId.map(dismissed.contains) == true }.map(\.id))
+            let standalone = SuggestionEntries.entries(suggestions: suggestions, consumed: consumed, segments: segments, calendar: calendar)
+            if standalone != self.suggestions { self.suggestions = standalone }
             hasLoaded = true
             error = nil
             return segments
@@ -63,6 +72,67 @@ public final class ReviewStore {
             _ = try await self.client.acceptTimeSuggestion(id: suggestion.id, endedAt: end)
             self.dismissals.add(item.id)
         }
+    }
+
+    // MARK: - SG1: suggestions (explicit decisions only, nothing is booked silently)
+
+    /// "Übernehmen" / "Anpassen": books the suggestion, with the user's times when they changed them.
+    @discardableResult
+    public func accept(_ entry: SuggestionEntry, startedAt: Date? = nil, endedAt: Date? = nil) async -> Bool {
+        let start = startedAt ?? (endedAt == nil ? entry.suggestion.proposedStartedAt : nil)
+        let end = endedAt ?? (startedAt == nil ? entry.suggestion.proposedEndedAt : nil)
+        return await run { _ = try await self.client.acceptTimeSuggestion(id: entry.id, startedAt: start, endedAt: end) }
+    }
+
+    /// "Ablehnen": the suggestion is dropped; nothing is booked.
+    @discardableResult
+    public func reject(_ entry: SuggestionEntry) async -> Bool {
+        await run { try await self.client.rejectTimeSuggestion(id: entry.id) }
+    }
+
+    /// Accepts every suggestion that can be accepted as proposed, one by one from the earliest. A refusal (overlap, running timer)
+    /// leaves that suggestion listed and does not stop the others.
+    @discardableResult
+    public func acceptAll() async -> SuggestionBulkOutcome {
+        var outcome = SuggestionBulkOutcome()
+        for entry in suggestions where entry.canAccept {
+            do {
+                _ = try await client.acceptTimeSuggestion(id: entry.id, startedAt: entry.suggestion.proposedStartedAt, endedAt: entry.suggestion.proposedEndedAt)
+                outcome.done += 1
+            } catch let failure as TimetrackError {
+                outcome.failed += 1
+                if outcome.firstError == nil, failure != .cancelled { outcome.firstError = failure }
+            } catch {
+                outcome.failed += 1
+            }
+        }
+        finishBulk(outcome)
+        await load()
+        return outcome
+    }
+
+    @discardableResult
+    public func rejectAll() async -> SuggestionBulkOutcome {
+        var outcome = SuggestionBulkOutcome()
+        for entry in suggestions {
+            do {
+                try await client.rejectTimeSuggestion(id: entry.id)
+                outcome.done += 1
+            } catch let failure as TimetrackError {
+                outcome.failed += 1
+                if outcome.firstError == nil, failure != .cancelled { outcome.firstError = failure }
+            } catch {
+                outcome.failed += 1
+            }
+        }
+        finishBulk(outcome)
+        await load()
+        return outcome
+    }
+
+    private func finishBulk(_ outcome: SuggestionBulkOutcome) {
+        error = outcome.firstError
+        if outcome.done > 0 { onOutcome?(.saved) } else if outcome.failed > 0 { onOutcome?(.failed) }
     }
 
     /// "Passt so": the entry stays as it is. An open end proposal for it is dropped so it does not come back.

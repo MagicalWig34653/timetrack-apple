@@ -61,9 +61,12 @@ struct MainView: View {
             case .vacation: VacationScreen()
             case .reports: NavigationStack { ReportsScreen(week: ui.reportsWeek) }
             case .activity: ActivityView()
+            case .suggestions: NavigationStack { SuggestionsMacScreen() } // SG1
+            case .cancelled: NavigationStack { CancelledScreen() } // SG1
             }
         }
         .ttSyncStatusLine() // UX3: only while actions wait or the server is unreachable
+        .task { await model.review?.load() } // SG1: the sidebar badge counts from the start
         .toolbar { ToolbarItemGroup(placement: .primaryAction) { TimerToolbarButton() } }
         .confirmationDialog(ux3String("h4.continue.choose \(DurationFormat.hoursMinutes(Int(model.today?.continueGap() ?? 0)))"), isPresented: $ui.continueChoice, titleVisibility: .visible) {
             Button(ux3String("h4.continue.with_gap")) { Task { await model.today?.continueLast() } }
@@ -78,6 +81,7 @@ struct MainView: View {
 
     private func row(_ item: SidebarItem) -> some View {
         Label(item.titleKey, systemImage: item.symbol)
+            .badge(item == .suggestions ? (model.review?.count ?? 0) : 0) // SG1
             .tag(item)
             .accessibilityIdentifier("sidebar.\(item.rawValue)")
     }

@@ -22,6 +22,9 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case noRunningTimer = "no_running_timer"
     case segmentOverlap = "segment_overlap"
     case staleVersion = "stale_version"
+    /// SG1 (contract 0.28.0): restoring/purging an entry that is not cancelled (409); a bulk purge without any selection (400).
+    case segmentNotCancelled = "segment_not_cancelled"
+    case purgeScopeRequired = "purge_scope_required"
     case modelOverlap = "model_overlap"
     case rangeTooLarge = "range_too_large"
     case absenceOverlap = "absence_overlap"

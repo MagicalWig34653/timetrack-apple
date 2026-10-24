@@ -257,6 +257,44 @@ public actor APIClient: PreferencesService {
         try await sendVoid(.post, "/time/suggestions/\(id.uuidString.lowercased())/reject")
     }
 
+    // MARK: - Cancelled entries (SG1, contract 0.28.0)
+
+    /// Cancelled entries, newest start first. `limit` 1...200.
+    public func listCancelledSegments(from: Date? = nil, to: Date? = nil, limit: Int = 50, offset: Int = 0) async throws -> CancelledSegmentPage {
+        var query = [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "offset", value: String(offset))]
+        if let from { query.append(URLQueryItem(name: "from", value: JSONCoding.formatInstant(from))) }
+        if let to { query.append(URLQueryItem(name: "to", value: JSONCoding.formatInstant(to))) }
+        return try await get("/time/segments/cancelled", query: query)
+    }
+
+    /// Lifts the cancellation. 409 `segment_overlap` / `timer_already_running` / `segment_not_cancelled`, 412 `stale_version` (when `ifMatchVersion` is sent).
+    public func restoreSegment(id: UUID, reason: String? = nil, ifMatchVersion: Int? = nil) async throws -> Segment {
+        struct Body: Encodable { let reason: String? }
+        var headers: [String: String] = [:]
+        if let ifMatchVersion { headers["If-Match"] = String(ifMatchVersion) }
+        return try await send(.post, "/time/segments/\(id.uuidString.lowercased())/restore", body: Body(reason: reason), headers: headers)
+    }
+
+    /// Permanently deletes one CANCELLED entry (409 `segment_not_cancelled` otherwise). Removes its correction log too; no tombstone.
+    public func purgeSegment(id: UUID) async throws -> PurgeSummary {
+        let data = try await perform(.delete, "/time/segments/\(id.uuidString.lowercased())", query: [URLQueryItem(name: "permanent", value: "true")])
+        return try decode(PurgeSummary.self, from: data)
+    }
+
+    /// Bulk deletion of cancelled entries; `dryRun` only counts (the preview before the strong confirmation).
+    public func purgeCancelledSegments(_ scope: PurgeScope, dryRun: Bool) async throws -> PurgeSummary {
+        var query: [URLQueryItem] = []
+        switch scope {
+        case .ids(let ids): query.append(URLQueryItem(name: "ids", value: ids.map { $0.uuidString.lowercased() }.joined(separator: ",")))
+        case .all: query.append(URLQueryItem(name: "all", value: "true"))
+        case .range(let from, let to):
+            if let from { query.append(URLQueryItem(name: "from", value: JSONCoding.formatInstant(from))) }
+            if let to { query.append(URLQueryItem(name: "to", value: JSONCoding.formatInstant(to))) }
+        }
+        if dryRun { query.append(URLQueryItem(name: "dryRun", value: "true")) }
+        return try decode(PurgeSummary.self, from: try await perform(.delete, "/time/segments/cancelled", query: query))
+    }
+
     public func startTimer(clientEventId: UUID, kind: SegmentKind? = nil, placeId: UUID? = nil) async throws -> Segment {
         struct Body: Encodable { let clientEventId: UUID; let kind: SegmentKind?; let placeId: UUID? }
         return try await send(.post, "/time/timer/start", body: Body(clientEventId: clientEventId, kind: kind, placeId: placeId))

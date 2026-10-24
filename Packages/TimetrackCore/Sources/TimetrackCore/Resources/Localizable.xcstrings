@@ -311,6 +311,17 @@
         }
       }
     },
+    "error.purge_scope_required": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wähle aus, was endgültig gelöscht werden soll."
+          }
+        }
+      }
+    },
     "error.range_too_large": {
       "localizations": {
         "de": {
@@ -348,6 +359,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bitte richte zuerst einen neuen Passkey ein."
+          }
+        }
+      }
+    },
+    "error.segment_not_cancelled": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Eintrag ist nicht storniert."
           }
         }
       }

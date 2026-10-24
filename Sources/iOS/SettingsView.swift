@@ -48,6 +48,7 @@ struct SettingsView: View {
     private var workGroup: some View {
         FormSection("Arbeit") {
             SettingsLinkRow(title: "workmodel.title", symbol: "calendar.badge.clock", id: "settings.workmodel") { WorkModelsScreen() }
+            SettingsLinkRow(title: wmKey("wm.account.title"), symbol: "plusminus.circle", id: "settings.timeaccount") { TimeAccountScreen() } // WM2
             if model.isEnabled(.planning) {
                 VacationEntitlementRow()
             }

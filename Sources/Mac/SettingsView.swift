@@ -105,18 +105,25 @@ private struct GeneralSettingsView: View {
 
 private struct WorkSettingsView: View {
     @State private var showWorkModels = false
+    @State private var showTimeAccount = false
 
     var body: some View {
         Form {
             Section {
                 Button { showWorkModels = true } label: { Label("workmodel.title", systemImage: "calendar.badge.clock") }
                     .accessibilityIdentifier("settings.workmodel")
+                Button { showTimeAccount = true } label: { Label(wmKey("wm.account.title"), systemImage: "plusminus.circle") } // WM2
+                    .accessibilityIdentifier("settings.timeaccount")
             } footer: { Text(AD.s("settings.work.workmodel_hint")) }
             Section(AD.s("settings.feedback")) { HapticsToggle() }
         }
         .formStyle(.grouped)
         .sheet(isPresented: $showWorkModels) {
             NavigationStack { WorkModelsScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showWorkModels = false } } } }
+                .frame(minWidth: 560, minHeight: 640)
+        }
+        .sheet(isPresented: $showTimeAccount) {
+            NavigationStack { TimeAccountScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showTimeAccount = false } } } }
                 .frame(minWidth: 560, minHeight: 640)
         }
     }

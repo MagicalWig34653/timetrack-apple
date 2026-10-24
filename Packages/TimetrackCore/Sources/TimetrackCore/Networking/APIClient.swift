@@ -201,6 +201,15 @@ public actor APIClient: PreferencesService {
         try await send(.post, "/work-models/\(id.uuidString.lowercased())/preview", body: input)
     }
 
+    /// New version from `validFrom` on (WM2): a running predecessor ends the day before, the past stays untouched (409 `model_overlap` otherwise).
+    public func createWorkModel(_ input: WorkModelInput) async throws -> WorkModel { try await send(.post, "/work-models", body: input) }
+
+    /// Ends one version on `validTo` (last valid day, inclusive), e.g. at the end of an apprenticeship; nothing else changes.
+    public func endWorkModel(id: UUID, validTo: LocalDay) async throws -> WorkModel {
+        struct Body: Encodable { let validTo: LocalDay }
+        return try await send(.patch, "/work-models/\(id.uuidString.lowercased())", body: Body(validTo: validTo))
+    }
+
     /// Version and build data; members get the version fields only. Old backends answer 404.
     public func getSystemInfo() async throws -> SystemInfo { try await get("/system/info") }
 
@@ -448,6 +457,19 @@ public actor APIClient: PreferencesService {
 
     /// Merge-patch: only the keys in `patch` change. Answers the full object.
     public func updatePreferences(_ patch: PreferencesPatch) async throws -> Preferences { try await send(.patch, "/me/preferences", body: patch) }
+
+    /// Opening balance (`opening`, at most one) or a dated correction of the time account (WM2); answers the new account state.
+    public func createAccountAdjustment(_ input: AccountAdjustmentInput) async throws -> TimeAccount {
+        try await send(.post, "/time/account/adjustments", body: input)
+    }
+
+    /// Chart series (contract v0.28.0); older servers answer 404.
+    public func getTimeStatistics(from: LocalDay, to: LocalDay, granularity: StatisticsGranularity, basis: StatisticsBasis) async throws -> TimeStatistics {
+        try await get("/time/statistics", query: [
+            URLQueryItem(name: "from", value: from), URLQueryItem(name: "to", value: to),
+            URLQueryItem(name: "granularity", value: granularity.rawValue), URLQueryItem(name: "basis", value: basis.rawValue),
+        ])
+    }
 
     public func getTimeAccount(asOf: LocalDay? = nil) async throws -> TimeAccount {
         try await get("/time/account", query: asOf.map { [URLQueryItem(name: "asOf", value: $0)] } ?? [])

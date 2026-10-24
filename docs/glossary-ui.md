@@ -22,6 +22,9 @@ Festgelegt vom Entwickler (Nutzerentscheidung: Wortwahl liegt beim Entwickler, e
 | **Berichtsheft** | Wochenbericht der Ausbildung (BH1): pro Woche Einträge mit Lernfeld, Zeit und Notizen; Status der Woche „Entwurf“/„Erledigt“ (nur Markierung). „Berichtszeit“ ist die Summe der Einträge und nicht „Gearbeitet“. Aktion „Für IHK-Portal kopieren“. | Bericht (allein), Tätigkeitsnachweis |
 | **Lernfeld** | Eigene Liste des Kontos (Nummer optional, Name); Einträge behalten den Namen als Momentaufnahme. | Fach, Kategorie |
 | **Quellen** | Notizen und Dateien einer Berichtswoche als Material; nie geteilt. | Anhänge (die gehören zu Abwesenheiten) |
+| **Arbeitsmodell-Version** | Ein Gültigkeitszeitraum des Arbeitsmodells (Soll, Rundung, Schule, feste Pausen). „Neue Version anlegen“ gilt ab einem Tag, die laufende Version endet am Vortag; „Beenden“ setzt nur den letzten Gültigkeitstag (z. B. Ausbildungsende); „Korrigieren“ überschreibt eine Version (mit Vorschau). Die Historie bleibt immer erhalten. | Modell (allein), Segment-Version |
+| **Korrektur (Zeitkonto)** | Datierte Gutschrift oder Abzug auf dem Zeitkonto mit Begründung; kann nicht gelöscht, nur mit einer Gegenbuchung ausgeglichen werden. **Anfangsstand**: Stand, ab dem das Zeitkonto zählt (nur einer). | Saldo, Buchung rückgängig |
+| **Statistik** | Diagramme unter Mehr: Zeitkonto-Verlauf, „Soll und Gearbeitet“, „Mehr- und Minderzeit“, „Verteilung nach Art“, Abwesenheiten, Pausen. „Mit Rundung“/„Ohne Rundung“ wählt, ob Rundung von erstem Beginn und letztem Ende mitzählt. | Auswertung (für die Statistik; „Auswertung und Export“ bleibt der Web-Bereich) |
 | **Im Web** | Bereich, den es nur in der Web-App gibt; Zeile öffnet sie im Browser. | – |
 
 Farben der Abwesenheiten (UX3): Urlaub smaragdgrün, Krank rose, Freigestellt teal, Sonstiges schiefergrau, Feiertag amber; Arten: Arbeit sky, Fahrt amber, Schule violett. Farbe ist nie die einzige Information (Symbol und Name stehen daneben).

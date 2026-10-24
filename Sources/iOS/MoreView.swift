@@ -12,6 +12,7 @@ struct MoreView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 AccountCard()
+                evaluationGroup
                 reportsGroup
                 webAreas
                 remindersGroup
@@ -24,6 +25,13 @@ struct MoreView: View {
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.more")
+    }
+
+    /// WM2: charts of the time account, target vs. worked, kinds, absences and breaks.
+    private var evaluationGroup: some View {
+        FormSection(wmKey("wm.more.evaluation")) {
+            SettingsLinkRow(title: wmKey("wm.stats.title"), symbol: "chart.xyaxis.line", id: "more.statistics") { StatisticsScreen() }
+        }
     }
 
     /// BH1: the Berichtsheft is native now (weeks, entries, learning fields, copy for the IHK portal).

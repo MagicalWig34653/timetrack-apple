@@ -106,4 +106,56 @@ public final class WorkModelStore {
             return nil
         }
     }
+
+    // MARK: - New version and ending (WM2)
+
+    /// Creates a new open-ended version from the form (validated locally against the timeline first). The running predecessor is closed
+    /// by the server on the day before. Returns the stored version; on failure `error` is set.
+    @discardableResult
+    public func create(form: WorkModelForm) async -> WorkModel? {
+        guard case .success(var input) = form.build() else { return nil }
+        input.validTo = nil
+        if case .overlaps = models.checkNewVersion(validFrom: input.validFrom) {
+            error = .api(status: 409, code: APIErrorCode.modelOverlap.rawValue, message: "")
+            onOutcome?(.failed)
+            return nil
+        }
+        do {
+            let stored = try await client.createWorkModel(input)
+            error = nil
+            onOutcome?(.saved)
+            await load()
+            onSaved?()
+            return stored
+        } catch let failure as TimetrackError {
+            if failure != .cancelled { error = failure; onOutcome?(.failed) }
+            return nil
+        } catch {
+            return nil
+        }
+    }
+
+    /// Ends `model` on `day` (last valid day, inclusive). Local checks mirror the server; history stays untouched.
+    @discardableResult
+    public func end(_ model: WorkModel, on day: LocalDay) async -> WorkModel? {
+        if let issue = models.checkEnd(of: model, on: day) {
+            error = issue == .invalidDate || issue == .beforeStart ? .api(status: 400, code: APIErrorCode.invalid.rawValue, message: "")
+                : .api(status: 409, code: APIErrorCode.modelOverlap.rawValue, message: "")
+            onOutcome?(.failed)
+            return nil
+        }
+        do {
+            let stored = try await client.endWorkModel(id: model.id, validTo: day)
+            error = nil
+            onOutcome?(.saved)
+            await load()
+            onSaved?()
+            return stored
+        } catch let failure as TimetrackError {
+            if failure != .cancelled { error = failure; onOutcome?(.failed) }
+            return nil
+        } catch {
+            return nil
+        }
+    }
 }

@@ -1,0 +1,1238 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "wm.account.amount": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dauer (h:mm)"
+          }
+        }
+      }
+    },
+    "wm.account.balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitkonto"
+          }
+        }
+      }
+    },
+    "wm.account.confirm %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur %@ am %@ buchen?"
+          }
+        }
+      }
+    },
+    "wm.account.confirm_action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buchen"
+          }
+        }
+      }
+    },
+    "wm.account.confirm_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Zeitkonto ändert sich sofort. Eine gebuchte Korrektur kann nicht gelöscht werden; du gleichst sie mit einer Gegenbuchung aus."
+          }
+        }
+      }
+    },
+    "wm.account.correction_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine datierte Gutschrift oder ein Abzug auf dem Zeitkonto, zum Beispiel für einen Zeitausgleich. Eine Korrektur lässt sich nicht löschen, nur mit einer Gegenbuchung ausgleichen."
+          }
+        }
+      }
+    },
+    "wm.account.correction_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur buchen"
+          }
+        }
+      }
+    },
+    "wm.account.correction_saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur gebucht."
+          }
+        }
+      }
+    },
+    "wm.account.correction_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur buchen"
+          }
+        }
+      }
+    },
+    "wm.account.corrections": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrekturen (Summe)"
+          }
+        }
+      }
+    },
+    "wm.account.credit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gutschrift"
+          }
+        }
+      }
+    },
+    "wm.account.date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datum"
+          }
+        }
+      }
+    },
+    "wm.account.deduction": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abzug"
+          }
+        }
+      }
+    },
+    "wm.account.direction": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art der Korrektur"
+          }
+        }
+      }
+    },
+    "wm.account.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stand deines Zeitkontos mit Anfangsstand und Korrekturen. Der Saldo ergibt sich aus den ausgewerteten Tagen; hier buchst du Anfangsstand oder eine datierte Korrektur mit Begründung."
+          }
+        }
+      }
+    },
+    "wm.account.invalid_reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib eine Begründung an (höchstens 200 Zeichen)."
+          }
+        }
+      }
+    },
+    "wm.account.invalid_value": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte gib die Dauer als h:mm an, zum Beispiel 1:30 oder -0:45."
+          }
+        }
+      }
+    },
+    "wm.account.no_start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch kein Anfangsstand: Tage werden erst ab dem Startdatum gezählt."
+          }
+        }
+      }
+    },
+    "wm.account.opening": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand"
+          }
+        }
+      }
+    },
+    "wm.account.opening_confirm %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand %@ ab %@ festlegen?"
+          }
+        }
+      }
+    },
+    "wm.account.opening_confirm_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Zeitkonto zählt ab diesem Tag. Ein Anfangsstand kann nicht wieder entfernt werden."
+          }
+        }
+      }
+    },
+    "wm.account.opening_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab diesem Datum zählt das Zeitkonto. Es kann nur einen Anfangsstand geben."
+          }
+        }
+      }
+    },
+    "wm.account.opening_reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand"
+          }
+        }
+      }
+    },
+    "wm.account.opening_save": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand speichern"
+          }
+        }
+      }
+    },
+    "wm.account.opening_saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand gespeichert."
+          }
+        }
+      }
+    },
+    "wm.account.opening_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand festlegen"
+          }
+        }
+      }
+    },
+    "wm.account.opening_value": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anfangsstand (h:mm)"
+          }
+        }
+      }
+    },
+    "wm.account.provisional": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vorläufig"
+          }
+        }
+      }
+    },
+    "wm.account.reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begründung"
+          }
+        }
+      }
+    },
+    "wm.account.since %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seit %@"
+          }
+        }
+      }
+    },
+    "wm.account.start_date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startdatum"
+          }
+        }
+      }
+    },
+    "wm.account.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitkonto"
+          }
+        }
+      }
+    },
+    "wm.account.value_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als h:mm, zum Beispiel 1:30 oder 45 für Minuten."
+          }
+        }
+      }
+    },
+    "wm.end.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version beenden"
+          }
+        }
+      }
+    },
+    "wm.end.before_start %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Datum darf nicht vor dem Beginn der Version (%@) liegen."
+          }
+        }
+      }
+    },
+    "wm.end.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden"
+          }
+        }
+      }
+    },
+    "wm.end.confirm_action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden"
+          }
+        }
+      }
+    },
+    "wm.end.confirm_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danach gilt kein Arbeitsmodell mehr, bis du eine neue Version anlegst. Erfasste Zeiten und die Historie bleiben erhalten."
+          }
+        }
+      }
+    },
+    "wm.end.confirm_title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version zum %@ beenden?"
+          }
+        }
+      }
+    },
+    "wm.end.consequence %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Version gilt bis einschließlich %@. Die Historie bleibt erhalten."
+          }
+        }
+      }
+    },
+    "wm.end.intro %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setzt den letzten Gültigkeitstag dieser Version (%@), zum Beispiel zum Ausbildungsende. Andere Werte bleiben unverändert; neue Regeln brauchen eine neue Version."
+          }
+        }
+      }
+    },
+    "wm.end.invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte wähle ein gültiges Datum."
+          }
+        }
+      }
+    },
+    "wm.end.last_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzter Gültigkeitstag"
+          }
+        }
+      }
+    },
+    "wm.end.overlaps_later %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine spätere Version beginnt schon am %@. Wähle ein Datum davor."
+          }
+        }
+      }
+    },
+    "wm.end.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version beenden"
+          }
+        }
+      }
+    },
+    "wm.gap %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lücke vom %@ bis %@: kein Arbeitsmodell"
+          }
+        }
+      }
+    },
+    "wm.more.evaluation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswertung"
+          }
+        }
+      }
+    },
+    "wm.new.button": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Version anlegen"
+          }
+        }
+      }
+    },
+    "wm.new.confirm_action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anlegen"
+          }
+        }
+      }
+    },
+    "wm.new.confirm_title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Version ab %@ anlegen?"
+          }
+        }
+      }
+    },
+    "wm.new.create": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version anlegen"
+          }
+        }
+      }
+    },
+    "wm.new.ends_predecessor %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die laufende Version (ab %@) endet am %@. Alles davor bleibt unverändert."
+          }
+        }
+      }
+    },
+    "wm.new.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine neue Version gilt ab dem gewählten Tag. Die laufende Version endet am Vortag, alles davor bleibt unverändert. Die Werte sind mit der neuesten Version vorbelegt."
+          }
+        }
+      }
+    },
+    "wm.new.no_predecessor": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die neue Version gilt ab dem gewählten Tag; vorherige Versionen bleiben unverändert."
+          }
+        }
+      }
+    },
+    "wm.new.overlap %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Startdatum muss nach dem Beginn der neuesten Version (ab %@) liegen und darf nicht in ihren Zeitraum fallen."
+          }
+        }
+      }
+    },
+    "wm.new.past": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Startdatum liegt in der Vergangenheit: Die Tage seit diesem Datum werden mit der neuen Version ausgewertet, dein Zeitkonto kann sich ändern. Erfasste Zeiten bleiben unverändert."
+          }
+        }
+      }
+    },
+    "wm.new.starts": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gilt ab"
+          }
+        }
+      }
+    },
+    "wm.new.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Version"
+          }
+        }
+      }
+    },
+    "wm.stats.absences": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abwesenheiten"
+          }
+        }
+      }
+    },
+    "wm.stats.absences_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Abwesenheiten im Zeitraum."
+          }
+        }
+      }
+    },
+    "wm.stats.balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitkonto-Verlauf"
+          }
+        }
+      }
+    },
+    "wm.stats.balance_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für diesen Zeitraum gibt es noch keinen Zeitkontostand (das Konto beginnt später)."
+          }
+        }
+      }
+    },
+    "wm.stats.balance_summary %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von %@ auf %@ (%@)."
+          }
+        }
+      }
+    },
+    "wm.stats.basis": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundung"
+          }
+        }
+      }
+    },
+    "wm.stats.basis_evaluated": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit Rundung"
+          }
+        }
+      }
+    },
+    "wm.stats.basis_evaluated_note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet mit Pausen und Rundung wie auf „Heute“. Das Zeitkonto ist immer der offizielle Stand."
+          }
+        }
+      }
+    },
+    "wm.stats.basis_raw": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Rundung"
+          }
+        }
+      }
+    },
+    "wm.stats.basis_raw_note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet ohne Rundung von erstem Beginn und letztem Ende; Pausen und Gutschriften bleiben. Das Zeitkonto ist immer der offizielle Stand."
+          }
+        }
+      }
+    },
+    "wm.stats.breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausen"
+          }
+        }
+      }
+    },
+    "wm.stats.breaks_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Pausen im Zeitraum."
+          }
+        }
+      }
+    },
+    "wm.stats.breaks_summary %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatsächliche Pausen %@, abgezogene feste Pausen %@."
+          }
+        }
+      }
+    },
+    "wm.stats.callout_breaks %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatsächlich %@"
+          }
+        }
+      }
+    },
+    "wm.stats.callout_fixed %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fest %@"
+          }
+        }
+      }
+    },
+    "wm.stats.callout_target %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@"
+          }
+        }
+      }
+    },
+    "wm.stats.callout_worked %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet %@"
+          }
+        }
+      }
+    },
+    "wm.stats.delta": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr- und Minderzeit"
+          }
+        }
+      }
+    },
+    "wm.stats.delta_summary %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insgesamt %@ (Mehrzeit %@, Minderzeit %@). Zählt nur Tage bis heute."
+          }
+        }
+      }
+    },
+    "wm.stats.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diesem Zeitraum gibt es weder Soll noch Einträge. Wähle einen anderen Zeitraum."
+          }
+        }
+      }
+    },
+    "wm.stats.empty_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Daten im Zeitraum"
+          }
+        }
+      }
+    },
+    "wm.stats.from": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Von"
+          }
+        }
+      }
+    },
+    "wm.stats.gran_day": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        }
+      }
+    },
+    "wm.stats.gran_month": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monat"
+          }
+        }
+      }
+    },
+    "wm.stats.gran_week": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woche"
+          }
+        }
+      }
+    },
+    "wm.stats.granularity": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswertung pro"
+          }
+        }
+      }
+    },
+    "wm.stats.kind_part %@ %@ %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ (%lld %%)"
+          }
+        }
+      }
+    },
+    "wm.stats.kinds": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verteilung nach Art"
+          }
+        }
+      }
+    },
+    "wm.stats.kinds_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Einträge im Zeitraum."
+          }
+        }
+      }
+    },
+    "wm.stats.kinds_total": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gesamt"
+          }
+        }
+      }
+    },
+    "wm.stats.range": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum"
+          }
+        }
+      }
+    },
+    "wm.stats.range_12m": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte 12 Monate"
+          }
+        }
+      }
+    },
+    "wm.stats.range_3m": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte 3 Monate"
+          }
+        }
+      }
+    },
+    "wm.stats.range_4w": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte 4 Wochen"
+          }
+        }
+      }
+    },
+    "wm.stats.range_custom": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Zeitraum"
+          }
+        }
+      }
+    },
+    "wm.stats.range_start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seit Kontobeginn"
+          }
+        }
+      }
+    },
+    "wm.stats.range_year": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Jahr"
+          }
+        }
+      }
+    },
+    "wm.stats.row_breaks %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatsächlich %@ · fest %@"
+          }
+        }
+      }
+    },
+    "wm.stats.row_target_actual %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll %@ · gearbeitet %@"
+          }
+        }
+      }
+    },
+    "wm.stats.series_breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tatsächliche Pausen"
+          }
+        }
+      }
+    },
+    "wm.stats.series_fixed_breaks": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feste Pausen"
+          }
+        }
+      }
+    },
+    "wm.stats.series_target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll"
+          }
+        }
+      }
+    },
+    "wm.stats.series_worked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet"
+          }
+        }
+      }
+    },
+    "wm.stats.target_actual": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll und Gearbeitet"
+          }
+        }
+      }
+    },
+    "wm.stats.target_actual_summary %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll bis heute %@, gearbeitet %@."
+          }
+        }
+      }
+    },
+    "wm.stats.tile_balance": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitkonto am Ende"
+          }
+        }
+      }
+    },
+    "wm.stats.tile_delta": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr- und Minderzeit"
+          }
+        }
+      }
+    },
+    "wm.stats.tile_target": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soll bis heute"
+          }
+        }
+      }
+    },
+    "wm.stats.tile_worked": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gearbeitet"
+          }
+        }
+      }
+    },
+    "wm.stats.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistik"
+          }
+        }
+      }
+    },
+    "wm.stats.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bis"
+          }
+        }
+      }
+    },
+    "wm.stats.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Server kennt die Statistik noch nicht. Sie braucht Version 0.28.0 oder neuer; aktualisiere den Server."
+          }
+        }
+      }
+    },
+    "wm.stats.unsupported_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistik nicht verfügbar"
+          }
+        }
+      }
+    },
+    "wm.stats.values": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werte als Liste"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

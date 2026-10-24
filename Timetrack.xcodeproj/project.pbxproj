@@ -44,6 +44,7 @@
 		24F90E026F42CAC10937CAD7 /* OverworkScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBCE39012EE4B2BD78486EF /* OverworkScheduler.swift */; };
 		25AFCB98E35413F9354AE95D /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		266312FC3489A3A78AAA9090 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 3F6FBF4DC896362A66FCFB8D /* TimetrackDesign */; };
+		2727A4A2AE2C176CDE9C17ED /* ReviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5C0DF877B5FFBAFCC03E1F2 /* ReviewTests.swift */; };
 		27FA5D9F3CC64869659B5753 /* CalendarEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9681420E6F893816773EC783 /* CalendarEnvironment.swift */; };
 		281B755166F4633E094FD1E6 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0CDA84E0B407AA96EB192CE /* Formatters.swift */; };
 		2836437453435B3BCF7189E7 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4DB0741E3449BE34F2E06C70 /* TimetrackCore */; };
@@ -518,6 +519,7 @@
 		E3902EFF1CF5049BE61DB804 /* TimetrackWidgetIOS.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = TimetrackWidgetIOS.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E45107C842B9211EE861FA97 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E52D0F9CF21A4E4FE73E0851 /* DayDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetail.swift; sourceTree = "<group>"; };
+		E5C0DF877B5FFBAFCC03E1F2 /* ReviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTests.swift; sourceTree = "<group>"; };
 		E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderTests.swift; sourceTree = "<group>"; };
 		EB17FE341DD2F527B643D90E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EB8D2E7E05CAF04885CAAC05 /* UX3.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = UX3.xcstrings; sourceTree = "<group>"; };
@@ -666,6 +668,7 @@
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
 				BD7B29F2240005F50DA9A037 /* PlanningAreaTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
+				E5C0DF877B5FFBAFCC03E1F2 /* ReviewTests.swift */,
 				F1D004903E693BE7FCB8A86C /* RunningTimerSurvivesNavigationTests.swift */,
 				E24BBA312CA476B29515F081 /* ScreenshotTests.swift */,
 				2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */,
@@ -1485,6 +1488,7 @@
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
 				CD270BC6F0BF891C34083444 /* PlanningAreaTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
+				2727A4A2AE2C176CDE9C17ED /* ReviewTests.swift in Sources */,
 				EC8C74B50730A5CA4661E84F /* RunningTimerSurvivesNavigationTests.swift in Sources */,
 				0955819CA9B8678BB9A3DACE /* ScreenshotTests.swift in Sources */,
 				221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */,

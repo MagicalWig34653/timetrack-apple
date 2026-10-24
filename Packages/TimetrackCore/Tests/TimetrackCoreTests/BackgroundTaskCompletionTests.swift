@@ -40,4 +40,21 @@ private final class CompletionRecorder: @unchecked Sendable {
         completion.attach(probe)
         #expect(probe.isCancelled)
     }
+
+    @Test func expirationCompletesImmediatelyEvenIfTheWorkIgnoresCancellation() async {
+        let recorder = CompletionRecorder()
+        let completion = BackgroundTaskCompletion(complete: { recorder.add($0) })
+        let gate = AsyncStream<Void>.makeStream()
+        let work = Task<Void, Never> {
+            for await _ in gate.stream {} // ignores cancellation until released
+            completion.finish(success: true) // late result must be ignored
+        }
+        completion.attach(work)
+        completion.expire()
+        #expect(recorder.values == [false]) // before the work returned
+        gate.continuation.finish()
+        await work.value
+        #expect(recorder.values == [false]) // exactly once
+        #expect(completion.finish(success: true) == false)
+    }
 }

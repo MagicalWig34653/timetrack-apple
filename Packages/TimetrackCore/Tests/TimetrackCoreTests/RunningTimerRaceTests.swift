@@ -77,6 +77,27 @@ import Testing
         #expect(store.running?.isRunning == true)
     }
 
+    @Test func staleBalanceAnswerAfterAnActionDoesNotOverwriteTheFreshBalance() async {
+        // X2: the balance of a deferred load is fetched after the day was applied; an action in between must win.
+        let transport = prepare(timerAnswer: "null")
+        let store = TodayStore(client: Fixtures.client(transport), calendar: calendar, queue: TimerActionQueue(fileURL: nil))
+        await store.load(deferAccount: true)
+        #expect(store.account?.balanceSeconds == -1080)
+        let gate = transport.hold("GET /api/v1/time/account")
+        transport.set("GET /api/v1/time/account", body: Fixtures.accountBalanceJSON.replacingOccurrences(of: "-1080", with: "5000")) // the old state
+        let stale = Task { await store.load(deferAccount: true) }
+        await waitForRequests(transport, "GET /api/v1/time/account", count: 2)
+        // The user acts meanwhile; the reload after the action reads the new state.
+        transport.set("GET /api/v1/time/account", body: Fixtures.accountBalanceJSON.replacingOccurrences(of: "-1080", with: "-1000"))
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        transport.enqueue("POST /api/v1/time/timer/start", body: Fixtures.segmentJSON)
+        await store.start()
+        #expect(store.account?.balanceSeconds == -1000)
+        gate.release()
+        await stale.value
+        #expect(store.account?.balanceSeconds == -1000, "the stale balance must not overwrite the newer one")
+    }
+
     @Test func plainReloadStillAppliesServerChanges() async {
         // The guard must only drop answers that overlap an own action: a timer stopped on another device shows up.
         let transport = prepare(timerAnswer: Fixtures.segmentJSON)

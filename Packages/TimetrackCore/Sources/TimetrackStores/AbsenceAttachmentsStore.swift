@@ -11,9 +11,21 @@ extension APIClient {
         do {
             return try await attachFile(absenceId: absenceId, fileId: meta.id)
         } catch {
+            // `DELETE /files/{id}` also removes an existing attachment link, so the upload may only be removed when it is
+            // certainly unlinked. Unclear outcomes (the success response may just have been lost) are checked first.
+            if Self.isOutcomeUnclear(error) {
+                guard let linked = try? await listAbsenceAttachments(id: absenceId) else { throw error } // state unknown: keep the file
+                if let existing = linked.first(where: { $0.id == meta.id }) { return existing } // the link exists: success
+            }
             try? await deleteFile(id: meta.id)
             throw error
         }
+    }
+
+    /// Network errors, timeouts, cancellation and server errors: the request may have been applied although no success arrived.
+    static func isOutcomeUnclear(_ error: Error) -> Bool {
+        guard let error = error as? TimetrackError, let status = error.status else { return true }
+        return status >= 500 || status == 408
     }
 }
 

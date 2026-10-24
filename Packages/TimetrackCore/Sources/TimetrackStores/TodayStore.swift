@@ -27,6 +27,8 @@ public final class TodayStore {
 
     /// Timer actions that could not be delivered yet (offline queue, watch). Shown optimistically and sent when the server answers.
     public private(set) var pending: [QueuedTimerAction] = []
+    /// X2: delayed "Fortführen" actions that were refused on delivery because the entries changed meanwhile; the user decides.
+    public private(set) var attention: [QueuedTimerAction] = []
     /// True after the first successful server load of this store.
     public private(set) var hasLoadedLive = false
     /// Last cached display state (App Group snapshot), shown until live data arrives.
@@ -55,7 +57,20 @@ public final class TodayStore {
     /// Restores actions persisted by an earlier launch.
     public func restorePending() async {
         guard let queue else { return }
+        await refreshPending(queue)
+    }
+
+    private func refreshPending(_ queue: TimerActionQueue) async {
         pending = await queue.pending
+        attention = await queue.needsAttention
+    }
+
+    /// X2: the user dismissed a delayed continue that could not be delivered (or started a new entry instead).
+    public func dismissAttention(_ id: UUID) async {
+        guard let queue else { return }
+        await queue.discard(id: id)
+        await refreshPending(queue)
+        changed()
     }
 
     /// What a compact screen shows right now: live data, else queued actions on top of the cache.
@@ -99,7 +114,9 @@ public final class TodayStore {
                 lastLoaded = .now
                 hasLoadedLive = true
                 changed()
-                account = try? await client.getTimeAccount(asOf: today)
+                let balance = try? await client.getTimeAccount(asOf: today)
+                // An action (or a newer load) may have started while the balance was in flight; its answer belongs to an older state.
+                if epoch == actionEpoch, today == calendar.day(for: .now) { account = balance }
             } else {
                 async let timer = client.currentTimer()
                 async let evaluation = client.getDay(today)
@@ -147,10 +164,16 @@ public final class TodayStore {
         actionEpoch += 1
         let result = await queue.drain(client: client)
         actionEpoch += 1
-        pending = await queue.pending
+        await refreshPending(queue)
         changed()
-        if result.delivered > 0, reload {
+        if result.needsAttention > 0, let refused = attention.last?.attention {
+            // Surface the conflict (409 segment_overlap / 412 stale_version) and show the real state instead of guessing.
+            error = .api(status: refused.status, code: refused.code ?? "conflict", message: "Fortführen nicht mehr möglich")
+        }
+        if result.delivered > 0 || result.needsAttention > 0, reload {
+            let surfaced = error
             await load(deferAccount: true)
+            if result.needsAttention > 0, error == nil { error = surfaced }
         } else if result.unauthorized {
             error = .api(status: 401, code: APIErrorCode.unauthorized.rawValue, message: "Unauthorized")
         }
@@ -307,7 +330,7 @@ public final class TodayStore {
 
     private func enqueue(_ action: QueuedTimerAction, queue: TimerActionQueue, success: StoreOutcome) async {
         await queue.enqueue(action)
-        pending = await queue.pending
+        await refreshPending(queue)
         changed()
         onOutcome?(success)
     }

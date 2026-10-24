@@ -53,7 +53,7 @@ import Testing
         #expect(patchBody.contains("Timer fortgesetzt"))
     }
 
-    @Test(arguments: [(400, "validation_failed"), (409, "segment_overlap"), (422, "validation_failed"), (404, "not_found"), (405, "not_found")])
+    @Test(arguments: [(400, "validation_failed"), (422, "validation_failed"), (404, "not_found"), (405, "not_found"), (501, "not_implemented")])
     func fallsBackToANewSegmentWhenReopenIsRefused(status: Int, code: String) async {
         let (transport, store) = await prepare()
         transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: status, body: #"{"error":{"code":"\#(code)","message":"x"}}"#)
@@ -68,6 +68,56 @@ import Testing
         #expect(startBody.contains("\"kind\":\"school\""))
         // The note of the continued entry is carried over to the new one.
         #expect(transport.requests(matching: "PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222").count == 1)
+    }
+
+    @Test(arguments: [(409, "segment_overlap"), (412, "stale_version")])
+    func conflictsNeverStartAReplacementAutomatically(status: Int, code: String) async {
+        let (transport, store) = await prepare()
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: status, body: #"{"error":{"code":"\#(code)","message":"x"}}"#)
+        #expect(await store.continueLast() == false)
+        #expect(transport.requests(matching: "POST /api/v1/time/timer/start").isEmpty)
+        #expect(store.running == nil)
+        #expect(store.error?.status == status) // surfaced to the user, state reloaded
+    }
+
+    @Test(arguments: [(409, "segment_overlap"), (412, "stale_version")])
+    func queuedContinueWithAConflictWaitsForTheUserInsteadOfBookingNewTime(status: Int, code: String) async {
+        let queue = TimerActionQueue(fileURL: nil)
+        let transport = MockTransport()
+        let target = QueuedTimerAction.ContinueTarget(segmentId: UUID(uuidString: Self.closedId)!, version: 3, kind: .school, placeId: nil, note: nil)
+        let action = QueuedTimerAction(command: .resume(target), queuedAt: .now.addingTimeInterval(-3600))
+        await queue.enqueue(action)
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: status, body: #"{"error":{"code":"\#(code)","message":"x"}}"#)
+        let result = await queue.drain(client: Fixtures.client(transport))
+        #expect(result.delivered == 0 && result.dropped == 0 && result.needsAttention == 1)
+        #expect(transport.requests(matching: "POST /api/v1/time/timer/start").isEmpty)
+        #expect(await queue.count == 0) // nothing left to deliver or to show as running
+        let waiting = await queue.needsAttention
+        #expect(waiting.map(\.id) == [action.id] && waiting.first?.attention?.status == status)
+        // A second drain does not retry it, and the user can dismiss it.
+        _ = await queue.drain(client: Fixtures.client(transport))
+        #expect(transport.requests(matching: "PATCH /api/v1/time/segments/\(Self.closedId)").count == 1)
+        await queue.discard(id: action.id)
+        #expect(await queue.needsAttention.isEmpty)
+    }
+
+    @Test func storeSurfacesADelayedContinueConflictAndKeepsTheItem() async {
+        let queue = TimerActionQueue(fileURL: nil)
+        let target = QueuedTimerAction.ContinueTarget(segmentId: UUID(uuidString: Self.closedId)!, version: 3, kind: .school, placeId: nil, note: nil)
+        await queue.enqueue(.init(command: .resume(target), queuedAt: .now.addingTimeInterval(-3600)))
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/time/timer", body: "null")
+        transport.enqueue("GET /api/v1/time/account", body: Fixtures.accountBalanceJSON)
+        transport.enqueue("GET /api/v1/time/days/\(calendar.day(for: .now))", body: idleDay())
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: 409, body: #"{"error":{"code":"segment_overlap","message":"x"}}"#)
+        let store = TodayStore(client: Fixtures.client(transport), calendar: calendar, queue: queue)
+        await store.load() // a successful load delivers the queue
+        #expect(store.attention.count == 1 && store.pending.isEmpty)
+        guard let waiting = store.attention.first else { return }
+        #expect(store.error?.status == 409)
+        #expect(transport.requests(matching: "POST /api/v1/time/timer/start").isEmpty)
+        await store.dismissAttention(waiting.id)
+        #expect(store.attention.isEmpty)
     }
 
     @Test func aServerThatIgnoresNullIsTreatedAsUnsupported() async {

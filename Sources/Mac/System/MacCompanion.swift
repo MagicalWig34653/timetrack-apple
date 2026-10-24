@@ -19,7 +19,9 @@ import TimetrackStores
 final class MacCompanion {
     static let shared = MacCompanion()
 
-    let activity: ActivityStore
+    /// Activity data and consent per account; another account starts with an empty log and recording off.
+    let activityScope: ActivityScope
+    var activity: ActivityStore { activityScope.store }
     let loginItem = LoginItem()
     let hotkey = GlobalHotkey()
 
@@ -44,7 +46,8 @@ final class MacCompanion {
     private init() {
         let folder = ((try? FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
             ?? FileManager.default.temporaryDirectory).appendingPathComponent("Activity", isDirectory: true)
-        activity = ActivityStore(storage: .files(in: folder))
+        ActivityScope.removeLegacyFiles(in: folder)
+        activityScope = ActivityScope(makeStorage: ActivityScope.folderStorage(base: folder))
         let stored = UserDefaults.standard.data(forKey: MacPrefs.presenceSettings).flatMap { try? JSONDecoder().decode(PresenceSettings.self, from: $0) } ?? PresenceSettings()
         presence = stored
         advisor = PresenceAdvisor(settings: stored)
@@ -56,6 +59,7 @@ final class MacCompanion {
         self.model = model
         guard !started else { return }
         started = true
+        syncActivityAccount()
         hotkey.onPress = { [weak self] in self?.hotkeyPressed() }
         applyHotkey()
         applyActivationPolicy()
@@ -67,6 +71,17 @@ final class MacCompanion {
                 try? await Task.sleep(for: .seconds(5))
             }
         }
+    }
+
+    /// Keeps the activity store on the signed-in account. The open interval is closed into the OLD store before switching
+    /// and the recorder restarts, so nothing recorded under one account lands in another.
+    private func syncActivityAccount() {
+        let current = model?.phase == .signedIn ? model?.account?.id : nil
+        guard current != activityScope.accountId else { return }
+        apply(recorder.finish(at: .now))
+        activityScope.switchAccount(to: current)
+        recorder = ActivityRecorder()
+        activity.prune(now: .now)
     }
 
     func quit() {
@@ -192,6 +207,7 @@ final class MacCompanion {
     }
 
     private func tick() {
+        syncActivityAccount()
         guard model?.phase == .signedIn else { _ = recorder.finish(at: .now); return }
         let now = Date.now
         let idle = idleSeconds

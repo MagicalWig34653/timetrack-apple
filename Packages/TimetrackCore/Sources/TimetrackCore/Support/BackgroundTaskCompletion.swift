@@ -28,7 +28,8 @@ public final class BackgroundTaskCompletion: @unchecked Sendable {
         if cancelNow { work.cancel() }
     }
 
-    /// Called from the expiration handler: cancels the work and runs the extra expiry action.
+    /// Called from the expiration handler: cancels the work, runs the extra expiry action and completes the system task
+    /// right away as unsuccessful (the system must not wait for work that may ignore cancellation; later `finish` calls do nothing).
     public func expire() {
         let work = lock.withLock { () -> Task<Void, Never>? in
             expired = true
@@ -36,6 +37,7 @@ public final class BackgroundTaskCompletion: @unchecked Sendable {
         }
         work?.cancel()
         onExpire()
+        finish(success: false)
     }
 
     /// Completes the system task once; later calls (or a call after an expiration that completed it) do nothing.

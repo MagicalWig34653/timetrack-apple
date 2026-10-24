@@ -31,13 +31,23 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     public let placeId: UUID?
     /// L4 (optional): reason recorded with the correction when a late delivery is moved back to `queuedAt`. Default: "Offline gestartet/gestoppt".
     public let correctionReason: String?
+    /// X2: set when a delayed "Fortführen" met a conflict on delivery (409/412: the entries changed meanwhile). The item stays
+    /// in the queue but is no longer delivered or shown as running; the user decides (start new, or dismiss).
+    public var attention: Attention?
 
-    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil) {
+    public struct Attention: Codable, Sendable, Equatable {
+        public let status: Int
+        public let code: String?
+        public init(status: Int, code: String?) { self.status = status; self.code = code }
+    }
+
+    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil, attention: Attention? = nil) {
         self.id = id
         self.command = command
         self.queuedAt = queuedAt
         self.placeId = placeId
         self.correctionReason = correctionReason
+        self.attention = attention
     }
 }
 
@@ -54,6 +64,8 @@ public actor TimerActionQueue {
         public var offline = false
         /// Delivery stopped because the session was rejected (401).
         public var unauthorized = false
+        /// Delayed "Fortführen" entries that hit a conflict (409/412) and wait for the user's decision (kept in the queue).
+        public var needsAttention = 0
     }
 
     /// Deliveries later than this after the button press are corrected to the press time.
@@ -75,13 +87,22 @@ public actor TimerActionQueue {
         }
     }
 
-    public var pending: [QueuedTimerAction] { entries }
-    public var count: Int { entries.count }
+    /// Entries still to be delivered (without those waiting for a decision).
+    public var pending: [QueuedTimerAction] { entries.filter { $0.attention == nil } }
+    public var count: Int { pending.count }
+    /// X2: delayed continues that were refused because the entries changed meanwhile; they wait for the user.
+    public var needsAttention: [QueuedTimerAction] { entries.filter { $0.attention != nil } }
+
+    /// Removes an entry that waited for a decision (the user dismissed it or chose another way).
+    public func discard(id: UUID) {
+        entries.removeAll { $0.id == id }
+        persist()
+    }
 
     /// Queues an action; returns false when it was redundant (same command as the newest queued one).
     @discardableResult
     public func enqueue(_ action: QueuedTimerAction) -> Bool {
-        if let last = entries.last, Self.sameKind(last.command, action.command) { return false }
+        if let last = pending.last, Self.sameKind(last.command, action.command) { return false }
         entries.append(action)
         if entries.count > limit { entries.removeFirst(entries.count - limit) }
         persist()
@@ -107,7 +128,7 @@ public actor TimerActionQueue {
         guard !draining else { result.remaining = entries.count; return result }
         draining = true
         defer { draining = false }
-        while let action = entries.first {
+        while let action = entries.first(where: { $0.attention == nil }) {
             do {
                 try await deliver(action, client: client, now: now)
                 result.delivered += 1
@@ -117,6 +138,14 @@ public actor TimerActionQueue {
             } catch let error as TimetrackError where error.isUnauthorized {
                 result.unauthorized = true
                 break
+            } catch let error as TimetrackError where Self.isResumeConflict(error, action) {
+                // The entries changed since the press: booking a new segment from delivery time would be a guess. Ask the user.
+                if let index = entries.firstIndex(where: { $0.id == action.id }) {
+                    entries[index].attention = .init(status: error.status ?? 409, code: error.code)
+                    persist()
+                }
+                result.needsAttention += 1
+                continue
             } catch let error as TimetrackError where Self.isAlreadyApplied(error) {
                 result.dropped += 1
             } catch let error as TimetrackError where (error.status ?? 0) >= 500 || error.status == 429 {
@@ -125,11 +154,16 @@ public actor TimerActionQueue {
             } catch {
                 result.dropped += 1
             }
-            entries.removeFirst()
+            entries.removeAll { $0.id == action.id }
             persist()
         }
-        result.remaining = entries.count
+        result.remaining = count
         return result
+    }
+
+    private static func isResumeConflict(_ error: TimetrackError, _ action: QueuedTimerAction) -> Bool {
+        guard case .resume = action.command else { return false }
+        return error.status == 409 || error.status == 412
     }
 
     /// 409 means the server already is in the state the action wanted (timer running / not running).
@@ -158,16 +192,20 @@ public actor TimerActionQueue {
     /// How a continue ended: the segment was reopened, or (server without/rejecting reopen) a new segment was started.
     public enum ResumeMode: Sendable, Equatable { case reopened, startedNew }
 
-    /// Tries to reopen (`endedAt: null`); on a refusal that means "not supported / not allowed" starts a new segment of the same kind
-    /// and place from now. Network errors and 5xx/429 propagate (the caller queues).
+    /// Statuses of an older server that cannot reopen (unknown `null`, method or validation): only these start a new segment
+    /// automatically. Everything else, notably 409 `segment_overlap` and 412 `stale_version` (the entries changed), propagates so
+    /// the user decides; a new segment from "now" would silently book time nobody asked for.
+    static let reopenUnsupportedStatuses: Set<Int> = [400, 404, 405, 422, 501]
+
+    /// Tries to reopen (`endedAt: null`); only a provably unsupported reopen starts a new segment of the same kind and place from now.
+    /// Network errors, 5xx/429, 401 and conflicts (409/412) propagate (the caller queues or shows them).
     public static func resume(_ target: QueuedTimerAction.ContinueTarget, client: APIClient, clientEventId: UUID, startNewOnly: Bool = false) async throws -> (segment: Segment, mode: ResumeMode) {
         if !startNewOnly { do {
             let segment = try await client.correctSegment(id: target.segmentId, SegmentCorrection(reason: "Timer fortgesetzt", reopen: true), ifMatchVersion: target.version)
             if segment.endedAt == nil { return (segment, .reopened) }
             // A server that ignores the unknown null silently answers a closed segment: treat as unsupported.
         } catch let error as TimetrackError {
-            let status = error.status ?? 0
-            if error.isNetworkError || error == .cancelled || error.isUnauthorized || status >= 500 || status == 429 { throw error }
+            guard let status = error.status, reopenUnsupportedStatuses.contains(status) else { throw error }
         } }
         let started = try await client.startTimer(clientEventId: clientEventId, kind: target.kind, placeId: target.placeId)
         if let note = target.note, !note.isEmpty {

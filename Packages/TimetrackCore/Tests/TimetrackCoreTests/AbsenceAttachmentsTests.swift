@@ -187,6 +187,7 @@ struct AbsenceAttachmentsStoreTests {
         let transport = MockTransport()
         transport.set("POST /api/v1/files", status: 201, body: meta(fileA))
         transport.set(attachKey, status: 500, body: #"{"error":{"code":"internal","message":"x"}}"#)
+        transport.set(listKey, body: "[]") // the link state was checked and the file is certainly not linked
         transport.set("DELETE /api/v1/files/\(fileA)", status: 204)
         let store = store(transport)
         store.add(name: "krankschein.pdf", data: Data([1, 2]))
@@ -194,6 +195,44 @@ struct AbsenceAttachmentsStoreTests {
         guard case .failed(.server) = store.uploads.first?.state else { Issue.record("expected a server failure"); return }
         #expect(transport.requests(matching: "DELETE /api/v1/files/\(fileA)").count == 1)
         #expect(store.uploads.first?.state != nil && UploadFailure.server(.network(.timedOut)).isRetryable)
+    }
+
+    @Test func definiteRejectionDeletesTheOrphanWithoutAskingTheList() async {
+        let transport = MockTransport()
+        transport.set("POST /api/v1/files", status: 201, body: meta(fileA))
+        transport.set(attachKey, status: 422, body: #"{"error":{"code":"validation_failed","message":"x"}}"#)
+        transport.set("DELETE /api/v1/files/\(fileA)", status: 204)
+        let store = store(transport)
+        store.add(name: "krankschein.pdf", data: Data([1, 2]))
+        await settle(store) { !store.isUploading }
+        #expect(transport.requests(matching: "DELETE /api/v1/files/\(fileA)").count == 1)
+        #expect(transport.requests(matching: listKey).isEmpty)
+    }
+
+    @Test func lostSuccessResponseKeepsTheExistingLinkAndCountsAsSuccess() async {
+        let transport = MockTransport()
+        transport.set("POST /api/v1/files", status: 201, body: meta(fileA))
+        transport.set(attachKey, error: .timedOut) // the server linked the file, only the answer got lost
+        transport.set(listKey, body: "[\(meta(fileA))]")
+        transport.set("DELETE /api/v1/files/\(fileA)", status: 204)
+        let store = store(transport)
+        store.add(name: "krankschein.pdf", data: Data([1, 2]))
+        await settle(store) { store.uploads.isEmpty && store.files.count == 1 }
+        #expect(store.uploads.isEmpty && store.files.count == 1)
+        #expect(transport.requests(matching: "DELETE /api/v1/files/\(fileA)").isEmpty) // deleting would have removed the link
+    }
+
+    @Test func unknownLinkStateNeverDeletesTheUpload() async {
+        let transport = MockTransport()
+        transport.set("POST /api/v1/files", status: 201, body: meta(fileA))
+        transport.set(attachKey, error: .timedOut)
+        transport.set(listKey, error: .timedOut) // cannot tell whether the link exists
+        transport.set("DELETE /api/v1/files/\(fileA)", status: 204)
+        let store = store(transport)
+        store.add(name: "krankschein.pdf", data: Data([1, 2]))
+        await settle(store) { !store.isUploading }
+        #expect(store.uploads.first?.state == .failed(.offline))
+        #expect(transport.requests(matching: "DELETE /api/v1/files/\(fileA)").isEmpty)
     }
 
     @Test func removingDetachesThenDeletesTheFile() async {

@@ -72,6 +72,54 @@ extension Array where Element == WorkModel {
     public var supportsCorrection: Bool { !isEmpty && allSatisfy { $0.version != nil } }
 }
 
+/// What a new version starting on a day does to the existing timeline (mirrors the server's `create` rules, WM2).
+public enum NewVersionOutcome: Sendable, Equatable {
+    /// Accepted. `endsPredecessor` is the version that is closed on `predecessorEnd` (the day before); nil when there is no open predecessor.
+    case ok(endsPredecessor: WorkModel?, predecessorEnd: LocalDay?)
+    /// The day is not after the newest version's start, or lies inside its closed range: the server answers 409 `model_overlap`.
+    case overlaps(WorkModel)
+}
+
+/// Why a version cannot end on a day (mirrors the server's `endWorkModel`).
+public enum EndVersionIssue: Sendable, Equatable {
+    case invalidDate
+    case beforeStart
+    /// A later version starts on or before the end day.
+    case overlapsLater(WorkModel)
+}
+
+extension Array where Element == WorkModel {
+    /// Check of a new open-ended version starting on `validFrom`; the server still decides.
+    public func checkNewVersion(validFrom: LocalDay) -> NewVersionOutcome {
+        guard let newest = self.max(by: { $0.validFrom < $1.validFrom }) else { return .ok(endsPredecessor: nil, predecessorEnd: nil) }
+        guard validFrom > newest.validFrom else { return .overlaps(newest) }
+        if newest.validTo == nil { return .ok(endsPredecessor: newest, predecessorEnd: LocalDays.adding(-1, to: validFrom)) }
+        if let end = newest.validTo, end >= validFrom { return .overlaps(newest) }
+        return .ok(endsPredecessor: nil, predecessorEnd: nil)
+    }
+
+    /// Days without any work model between two consecutive versions (`from`...`to` inclusive), keyed by the version that follows the gap.
+    public var gaps: [UUID: (from: LocalDay, to: LocalDay)] {
+        let sorted = self.sorted { $0.validFrom < $1.validFrom }
+        var result: [UUID: (from: LocalDay, to: LocalDay)] = [:]
+        for (previous, next) in zip(sorted, sorted.dropFirst()) {
+            guard let end = previous.validTo, let start = LocalDays.adding(1, to: end), let last = LocalDays.adding(-1, to: next.validFrom), start <= last else { continue }
+            result[next.id] = (start, last)
+        }
+        return result
+    }
+
+    /// Versions that can still be ended: the open-ended ones.
+    public var endable: [WorkModel] { filter { $0.validTo == nil } }
+
+    public func checkEnd(of model: WorkModel, on day: LocalDay) -> EndVersionIssue? {
+        guard LocalDays.parse(day) != nil else { return .invalidDate }
+        guard day >= model.validFrom else { return .beforeStart }
+        if let later = first(where: { $0.id != model.id && $0.validFrom > model.validFrom && $0.validFrom <= day }) { return .overlapsLater(later) }
+        return nil
+    }
+}
+
 /// Body of `PUT /work-models/{id}` and `POST /work-models/{id}/preview` (contract `WorkModelInput`).
 public struct WorkModelInput: Encodable, Sendable, Equatable {
     public var validFrom: LocalDay
@@ -183,6 +231,30 @@ public struct WorkModelForm: Sendable, Equatable {
         dayBoundaryMinutes = String(model.dayBoundaryMinutes ?? 0)
         fixedBreaks = model.fixedBreaks ?? []
         dailyTargetSeconds = (model.dailyTargetSeconds?.isEmpty ?? true) ? nil : model.dailyTargetSeconds
+    }
+
+    /// Form for a new version: values come from `base` (the newest version) and it starts on `validFrom`, open-ended (WM2).
+    public init(basedOn base: WorkModel, startingOn validFrom: LocalDay) {
+        self.init(model: base)
+        self.validFrom = validFrom
+        validTo = ""
+    }
+
+    /// Form for the very first version (no model yet), with the PWA's defaults.
+    public init(validFrom: LocalDay, timezone: String = "Europe/Berlin") {
+        self.validFrom = validFrom
+        validTo = ""
+        self.timezone = timezone
+        weeklyTarget = "38:30"
+        workdays = [1, 2, 3, 4, 5]
+        travelCountsAsWork = true
+        roundingEnabled = true
+        roundingMinutes = "15"
+        schoolThreshold = "3:00"
+        schoolCredit = ""
+        dayBoundaryMinutes = "0"
+        fixedBreaks = []
+        dailyTargetSeconds = nil
     }
 
     static func isValidDay(_ text: String) -> Bool {

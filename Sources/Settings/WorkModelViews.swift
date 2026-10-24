@@ -7,7 +7,7 @@ import TimetrackStores
 struct WorkModelsScreen: View {
     @Environment(AppModel.self) private var model
     @State private var store: WorkModelStore?
-    @State private var editing: WorkModel?
+    @State private var sheet: WorkModelSheet?
 
     var body: some View {
         ScrollView {
@@ -19,9 +19,10 @@ struct WorkModelsScreen: View {
                     }
                     if !store.supportsCorrection && !store.models.isEmpty { HintBanner("workmodel.unsupported") }
                     if store.models.isEmpty && !store.isLoading { Card { EmptyState(symbol: "calendar.badge.clock", title: "workmodel.empty") } }
-                    ForEach(store.newestFirst) { version in
-                        WorkModelCard(model: version, today: model.dayCalendar.day(for: .now), canEdit: store.supportsCorrection) { editing = version }
-                    }
+                    timeline(store)
+                    Button { sheet = .new } label: { Label(wmKey("wm.new.button"), systemImage: "plus") }
+                        .buttonStyle(.ttPrimary)
+                        .accessibilityIdentifier("workmodel.new")
                 } else {
                     SkeletonList(rows: 3)
                 }
@@ -40,17 +41,41 @@ struct WorkModelsScreen: View {
             }
             await store?.load()
         }
-        .sheet(item: $editing) { version in
-            if let store { WorkModelEditSheet(store: store, version: version, calendar: model.dayCalendar) }
+        .sheet(item: $sheet) { sheet in
+            if let store {
+                switch sheet {
+                case .edit(let version): WorkModelEditSheet(store: store, version: version, calendar: model.dayCalendar)
+                case .new: WorkModelNewSheet(store: store, calendar: model.dayCalendar)
+                case .end(let version): WorkModelEndSheet(store: store, version: version, calendar: model.dayCalendar)
+                }
+            }
+        }
+    }
+
+    /// History, newest first: a rail with one dot per version, gaps between versions called out.
+    @ViewBuilder private func timeline(_ store: WorkModelStore) -> some View {
+        let versions = store.newestFirst
+        let gaps = store.models.gaps
+        let today = model.dayCalendar.day(for: .now)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(versions.enumerated()), id: \.element.id) { index, version in
+                HStack(alignment: .top, spacing: TT.Space.m) {
+                    TimelineRail(highlighted: version.validFrom <= today && (version.validTo.map { $0 >= today } ?? true), isLast: index == versions.count - 1)
+                    WorkModelCard(model: version, today: today, canEdit: store.supportsCorrection, edit: { sheet = .edit(version) }, end: { sheet = .end(version) })
+                        .padding(.bottom, TT.Space.m)
+                }
+                if let gap = gaps[version.id] { TimelineGapRow(from: gap.from, to: gap.to) }
+            }
         }
     }
 }
 
-private struct WorkModelCard: View {
+struct WorkModelCard: View {
     let model: WorkModel
     let today: LocalDay
     let canEdit: Bool
     let edit: () -> Void
+    let end: () -> Void
 
     private var isCurrent: Bool { model.validFrom <= today && (model.validTo.map { $0 >= today } ?? true) }
     private var isFuture: Bool { model.validFrom > today }
@@ -70,14 +95,26 @@ private struct WorkModelCard: View {
                     row("workmodel.rounding", (model.roundingEnabled ?? true) ? "\(model.roundingMinutes ?? 15) min" : String(localized: "workmodel.off"))
                     row("workmodel.timezone", model.timezone ?? "Europe/Berlin")
                 }
-                if canEdit {
-                    Button { edit() } label: { Label("workmodel.edit", systemImage: "pencil") }
-                        .buttonStyle(.ttSecondary)
-                        .accessibilityIdentifier("workmodel.edit")
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: TT.Space.s) { actions }
+                    VStack(alignment: .leading, spacing: TT.Space.s) { actions }
                 }
             }
         }
         .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder private var actions: some View {
+        if canEdit {
+            Button { edit() } label: { Label("workmodel.edit", systemImage: "pencil") }
+                .buttonStyle(.ttSecondary)
+                .accessibilityIdentifier("workmodel.edit")
+        }
+        if model.validTo == nil {
+            Button { end() } label: { Label(wmKey("wm.end.button"), systemImage: "calendar.badge.minus") }
+                .buttonStyle(.ttSecondary)
+                .accessibilityIdentifier("workmodel.end")
+        }
     }
 
     private func row(_ key: LocalizedStringKey, _ value: String) -> some View {
@@ -119,10 +156,6 @@ struct WorkModelEditSheet: View {
         _form = State(initialValue: WorkModelForm(model: version))
     }
 
-    private var invalid: Set<WorkModelForm.Field> {
-        if case .failure(let errors) = form.build() { return errors.fields }
-        return []
-    }
     private var canSave: Bool { confirmed && !saving && store.canSave(form: form) }
 
     var body: some View {
@@ -130,14 +163,7 @@ struct WorkModelEditSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: TT.Space.l) {
                     correctionPanel
-                    scheduleSection
-                    roundingSection
-                    schoolSection
-                    breaksSection
-                    if form.dailyTargetSeconds != nil {
-                        HintBanner("workmodel.daily_override")
-                        Button("workmodel.daily_override_remove") { form.dailyTargetSeconds = nil }.buttonStyle(.ttSecondary)
-                    }
+                    WorkModelFormFields(form: $form, calendar: calendar)
                     if let error = store.error {
                         ErrorBanner(message: Self.message(error), retryTitle: "common.dismiss") { store.error = nil }
                     }
@@ -224,96 +250,6 @@ struct WorkModelEditSheet: View {
         case .modelOverlap: String(localized: "workmodel.error_overlap")
         case .staleVersion: String(localized: "workmodel.error_stale")
         default: error.germanDescription
-        }
-    }
-
-    // MARK: Fields
-
-    private func flag(_ field: WorkModelForm.Field) -> Bool { invalid.contains(field) }
-
-    private func field(_ key: LocalizedStringKey, _ text: Binding<String>, _ field: WorkModelForm.Field, hint: LocalizedStringKey? = nil, id: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(key).font(TTFont.meta).foregroundStyle(flag(field) ? TT.danger : TT.textSecondary)
-            TextField(key, text: text)
-                .autocorrectionDisabled()
-                #if os(iOS)
-                .textInputAutocapitalization(.never)
-                #endif
-                .accessibilityIdentifier(id)
-            if flag(field) { Text("workmodel.invalid").font(TTFont.meta).foregroundStyle(TT.danger) }
-            else if let hint { Text(hint).font(TTFont.meta).foregroundStyle(TT.textTertiary) }
-        }
-        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-    }
-
-    private var openEnded: Binding<Bool> {
-        Binding(get: { form.validTo.isEmpty }, set: { form.validTo = $0 ? "" : max(form.validFrom, calendar.day(for: .now)) })
-    }
-
-    private var scheduleSection: some View {
-        FormSection("workmodel.section_schedule") {
-            EditorRow { DatePicker("workmodel.valid_from", selection: dayBinding($form.validFrom, calendar: calendar), displayedComponents: .date) }
-            EditorRow { Toggle("workmodel.open_end_toggle", isOn: openEnded) }
-            if !form.validTo.isEmpty {
-                EditorRow { DatePicker("workmodel.valid_to", selection: dayBinding($form.validTo, calendar: calendar), displayedComponents: .date) }
-                if flag(.validTo) { Text("workmodel.invalid").font(TTFont.meta).foregroundStyle(TT.danger).padding(.horizontal, TT.Space.l) }
-            }
-            field("workmodel.weekly", $form.weeklyTarget, .weekly, hint: "workmodel.weekly_hint", id: "workmodel.field.weekly")
-            VStack(alignment: .leading, spacing: TT.Space.s) {
-                Text("workmodel.workdays").font(TTFont.meta).foregroundStyle(flag(.workdays) ? TT.danger : TT.textSecondary)
-                HStack(spacing: TT.Space.xs) {
-                    ForEach(1...7, id: \.self) { day in
-                        let on = form.workdays.contains(day)
-                        Button { if on { form.workdays.remove(day) } else { form.workdays.insert(day) } } label: {
-                            Text(verbatim: WorkModelCard.workdays([day])).font(TTFont.label).frame(maxWidth: .infinity, minHeight: 44)
-                                .foregroundStyle(on ? Color.primary : TT.textSecondary)
-                                .background(on ? TT.surfaceRaised : Color.clear, in: .rect(cornerRadius: TT.Radius.chip))
-                                .overlay { RoundedRectangle(cornerRadius: TT.Radius.chip).strokeBorder(on ? TT.textSecondary : TT.separator, lineWidth: on ? 2 : 1) }
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(on ? .isSelected : [])
-                        .accessibilityIdentifier("workmodel.day.\(day)")
-                    }
-                }
-                if flag(.workdays) { Text("workmodel.invalid_workdays").font(TTFont.meta).foregroundStyle(TT.danger) }
-            }
-            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
-            field("workmodel.timezone", $form.timezone, .timezone, id: "workmodel.field.timezone")
-            field("workmodel.boundary", $form.dayBoundaryMinutes, .dayBoundary, hint: "workmodel.boundary_hint", id: "workmodel.field.boundary")
-        }
-    }
-
-    private var roundingSection: some View {
-        FormSection("workmodel.rounding", footer: "workmodel.rounding_hint") {
-            EditorRow { Toggle("workmodel.rounding_enabled", isOn: $form.roundingEnabled) }
-            if form.roundingEnabled { field("workmodel.rounding_minutes", $form.roundingMinutes, .roundingMinutes, id: "workmodel.field.rounding") }
-            EditorRow { Toggle("workmodel.travel", isOn: $form.travelCountsAsWork) }
-        }
-    }
-
-    private var schoolSection: some View {
-        FormSection("workmodel.section_school") {
-            field("workmodel.school_threshold", $form.schoolThreshold, .schoolThreshold, hint: "workmodel.school_threshold_hint", id: "workmodel.field.school_threshold")
-            field("workmodel.school_credit", $form.schoolCredit, .schoolCredit, hint: "workmodel.school_credit_hint", id: "workmodel.field.school_credit")
-        }
-    }
-
-    private var breaksSection: some View {
-        FormSection("workmodel.breaks", footer: "workmodel.breaks_hint") {
-            ForEach(form.fixedBreaks.indices, id: \.self) { index in
-                HStack(spacing: TT.Space.s) {
-                    TextField("workmodel.break_from", text: $form.fixedBreaks[index].start).frame(maxWidth: 90)
-                    Text(verbatim: "–").foregroundStyle(TT.textSecondary)
-                    TextField("workmodel.break_to", text: $form.fixedBreaks[index].end).frame(maxWidth: 90)
-                    Spacer(minLength: 0)
-                    Button(role: .destructive) { form.fixedBreaks.remove(at: index) } label: { Image(systemName: "trash").frame(width: 44, height: 44) }
-                        .buttonStyle(.borderless).accessibilityLabel(Text("workmodel.break_remove"))
-                }
-                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.xs)
-            }
-            if flag(.fixedBreaks) { Text("workmodel.invalid_breaks").font(TTFont.meta).foregroundStyle(TT.danger).padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s) }
-            Button { form.fixedBreaks.append(FixedBreak(start: "12:00", end: "12:30")) } label: { Label("workmodel.break_add", systemImage: "plus") }
-                .buttonStyle(.ttSecondary).padding(TT.Space.l)
         }
     }
 

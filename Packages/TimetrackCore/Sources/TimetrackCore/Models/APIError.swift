@@ -41,6 +41,9 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case learningFieldExists = "learning_field_exists"
     case fileTooLarge = "file_too_large"
     case unsupportedType = "unsupported_type"
+    /// Vacation request template (AB1, contract v0.25.0): no template stored (409), mapping above 64 KB (413).
+    case noTemplate = "no_template"
+    case mappingTooLarge = "mapping_too_large"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

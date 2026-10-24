@@ -3,6 +3,25 @@ import Foundation
 /// Injectable transport so tests can run the client without a network.
 public protocol HTTPTransport: Sendable {
     func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse)
+    /// Same as `send`, reporting the upload progress (0...1) of the request body. Transports without progress ignore the handler.
+    func send(_ request: URLRequest, progress: (@Sendable (Double) -> Void)?) async throws -> (Data, HTTPURLResponse)
+}
+
+public extension HTTPTransport {
+    func send(_ request: URLRequest, progress: (@Sendable (Double) -> Void)?) async throws -> (Data, HTTPURLResponse) {
+        try await send(request)
+    }
+}
+
+/// Forwards `didSendBodyData` of one task to a progress handler.
+private final class UploadProgressDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+    private let handler: @Sendable (Double) -> Void
+    init(_ handler: @escaping @Sendable (Double) -> Void) { self.handler = handler }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
+        guard totalBytesExpectedToSend > 0 else { return }
+        handler(min(max(Double(totalBytesSent) / Double(totalBytesExpectedToSend), 0), 1))
+    }
 }
 
 /// Where the opaque `tt_session` cookie value is kept between launches (Keychain in the apps).
@@ -32,7 +51,16 @@ public final class URLSessionTransport: HTTPTransport, SessionCookieJar, @unchec
     }
 
     public func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-        let (data, response) = try await session.data(for: request)
+        try await send(request, progress: nil)
+    }
+
+    public func send(_ request: URLRequest, progress: (@Sendable (Double) -> Void)?) async throws -> (Data, HTTPURLResponse) {
+        let (data, response): (Data, URLResponse)
+        if let progress {
+            (data, response) = try await session.data(for: request, delegate: UploadProgressDelegate(progress))
+        } else {
+            (data, response) = try await session.data(for: request)
+        }
         guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
         return (data, http)
     }

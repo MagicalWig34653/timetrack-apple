@@ -172,6 +172,8 @@ targets:
           AutomationVerification: Für die Standortautomatik braucht Timetrack einmalig den genauen Standort, um Ankünfte zuverlässig zu erkennen.
         # E1: EventKit. Reading events needs full access; Timetrack writes only after the user switches it on, and only to its own calendar.
         NSCalendarsFullAccessUsageDescription: Timetrack zeigt Termine der von dir gewählten Kalender im Tag als Kontext. Die Termine bleiben auf diesem Gerät. Schreiben tut Timetrack nur, wenn du es in den Einstellungen einschaltest, und nur in den eigenen Kalender „Timetrack“.
+        # AB1: the document scanner (VisionKit) for sick notes and other absence attachments; images stay on the device until the user saves them as an attachment.
+        NSCameraUsageDescription: Timetrack scannt mit der Kamera Dokumente wie einen Krankenschein, damit du sie an eine Abwesenheit anhängen kannst. Das Bild wird nur hochgeladen, wenn du es speicherst.
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [de.linolaske.timetrack.automation.refresh, de.linolaske.timetrack.focus.retry]
         UIApplicationSceneManifest:

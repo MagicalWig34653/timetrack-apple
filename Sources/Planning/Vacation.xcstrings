@@ -34,6 +34,83 @@
         }
       }
     },
+    "attachments.add_a11y": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhänge hinzufügen"
+          }
+        }
+      }
+    },
+    "attachments.add_file": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datei auswählen"
+          }
+        }
+      }
+    },
+    "attachments.add_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlaubt sind PDF, PNG, JPG, HEIC und TXT. Anhänge werden nie geteilt und erscheinen in keiner Freigabeansicht."
+          }
+        }
+      }
+    },
+    "attachments.add_hint_drop": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du kannst Dateien auch hierher ziehen."
+          }
+        }
+      }
+    },
+    "attachments.add_photo": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto aus der Mediathek"
+          }
+        }
+      }
+    },
+    "attachments.add_scan": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dokument scannen"
+          }
+        }
+      }
+    },
+    "attachments.add_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinzufügen"
+          }
+        }
+      }
+    },
     "attachments.count_one": {
       "extractionState": "manual",
       "localizations": {
@@ -56,6 +133,61 @@
         }
       }
     },
+    "attachments.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "attachments.delete_label": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ löschen"
+          }
+        }
+      }
+    },
+    "attachments.delete_message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„%@“ wird von dieser Abwesenheit entfernt und gelöscht."
+          }
+        }
+      }
+    },
+    "attachments.delete_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhang löschen?"
+          }
+        }
+      }
+    },
+    "attachments.dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwerfen"
+          }
+        }
+      }
+    },
     "attachments.done": {
       "extractionState": "manual",
       "localizations": {
@@ -67,6 +199,17 @@
         }
       }
     },
+    "attachments.drop_here": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datei hier ablegen"
+          }
+        }
+      }
+    },
     "attachments.empty": {
       "extractionState": "manual",
       "localizations": {
@@ -74,6 +217,61 @@
           "stringUnit": {
             "state": "translated",
             "value": "Keine Anhänge vorhanden."
+          }
+        }
+      }
+    },
+    "attachments.failed.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei ist leer."
+          }
+        }
+      }
+    },
+    "attachments.failed.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Verbindung zum Server. Die Datei bleibt hier, bis du es erneut versuchst."
+          }
+        }
+      }
+    },
+    "attachments.failed.too_large": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei ist zu groß. Wähle eine kleinere Datei oder scanne sie erneut."
+          }
+        }
+      }
+    },
+    "attachments.failed.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Dateityp ist nicht erlaubt. Erlaubt sind PDF, PNG, JPG, HEIC und TXT."
+          }
+        }
+      }
+    },
+    "attachments.files_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angehängte Dateien"
           }
         }
       }
@@ -100,6 +298,17 @@
         }
       }
     },
+    "attachments.menu_a11y": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhänge und Urlaubsantrag"
+          }
+        }
+      }
+    },
     "attachments.open_failed": {
       "extractionState": "manual",
       "localizations": {
@@ -111,6 +320,17 @@
         }
       }
     },
+    "attachments.read_failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei konnte nicht gelesen werden."
+          }
+        }
+      }
+    },
     "attachments.retry": {
       "extractionState": "manual",
       "localizations": {
@@ -118,6 +338,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "attachments.retry_upload": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "attachments.scan_failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Scan konnte nicht gespeichert werden."
           }
         }
       }
@@ -140,6 +382,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Anhänge"
+          }
+        }
+      }
+    },
+    "attachments.unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhänge sind auf diesem Server noch nicht verfügbar."
+          }
+        }
+      }
+    },
+    "attachments.uploading": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird hochgeladen … %d %%"
+          }
+        }
+      }
+    },
+    "attachments.uploads_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird hochgeladen"
           }
         }
       }
@@ -437,6 +712,391 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aktuell und kommend"
+          }
+        }
+      }
+    },
+    "request.action": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubsantrag erstellen"
+          }
+        }
+      }
+    },
+    "request.attach": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als Anhang speichern"
+          }
+        }
+      }
+    },
+    "request.attached": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als Anhang gespeichert."
+          }
+        }
+      }
+    },
+    "request.attaching": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gespeichert …"
+          }
+        }
+      }
+    },
+    "request.flatten": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht mehr bearbeitbar machen"
+          }
+        }
+      }
+    },
+    "request.free_confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese freien Tage stimmen und kommen in den Antrag"
+          }
+        }
+      }
+    },
+    "request.free_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine freien Tage im Zeitraum (keine Wochenenden oder Feiertage)."
+          }
+        }
+      }
+    },
+    "request.free_overflow": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Formular hat nur %d Plätze für freie Tage. Nicht eingetragen: %@"
+          }
+        }
+      }
+    },
+    "request.free_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freie Tage im Zeitraum"
+          }
+        }
+      }
+    },
+    "request.generate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF erstellen"
+          }
+        }
+      }
+    },
+    "request.generating": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird erstellt …"
+          }
+        }
+      }
+    },
+    "request.no_template": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast noch keine Vorlage für den Urlaubsantrag hochgeladen. Das Einrichten (leeres PDF hochladen, Felder zuordnen) geht in der Web-Oberfläche. Danach füllt die App den Antrag aus."
+          }
+        }
+      }
+    },
+    "request.no_template_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Vorlage"
+          }
+        }
+      }
+    },
+    "request.period": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeitraum %@"
+          }
+        }
+      }
+    },
+    "request.preview": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorschau des Urlaubsantrags"
+          }
+        }
+      }
+    },
+    "request.print": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drucken"
+          }
+        }
+      }
+    },
+    "request.privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das PDF wird auf diesem Gerät ausgefüllt. Nur „Als Anhang speichern“ lädt es auf deinen Server."
+          }
+        }
+      }
+    },
+    "request.problem.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorlage ist leer."
+          }
+        }
+      }
+    },
+    "request.problem.encrypted": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorlage ist passwortgeschützt und kann nicht ausgefüllt werden."
+          }
+        }
+      }
+    },
+    "request.problem.not_pdf": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorlage ist keine PDF-Datei."
+          }
+        }
+      }
+    },
+    "request.problem.too_large": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorlage ist größer als 5 MB."
+          }
+        }
+      }
+    },
+    "request.problem.unreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das PDF konnte nicht erstellt werden. Die Vorlage lässt sich nicht lesen."
+          }
+        }
+      }
+    },
+    "request.ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Antrag ist fertig."
+          }
+        }
+      }
+    },
+    "request.regenerate": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF neu erstellen"
+          }
+        }
+      }
+    },
+    "request.rest": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resttage vorher / nachher"
+          }
+        }
+      }
+    },
+    "request.save_files": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sichern"
+          }
+        }
+      }
+    },
+    "request.setup_web": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorlage in der Web-Oberfläche einrichten"
+          }
+        }
+      }
+    },
+    "request.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilen"
+          }
+        }
+      }
+    },
+    "request.skipped": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Felder konnten nicht gesetzt werden: %@"
+          }
+        }
+      }
+    },
+    "request.stale": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Resttage stammen vom Urlaubskonto des Jahres %@."
+          }
+        }
+      }
+    },
+    "request.substitute": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vertreter"
+          }
+        }
+      }
+    },
+    "request.substitute_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird nur in dieses PDF geschrieben, nicht gespeichert."
+          }
+        }
+      }
+    },
+    "request.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubsantrag"
+          }
+        }
+      }
+    },
+    "request.unmapped": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Vorlage hat noch keine Zuordnung. Ordne die Felder in der Web-Oberfläche zu, sonst bleibt das PDF leer."
+          }
+        }
+      }
+    },
+    "request.working_days": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitstage"
           }
         }
       }

@@ -28,6 +28,7 @@ private struct VacationContent: View {
     @State private var showSettings = false // iOS reaches these settings from Einstellungen (S2)
     #endif
     @State private var attachmentsOf: Absence? // V3
+    @State private var requestFor: Absence? // AB1
 
     private var wide: Bool { planningIsWide(sizeClass) }
     private var today: LocalDay { store.today }
@@ -76,7 +77,8 @@ private struct VacationContent: View {
         #if os(macOS)
         .sheet(isPresented: $showSettings) { VacationSettingsSheet(store: store) }
         #endif
-        .sheet(item: $attachmentsOf) { AbsenceAttachmentsSheet(store: store, absence: $0) } // V3
+        .sheet(item: $attachmentsOf) { AbsenceAttachmentsSheet(planning: store, absence: $0) } // V3, AB1: add/scan/delete
+        .sheet(item: $requestFor) { VacationRequestSheet(planning: store, absence: $0) } // AB1: vacation request PDF
     }
 
     private var yearSwitcher: some View {
@@ -156,13 +158,30 @@ private struct VacationContent: View {
                                 AbsenceRow(absence: absence, calendar: store.calendar)
                             }
                             .buttonStyle(.plain).accessibilityIdentifier("absence.row")
-                            if absence.attachmentCount > 0 { // V3: paperclip opens the attachment preview
+                            .contextMenu { rowActions(absence) }
+                            // V3/AB1: the paperclip opens the attachments (view, add, scan, delete); vacation also offers the request PDF.
+                            if absence.kind == .vacation {
+                                Menu { rowActions(absence) } label: { AttachmentGlyph(count: absence.attachmentCount) }
+                                    .menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).padding(.trailing, TT.Space.s)
+                                    .accessibilityLabel(Text(verbatim: VT.s("attachments.menu_a11y")))
+                                    .accessibilityIdentifier("absence.attachments")
+                            } else {
                                 AttachmentButton(count: absence.attachmentCount) { attachmentsOf = absence }.padding(.trailing, TT.Space.s)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    /// AB1: actions of one absence row (context menu and the paperclip menu of vacation rows).
+    @ViewBuilder private func rowActions(_ absence: Absence) -> some View {
+        Button { attachmentsOf = absence } label: { Label(VT.s("attachments.title"), systemImage: "paperclip") }
+            .accessibilityIdentifier("absence.action.attachments")
+        if absence.kind == .vacation {
+            Button { requestFor = absence } label: { Label(VT.s("request.action"), systemImage: "doc.text") }
+                .accessibilityIdentifier("absence.action.request")
         }
     }
 

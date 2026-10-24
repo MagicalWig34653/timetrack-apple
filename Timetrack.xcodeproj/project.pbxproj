@@ -10,6 +10,7 @@
 		0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */; };
 		00CB91B0DDA62D3F3745D7E6 /* WeekZoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3020493852D34BCE225751 /* WeekZoom.swift */; };
 		020ACB90BDA555DF19368EFD /* VacationTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A11A846346102B37268831 /* VacationTools.swift */; };
+		0280FFA8B5483607E8268C75 /* AbsenceAttachmentsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFE0E1B8381D99C1D653BF9 /* AbsenceAttachmentsSheet.swift */; };
 		03D19B1A44B6F1403EFD1564 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 25C1D8D3BDCB8BC0109AC511 /* TimetrackCore */; };
 		043F287187BED2FE2F8CF439 /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		047DB10873C68BD6C43702BE /* WeekVacationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8008229515AD5E7F5DCE042 /* WeekVacationTests.swift */; };
@@ -72,6 +73,7 @@
 		3B11FF5FA92778AEE9607EC2 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 29E63F297776453DF5AF50AB /* TimetrackCore */; };
 		3BB452F9B72F43D4E54C448F /* TimetrackSunset.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22C089E2303199136FDFB343 /* TimetrackSunset.icon */; };
 		3C33E1AE608DB3AF63B9BF3C /* Widget.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A8DD7B0CCF8A11CAA2086716 /* Widget.xcstrings */; };
+		3C8482B599387AB3F8B0EAF4 /* AbsenceAttachmentsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFE0E1B8381D99C1D653BF9 /* AbsenceAttachmentsSheet.swift */; };
 		3D79385F6489C0A63390405C /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C994C099357497A50E66E11 /* CalendarSettingsView.swift */; };
 		3DE372E1109C318EE4BEEA41 /* MonthPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020E290DA733637042202DCC /* MonthPager.swift */; };
 		3EBCDEC78EAB39A445EB94F3 /* AutomationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753667477D8FD54ABCCDBF6 /* AutomationSettingsView.swift */; };
@@ -139,6 +141,7 @@
 		6E450D69C4FC0B35946D5ADC /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = E71BEFC2EC11D35079D118C9 /* TimetrackCore */; };
 		6EF83BAA3EC094369E14A4D8 /* TimerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AB666CFC135DC93A7790FE /* TimerLiveActivity.swift */; };
 		6F1F90153BD346850931C821 /* VacationReminderSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CD59A5554B59B86E61DDB2 /* VacationReminderSettingsView.swift */; };
+		6F9F9E431480574DD8C9CD58 /* VacationRequestSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C763282810FAFC5076E633B /* VacationRequestSheet.swift */; };
 		70CC685F9F0B9B9D8C6D0A55 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D226EEF4AA248813E2E5245 /* BackgroundRefresh.swift */; };
 		70D061F8FBFEEEA3B488D27B /* UX3.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = EB8D2E7E05CAF04885CAAC05 /* UX3.xcstrings */; };
 		711DA7DA7385A54A94FB11C3 /* AboutSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48532679BA93CAFBAFCAE3DA /* AboutSection.swift */; };
@@ -234,6 +237,8 @@
 		BF6AF7A69042B5CE464BC219 /* UX3.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = EB8D2E7E05CAF04885CAAC05 /* UX3.xcstrings */; };
 		C06078D01742ABDAAF48C7F0 /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E299FCCA25A9EAA2930CF1A /* WidgetGallery.swift */; };
 		C0D2EA350F262975270B39BD /* WeekBalanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7A03500DE4C9FFCC5C28DB8 /* WeekBalanceView.swift */; };
+		C0E9CC36F1C1F3C737C736B4 /* VacationRequestSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C763282810FAFC5076E633B /* VacationRequestSheet.swift */; };
+		C142D845EE146069359D3474 /* AttachmentsRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD2B597F21E123DD98932FF /* AttachmentsRequestTests.swift */; };
 		C1F2E52C0F157881B395628F /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
 		C2724CD4E883D38438A32A78 /* AppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6E8EEB9A124779C6977A95 /* AppearanceView.swift */; };
 		C2DC9E677C879BE44779F5D1 /* LearningFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA365EBA653DE3CA5C24A14 /* LearningFieldsView.swift */; };
@@ -490,6 +495,7 @@
 		8477364AADA1DCD3E8009749 /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
 		84CD59A5554B59B86E61DDB2 /* VacationReminderSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderSettingsView.swift; sourceTree = "<group>"; };
 		8597EA72F400AE8400C3242E /* QuickAbsenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAbsenceRow.swift; sourceTree = "<group>"; };
+		8C763282810FAFC5076E633B /* VacationRequestSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationRequestSheet.swift; sourceTree = "<group>"; };
 		8E422A87184929AD155B5655 /* TimetrackStopwatch.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackStopwatch.icon; sourceTree = "<group>"; };
 		8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
 		8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderCenter.swift; sourceTree = "<group>"; };
@@ -547,7 +553,9 @@
 		D8008229515AD5E7F5DCE042 /* WeekVacationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekVacationTests.swift; sourceTree = "<group>"; };
 		D824D708214E9557BC2C2140 /* Timetrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Timetrack.entitlements; sourceTree = "<group>"; };
 		D8725765AFF6EDE5CAF09B9E /* H3ShotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = H3ShotTests.swift; sourceTree = "<group>"; };
+		DAD2B597F21E123DD98932FF /* AttachmentsRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentsRequestTests.swift; sourceTree = "<group>"; };
 		DAE5F3A7A281EFE85ECDBFA1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		DAFE0E1B8381D99C1D653BF9 /* AbsenceAttachmentsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbsenceAttachmentsSheet.swift; sourceTree = "<group>"; };
 		DB16BA707284487ACF177ED7 /* Vacation.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Vacation.xcstrings; sourceTree = "<group>"; };
 		DB41E1BEF6E0BAE868D4C97D /* IntentSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentSupport.swift; sourceTree = "<group>"; };
 		DB4CCDCEC47454447400107A /* WeekPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekPlannerView.swift; sourceTree = "<group>"; };
@@ -726,6 +734,7 @@
 				DD01AD93CEB86333CE929433 /* AdaptiveShotTests.swift */,
 				5DB87D8AB149537B70B2527E /* AppearanceShotTests.swift */,
 				81BD0D73D00301B634764623 /* AppIconSwitchTests.swift */,
+				DAD2B597F21E123DD98932FF /* AttachmentsRequestTests.swift */,
 				CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */,
 				21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */,
 				1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */,
@@ -1026,6 +1035,7 @@
 		FE581AF938F99A4A268E9DCC /* Planning */ = {
 			isa = PBXGroup;
 			children = (
+				DAFE0E1B8381D99C1D653BF9 /* AbsenceAttachmentsSheet.swift */,
 				74F2B113E432CCEAB8720173 /* AbsenceEditor.swift */,
 				F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */,
 				E52D0F9CF21A4E4FE73E0851 /* DayDetail.swift */,
@@ -1034,6 +1044,7 @@
 				829AB0BC0EA6FA97BA015CB8 /* PlanSheets.swift */,
 				8597EA72F400AE8400C3242E /* QuickAbsenceRow.swift */,
 				DB16BA707284487ACF177ED7 /* Vacation.xcstrings */,
+				8C763282810FAFC5076E633B /* VacationRequestSheet.swift */,
 				107B571DCC7A09FAC53B31E7 /* VacationScreen.swift */,
 				16A11A846346102B37268831 /* VacationTools.swift */,
 			);
@@ -1407,6 +1418,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				711DA7DA7385A54A94FB11C3 /* AboutSection.swift in Sources */,
+				3C8482B599387AB3F8B0EAF4 /* AbsenceAttachmentsSheet.swift in Sources */,
 				B99817312B3946FFF46592DD /* AbsenceEditor.swift in Sources */,
 				5B5AD0E8B38489D9DD8718D8 /* ActivitySettingsView.swift in Sources */,
 				B1B5DE9EBB1CA581CBFC6AB3 /* ActivityView.swift in Sources */,
@@ -1462,6 +1474,7 @@
 				80269B3C174A73B5EA721B7C /* TodayView.swift in Sources */,
 				B1C466C3A86245EB36120976 /* UX3Support.swift in Sources */,
 				30A71B8710719CAE5E3B5DD7 /* VacationPlannerView.swift in Sources */,
+				6F9F9E431480574DD8C9CD58 /* VacationRequestSheet.swift in Sources */,
 				BB12A8529D259B67BA7648D2 /* VacationScreen.swift in Sources */,
 				020ACB90BDA555DF19368EFD /* VacationTools.swift in Sources */,
 				6B027F473E05CDA6BB28418F /* WeekBalanceView.swift in Sources */,
@@ -1518,6 +1531,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ADCD599E9DF61F9DBA0647A9 /* AboutSection.swift in Sources */,
+				0280FFA8B5483607E8268C75 /* AbsenceAttachmentsSheet.swift in Sources */,
 				FD1804AC47A4D131DC85E6C2 /* AbsenceEditor.swift in Sources */,
 				E413DFDF380467B041048E50 /* AppIconSettingsSection.swift in Sources */,
 				C2724CD4E883D38438A32A78 /* AppearanceView.swift in Sources */,
@@ -1585,6 +1599,7 @@
 				6B172ADB743F516496F35920 /* VacationPlannerView.swift in Sources */,
 				840FBEA7782724833B2A4CA6 /* VacationReminderCenter.swift in Sources */,
 				6F1F90153BD346850931C821 /* VacationReminderSettingsView.swift in Sources */,
+				C0E9CC36F1C1F3C737C736B4 /* VacationRequestSheet.swift in Sources */,
 				F708A6F22A997C13BD4BD459 /* VacationScreen.swift in Sources */,
 				977B95DE6C4AE3F77C530710 /* VacationTools.swift in Sources */,
 				348AA21EE70CC4E13FAF50CE /* VacationView.swift in Sources */,
@@ -1610,6 +1625,7 @@
 				ADC09ED5A8D474F6D13DE527 /* AdaptiveShotTests.swift in Sources */,
 				63B1E20458EC25403CB2B0C4 /* AppIconSwitchTests.swift in Sources */,
 				32E5D9A4FB08865626415A86 /* AppearanceShotTests.swift in Sources */,
+				C142D845EE146069359D3474 /* AttachmentsRequestTests.swift in Sources */,
 				0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */,
 				540F7CEDD1A0819445FA6740 /* CalendarIntegrationTests.swift in Sources */,
 				59EAFBE4C2F2122E57147C64 /* ContinueLastTests.swift in Sources */,

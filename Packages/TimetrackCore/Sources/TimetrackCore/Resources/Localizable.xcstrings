@@ -199,6 +199,17 @@
         }
       }
     },
+    "error.mapping_too_large": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Zuordnung ist zu groß (mehr als 64 KB)."
+          }
+        }
+      }
+    },
     "error.model_overlap": {
       "localizations": {
         "de": {
@@ -245,6 +256,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es läuft kein Timer."
+          }
+        }
+      }
+    },
+    "error.no_template": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es ist noch keine Urlaubsantrag-Vorlage hochgeladen."
           }
         }
       }

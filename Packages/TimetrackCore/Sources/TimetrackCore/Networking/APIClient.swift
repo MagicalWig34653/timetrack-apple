@@ -55,7 +55,8 @@ public actor APIClient: PreferencesService {
         return request
     }
 
-    private func perform(_ method: Method, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, headers: [String: String] = [:]) async throws -> Data {
+    private func perform(_ method: Method, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, headers: [String: String] = [:],
+                         progress: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
         var refreshedCSRF = false
         var unavailableRetries = 0
         while true {
@@ -64,7 +65,7 @@ public actor APIClient: PreferencesService {
             let data: Data
             let response: HTTPURLResponse
             do {
-                (data, response) = try await transport.send(request)
+                (data, response) = try await transport.send(request, progress: progress)
             } catch is CancellationError {
                 throw TimetrackError.cancelled
             } catch let error as URLError {
@@ -287,6 +288,30 @@ public actor APIClient: PreferencesService {
         return try await perform(.get, "/files/\(id.uuidString.lowercased())", query: query, headers: ["Accept": "*/*"])
     }
 
+    /// `POST /absences/{id}/attachments`: links an uploaded file (`POST /files`) to an absence (contract v0.24.0).
+    public func attachFile(absenceId: UUID, fileId: UUID) async throws -> FileMeta {
+        struct Body: Encodable { let fileId: String }
+        return try await send(.post, "/absences/\(absenceId.uuidString.lowercased())/attachments", body: Body(fileId: fileId.uuidString.lowercased()))
+    }
+
+    /// `DELETE /absences/{id}/attachments/{fileId}`: removes the link only; the file itself stays until `deleteFile`.
+    public func detachFile(absenceId: UUID, fileId: UUID) async throws {
+        try await sendVoid(.delete, "/absences/\(absenceId.uuidString.lowercased())/attachments/\(fileId.uuidString.lowercased())")
+    }
+
+    /// `DELETE /files/{id}`.
+    public func deleteFile(id: UUID) async throws { try await sendVoid(.delete, "/files/\(id.uuidString.lowercased())") }
+
+    // MARK: - Vacation request form (contract v0.25.0, ADR-0026)
+
+    /// `GET /vacation/request-form`: template info and mapping; `exists == false` without a template.
+    public func getVacationRequestForm() async throws -> VacationRequestFormInfo { try await get("/vacation/request-form") }
+
+    /// `GET /vacation/request-form/file`: the template PDF (404 without a template).
+    public func downloadVacationRequestFormFile() async throws -> Data {
+        try await perform(.get, "/vacation/request-form/file", headers: ["Accept": "application/pdf"])
+    }
+
     public func getVacationBalance(year: Int) async throws -> VacationBalance {
         try await get("/vacation/balance", query: [URLQueryItem(name: "year", value: String(year))])
     }
@@ -412,14 +437,14 @@ public actor APIClient: PreferencesService {
     public func deleteReportSource(id: UUID) async throws { try await sendVoid(.delete, "/reports/sources/\(id.uuidString.lowercased())") }
 
     /// `POST /files` (multipart, field `file`). 413 `file_too_large` and 415 `unsupported_type` come back as API errors.
-    public func uploadFile(name: String, contentType: String, data: Data) async throws -> FileMeta {
+    public func uploadFile(name: String, contentType: String, data: Data, progress: (@Sendable (Double) -> Void)? = nil) async throws -> FileMeta {
         let boundary = "tt-\(UUID().uuidString)"
         var body = Data()
         let safeName = name.replacingOccurrences(of: "\"", with: "_").replacingOccurrences(of: "\r", with: "_").replacingOccurrences(of: "\n", with: "_")
         body.append(Data("--\(boundary)\r\nContent-Disposition: form-data; name=\"file\"; filename=\"\(safeName)\"\r\nContent-Type: \(contentType)\r\n\r\n".utf8))
         body.append(data)
         body.append(Data("\r\n--\(boundary)--\r\n".utf8))
-        let answer = try await perform(.post, "/files", body: body, headers: ["Content-Type": "multipart/form-data; boundary=\(boundary)"])
+        let answer = try await perform(.post, "/files", body: body, headers: ["Content-Type": "multipart/form-data; boundary=\(boundary)"], progress: progress)
         return try decode(FileMeta.self, from: answer)
     }
 

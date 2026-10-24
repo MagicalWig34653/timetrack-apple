@@ -71,6 +71,16 @@ public final class PlanningStore {
         try await client.downloadFile(id: file.id, inline: file.supportsInline)
     }
 
+    /// Store for the attachment sheet of one absence (AB1); reloads this list when attachments change so the paperclips stay right.
+    public func makeAttachmentsStore(for absence: Absence) -> AbsenceAttachmentsStore {
+        AbsenceAttachmentsStore(client: client, absenceId: absence.id) { [weak self] in Task { await self?.load() } }
+    }
+
+    /// Store for the vacation request form of one vacation absence (AB1).
+    public func makeRequestStore(for absence: Absence) -> VacationRequestStore {
+        VacationRequestStore(client: client, absence: absence, today: today) { [weak self] in Task { await self?.load() } }
+    }
+
     public func shiftYears(_ count: Int) async {
         year += count
         balance = nil

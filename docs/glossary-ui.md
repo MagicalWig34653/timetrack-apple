@@ -22,6 +22,8 @@ Festgelegt vom Entwickler (Nutzerentscheidung: Wortwahl liegt beim Entwickler, e
 | **Berichtsheft** | Wochenbericht der Ausbildung (BH1): pro Woche Einträge mit Lernfeld, Zeit und Notizen; Status der Woche „Entwurf“/„Erledigt“ (nur Markierung). „Berichtszeit“ ist die Summe der Einträge und nicht „Gearbeitet“. Aktion „Für IHK-Portal kopieren“. | Bericht (allein), Tätigkeitsnachweis |
 | **Lernfeld** | Eigene Liste des Kontos (Nummer optional, Name); Einträge behalten den Namen als Momentaufnahme. | Fach, Kategorie |
 | **Quellen** | Notizen und Dateien einer Berichtswoche als Material; nie geteilt. | Anhänge (die gehören zu Abwesenheiten) |
+| **Anhang** | Datei an einer Abwesenheit (z. B. Krankschein, Urlaubsantrag): hinzufügen per „Datei auswählen“, „Dokument scannen“, „Foto aus der Mediathek“ oder Ziehen; ansehen, löschen. Nie geteilt, in keiner Freigabeansicht. Büroklammer in der Liste. | Beleg, Upload (in der Oberfläche) |
+| **Urlaubsantrag** | Das PDF, das die App aus der Vorlage des Kontos (im Web eingerichtet) für einen Urlaub ausfüllt; „Urlaubsantrag erstellen“, „PDF erstellen“, „Als Anhang speichern“. Gefüllt wird auf dem Gerät. | Formular (für das Ergebnis), Antrag stellen (die App stellt keinen Antrag, sie erzeugt nur das PDF) |
 | **Im Web** | Bereich, den es nur in der Web-App gibt; Zeile öffnet sie im Browser. | – |
 
 Farben der Abwesenheiten (UX3): Urlaub smaragdgrün, Krank rose, Freigestellt teal, Sonstiges schiefergrau, Feiertag amber; Arten: Arbeit sky, Fahrt amber, Schule violett. Farbe ist nie die einzige Information (Symbol und Name stehen daneben).

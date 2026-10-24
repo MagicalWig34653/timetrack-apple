@@ -21,6 +21,9 @@ enum WidgetPublisher {
         }
         store.write(snapshot)
         reloadAll()
+        #if os(macOS)
+        await OverworkScheduler.sync(snapshot: snapshot) // M2: same overwork notifications as iOS, planned from the timer state
+        #endif
         #if os(iOS)
         // A running timer ends any pause (resumed in the app or elsewhere); otherwise a pause marker keeps a paused activity.
         let markers = PauseMarkerStore()
@@ -33,6 +36,9 @@ enum WidgetPublisher {
     static func clear(store: WidgetSnapshotStore = WidgetSnapshotStore()) async {
         store.clear()
         reloadAll()
+        #if os(macOS)
+        await OverworkScheduler.sync(snapshot: nil)
+        #endif
         #if os(iOS)
         PauseMarkerStore().clear()
         await TimerLiveActivity.sync(target: nil, source: "signedOut")

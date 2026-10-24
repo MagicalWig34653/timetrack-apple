@@ -3642,6 +3642,17 @@
         }
       }
     },
+    "sidebar.reports": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichtsheft"
+          }
+        }
+      }
+    },
     "sidebar.settings": {
       "extractionState": "manual",
       "localizations": {

@@ -37,6 +37,10 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case recipientNotFound = "recipient_not_found"
     case shareExists = "share_exists"
     case cannotShareWithSelf = "cannot_share_with_self"
+    /// Berichtsheft (BH1): a learning field with this name exists (409); upload limits (413/415).
+    case learningFieldExists = "learning_field_exists"
+    case fileTooLarge = "file_too_large"
+    case unsupportedType = "unsupported_type"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

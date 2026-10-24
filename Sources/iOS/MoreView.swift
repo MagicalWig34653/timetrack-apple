@@ -12,6 +12,7 @@ struct MoreView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 AccountCard()
+                reportsGroup
                 webAreas
                 remindersGroup
                 automationGroup
@@ -25,7 +26,16 @@ struct MoreView: View {
         .navigationTitle("sidebar.more")
     }
 
-    /// Areas that exist in the web app only (reports, evaluation/export): one honest row each instead of a dead end.
+    /// BH1: the Berichtsheft is native now (weeks, entries, learning fields, copy for the IHK portal).
+    @ViewBuilder private var reportsGroup: some View {
+        if model.isEnabled(.reports) {
+            FormSection("Ausbildung", footer: "Wochenberichte für die Ausbildung: Lernfeld, Zeit und Notizen, kopierbar für das IHK-Portal.") {
+                SettingsLinkRow(title: "Berichtsheft", symbol: "book.closed", id: "more.reports") { ReportsScreen() }
+            }
+        }
+    }
+
+    /// Areas that exist in the web app only (evaluation/export): one honest row each instead of a dead end.
     @ViewBuilder private var webAreas: some View {
         let rows = webRows
         if let url = model.serverURL, !rows.isEmpty {
@@ -44,7 +54,6 @@ struct MoreView: View {
 
     private var webRows: [(id: String, title: LocalizedStringKey, symbol: String)] {
         var rows: [(id: String, title: LocalizedStringKey, symbol: String)] = []
-        if model.isEnabled(.reports) { rows.append(("more.reports", "Berichtsheft", "book.closed")) }
         if model.isEnabled(.transfer) { rows.append(("more.export", "Auswertung und Export", "square.and.arrow.up")) }
         // Freigaben exist natively since PL1 (Zeit › Mehr); they join this list when "Planung" is merged (UX3 follow-up).
         return rows

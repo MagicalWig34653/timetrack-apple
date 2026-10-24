@@ -3,7 +3,7 @@ import TimetrackCore
 import TimetrackStores
 
 /// Commands the "Zeit" screen reacts to (menu bar, keyboard shortcuts, toolbar of other screens).
-enum TimeCommand { case previousWeek, nextWeek, thisWeek, newEntry, search, toggleInspector }
+enum TimeCommand { case previousWeek, nextWeek, thisWeek, newEntry, search, toggleInspector, openReports }
 
 /// Menu bar of the Mac app: File/Edit additions, "Zeit" menu, "Gehe zu" menu. Every command has a keyboard shortcut.
 struct TimetrackCommands: Commands {
@@ -48,6 +48,11 @@ struct TimetrackCommands: Commands {
             Button("time.this_week") { ui.send(.thisWeek) }
                 .keyboardShortcut("t", modifiers: [.command, .shift])
                 .disabled(!signedIn)
+
+            // BH1: the Berichtsheft of the week shown in "Zeit".
+            Button(BH.s("entry.link")) { ui.send(.openReports) }
+                .keyboardShortcut("b", modifiers: [.command, .option])
+                .disabled(!signedIn || !model.isEnabled(.reports))
 
             Divider()
 

@@ -33,6 +33,7 @@ private struct VoidRequest: Identifiable {
 private struct TimeContent: View {
     let store: TimeListStore
     @Environment(UIState.self) private var ui
+    @Environment(AppModel.self) private var model
     @State private var editor: EditorRequest?
     @State private var voiding: VoidRequest?
     @State private var selection = Set<UUID>()
@@ -79,6 +80,13 @@ private struct TimeContent: View {
 
     private func newEntry() { editor = EditorRequest(segment: nil, day: store.calendar.day(for: .now)) }
 
+    /// BH1: opens the Berichtsheft on the week that is shown here.
+    private func openReports() {
+        guard model.isEnabled(.reports) else { return }
+        ui.reportsWeek = ReportWeekRef(containing: store.weekStart)
+        ui.selection = .reports
+    }
+
     private func handleCommand() {
         guard let command = ui.timeCommand else { return }
         ui.timeCommand = nil
@@ -89,6 +97,7 @@ private struct TimeContent: View {
         case .newEntry: newEntry()
         case .search: searchFocused = true
         case .toggleInspector: ui.inspectorVisible.toggle()
+        case .openReports: openReports()
         }
     }
 
@@ -157,6 +166,11 @@ private struct TimeContent: View {
                     .help(Text("time.next_week"))
                 Button { newEntry() } label: { Label("command.new_entry", systemImage: "plus") }
                     .help(Text("command.new_entry"))
+                if model.isEnabled(.reports) {
+                    Button { openReports() } label: { Label(BH.s("entry.link"), systemImage: "book.closed") }
+                        .help(Text(verbatim: BH.s("entry.link")))
+                        .accessibilityIdentifier("time.reports")
+                }
                 Button { ui.inspectorVisible.toggle() } label: { Label(AD.s("command.inspector"), systemImage: "sidebar.trailing") }
                     .help(Text(AD.s("command.inspector")))
             }

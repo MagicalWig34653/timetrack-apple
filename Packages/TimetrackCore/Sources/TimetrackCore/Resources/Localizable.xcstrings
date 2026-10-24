@@ -85,6 +85,17 @@
         }
       }
     },
+    "error.file_too_large": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Datei ist zu groß."
+          }
+        }
+      }
+    },
     "error.forbidden": {
       "localizations": {
         "de": {
@@ -173,6 +184,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Der letzte Passkey kann nicht entfernt werden."
+          }
+        }
+      }
+    },
+    "error.learning_field_exists": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Lernfeld mit diesem Namen gibt es schon."
           }
         }
       }
@@ -387,6 +409,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Du bist nicht angemeldet oder die Anmeldung ist abgelaufen."
+          }
+        }
+      }
+    },
+    "error.unsupported_type": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Dateityp wird nicht unterstützt."
           }
         }
       }

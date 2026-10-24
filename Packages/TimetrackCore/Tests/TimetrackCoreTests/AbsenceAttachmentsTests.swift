@@ -178,7 +178,7 @@ struct AbsenceAttachmentsStoreTests {
         transport.set(attachKey, status: 201, body: meta(fileA))
         store.retry(failed!.id)
         #expect(store.isUploading)
-        await settle(store) { store.uploads.isEmpty }
+        await settle(store) { store.uploads.isEmpty && store.files.count == 1 }
         #expect(store.uploads.isEmpty && store.files.count == 1)
         #expect(transport.requests(matching: "POST /api/v1/files").count == 2)
     }

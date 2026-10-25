@@ -237,6 +237,8 @@ struct DayHeader: View {
 
     var body: some View {
         let done = day.evaluatedWorkSeconds + day.creditSeconds
+        let delta = DayDeltaPolicy.presentation(day: day.date, today: calendar.day(for: .now), doneSeconds: done,
+                                                targetSeconds: day.targetSeconds, hasStarted: !(day.segments ?? []).isEmpty)
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .center, spacing: TT.Space.s))
         layout {
             VStack(alignment: .leading, spacing: 3) {
@@ -255,10 +257,17 @@ struct DayHeader: View {
                 VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
                     Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
                         .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
-                    // F10: today is still running, so only finished days show a (warning) balance.
-                    if day.deltaSeconds != 0 && !isToday {
-                        Text(verbatim: DurationFormat.signed(day.deltaSeconds)).font(TTFont.numeralSmall.weight(.semibold))
-                            .foregroundStyle(day.deltaSeconds < 0 ? TT.warning : TT.success)
+                    switch delta {
+                    case .hidden: EmptyView()
+                    case .open(let seconds):
+                        Text(Z2.s("week.open_left \(DurationFormat.hoursMinutes(seconds))"))
+                            .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
+                    case .deficit(let seconds):
+                        Text(verbatim: DurationFormat.signed(-seconds))
+                            .font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.warning)
+                    case .surplus(let seconds):
+                        Text(verbatim: DurationFormat.signed(seconds))
+                            .font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.success)
                     }
                 }
             }

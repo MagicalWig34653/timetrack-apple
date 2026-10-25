@@ -277,17 +277,6 @@
         }
       }
     },
-    "w.live.of_planned %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "von %@ geplant"
-          }
-        }
-      }
-    },
     "w.live.planned_end %@": {
       "extractionState": "manual",
       "localizations": {
@@ -306,17 +295,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Soll erreicht"
-          }
-        }
-      }
-    },
-    "w.live.since %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "seit %@"
           }
         }
       }

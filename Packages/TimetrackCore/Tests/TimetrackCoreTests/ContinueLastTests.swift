@@ -120,6 +120,25 @@ import Testing
         #expect(store.attention.isEmpty)
     }
 
+    @Test func retryingAnAttentionItemKeepsItsIdAndReturnsARepeatedConflictToAttention() async {
+        let queue = TimerActionQueue(fileURL: nil)
+        let target = QueuedTimerAction.ContinueTarget(segmentId: UUID(uuidString: Self.closedId)!, version: 3, kind: .school, placeId: nil, note: nil)
+        let action = QueuedTimerAction(command: .resume(target), queuedAt: .now.addingTimeInterval(-3600))
+        await queue.enqueue(action)
+        let transport = MockTransport()
+        let path = "PATCH /api/v1/time/segments/\(Self.closedId)"
+        transport.enqueue(path, status: 409, body: #"{"error":{"code":"segment_overlap","message":"x"}}"#)
+        _ = await queue.drain(client: Fixtures.client(transport))
+        #expect(await queue.needsAttention.map(\.id) == [action.id])
+        #expect(await queue.retry(id: action.id))
+        #expect(await queue.pending.map(\.id) == [action.id])
+        transport.enqueue(path, status: 409, body: #"{"error":{"code":"segment_overlap","message":"x"}}"#)
+        _ = await queue.drain(client: Fixtures.client(transport))
+        #expect(await queue.needsAttention.map(\.id) == [action.id])
+        #expect(transport.requests(matching: path).count == 2)
+        #expect(transport.requests(matching: "POST /api/v1/time/timer/start").isEmpty)
+    }
+
     @Test func aServerThatIgnoresNullIsTreatedAsUnsupported() async {
         let (transport, store) = await prepare()
         transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", body: Fixtures.closedSegmentJSON) // still closed

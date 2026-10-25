@@ -99,6 +99,15 @@ public actor TimerActionQueue {
         persist()
     }
 
+    /// Makes one refused action eligible for an explicit retry with its original idempotency key.
+    @discardableResult
+    public func retry(id: UUID) -> Bool {
+        guard let index = entries.firstIndex(where: { $0.id == id && $0.attention != nil }) else { return false }
+        entries[index].attention = nil
+        persist()
+        return true
+    }
+
     /// Queues an action; returns false when it was redundant (same command as the newest queued one).
     @discardableResult
     public func enqueue(_ action: QueuedTimerAction) -> Bool {

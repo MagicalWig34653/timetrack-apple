@@ -364,17 +364,6 @@
         }
       }
     },
-    "attachments.show": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anhänge ansehen"
-          }
-        }
-      }
-    },
     "attachments.title": {
       "extractionState": "manual",
       "localizations": {
@@ -591,17 +580,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Umgekehrte Reihenfolge"
-          }
-        }
-      }
-    },
-    "filter.section_filter": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filter"
           }
         }
       }

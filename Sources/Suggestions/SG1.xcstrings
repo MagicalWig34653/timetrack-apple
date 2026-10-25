@@ -177,17 +177,6 @@
         }
       }
     },
-    "sg1.adjust.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vorschlag anpassen"
-          }
-        }
-      }
-    },
     "sg1.badge.label %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -283,39 +272,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nichts storniert"
-          }
-        }
-      }
-    },
-    "sg1.cancelled.group": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einträge"
-          }
-        }
-      }
-    },
-    "sg1.cancelled.group.footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stornierte Einträge zählen nicht zur Arbeitszeit. Du kannst sie wiederherstellen oder endgültig löschen."
-          }
-        }
-      }
-    },
-    "sg1.cancelled.hint.restore %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eintrag %@ wiederherstellen"
           }
         }
       }
@@ -474,17 +430,6 @@
         }
       }
     },
-    "sg1.cancelled.row": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storniert"
-          }
-        }
-      }
-    },
     "sg1.cancelled.select": {
       "extractionState": "manual",
       "localizations": {
@@ -514,17 +459,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fertig"
-          }
-        }
-      }
-    },
-    "sg1.cancelled.select_none": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auswahl aufheben"
           }
         }
       }
@@ -602,39 +536,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vorschlag"
-          }
-        }
-      }
-    },
-    "sg1.more.footer": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vorschläge der Automatik und Einträge, die einen Blick brauchen. Nichts wird ohne dein Zutun gebucht."
-          }
-        }
-      }
-    },
-    "sg1.more.group": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatik"
-          }
-        }
-      }
-    },
-    "sg1.more.row": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zu prüfen"
           }
         }
       }
@@ -833,17 +734,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dieser Vorschlag kann in dieser App-Version nicht übernommen werden."
-          }
-        }
-      }
-    },
-    "sg1.review.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zu prüfen"
           }
         }
       }

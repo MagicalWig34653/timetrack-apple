@@ -235,7 +235,7 @@ struct WorkModelEditSheet: View {
         }
         .padding(TT.Space.m).frame(maxWidth: .infinity, alignment: .leading)
         .background(TT.surface, in: .rect(cornerRadius: TT.Radius.control, style: .continuous))
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
     }
 
     /// `Zeitkonto heute: vorher +1:00 -> nachher -0:30 (-1:30), betroffen: 48 Tage`.

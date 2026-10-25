@@ -58,6 +58,8 @@ public final class AppModel {
     }
 
     public var fastLaunch: FastLaunch?
+    /// Shared queue for timer actions initiated by the app, intents, and automation on iOS.
+    public var actionQueue: TimerActionQueue?
     /// Forwarded to the fast-launch today store (`TodayStore.onChange`).
     public var onTodayChanged: (@MainActor () -> Void)?
 
@@ -263,7 +265,7 @@ public final class AppModel {
         workModel = await models?.current()
         let client = context.client
         let calendar = dayCalendar
-        let todayStore = TodayStore(client: client, calendar: calendar)
+        let todayStore = TodayStore(client: client, calendar: calendar, queue: actionQueue)
         let timeListStore = TimeListStore(client: client, calendar: calendar)
         todayStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         timeListStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
@@ -274,6 +276,7 @@ public final class AppModel {
         cancelledStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         cancelled = cancelledStore
         today = todayStore
+        await todayStore.restorePending()
         timeList = timeListStore
         makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
         phase = .signedIn

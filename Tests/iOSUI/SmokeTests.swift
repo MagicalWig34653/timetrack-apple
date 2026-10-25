@@ -2,6 +2,7 @@ import XCTest
 
 /// Smoke test against a THROWAWAY backend. Needs TT_DEV_SERVER and TT_DEV_COOKIE in the test runner's environment
 /// (xcodebuild passes `TEST_RUNNER_TT_DEV_SERVER` / `TEST_RUNNER_TT_DEV_COOKIE`); skipped otherwise.
+/// Use seed-throwaway.py --no-today so the timer can start at any time of day.
 final class SmokeTests: XCTestCase {
     func testTimerAndTabs() throws {
         let env = ProcessInfo.processInfo.environment
@@ -10,6 +11,7 @@ final class SmokeTests: XCTestCase {
         let app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "month"]
         app.launch()
 
         let start = app.startControl

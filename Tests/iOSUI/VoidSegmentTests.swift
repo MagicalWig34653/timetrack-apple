@@ -1,9 +1,9 @@
 import XCTest
 
 /// A9 regression: voiding a segment in "Zeit" crashed the app (UICollectionView batch-update assertion of the SwiftUI List).
-/// Runs against a THROWAWAY backend seeded by scripts/seed-throwaway.py (env TT_DEV_SERVER, TT_DEV_COOKIE); skipped otherwise.
+/// Runs against a THROWAWAY backend seeded by scripts/seed-cx1.py (env TT_DEV_SERVER, TT_DEV_COOKIE); skipped otherwise.
 /// Each test voids exactly one seeded segment, so run a freshly seeded backend per test method (or the whole class once:
-/// the tests use distinct notes). Seeded notes used: "Lernfeld 5" (one of several on today), "Berufsschule" (the only segment of its day),
+/// the tests use distinct notes). Seeded notes used: "Lernfeld 5" (one of several last Thursday), "Berufsschule" (the only segment of its day),
 /// "Vor-Ort-Termin" (refresh in flight), "Updates ausgerollt" (double tap).
 final class VoidSegmentTests: XCTestCase {
     private var app: XCUIApplication!
@@ -16,12 +16,13 @@ final class VoidSegmentTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
-        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE", "-time.zoom", "week"]
         app.launch()
         XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
         let tab = app.tabBars.buttons["Zeit"]
         if tab.exists { tab.tap() } else { app.descendants(matching: .any)["sidebar.time"].firstMatch.tap() }
         XCTAssertTrue(app.buttons["time.new"].waitForExistence(timeout: 10))
+        app.buttons["calendar.prev"].tap()
     }
 
     /// One of several segments of a day disappears.
@@ -69,7 +70,7 @@ final class VoidSegmentTests: XCTestCase {
         app.cells.containing(NSPredicate(format: "label CONTAINS %@", note)).firstMatch
     }
 
-    /// The list is lazy: bring the row on screen (today's rows are at the bottom of the week).
+    /// The list is lazy: bring the row on screen in the seeded previous week.
     private func reveal(_ note: String) -> XCUIElement {
         let row = segmentCell(note)
         for _ in 0..<8 where !(row.exists && row.isHittable) { app.collectionViews.firstMatch.swipeUp(velocity: .slow) }

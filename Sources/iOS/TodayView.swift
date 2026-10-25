@@ -27,12 +27,22 @@ private struct TodayContent: View {
     @State private var contentWidth: CGFloat = 0
     /// H3: on iPhone the clock card opens the "Jetzt" sheet (the same sheet as the bar).
     @State private var showSheet = false
+    @State private var showAttention = false
     private var twoColumns: Bool { sizeClass == .regular && contentWidth >= 760 }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
                 Eyebrow(verbatim: dateLine).padding(.horizontal, TT.Space.xs)
+                if !store.attention.isEmpty {
+                    Button { showAttention = true } label: {
+                        Label("attention.banner", systemImage: "exclamationmark.triangle")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.ttSecondary)
+                    .accessibilityIdentifier("today.attention.open")
+                    .accessibilityValue(Text(verbatim: "\(store.attention.count)"))
+                }
                 if let error = store.error { ErrorBannerView(error: error) { Task { await store.load() } } }
                 if twoColumns {
                     HStack(alignment: .top, spacing: TT.Space.xl) {
@@ -71,6 +81,7 @@ private struct TodayContent: View {
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         .animation(.smooth(duration: 0.35), value: store.running?.id)
         .sheet(isPresented: $showSheet) { NowSheet(store: store) }
+        .sheet(isPresented: $showAttention) { AttentionSheet(store: store) }
     }
 
     @ViewBuilder private var hints: some View {
@@ -83,6 +94,55 @@ private struct TodayContent: View {
 
     private var dateLine: String {
         Date.now.formatted(Date.FormatStyle(timeZone: model.dayCalendar.timeZone).weekday(.wide).day().month(.wide))
+    }
+}
+
+private struct AttentionSheet: View {
+    let store: TodayStore
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: TT.Space.l) {
+                    Text("attention.message")
+                        .font(TTFont.body).foregroundStyle(TT.textSecondary)
+                    ForEach(store.attention) { action in
+                        Card {
+                            VStack(alignment: .leading, spacing: TT.Space.m) {
+                                actionTitle(action).font(TTFont.cardTitle)
+                                if action.attention?.status == 412 {
+                                    Text("attention.changed").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                                } else {
+                                    Text("attention.conflict").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                                }
+                                HStack {
+                                    Button("attention.discard", role: .destructive) { Task { await store.dismissAttention(action.id) } }
+                                        .accessibilityIdentifier("attention.discard.\(action.id)")
+                                    Spacer()
+                                    Button("attention.retry") { Task { await store.retryAttention(action.id) } }
+                                        .accessibilityIdentifier("attention.retry.\(action.id)")
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(TT.Space.l)
+            }
+            .ttScreenBackground()
+            .navigationTitle("attention.title")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("attention.done") { dismiss() } } }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func actionTitle(_ action: QueuedTimerAction) -> Text {
+        switch action.command {
+        case .resume(let target): Text("attention.resume") + Text(target.kind.ttTitle)
+        case .start(let kind): Text("attention.start") + Text(kind.ttTitle)
+        case .stop: Text("attention.stop")
+        }
     }
 }
 

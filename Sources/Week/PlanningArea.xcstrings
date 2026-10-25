@@ -68,39 +68,6 @@
         }
       }
     },
-    "hub.menu": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Planung"
-          }
-        }
-      }
-    },
-    "hub.menu.shares": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Freigaben"
-          }
-        }
-      }
-    },
-    "hub.menu.weeks": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kommende Wochen"
-          }
-        }
-      }
-    },
     "hub.more": {
       "extractionState": "manual",
       "localizations": {

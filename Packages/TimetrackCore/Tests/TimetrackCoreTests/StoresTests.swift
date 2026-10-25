@@ -96,6 +96,21 @@ import Testing
         #expect(restrictedTransport.requests(matching: "GET /api/v1/modules").isEmpty, "no feature calls in a recovery session")
     }
 
+    @Test func appModelRestoresTimerActionsNeedingAttentionAfterSignIn() async {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())
+        transport.enqueue("GET /api/v1/modules", body: Fixtures.modulesJSON)
+        transport.enqueue("GET /api/v1/work-models", body: Fixtures.workModelJSON)
+        let queue = TimerActionQueue(fileURL: nil)
+        let id = UUID()
+        let target = QueuedTimerAction.ContinueTarget(segmentId: UUID(), version: 1, kind: .work, placeId: nil, note: nil)
+        await queue.enqueue(.init(id: id, command: .resume(target), attention: .init(status: 409, code: "segment_overlap")))
+        let model = AppModel(auth: AuthService(secrets: InMemorySecretStore(), transport: transport))
+        model.actionQueue = queue
+        await model.signInWithSessionCookie(serverInput: "http://localhost:18090", cookie: "c")
+        #expect(model.today?.attention.map(\.id) == [id])
+    }
+
     @Test func appModelReportsSignInErrors() async {
         let transport = MockTransport()
         transport.enqueue("POST /api/v1/auth/recovery/start", status: 202, body: #"{"recoveryId":"r"}"#)

@@ -94,6 +94,12 @@ struct NewPlaceSheet: View {
     }
 
     private func useCurrentLocation() async {
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["TT_DEV_CX1_LOCATION"] == "1" {
+            setCoordinate(CLLocationCoordinate2D(latitude: 51.48, longitude: 11.97))
+            return
+        }
+        #endif
         locating = true
         locationFailed = false
         defer { locating = false }

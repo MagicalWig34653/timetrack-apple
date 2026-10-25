@@ -980,6 +980,127 @@
         }
       }
     },
+    "attention.banner": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer-Aktionen prüfen"
+          }
+        }
+      }
+    },
+    "attention.changed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Eintrag wurde inzwischen geändert."
+          }
+        }
+      }
+    },
+    "attention.conflict": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Eintrag überschneidet sich mit einer anderen Buchung."
+          }
+        }
+      }
+    },
+    "attention.discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwerfen"
+          }
+        }
+      }
+    },
+    "attention.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        }
+      }
+    },
+    "attention.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese Timer-Aktionen konnten nach einer Änderung auf dem Server nicht abgeschlossen werden. Prüfe den aktuellen Stand, bevor du sie erneut versuchst."
+          }
+        }
+      }
+    },
+    "attention.resume": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortführen: "
+          }
+        }
+      }
+    },
+    "attention.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "attention.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten: "
+          }
+        }
+      }
+    },
+    "attention.stop": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer stoppen"
+          }
+        }
+      }
+    },
+    "attention.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timer-Aktionen prüfen"
+          }
+        }
+      }
+    },
     "calendar.custom": {
       "extractionState": "manual",
       "localizations": {
@@ -2443,17 +2564,6 @@
         }
       }
     },
-    "plan.action.custom_day": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eigenen Tag anlegen"
-          }
-        }
-      }
-    },
     "plan.action.excused": {
       "extractionState": "manual",
       "localizations": {
@@ -2494,17 +2604,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zeitraum wählen"
-          }
-        }
-      }
-    },
-    "plan.action.segment": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitabschnitt hinzufügen"
           }
         }
       }
@@ -3950,17 +4049,6 @@
         }
       }
     },
-    "signin.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bei Timetrack anmelden"
-          }
-        }
-      }
-    },
     "time.add_to_day %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4038,17 +4126,6 @@
         }
       }
     },
-    "time.overview": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wochenübersicht"
-          }
-        }
-      }
-    },
     "time.previous_week": {
       "extractionState": "manual",
       "localizations": {
@@ -4093,28 +4170,6 @@
         }
       }
     },
-    "time.week_range %@ %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ bis %2$@"
-          }
-        }
-      }
-    },
-    "time.week_total %@ %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Woche: %1$@ von %2$@"
-          }
-        }
-      }
-    },
     "today.balance": {
       "extractionState": "manual",
       "localizations": {
@@ -4122,17 +4177,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zeitkonto"
-          }
-        }
-      }
-    },
-    "today.delta": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Differenz"
           }
         }
       }
@@ -4199,17 +4243,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kein Timer läuft"
-          }
-        }
-      }
-    },
-    "today.of_target %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "von %@ Soll"
           }
         }
       }
@@ -4412,28 +4445,6 @@
         }
       }
     },
-    "vacation.balance_formula": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verfügbar = Anspruch + Übertrag + Korrekturen − gebuchter Urlaub. Geplanter Urlaub wird erst abgezogen, wenn er genehmigt ist."
-          }
-        }
-      }
-    },
-    "vacation.booked": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Genehmigt oder genommen"
-          }
-        }
-      }
-    },
     "vacation.carry_field %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4456,17 +4467,6 @@
         }
       }
     },
-    "vacation.carry_over": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Übertrag"
-          }
-        }
-      }
-    },
     "vacation.days %@": {
       "extractionState": "manual",
       "localizations": {
@@ -4485,17 +4485,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Urlaub und Planung sind für dieses Konto abgeschaltet."
-          }
-        }
-      }
-    },
-    "vacation.edit_entitlement": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anspruch ändern"
           }
         }
       }
@@ -4720,17 +4709,6 @@
         }
       }
     },
-    "vacation.planned": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geplant oder beantragt"
-          }
-        }
-      }
-    },
     "vacation.previous_year": {
       "extractionState": "manual",
       "localizations": {
@@ -4830,17 +4808,6 @@
         }
       }
     },
-    "vacation.snapshot_row %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resturlaub zum Stichtag %@"
-          }
-        }
-      }
-    },
     "vacation.snapshot_save": {
       "extractionState": "manual",
       "localizations": {
@@ -4874,94 +4841,6 @@
         }
       }
     },
-    "vacation.tile_adjustments": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gutschriften (+) oder Abzüge (−) von dir."
-          }
-        }
-      }
-    },
-    "vacation.tile_booked_text": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bereits abgezogene Urlaubstage."
-          }
-        }
-      }
-    },
-    "vacation.tile_carry_text": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aus dem Vorjahr, von dir eingetragen."
-          }
-        }
-      }
-    },
-    "vacation.tile_entitlement": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Anspruch für das Jahr laut Einstellungen."
-          }
-        }
-      }
-    },
-    "vacation.tile_planned_text": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geplant oder beantragt, noch nicht abgezogen."
-          }
-        }
-      }
-    },
-    "vacation.tile_replaced": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gespeichert, aber durch den Stichtagsbestand ersetzt."
-          }
-        }
-      }
-    },
-    "vacation.tile_snapshot": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stichtagsbestand"
-          }
-        }
-      }
-    },
-    "vacation.tile_snapshot_text %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resturlaub am %@, ersetzt Anspruch und Übertrag."
-          }
-        }
-      }
-    },
     "void.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -4980,39 +4859,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eintrag stornieren"
-          }
-        }
-      }
-    },
-    "wk.aria.balance": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saldo %@"
-          }
-        }
-      }
-    },
-    "wk.aria.hours": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ Stunden"
-          }
-        }
-      }
-    },
-    "wk.aria.planned": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "geplant %@ Stunden"
           }
         }
       }
@@ -5387,39 +5233,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ Tage"
-          }
-        }
-      }
-    },
-    "wk.detail.link": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wochendetails: Zeitkonto, Plan, Durchschnitt"
-          }
-        }
-      }
-    },
-    "wk.detail.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wochendetails"
-          }
-        }
-      }
-    },
-    "wk.empty.plan": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Woche planen"
           }
         }
       }
@@ -5952,17 +5765,6 @@
         }
       }
     },
-    "wk.segment.list": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Liste"
-          }
-        }
-      }
-    },
     "wk.segment.plan": {
       "extractionState": "manual",
       "localizations": {
@@ -5970,17 +5772,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Planen"
-          }
-        }
-      }
-    },
-    "wk.segment.week": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Woche"
           }
         }
       }
@@ -6003,28 +5794,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Davor %@"
-          }
-        }
-      }
-    },
-    "wk.sum.actual": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ist"
-          }
-        }
-      }
-    },
-    "wk.sum.actual_hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gearbeitet und angerechnet"
           }
         }
       }
@@ -6751,28 +6520,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die letzte Woche hat keinen Plan."
-          }
-        }
-      }
-    },
-    "wk.week.empty_text": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sobald du Zeiten erfasst oder Urlaub einträgst, erscheint hier die Übersicht."
-          }
-        }
-      }
-    },
-    "wk.week.empty_title": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch keine Einträge in dieser Woche"
           }
         }
       }

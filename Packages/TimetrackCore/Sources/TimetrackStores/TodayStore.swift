@@ -73,6 +73,14 @@ public final class TodayStore {
         changed()
     }
 
+    /// Explicit retry keeps the original event id; another conflict returns the item to the attention list.
+    public func retryAttention(_ id: UUID) async {
+        guard let queue, await queue.retry(id: id) else { return }
+        await refreshPending(queue)
+        changed()
+        await drainQueue()
+    }
+
     /// What a compact screen shows right now: live data, else queued actions on top of the cache.
     public var display: TodayDisplay {
         let base = hasLoadedLive

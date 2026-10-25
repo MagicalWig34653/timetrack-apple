@@ -105,7 +105,7 @@ final class ParityFlowTests: XCTestCase {
         shot("workmodel-saved")
 
         // Back to settings: about, haptics.
-        app.navigationBars.buttons.firstMatch.tap()
+        app.openSettings()
         // S2: the about page is one level down ("Über Timetrack"); the haptic level lives on the appearance page.
         let aboutRow = el("settings.about")
         scrollTo(aboutRow)
@@ -114,7 +114,7 @@ final class ParityFlowTests: XCTestCase {
         XCTAssertTrue(copy.waitForExistence(timeout: 10))
         XCTAssertTrue(el("about.backend.version").waitForExistence(timeout: 10) || el("about.unavailable").exists)
         shot("about")
-        app.navigationBars.buttons.firstMatch.tap()
+        app.openSettings()
 
         // Appearance: grid with the new ids, glow.
         app.swipeDown(); app.swipeDown(); app.swipeDown()

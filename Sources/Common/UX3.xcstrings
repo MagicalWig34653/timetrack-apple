@@ -442,17 +442,6 @@
         }
       }
     },
-    "ux3.now.open_today": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffnet Heute"
-          }
-        }
-      }
-    },
     "ux3.now.running %@ %@": {
       "extractionState": "manual",
       "localizations": {
@@ -515,17 +504,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erklärt, was vorläufig bedeutet"
-          }
-        }
-      }
-    },
-    "ux3.sheet.details": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laufender Eintrag"
           }
         }
       }

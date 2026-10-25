@@ -17,6 +17,7 @@ final class AutomationFlowTests: XCTestCase {
         app = XCUIApplication()
         app.launchEnvironment["TT_DEV_SERVER"] = server
         app.launchEnvironment["TT_DEV_COOKIE"] = cookie
+        app.launchEnvironment["TT_DEV_CX1_LOCATION"] = "1"
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
         XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
@@ -78,7 +79,7 @@ final class AutomationFlowTests: XCTestCase {
         el("automation.newplace.name").tap()
         el("automation.newplace.name").typeText("Zuhause Test")
         el("automation.newplace.locate").tap()
-        sleep(4) // permission is granted by the harness; the one-shot fix returns the simulated location
+        XCTAssertTrue(el("automation.newplace.save").waitForExistence(timeout: 5))
         shot("newplace")
         XCTAssertTrue(el("automation.newplace.save").isEnabled, "location should have been set")
         app.buttons["Abbrechen"].tap()

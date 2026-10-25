@@ -18,6 +18,7 @@ struct TimetrackIOSApp: App {
         let passkeys = PlatformPasskeyAuthenticator { Self.keyWindow() }
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
         let model = AppModel(auth: auth)
+        model.actionQueue = TimerControlRunner.queue
         FocusNotifications.install() // F2: action buttons of the Focus filter's questions
         FocusEnvironment.registerBackgroundRetry() // F3: retries of Focus actions that could not reach the server (must be registered before launch ends)
         Task { await FocusEnvironment.retryPending() } // F3: also runs on background launches caused by a Focus callback

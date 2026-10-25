@@ -85,8 +85,9 @@ for offset, items in plans.items():
     day = monday + dt.timedelta(days=offset)
     if day < today:
         for item in items: seg(day, *item)
-for item in [("work", "08:00", "12:15", "Planung Sprint"), ("travel", "12:30", "13:00", None), ("school", "13:30", "16:00", "Lernfeld 5")]:
-    seg(today, *item)
+if "--no-today" not in sys.argv:
+    for item in [("work", "08:00", "12:15", "Planung Sprint"), ("travel", "12:30", "13:00", None), ("school", "13:30", "16:00", "Lernfeld 5")]:
+        seg(today, *item)
 
 year = today.year
 nxt = monday + dt.timedelta(days=21)

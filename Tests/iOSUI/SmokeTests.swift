@@ -21,6 +21,10 @@ final class SmokeTests: XCTestCase {
         shot("running")
         app.stopControl.tap()
         XCTAssertTrue(app.startControl.waitForExistence(timeout: 10))
+        // The "Timer beendet / Weiter" banner overlays the top of every tab for ~7 s and would swallow the toolbar tap below.
+        let toast = app.descendants(matching: .any)["toast.stopped"].firstMatch
+        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: toast)
+        XCTAssertEqual(XCTWaiter().wait(for: [gone], timeout: 15), .completed, "stop banner disappears")
 
         open(app, "Zeit", "time")
         XCTAssertTrue(app.buttons["time.new"].waitForExistence(timeout: 10))

@@ -77,7 +77,7 @@ struct VacationRequestSheet: View {
         if let data = store.request {
             if store.mappedFieldCount == 0 { HintBanner(LocalizedStringKey(VT.s("request.unmapped")), symbol: "exclamationmark.triangle.fill") }
             summary(data)
-            inputs(data)
+            inputs(data).disabled(store.isGenerating) // X4: no edits while the PDF is being filled
             Button { Task { await store.generate() } } label: {
                 Text(verbatim: store.isGenerating ? VT.s("request.generating") : (store.generated == nil ? VT.s("request.generate") : VT.s("request.regenerate")))
             }
@@ -164,7 +164,7 @@ struct VacationRequestSheet: View {
                 .accessibilityLabel(Text(verbatim: VT.s("request.preview"))).accessibilityIdentifier("request.preview")
             actions(generated)
         }
-        .task(id: generated.data.count) { prepareShare(generated) }
+        .task(id: generated.id) { prepareShare(generated) }
     }
 
     private func actions(_ generated: VacationRequestStore.Generated) -> some View {
@@ -208,7 +208,10 @@ struct VacationRequestSheet: View {
             let root = tempDirectory ?? FileManager.default.temporaryDirectory.appendingPathComponent("vacation-request-\(UUID().uuidString)")
             try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
             tempDirectory = root
-            let url = root.appendingPathComponent(generated.fileName)
+            // X4: one folder per generation, so the link never points at the file of an earlier PDF.
+            let folder = root.appendingPathComponent(generated.id.uuidString, isDirectory: true)
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let url = folder.appendingPathComponent(generated.fileName)
             try generated.data.write(to: url, options: .atomic)
             shareURL = url
         } catch {

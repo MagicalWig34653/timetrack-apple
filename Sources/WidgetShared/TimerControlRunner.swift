@@ -15,6 +15,9 @@ enum TimerControlRunner {
     }()
 
     static func perform(_ action: TimerControlAction) async {
+        // X4: without a stored session there is no account the press could belong to (signed out): nothing is queued, so it
+        // can never be delivered with an account that signs in later.
+        guard let client = await AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(timeout: 8)).optimisticClient() else { return }
         let snapshots = WidgetSnapshotStore()
         let markers = PauseMarkerStore()
         let plan = TimerPress.plan(action, snapshot: snapshots.read(), marker: markers.read())
@@ -28,8 +31,7 @@ enum TimerControlRunner {
         WidgetPublisher.reloadAll()
         await TimerLiveActivity.sync(target: LiveActivityTarget.desired(snapshot: snapshots.read(), pause: markers.read(), iconStyle: LiveActivityIconStore().read(), tintStyle: LiveActivityTintStore().read()), source: "intent")
 
-        guard plan.queued != nil,
-              let client = await AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(timeout: 8)).optimisticClient() else { return }
+        guard plan.queued != nil else { return }
         let result = await queue.drain(client: client)
         if result.delivered > 0 { await WidgetPublisher.refresh(client: client, source: "intent") }
     }

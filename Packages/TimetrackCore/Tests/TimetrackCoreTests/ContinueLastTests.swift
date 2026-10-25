@@ -53,7 +53,7 @@ import Testing
         #expect(patchBody.contains("Timer fortgesetzt"))
     }
 
-    @Test(arguments: [(400, "validation_failed"), (422, "validation_failed"), (404, "not_found"), (405, "not_found"), (501, "not_implemented")])
+    @Test(arguments: [(400, "validation_failed"), (422, "validation_failed"), (405, "not_found"), (501, "not_implemented")])
     func fallsBackToANewSegmentWhenReopenIsRefused(status: Int, code: String) async {
         let (transport, store) = await prepare()
         transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: status, body: #"{"error":{"code":"\#(code)","message":"x"}}"#)
@@ -70,7 +70,7 @@ import Testing
         #expect(transport.requests(matching: "PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222").count == 1)
     }
 
-    @Test(arguments: [(409, "segment_overlap"), (412, "stale_version")])
+    @Test(arguments: [(404, "not_found"), (409, "segment_overlap"), (412, "stale_version")])
     func conflictsNeverStartAReplacementAutomatically(status: Int, code: String) async {
         let (transport, store) = await prepare()
         transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: status, body: #"{"error":{"code":"\#(code)","message":"x"}}"#)
@@ -80,7 +80,7 @@ import Testing
         #expect(store.error?.status == status) // surfaced to the user, state reloaded
     }
 
-    @Test(arguments: [(409, "segment_overlap"), (412, "stale_version")])
+    @Test(arguments: [(404, "not_found"), (409, "segment_overlap"), (412, "stale_version")])
     func queuedContinueWithAConflictWaitsForTheUserInsteadOfBookingNewTime(status: Int, code: String) async {
         let queue = TimerActionQueue(fileURL: nil)
         let transport = MockTransport()
@@ -98,6 +98,24 @@ import Testing
         _ = await queue.drain(client: Fixtures.client(transport))
         #expect(transport.requests(matching: "PATCH /api/v1/time/segments/\(Self.closedId)").count == 1)
         await queue.discard(id: action.id)
+        #expect(await queue.needsAttention.isEmpty)
+    }
+
+    @Test func conflictEntriesSurviveEvictionByLaterEntries() async {
+        let queue = TimerActionQueue(fileURL: nil, limit: 3)
+        let transport = MockTransport()
+        let target = QueuedTimerAction.ContinueTarget(segmentId: UUID(uuidString: Self.closedId)!, version: 3, kind: .school, placeId: nil, note: nil)
+        let held = QueuedTimerAction(command: .resume(target), queuedAt: .now.addingTimeInterval(-3600))
+        await queue.enqueue(held)
+        transport.enqueue("PATCH /api/v1/time/segments/\(Self.closedId)", status: 404, body: #"{"error":{"code":"not_found","message":"x"}}"#)
+        _ = await queue.drain(client: Fixtures.client(transport))
+        #expect(await queue.needsAttention.map(\.id) == [held.id])
+        for index in 0..<10 {
+            await queue.enqueue(.init(command: index.isMultiple(of: 2) ? .stop : .start(.work), queuedAt: .now))
+        }
+        #expect(await queue.pending.count == 3)
+        #expect(await queue.needsAttention.map(\.id) == [held.id])
+        await queue.discard(id: held.id)
         #expect(await queue.needsAttention.isEmpty)
     }
 

@@ -460,6 +460,35 @@ struct VacationRequestStoreTests {
         #expect(upload.contains("filename=\"Urlaubsantrag_2026-07-06_2026-07-17.pdf\"") && upload.contains("Content-Type: application/pdf") && upload.contains("%PDF-"))
     }
 
+    /// X4: an input changed while the PDF was being filled; the older result must not show up (or be attached).
+    @Test func aPDFFilledForOlderInputsIsDiscarded() async throws {
+        let transport = MockTransport()
+        let store = prepared(transport)
+        transport.set("GET /api/v1/vacation/request-form/file", body: String(decoding: SyntheticFormPDF.make(fields: [.init(name: "Name", kind: .text), .init(name: "Frei", kind: .text, rect: [50, 620, 250, 640])]), as: UTF8.self))
+        await store.load()
+        let running = Task { await store.generate() }
+        await Task.yield() // generate() is now suspended inside the detached fill
+        #expect(store.isGenerating)
+        store.freeConfirmed = false // input change during generation
+        await running.value
+        #expect(store.generated == nil)
+        #expect(!store.isGenerating)
+        await store.generate()
+        #expect(try FormPDF.fieldValues(#require(store.generated).data)["Frei"] == "")
+    }
+
+    @Test func everyGenerationGetsItsOwnId() async throws {
+        let transport = MockTransport()
+        let store = prepared(transport)
+        transport.set("GET /api/v1/vacation/request-form/file", body: String(decoding: SyntheticFormPDF.make(fields: [.init(name: "Name", kind: .text)]), as: UTF8.self))
+        await store.load()
+        await store.generate()
+        let first = try #require(store.generated)
+        await store.generate() // same inputs, same size
+        let second = try #require(store.generated)
+        #expect(first.id != second.id && first.data.count == second.data.count)
+    }
+
     @Test func attachingFailureDeletesTheOrphanedUpload() async throws {
         let transport = MockTransport()
         let store = prepared(transport)

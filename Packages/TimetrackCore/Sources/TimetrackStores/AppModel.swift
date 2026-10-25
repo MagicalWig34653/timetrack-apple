@@ -226,6 +226,12 @@ public final class AppModel {
             return
         }
         await context.client.setModuleDisabledHandler { [weak self] in Task { @MainActor in await self?.refreshModules() } }
+        // X4: bind the fast-launch queue to this account; foreign entries are purged, the optimistic store learns its account.
+        if let queue = fastLaunch?.queue {
+            await queue.bind(accountId: context.session.account.id)
+            today?.accountId = context.session.account.id
+            await today?.restorePending()
+        }
         async let statuses = try? context.client.listModules()
         async let models = try? context.client.listWorkModels()
         modules = ModuleSwitches(await statuses ?? [])
@@ -235,7 +241,7 @@ public final class AppModel {
                                  serverPreferences: context.session.account.preferences, canWrite: true)
         if let zone = workModel?.timeZone, zone != today?.timeZone, let launch = fastLaunch {
             // The cached zone was wrong (first launch or the work model changed): rebuild with the right day boundaries.
-            let store = TodayStore(client: context.client, calendar: dayCalendar, queue: launch.queue)
+            let store = TodayStore(client: context.client, calendar: dayCalendar, queue: launch.queue, accountId: context.session.account.id)
             store.onChange = { [weak self] in self?.onTodayChanged?() }
             store.onOutcome = { [weak self] in self?.forwardOutcome($0) }
             today = store
@@ -265,7 +271,9 @@ public final class AppModel {
         workModel = await models?.current()
         let client = context.client
         let calendar = dayCalendar
-        let todayStore = TodayStore(client: client, calendar: calendar, queue: actionQueue)
+        // X4: fence first. Entries of another account are purged before this account's stores can deliver anything.
+        await actionQueue?.bind(accountId: context.session.account.id)
+        let todayStore = TodayStore(client: client, calendar: calendar, queue: actionQueue, accountId: context.session.account.id)
         let timeListStore = TimeListStore(client: client, calendar: calendar)
         todayStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
         timeListStore.onOutcome = { [weak self] in self?.forwardOutcome($0) }
@@ -330,6 +338,10 @@ public final class AppModel {
 
     private func reset(to phase: Phase) {
         if phase == .signedOut, !lifecycle.isSignedOut { lifecycle.apply(.userSignedOut) }
+        // X4: the account's waiting actions leave with it. Compare-and-clear by account, so a late cleanup never touches the next account.
+        if let leaving = account?.id {
+            for queue in [actionQueue, fastLaunch?.queue].compactMap({ $0 }) { Task { await queue.release(accountId: leaving) } }
+        }
         appearance.disconnect()
         context = nil
         account = nil

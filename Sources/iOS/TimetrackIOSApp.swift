@@ -11,6 +11,9 @@ struct TimetrackIOSApp: App {
     @State private var ui = UIState.shared
     @State private var deviceCalendar = CalendarEnvironment.makeStore() // E1: device calendars (EventKit), read-only by default
     @Environment(\.scenePhase) private var scenePhase
+    /// X4: the sign-out cleanup (automation token/queue, Focus state). Work of the next account waits for it, so the cleanup of
+    /// account A can never delete what account B has just set up.
+    @State private var signOutCleanup = CleanupFence()
     /// Hands the session to the Apple Watch app (WatchConnectivity); the watch stores it in its own Keychain.
     private let watchSender = WatchHandoffSender(channel: WCSessionChannel(), secrets: KeychainSecretStore())
 
@@ -55,11 +58,13 @@ struct TimetrackIOSApp: App {
                         Task { try? await Task.sleep(for: .seconds(3)); await TimerLiveActivity.sync(target: .sample(), source: "dev") }
                     }
                     #endif
-                    if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
+                    if model.phase == .signedIn { Task { await signOutCleanup.wait(); await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                 }
                 .onChange(of: model.phase) { old, _ in
-                    if old == .signedIn, model.phase == .signedOut { Task { await AutomationRuntime.shared.signedOut(); await FocusEnvironment.signedOut() } } // L2: stop watching, forget token and queue
-                    if model.phase == .signedIn { Task { await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
+                    if old == .signedIn, model.phase == .signedOut { // L2: stop watching, forget token and queue
+                        signOutCleanup.run { await AutomationRuntime.shared.signedOut(); await FocusEnvironment.signedOut() }
+                    }
+                    if model.phase == .signedIn { Task { await signOutCleanup.wait(); await AutomationRuntime.shared.refreshPlaces(using: model.apiClient) } }
                     // restoring/offline keep the watch's session untouched (credentials are still stored on this phone).
                     switch model.phase {
                     case .signedIn: Task { await watchSender.update(isSignedIn: true) }
@@ -115,6 +120,19 @@ struct TimetrackIOSApp: App {
         guard let scene = scenes.first else { return UIWindow(frame: .zero) } // no scene: the system sheet fails instead of crashing
         return UIWindow(windowScene: scene)
     }
+}
+
+/// X4: runs the cleanup of a sign-out and lets later work wait for it (chained, never concurrent with the next account's setup).
+@MainActor
+final class CleanupFence {
+    private var task: Task<Void, Never>?
+
+    func run(_ work: @escaping @MainActor () async -> Void) {
+        let previous = task
+        task = Task { await previous?.value; await work() }
+    }
+
+    func wait() async { await task?.value }
 }
 
 /// Cross-screen UI state. A shared instance lets the UIKit quick-action callbacks reach SwiftUI.

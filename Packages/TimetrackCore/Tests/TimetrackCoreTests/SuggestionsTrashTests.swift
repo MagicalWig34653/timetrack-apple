@@ -335,4 +335,57 @@ private let purgeJSON = #"{"dryRun":true,"segments":2,"revisions":5,"suggestions
         #expect(await store.purge(.ids([uuid(1), uuid(2)])) == nil)
         #expect(store.error?.knownCode == .segmentNotCancelled)
     }
+
+    /// X4: "delete all" must remove exactly the set the user confirmed, not whatever is cancelled at delivery time.
+    @Test func purgeAllDeletesExactlyTheConfirmedIds() async {
+        let transport = MockTransport()
+        let store = await loaded(transport, items: 3)
+        let key = "DELETE /api/v1/time/segments/cancelled"
+        transport.set(key, body: purgeJSON.replacingOccurrences(of: "true", with: "false"))
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([1, 2, 3].map { cancelledJSON($0, start: Double($0) * 10_000) }, total: 3))
+        let scope = await store.confirmationScope(for: .all)
+        #expect(scope == .ids([uuid(1), uuid(2), uuid(3)]))
+        // Another device cancels entry 4 after the preview; the confirmed ids stay the same.
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([1, 2, 3, 4].map { cancelledJSON($0, start: Double($0) * 10_000) }, total: 4))
+        guard let scope else { return }
+        _ = await store.preview(scope)
+        _ = await store.purge(scope)
+        let sent = transport.requests(matching: key)
+        #expect(sent.count == 2)
+        for request in sent {
+            let query = request.url?.query ?? ""
+            #expect(!query.contains("all=true"))
+            #expect(!query.contains(uuid(4).uuidString.lowercased()))
+            #expect(query.contains("ids="))
+        }
+    }
+
+    @Test func confirmationScopeLeavesOtherScopesAlone() async {
+        let store = await loaded(MockTransport())
+        #expect(await store.confirmationScope(for: .ids([uuid(1)])) == .ids([uuid(1)]))
+    }
+
+    @Test func largeIdSetsGoOutInBatchesOfAtMost500() async {
+        let transport = MockTransport()
+        let store = await loaded(transport)
+        let key = "DELETE /api/v1/time/segments/cancelled"
+        transport.set(key, body: #"{"dryRun":false,"segments":500,"revisions":1,"suggestions":0,"timerEvents":0,"automationEvents":0}"#)
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([], total: 0))
+        let summary = await store.purge(.ids((1...1200).map { uuid($0) }))
+        let sizes = transport.requests(matching: key).map { ($0.url?.query ?? "").components(separatedBy: ",").count }
+        #expect(sizes == [500, 500, 200])
+        #expect(summary?.segments == 1500) // sums the batch answers
+    }
+
+    @Test func aConflictInALaterBatchIsReportedAndTheBinReloaded() async {
+        let transport = MockTransport()
+        let store = await loaded(transport)
+        let key = "DELETE /api/v1/time/segments/cancelled"
+        transport.enqueue(key, body: purgeJSON.replacingOccurrences(of: "true", with: "false"))
+        transport.enqueue(key, status: 409, body: #"{"error":{"code":"segment_not_cancelled","message":"x"}}"#)
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([cancelledJSON(9, start: 90_000)], total: 1))
+        #expect(await store.purge(.ids((1...600).map { uuid($0) })) == nil)
+        #expect(store.error?.knownCode == .segmentNotCancelled)
+        #expect(store.items.map(\.id) == [uuid(9)])
+    }
 }

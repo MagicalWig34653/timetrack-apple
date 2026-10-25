@@ -17,10 +17,16 @@ public final class VacationRequestStore {
     }
 
     public struct Generated: Sendable, Equatable {
+        /// X4: one id per generated PDF; the share file is refreshed for every new id (equal-sized PDFs differ in content).
+        public let id: UUID
         public let data: Data
         public let fileName: String
         public let skippedFields: [String]
         public let filledCount: Int
+
+        public init(id: UUID = UUID(), data: Data, fileName: String, skippedFields: [String], filledCount: Int) {
+            self.id = id; self.data = data; self.fileName = fileName; self.skippedFields = skippedFields; self.filledCount = filledCount
+        }
     }
 
     public enum AttachState: Equatable {
@@ -64,7 +70,11 @@ public final class VacationRequestStore {
         FormCalendar.fit(request?.freeRanges ?? [], slots: freeRangeSlots)
     }
 
+    /// X4: counts input changes. A PDF whose generation started under an older value is discarded, never shown or attached.
+    private var inputGeneration = 0
+
     private func invalidate() {
+        inputGeneration += 1
         generated = nil
         generationProblem = nil
         attachState = .idle
@@ -111,6 +121,7 @@ public final class VacationRequestStore {
     /// Fills the template. Heavy work runs off the main actor.
     public func generate() async {
         guard let template, var data = request, !isGenerating else { return }
+        let generation = inputGeneration
         isGenerating = true
         generationProblem = nil
         attachState = .idle
@@ -122,6 +133,8 @@ public final class VacationRequestStore {
         let outcome: Result<FormFillResult, FormPDFProblem> = await Task.detached {
             do { return .success(try FormPDF.fill(template: template, mapping: mapping, request: input, flatten: flatten)) } catch let problem as FormPDFProblem { return .failure(problem) } catch { return .failure(.unreadable) }
         }.value
+        // The inputs changed while the PDF was being filled: its content is stale.
+        guard generation == inputGeneration else { return }
         switch outcome {
         case .success(let result): generated = Generated(data: result.data, fileName: name, skippedFields: result.skipped, filledCount: result.filledCount)
         case .failure(let problem): generationProblem = problem
@@ -135,9 +148,11 @@ public final class VacationRequestStore {
     public func saveAsAttachment() async {
         guard let generated, attachState != .saving else { return }
         attachState = .saving
+        let generation = inputGeneration
         do {
             try await client.uploadAttachment(absenceId: absence.id, name: generated.fileName, contentType: "application/pdf", data: generated.data)
-            attachState = .saved
+            // The upload itself cannot be taken back; if the inputs changed meanwhile the state belongs to the new inputs.
+            if generation == inputGeneration { attachState = .saved }
             onAttached?()
         } catch let error as TimetrackError {
             attachState = .failed(UploadFailure(error))

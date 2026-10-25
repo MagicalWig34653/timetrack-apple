@@ -77,9 +77,10 @@ enum FocusEnvironment {
         _ = try? await withFocusDeadline(4) { await WidgetPublisher.refresh(client: client, source: "focus") }
     }
 
-    /// Sign-out: waiting actions belong to the old account and must never be sent with another one.
+    /// Sign-out: waiting actions belong to the old account and must never be sent with another one. X4: the queue entries are
+    /// bound to their account and released by `AppModel` (compare-and-clear), so this must not wipe the shared queue: an account
+    /// that signed in meanwhile owns entries there.
     static func signedOut() async {
-        await queue.clear()
         FocusStateStore().update { $0.queuedStartEventId = nil }
     }
 

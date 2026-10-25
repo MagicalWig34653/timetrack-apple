@@ -240,6 +240,8 @@ struct PurgeConfirmSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var preview: PurgeSummary?
     @State private var loadFailed = false
+    /// X4: exactly what the dry-run counted (for "all": the ids read with the preview); the deletion sends these ids.
+    @State private var confirmedScope: PurgeScope?
     @State private var typed = ""
     @State private var busy = false
 
@@ -325,15 +327,20 @@ struct PurgeConfirmSheet: View {
 
     private func count() async {
         loadFailed = false
-        preview = await model.cancelled?.preview(scope)
+        preview = nil
+        confirmedScope = nil
+        if let resolved = await model.cancelled?.confirmationScope(for: scope) {
+            confirmedScope = resolved
+            preview = await model.cancelled?.preview(resolved)
+        }
         loadFailed = preview == nil
     }
 
     private func delete() {
-        guard canDelete else { return }
+        guard canDelete, let confirmedScope else { return }
         busy = true
         Task {
-            if let summary = await model.cancelled?.purge(scope) {
+            if let summary = await model.cancelled?.purge(confirmedScope) {
                 onDone(summary)
                 dismiss()
             }

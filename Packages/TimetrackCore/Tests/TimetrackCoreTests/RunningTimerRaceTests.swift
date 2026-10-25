@@ -98,6 +98,38 @@ import Testing
         #expect(store.account?.balanceSeconds == -1000, "the stale balance must not overwrite the newer one")
     }
 
+    @Test func olderParallelLoadNeverOverwritesTheNewerOne() async {
+        // X4: two loads without an own action share one epoch; the older (slower) answer must lose.
+        let transport = prepare(timerAnswer: "null")
+        let store = TodayStore(client: Fixtures.client(transport), calendar: calendar)
+        let gate = transport.hold("GET /api/v1/time/timer")
+        let older = Task { await store.load() }
+        await waitForRequests(transport, "GET /api/v1/time/timer", count: 1)
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON) // the server changed; the newer load reads it
+        await store.load()
+        #expect(store.running?.isRunning == true)
+        gate.release()
+        await older.value
+        #expect(store.running?.isRunning == true, "the older answer (no timer) must not replace the newer state")
+        #expect(!store.isLoading)
+    }
+
+    @Test func olderParallelLoadsErrorDoesNotShowAfterTheNewerSucceeded() async {
+        let transport = prepare(timerAnswer: "null")
+        transport.set("GET /api/v1/time/timer", error: .notConnectedToInternet)
+        let store = TodayStore(client: Fixtures.client(transport), calendar: calendar)
+        let gate = transport.hold("GET /api/v1/time/timer")
+        let older = Task { await store.load() }
+        await waitForRequests(transport, "GET /api/v1/time/timer", count: 1)
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        await store.load()
+        #expect(store.error == nil)
+        gate.release()
+        await older.value
+        #expect(store.error == nil, "an error of a superseded load must not surface")
+        #expect(store.running?.isRunning == true)
+    }
+
     @Test func plainReloadStillAppliesServerChanges() async {
         // The guard must only drop answers that overlap an own action: a timer stopped on another device shows up.
         let transport = prepare(timerAnswer: Fixtures.segmentJSON)

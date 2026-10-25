@@ -106,10 +106,36 @@ public final class CancelledStore {
 
     public func clearRestoreFailure() { restoreFailure = nil }
 
+    /// Server limit per bulk request; larger id sets are sent in several requests.
+    public static let purgeBatchSize = 500
+
+    /// X4: turns "delete all" into the exact set the user is about to confirm. The ids of every cancelled entry are read now;
+    /// preview and deletion then address exactly these ids, so an entry cancelled meanwhile on another device is never deleted
+    /// unseen. Other scopes are returned unchanged. `nil` when the entries could not be read.
+    public func confirmationScope(for scope: PurgeScope) async -> PurgeScope? {
+        guard case .all = scope else { return scope }
+        do {
+            var ids: [UUID] = []
+            var seen = Set<UUID>()
+            var offset = 0
+            while true {
+                let page = try await client.listCancelledSegments(limit: 200, offset: offset)
+                for item in page.items where seen.insert(item.id).inserted { ids.append(item.id) }
+                offset += page.items.count
+                if page.items.isEmpty || offset >= page.total { break }
+            }
+            error = nil
+            return .ids(ids)
+        } catch let failure as TimetrackError {
+            if failure != .cancelled { error = failure }
+        } catch {}
+        return nil
+    }
+
     /// How many records a deletion would remove, without deleting anything (`dryRun`). `nil` when the count could not be read.
     public func preview(_ scope: PurgeScope) async -> PurgeSummary? {
         do {
-            let summary = try await client.purgeCancelledSegments(scope, dryRun: true)
+            let summary = try await run(scope, dryRun: true)
             error = nil
             return summary
         } catch let failure as TimetrackError {
@@ -118,16 +144,12 @@ public final class CancelledStore {
         return nil
     }
 
-    /// Deletes permanently. Callers confirm first (typed word) and show the `preview` numbers. A single id uses the single-entry call.
+    /// Deletes permanently. Callers confirm first (typed word) and show the `preview` numbers; for "all" they pass the scope from
+    /// `confirmationScope(for:)`. A single id uses the single-entry call; more than `purgeBatchSize` ids go out in batches.
     @discardableResult
     public func purge(_ scope: PurgeScope) async -> PurgeSummary? {
         do {
-            let summary: PurgeSummary
-            if case .ids(let ids) = scope, ids.count == 1, let only = ids.first {
-                summary = try await client.purgeSegment(id: only)
-            } else {
-                summary = try await client.purgeCancelledSegments(scope, dryRun: false)
-            }
+            let summary = try await run(scope, dryRun: false)
             error = nil
             onOutcome?(.deleted)
             await load()
@@ -139,5 +161,26 @@ public final class CancelledStore {
             onOutcome?(.failed)
         } catch {}
         return nil
+    }
+
+    private func run(_ scope: PurgeScope, dryRun: Bool) async throws -> PurgeSummary {
+        guard case .ids(let ids) = scope else { return try await client.purgeCancelledSegments(scope, dryRun: dryRun) }
+        if ids.isEmpty { return PurgeSummary(dryRun: dryRun, segments: 0) }
+        if !dryRun, ids.count == 1, let only = ids.first { return try await client.purgeSegment(id: only) }
+        var total = PurgeSummary(dryRun: dryRun, segments: 0)
+        for start in stride(from: 0, to: ids.count, by: Self.purgeBatchSize) {
+            let batch = Array(ids[start..<min(start + Self.purgeBatchSize, ids.count)])
+            let part: PurgeSummary
+            do {
+                part = try await client.purgeCancelledSegments(.ids(batch), dryRun: dryRun)
+            } catch {
+                if start > 0 { await load() } // earlier batches are already gone: show the current bin
+                throw error
+            }
+            total = PurgeSummary(dryRun: dryRun, segments: total.segments + part.segments, revisions: total.revisions + part.revisions,
+                                 suggestions: total.suggestions + part.suggestions, timerEvents: total.timerEvents + part.timerEvents,
+                                 automationEvents: total.automationEvents + part.automationEvents)
+        }
+        return total
     }
 }

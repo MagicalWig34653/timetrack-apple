@@ -37,13 +37,19 @@ public final class TodayStore {
     /// H4: counts own timer actions (begin and end of each). A load whose answer was read before the latest action reached the server
     /// would show the timer as it was before that action (a started timer "stops" when returning to Heute); such answers are discarded.
     private var actionEpoch = 0
+    /// X4: counts `load()` calls. Two loads without an action in between share one `actionEpoch`; only the answer (or error) of
+    /// the latest load may change the state, an older response never overwrites a newer one.
+    private var loadGeneration = 0
 
     private let client: APIClient
     private let calendar: DayCalendar
     private let queue: TimerActionQueue?
+    /// X4: the account this store belongs to; queued actions are only delivered for it. `nil` until known (watch fast launch).
+    public var accountId: UUID?
 
     /// With a `queue`, start/stop that cannot reach the server are stored and delivered later instead of failing.
-    public init(client: APIClient, calendar: DayCalendar, queue: TimerActionQueue? = nil) {
+    public init(client: APIClient, calendar: DayCalendar, queue: TimerActionQueue? = nil, accountId: UUID? = nil) {
+        self.accountId = accountId
         self.client = client
         self.calendar = calendar
         self.queue = queue
@@ -106,8 +112,10 @@ public final class TodayStore {
 
     /// `deferAccount`: the balance is fetched after the timer and the day are shown (compact screens; one round trip less before content).
     public func load(deferAccount: Bool = false) async {
+        loadGeneration += 1
+        let generation = loadGeneration
         isLoading = true
-        defer { isLoading = false }
+        defer { if generation == loadGeneration { isLoading = false } }
         let today = calendar.day(for: .now)
         let epoch = actionEpoch
         do {
@@ -115,7 +123,7 @@ public final class TodayStore {
                 async let timer = client.currentTimer()
                 async let evaluation = client.getDay(today)
                 let (timerValue, dayValue) = try await (timer, evaluation)
-                guard epoch == actionEpoch else { return }
+                guard epoch == actionEpoch, generation == loadGeneration else { return }
                 apply(running: timerValue, day: dayValue, account: account)
                 // Timer and day are on screen now; the balance follows without delaying them.
                 error = nil
@@ -124,13 +132,13 @@ public final class TodayStore {
                 changed()
                 let balance = try? await client.getTimeAccount(asOf: today)
                 // An action (or a newer load) may have started while the balance was in flight; its answer belongs to an older state.
-                if epoch == actionEpoch, today == calendar.day(for: .now) { account = balance }
+                if epoch == actionEpoch, generation == loadGeneration, today == calendar.day(for: .now) { account = balance }
             } else {
                 async let timer = client.currentTimer()
                 async let evaluation = client.getDay(today)
                 async let balance = client.getTimeAccount(asOf: today)
                 let (timerValue, dayValue, accountValue) = try await (timer, evaluation, balance)
-                guard epoch == actionEpoch else { return }
+                guard epoch == actionEpoch, generation == loadGeneration else { return }
                 apply(running: timerValue, day: dayValue, account: accountValue)
             }
             error = nil
@@ -138,10 +146,10 @@ public final class TodayStore {
             hasLoadedLive = true
             changed()
         } catch let failure as TimetrackError {
-            if failure != .cancelled { error = failure }
+            if failure != .cancelled, generation == loadGeneration { error = failure }
             return
         } catch {
-            self.error = .cancelled
+            if generation == loadGeneration { self.error = .cancelled }
             return
         }
         await drainQueue(reload: deferAccount)
@@ -170,7 +178,7 @@ public final class TodayStore {
     public func drainQueue(reload: Bool = true) async {
         guard let queue, await queue.count > 0 else { return }
         actionEpoch += 1
-        let result = await queue.drain(client: client)
+        let result = await queue.drain(client: client, accountId: accountId)
         actionEpoch += 1
         await refreshPending(queue)
         changed()
@@ -337,6 +345,8 @@ public final class TodayStore {
     }
 
     private func enqueue(_ action: QueuedTimerAction, queue: TimerActionQueue, success: StoreOutcome) async {
+        var action = action
+        if action.accountId == nil { action.accountId = accountId }
         await queue.enqueue(action)
         await refreshPending(queue)
         changed()

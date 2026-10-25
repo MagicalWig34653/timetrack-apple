@@ -34,6 +34,10 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     /// X2: set when a delayed "Fortführen" met a conflict on delivery (409/412: the entries changed meanwhile). The item stays
     /// in the queue but is no longer delivered or shown as running; the user decides (start new, or dismiss).
     public var attention: Attention?
+    /// X4: the account the press belongs to. An entry is only ever delivered with a session of this account; entries of
+    /// another account are purged. `nil` = written without an account context (extensions, entries from before X4); the queue
+    /// adopts such entries for the account that is bound when it first sees them.
+    public var accountId: UUID?
 
     public struct Attention: Codable, Sendable, Equatable {
         public let status: Int
@@ -41,13 +45,14 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
         public init(status: Int, code: String?) { self.status = status; self.code = code }
     }
 
-    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil, attention: Attention? = nil) {
+    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil, attention: Attention? = nil, accountId: UUID? = nil) {
         self.id = id
         self.command = command
         self.queuedAt = queuedAt
         self.placeId = placeId
         self.correctionReason = correctionReason
         self.attention = attention
+        self.accountId = accountId
     }
 }
 
@@ -75,13 +80,15 @@ public actor TimerActionQueue {
     private let limit: Int
     private(set) var entries: [QueuedTimerAction]
     private var draining = false
+    /// X4: the account whose session this process uses right now (set by `bind`, cleared by `release`).
+    private(set) var boundAccount: UUID?
 
     /// `fileURL == nil` keeps the queue in memory only (tests).
     public init(fileURL: URL?, limit: Int = 8) {
         self.fileURL = fileURL
         self.limit = limit
         if let fileURL, let data = try? Data(contentsOf: fileURL), let stored = try? JSONCoding.makeDecoder().decode([QueuedTimerAction].self, from: data) {
-            entries = Array(stored.suffix(limit))
+            entries = Self.trimmed(stored, limit: limit)
         } else {
             entries = []
         }
@@ -108,14 +115,44 @@ public actor TimerActionQueue {
         return true
     }
 
+    /// X4: the fence before a session is adopted. Entries of any other account are purged (never delivered with this session);
+    /// entries without an account are adopted. Must be awaited before the new account's stores can deliver anything.
+    public func bind(accountId: UUID) {
+        boundAccount = accountId
+        entries.removeAll { $0.accountId != nil && $0.accountId != accountId }
+        for index in entries.indices where entries[index].accountId == nil { entries[index].accountId = accountId }
+        persist()
+    }
+
+    /// X4: sign-out of `accountId`. Removes what belongs to that account only, so a late cleanup never wipes the entries of an
+    /// account that signed in meanwhile.
+    public func release(accountId: UUID) {
+        entries.removeAll { $0.accountId == accountId || ($0.accountId == nil && boundAccount == accountId) }
+        if boundAccount == accountId { boundAccount = nil }
+        persist()
+    }
+
     /// Queues an action; returns false when it was redundant (same command as the newest queued one).
     @discardableResult
     public func enqueue(_ action: QueuedTimerAction) -> Bool {
+        var action = action
+        if action.accountId == nil { action.accountId = boundAccount }
         if let last = pending.last, Self.sameKind(last.command, action.command) { return false }
         entries.append(action)
-        if entries.count > limit { entries.removeFirst(entries.count - limit) }
+        entries = Self.trimmed(entries, limit: limit)
         persist()
         return true
+    }
+
+    /// X4: only deliverable entries count against `limit` (the oldest of them is dropped first). Entries waiting for a
+    /// decision (`attention`) are never evicted; they leave the queue only through `discard` or `retry`.
+    static func trimmed(_ entries: [QueuedTimerAction], limit: Int) -> [QueuedTimerAction] {
+        var excess = entries.filter { $0.attention == nil }.count - limit
+        guard excess > 0 else { return entries }
+        return entries.filter { entry in
+            if entry.attention == nil, excess > 0 { excess -= 1; return false }
+            return true
+        }
     }
 
     public func clear() {
@@ -132,12 +169,22 @@ public actor TimerActionQueue {
 
     /// Delivers the queued actions in order. Network errors stop the run and keep the rest; a 401 stops it too (the caller
     /// handles the session); other rejections drop the entry (a stuck entry must never block later ones).
-    public func drain(client: APIClient, now: Date = .now) async -> DrainResult {
+    ///
+    /// X4: with `accountId` (or a bound account) only that account's entries are delivered and foreign ones are purged first.
+    /// Without any account context (extensions) only entries without an account are delivered; the app delivers the rest.
+    public func drain(client: APIClient, accountId: UUID? = nil, now: Date = .now) async -> DrainResult {
         var result = DrainResult()
         guard !draining else { result.remaining = entries.count; return result }
         draining = true
         defer { draining = false }
-        while let action = entries.first(where: { $0.attention == nil }) {
+        let account = accountId ?? boundAccount
+        if let account, entries.contains(where: { $0.accountId != nil && $0.accountId != account }) {
+            entries.removeAll { $0.accountId != nil && $0.accountId != account }
+            persist()
+        }
+        while let action = entries.first(where: { $0.attention == nil && (account == nil ? $0.accountId == nil : ($0.accountId == nil || $0.accountId == account)) }) {
+            // The bound account may change while a delivery is in flight (sign-out/sign-in): stop instead of delivering for the wrong one.
+            if let account, let current = boundAccount, current != account { break }
             do {
                 try await deliver(action, client: client, now: now)
                 result.delivered += 1
@@ -172,7 +219,9 @@ public actor TimerActionQueue {
 
     private static func isResumeConflict(_ error: TimetrackError, _ action: QueuedTimerAction) -> Bool {
         guard case .resume = action.command else { return false }
-        return error.status == 409 || error.status == 412
+        // X4: a 404 on the segment route means the segment is gone (e.g. purged on another device); the route exists on every
+        // server, so it is no "reopen unsupported" signal. Booking a new segment from delivery time would be a guess.
+        return error.status == 409 || error.status == 412 || error.status == 404
     }
 
     /// 409 means the server already is in the state the action wanted (timer running / not running).
@@ -202,9 +251,10 @@ public actor TimerActionQueue {
     public enum ResumeMode: Sendable, Equatable { case reopened, startedNew }
 
     /// Statuses of an older server that cannot reopen (unknown `null`, method or validation): only these start a new segment
-    /// automatically. Everything else, notably 409 `segment_overlap` and 412 `stale_version` (the entries changed), propagates so
+    /// automatically. 404 is deliberately absent (X4): the segment route exists on every server, so 404 means the segment was
+    /// deleted meanwhile and the user decides. Everything else, notably 404 (segment deleted), 409 `segment_overlap` and 412 `stale_version` (the entries changed), propagates so
     /// the user decides; a new segment from "now" would silently book time nobody asked for.
-    static let reopenUnsupportedStatuses: Set<Int> = [400, 404, 405, 422, 501]
+    static let reopenUnsupportedStatuses: Set<Int> = [400, 405, 422, 501]
 
     /// Tries to reopen (`endedAt: null`); only a provably unsupported reopen starts a new segment of the same kind and place from now.
     /// Network errors, 5xx/429, 401 and conflicts (409/412) propagate (the caller queues or shows them).

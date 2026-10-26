@@ -36,6 +36,7 @@
 		1550BED162D6E740D2152B95 /* Reports.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 7EC51CCBA2BBB7C228F524DD /* Reports.xcstrings */; };
 		17ADD63A7B6809E6B8E76A48 /* PlanningArea.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 3C7FD87BEC4B8994CC682F49 /* PlanningArea.xcstrings */; };
 		17B5FD636523DE4466A66D62 /* CalendarEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9681420E6F893816773EC783 /* CalendarEnvironment.swift */; };
+		1A7A46771DC4C0C7C8190DB6 /* CalendarAutoSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B96E227B5E58CBE6CDA4A2 /* CalendarAutoSync.swift */; };
 		1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */; };
 		1CB2B8456DE4003CCDE22A60 /* MacAutomationRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4649CA7EFF3E2A58AB22F0 /* MacAutomationRuntime.swift */; };
 		1DDB2CA107A46D28573487E6 /* TimeCalendarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673DD3F5DA3A19CD40620537 /* TimeCalendarTests.swift */; };
@@ -69,6 +70,7 @@
 		30A71B8710719CAE5E3B5DD7 /* VacationPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C1348A5C4F090840B1A121 /* VacationPlannerView.swift */; };
 		30C7E5169EE7DCFE47AAEA97 /* TimetrackCore in Frameworks */ = {isa = PBXBuildFile; productRef = 44030A0ED502D396B15AB42D /* TimetrackCore */; };
 		30D2583DE2256E52FCAD663C /* IconCatalog.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00034D02ECB5AFAE00E8D16D /* IconCatalog.generated.swift */; };
+		318EB7FA664F47C8284A3DBA /* CalendarAutoSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B96E227B5E58CBE6CDA4A2 /* CalendarAutoSync.swift */; };
 		32E5D9A4FB08865626415A86 /* AppearanceShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB87D8AB149537B70B2527E /* AppearanceShotTests.swift */; };
 		32FCFEED13A56D37DDD19622 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E21F1785484A3EC6DC62CD29 /* Assets.xcassets */; };
 		33498551A1390B374E810D86 /* TimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD733A09D977D0687741719F /* TimeView.swift */; };
@@ -612,6 +614,7 @@
 		E5C0DF877B5FFBAFCC03E1F2 /* ReviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewTests.swift; sourceTree = "<group>"; };
 		E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderTests.swift; sourceTree = "<group>"; };
 		E7BAD88C5AEAEA8C67CE5122 /* Q1.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Q1.xcstrings; sourceTree = "<group>"; };
+		E9B96E227B5E58CBE6CDA4A2 /* CalendarAutoSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAutoSync.swift; sourceTree = "<group>"; };
 		EB17FE341DD2F527B643D90E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EB8D2E7E05CAF04885CAAC05 /* UX3.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = UX3.xcstrings; sourceTree = "<group>"; };
 		EBBB09E08E4FE6BC5926BE4B /* VacationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationView.swift; sourceTree = "<group>"; };
@@ -894,6 +897,7 @@
 		8B17FBB09DAF42A512A74843 /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
+				E9B96E227B5E58CBE6CDA4A2 /* CalendarAutoSync.swift */,
 				EE856B5EA18565180559244C /* CalendarDayDemo.swift */,
 				9681420E6F893816773EC783 /* CalendarEnvironment.swift */,
 				0C994C099357497A50E66E11 /* CalendarSettingsView.swift */,
@@ -1500,6 +1504,7 @@
 				5B5AD0E8B38489D9DD8718D8 /* ActivitySettingsView.swift in Sources */,
 				B1B5DE9EBB1CA581CBFC6AB3 /* ActivityView.swift in Sources */,
 				7A1A89FC0DEAB330D006740C /* AutomationSettingsView.swift in Sources */,
+				1A7A46771DC4C0C7C8190DB6 /* CalendarAutoSync.swift in Sources */,
 				17B5FD636523DE4466A66D62 /* CalendarEnvironment.swift in Sources */,
 				95B03206FF919F46DD6C7247 /* CalendarScreen.swift in Sources */,
 				8F1B9DDA1BFD7984C10FCD9B /* CalendarSettingsView.swift in Sources */,
@@ -1625,6 +1630,7 @@
 				F11D5311CB8F6DC19256E1A5 /* AutomationRuntime.swift in Sources */,
 				3EBCDEC78EAB39A445EB94F3 /* AutomationSettingsView.swift in Sources */,
 				97587076D3F7E3EE883FC328 /* BackgroundTaskCompletion+BGTask.swift in Sources */,
+				318EB7FA664F47C8284A3DBA /* CalendarAutoSync.swift in Sources */,
 				D12060BA13B92DB3338CF5E4 /* CalendarDayDemo.swift in Sources */,
 				27FA5D9F3CC64869659B5753 /* CalendarEnvironment.swift in Sources */,
 				5D9B9C20637004A003D445CB /* CalendarScreen.swift in Sources */,

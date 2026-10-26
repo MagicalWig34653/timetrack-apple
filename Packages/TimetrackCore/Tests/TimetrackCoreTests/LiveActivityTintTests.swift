@@ -20,11 +20,22 @@ struct LiveActivityTintTests {
 
     @Test func subtleIsDarkAndLowSaturation() {
         let subtle = tint(.subtle), colorful = tint(.colorful)
-        #expect(subtle.brightness <= 0.22)
-        #expect(subtle.saturation <= 0.35)
+        #expect(subtle.brightness <= 0.12)
+        #expect(subtle.saturation <= 0.5)
         #expect(subtle.saturation < colorful.saturation / 2)
         #expect(subtle.brightness < colorful.brightness)
         #expect(subtle.hue == teal.hue) // still a hint of the kind colour
+    }
+
+    @Test func subtleDarkIsAlmostTransparentButReadable() {
+        // N2: dark and see-through, white text still readable over a mid grey and over a fairly bright backdrop.
+        for style in [LiveActivityTintStyle.subtle, .neutral] {
+            let color = tint(style)
+            #expect(color.alpha <= 0.55, "\(style)")
+            #expect(color.brightness <= 0.12, "\(style)")
+            #expect(color.whiteTextContrast(overGrey: 0.34) >= 7, "\(style)")
+            #expect(color.whiteTextContrast(overGrey: 0.62) >= 4.5, "\(style)")
+        }
     }
 
     @Test func neutralHasNoHue() {

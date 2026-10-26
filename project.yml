@@ -36,6 +36,7 @@ targets:
       - Sources/Calendar/CalendarEnvironment.swift
       - Sources/Calendar/EventKitProvider.swift
       - Sources/Calendar/CalendarSettingsView.swift
+      - Sources/Calendar/CalendarAutoSync.swift
       # A6b: Icon Composer icon (primary). See docs/ICONS.md.
       - path: Icons/TimetrackPrimary.icon
         buildPhase: resources

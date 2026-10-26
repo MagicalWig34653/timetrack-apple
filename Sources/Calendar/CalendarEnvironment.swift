@@ -14,7 +14,7 @@ enum CalendarEnvironment {
             return DeviceCalendarStore(provider: provider, storage: MemoryCalendarPreferencesStorage())
         }
         #endif
-        return DeviceCalendarStore(provider: EventKitProvider())
+        return DeviceCalendarStore(provider: EventKitProvider(), ledgerStorage: UserDefaultsCalendarLedgerStorage())
     }
 
     #if DEBUG

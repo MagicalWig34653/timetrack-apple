@@ -42,6 +42,7 @@ struct TimetrackIOSApp: App {
                 .widgetSync(model) // A7: widget snapshot, Live Activity
                 .focusSync(model) // F2: automation module flag for the Focus filter
                 .vacationReminderSync(model) // R3: local reminders to submit planned vacation
+                .deviceCalendarSync(model, deviceCalendar) // N2: events written into the calendars follow the server
                 .environment(\.watchSender, watchSender)
                 .ttAppearance()
                 .frameMeter() // Z2: DEBUG-only frame-time overlay for UI tests

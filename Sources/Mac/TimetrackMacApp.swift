@@ -28,6 +28,7 @@ struct TimetrackMacApp: App {
                 .environment(ui)
                 .environment(\.deviceCalendar, deviceCalendar)
                 .widgetSync(model) // A7: widget snapshot
+                .deviceCalendarSync(model, deviceCalendar) // N2: events written into the calendars follow the server
                 .frame(minWidth: 900, minHeight: 560)
                 .ttAppearance()
                 .debugSettingsOpener()

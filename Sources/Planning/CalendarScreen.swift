@@ -25,7 +25,6 @@ private struct CalendarContent: View {
     @Environment(AppModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.deviceCalendar) private var deviceCalendar
     @State private var absenceRequest: AbsenceRequest?
     @State private var sheet: PlanSheet?
     @State private var picker = false
@@ -58,12 +57,8 @@ private struct CalendarContent: View {
         .ttScreenBackground()
         .task {
             await store.load()
-            syncDeviceCalendar()
             if store.selectedDay == nil { await store.select(store.today) }
         }
-        .onChange(of: store.planDays) { syncDeviceCalendar() }
-        .onChange(of: store.absences) { syncDeviceCalendar() }
-        .onChange(of: deviceCalendar?.preferences) { syncDeviceCalendar() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await store.load() } } }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -119,13 +114,6 @@ private struct CalendarContent: View {
     private func selectDefault() async {
         guard !store.isRangeMode else { return }
         await store.select(store.isInVisibleMonth(store.today) ? store.today : store.firstOfMonth)
-    }
-
-    /// E1/E2: mirrors the visible plan days and the planned vacation/sick days into the calendars the user set to "Lesen + Schreiben".
-    /// Does nothing unless at least one calendar is set to write.
-    private func syncDeviceCalendar() {
-        guard let deviceCalendar, !deviceCalendar.preferences.writeCalendarIDs.isEmpty, !store.isLoading, let from = store.gridDays.first, let to = store.gridDays.last else { return }
-        deviceCalendar.sync(planDays: store.planDays, absences: store.absences, from: from, to: to, calendar: store.calendar) { "Arbeit: \($0.plainName)" }
     }
 
     private var header: some View {

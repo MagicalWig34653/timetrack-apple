@@ -15,7 +15,10 @@ public protocol DeviceCalendarProvider: AnyObject {
     func ensureTimetrackCalendar(existingID: String?) throws -> String
     /// Events in one calendar that carry Timetrack's marker URL (and only those).
     func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent]
-    func apply(_ operations: [WriteOperation], calendarID: String, calendar: DayCalendar) throws
+    /// Applies the operations in one commit and returns the event identifier of every created or updated entry (by entry key),
+    /// read after the commit because EventKit may assign or change identifiers on save.
+    @discardableResult
+    func apply(_ operations: [WriteOperation], calendarID: String, calendar: DayCalendar) throws -> [String: String]
     /// Called when the system reports changes to the calendar database.
     var onStoreChanged: (@MainActor () -> Void)? { get set }
 }
@@ -24,6 +27,49 @@ public protocol DeviceCalendarProvider: AnyObject {
 public protocol CalendarPreferencesStorage: Sendable {
     func load() -> CalendarPreferences
     func save(_ preferences: CalendarPreferences)
+}
+
+/// Where the `CalendarLedger` lives (per device).
+public protocol CalendarLedgerStorage: Sendable {
+    func load() -> CalendarLedger
+    func save(_ ledger: CalendarLedger)
+}
+
+public struct UserDefaultsCalendarLedgerStorage: CalendarLedgerStorage, @unchecked Sendable {
+    private let defaults: UserDefaults
+    private let key: String
+
+    public init(defaults: UserDefaults = .standard, key: String = "timetrack.calendar.ledger") {
+        self.defaults = defaults
+        self.key = key
+    }
+
+    public func load() -> CalendarLedger {
+        defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(CalendarLedger.self, from: $0) } ?? CalendarLedger()
+    }
+
+    public func save(_ ledger: CalendarLedger) {
+        if let data = try? JSONEncoder().encode(ledger) { defaults.set(data, forKey: key) }
+    }
+}
+
+public final class MemoryCalendarLedgerStorage: CalendarLedgerStorage, @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = CalendarLedger()
+    public init() {}
+    public func load() -> CalendarLedger { lock.withLock { value } }
+    public func save(_ ledger: CalendarLedger) { lock.withLock { value = ledger } }
+}
+
+/// What a full reconciliation reads from the server. `APIClient` conforms (see below); tests use a fake.
+public protocol CalendarSyncSource: Sendable {
+    func calendarAbsences(from: LocalDay, to: LocalDay) async throws -> [Absence]
+    func calendarPlanDays(from: LocalDay, to: LocalDay) async throws -> [PlanDay]
+}
+
+extension APIClient: CalendarSyncSource {
+    public func calendarAbsences(from: LocalDay, to: LocalDay) async throws -> [Absence] { try await listAbsences(from: from, to: to) }
+    public func calendarPlanDays(from: LocalDay, to: LocalDay) async throws -> [PlanDay] { try await listPlanDays(from: from, to: to) }
 }
 
 public struct UserDefaultsCalendarPreferencesStorage: CalendarPreferencesStorage, @unchecked Sendable {
@@ -81,10 +127,25 @@ public final class DeviceCalendarStore {
 
     private let provider: DeviceCalendarProvider
     private let storage: CalendarPreferencesStorage
+    private let ledgerStorage: CalendarLedgerStorage
+    private var ledger: CalendarLedger
+    private var isSyncing = false
+    private var syncRequested = false
 
-    public init(provider: DeviceCalendarProvider, storage: CalendarPreferencesStorage = UserDefaultsCalendarPreferencesStorage()) {
+    /// N2: windows of a full reconciliation. Absences reach a year back and two years ahead (so a vacation that moved or was
+    /// cancelled is corrected no matter which month is open); plan days (optional, many) a month back and about four months ahead.
+    public static let absenceWindowDaysBack = 366
+    public static let absenceWindowDaysAhead = 731
+    public static let planWindowDaysBack = 31
+    public static let planWindowDaysAhead = 120
+
+    /// `ledgerStorage` defaults to an in-memory ledger; the app passes `UserDefaultsCalendarLedgerStorage`.
+    public init(provider: DeviceCalendarProvider, storage: CalendarPreferencesStorage = UserDefaultsCalendarPreferencesStorage(),
+                ledgerStorage: CalendarLedgerStorage = MemoryCalendarLedgerStorage()) {
         self.provider = provider
         self.storage = storage
+        self.ledgerStorage = ledgerStorage
+        self.ledger = ledgerStorage.load()
         self.access = provider.access
         self.preferences = storage.load()
         provider.onStoreChanged = { [weak self] in self?.storeChanged() }
@@ -158,7 +219,10 @@ public final class DeviceCalendarStore {
                 return
             }
         }
-        if previous.writes, !mode.writes { removeWritten(inCalendar: id, dayCalendar: dayCalendar ?? DayCalendar(timeZone: .current)) }
+        if previous.writes, !mode.writes {
+            removeWritten(inCalendar: id, dayCalendar: dayCalendar ?? DayCalendar(timeZone: .current))
+            forgetLedger(of: id)
+        }
         preferences.setMode(mode, for: id)
         storage.save(preferences)
         changeCount += 1
@@ -224,25 +288,83 @@ public final class DeviceCalendarStore {
     // MARK: Writing (only into calendars set to read+write)
 
     /// Makes every read+write calendar match the plan days (if enabled) and the planned/approved vacation and sick days (if enabled)
-    /// for `[from, to]`. Does nothing without write access or without a read+write calendar. Only marker events are touched.
+    /// for `[from, to]` (absences and plan days use the same window). Does nothing without write access or without a read+write
+    /// calendar. Only marker events are touched.
     @discardableResult
     public func sync(planDays: [LocalDay: PlanDay], absences: [Absence], from: LocalDay, to: LocalDay, calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
+        reconcile(planDays: planDays, absences: absences, absenceWindow: (from, to), planWindow: (from, to), calendar: calendar, planTitle: planTitle)
+    }
+
+    /// N2: reads the absences (and, if enabled, the plan days) of the wide windows from the server itself and reconciles every
+    /// read+write calendar, independent of which screen or month is open. Nothing is changed when the server could not be read, so a
+    /// network error can never delete events. Calls that arrive while a run is in progress cause exactly one more run afterwards.
+    @discardableResult
+    public func syncAll(source: CalendarSyncSource, calendar: DayCalendar, now: Date = .now, planTitle: @escaping (PlanMode) -> String) async -> CalendarWriteResult {
+        if isSyncing {
+            syncRequested = true
+            return .skipped
+        }
+        isSyncing = true
+        defer { isSyncing = false }
+        var result = CalendarWriteResult.skipped
+        repeat {
+            syncRequested = false
+            result = await runFullSync(source: source, calendar: calendar, now: now, planTitle: planTitle)
+        } while syncRequested
+        return result
+    }
+
+    private func runFullSync(source: CalendarSyncSource, calendar: DayCalendar, now: Date, planTitle: (PlanMode) -> String) async -> CalendarWriteResult {
         access = provider.access
-        let targets = calendars.filter { preferences.mode(for: $0.id).writes && $0.allowsWrite }
-        guard access.canWrite, !targets.isEmpty, let start = calendar.interval(of: from)?.start, let end = calendar.interval(of: to)?.end else {
+        guard access.canWrite, calendars.contains(where: { preferences.mode(for: $0.id).writes && $0.allowsWrite }) else {
             lastWrite = .skipped
             return .skipped
         }
-        var desired: [CalendarEntry] = []
-        if preferences.writePlanDays { desired += CalendarWritePlanner.desiredPlanDays(from: planDays, from: from, to: to, title: planTitle) }
-        if preferences.writeAbsences { desired += CalendarWritePlanner.desiredAbsences(absences, from: from, to: to) }
+        let today = calendar.day(for: now)
+        func shifted(_ days: Int) -> LocalDay { LocalDays.adding(days, to: today) ?? today }
+        let absenceWindow = (from: shifted(-Self.absenceWindowDaysBack), to: shifted(Self.absenceWindowDaysAhead))
+        let planWindow = (from: shifted(-Self.planWindowDaysBack), to: shifted(Self.planWindowDaysAhead))
+        var absences: [Absence] = []
+        var planDays: [LocalDay: PlanDay] = [:]
+        do {
+            if preferences.writeAbsences { absences = try await source.calendarAbsences(from: absenceWindow.from, to: absenceWindow.to) }
+            if preferences.writePlanDays {
+                for day in try await source.calendarPlanDays(from: planWindow.from, to: planWindow.to) { planDays[day.date] = day }
+            }
+        } catch {
+            lastWrite = .skipped
+            return .skipped
+        }
+        return reconcile(planDays: planDays, absences: absences, absenceWindow: absenceWindow, planWindow: planWindow, calendar: calendar, planTitle: planTitle)
+    }
+
+    private func reconcile(planDays: [LocalDay: PlanDay], absences: [Absence], absenceWindow: (from: LocalDay, to: LocalDay),
+                           planWindow: (from: LocalDay, to: LocalDay), calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
+        access = provider.access
+        let targets = calendars.filter { preferences.mode(for: $0.id).writes && $0.allowsWrite }
+        let queryFrom = min(absenceWindow.from, planWindow.from), queryTo = max(absenceWindow.to, planWindow.to)
+        guard access.canWrite, !targets.isEmpty, let start = calendar.interval(of: queryFrom)?.start, let end = calendar.interval(of: queryTo)?.end else {
+            lastWrite = .skipped
+            return .skipped
+        }
+        let desiredPlan = preferences.writePlanDays ? CalendarWritePlanner.desiredPlanDays(from: planDays, from: planWindow.from, to: planWindow.to, title: planTitle) : []
+        let desiredAbsences = preferences.writeAbsences ? CalendarWritePlanner.desiredAbsences(absences, from: absenceWindow.from, to: absenceWindow.to) : []
         var created = 0, updated = 0, deleted = 0
         for target in targets {
             let existing = provider.writtenEvents(calendarID: target.id, from: start, to: end)
-            let operations = CalendarWritePlanner.operations(desired: desired, existing: existing, from: from, to: to)
-            guard !operations.isEmpty else { continue }
-            do {
-                try provider.apply(operations, calendarID: target.id, calendar: calendar)
+            var records = ledger.records(for: target.id)
+            let absencePlan = CalendarReconciler.plan(desired: desiredAbsences, existing: existing, records: records, from: absenceWindow.from, to: absenceWindow.to, managing: [EntryMarker.absenceHost])
+            let planPlan = CalendarReconciler.plan(desired: desiredPlan, existing: existing, records: records, from: planWindow.from, to: planWindow.to, managing: [EntryMarker.planHost])
+            let operations = (absencePlan.operations + planPlan.operations).sorted { CalendarWritePlanner.sortKey($0) < CalendarWritePlanner.sortKey($1) }
+            var assigned: [String: String] = [:]
+            if !operations.isEmpty {
+                do {
+                    assigned = try provider.apply(operations, calendarID: target.id, calendar: calendar)
+                } catch {
+                    lastWrite = .failed
+                    message = "Die Termine konnten nicht in den Kalender „\(target.title)“ geschrieben werden."
+                    return .failed
+                }
                 for operation in operations {
                     switch operation {
                     case .create: created += 1
@@ -250,16 +372,30 @@ public final class DeviceCalendarStore {
                     case .delete: deleted += 1
                     }
                 }
-            } catch {
-                lastWrite = .failed
-                message = "Die Termine konnten nicht in den Kalender „\(target.title)“ geschrieben werden."
-                return .failed
             }
+            for plan in [absencePlan, planPlan] {
+                for key in plan.forget { records[key] = nil }
+                for (key, record) in plan.adopt { records[key] = record }
+                for operation in plan.operations {
+                    switch operation {
+                    case .create(let entry): records[entry.key] = CalendarLedgerRecord(eventID: assigned[entry.key] ?? "", entry: entry)
+                    case .update(_, let entry): records[entry.key] = CalendarLedgerRecord(eventID: assigned[entry.key] ?? records[entry.key]?.eventID ?? "", entry: entry)
+                    case .delete: break
+                    }
+                }
+            }
+            ledger.set(records, for: target.id)
         }
+        ledgerStorage.save(ledger)
         message = nil
         let result = CalendarWriteResult.written(created: created, updated: updated, deleted: deleted)
         lastWrite = result
         return result
+    }
+
+    private func forgetLedger(of calendarID: String) {
+        ledger.clear(calendar: calendarID)
+        ledgerStorage.save(ledger)
     }
 
     /// Removes every event Timetrack wrote (marker URL) from all calendars that accept changes, within two years around today.
@@ -272,6 +408,8 @@ public final class DeviceCalendarStore {
         for info in calendars where info.allowsWrite {
             removed += removeWritten(inCalendar: info.id, dayCalendar: calendar, now: now)
         }
+        ledger = CalendarLedger()
+        ledgerStorage.save(ledger)
         lastRemoval = removed
         lastWrite = nil
         changeCount += 1

@@ -22,7 +22,6 @@ struct TimeHub: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.deviceCalendar) private var deviceCalendar
     @AppStorage("time.zoom") private var storedZoom = TimeZoom.month.rawValue
 
     @State private var focus: TimeFocus
@@ -115,9 +114,6 @@ struct TimeHub: View {
         .onChange(of: focus) { syncStores() }
         .onChange(of: pagerPosition) { _, new in pagerSettled(new) }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await reloadAll() } } }
-        .onChange(of: calendar?.planDays) { syncDeviceCalendar() }
-        .onChange(of: calendar?.absences) { syncDeviceCalendar() }
-        .onChange(of: deviceCalendar?.preferences) { syncDeviceCalendar() }
         .onAppear { planStore?.onSaved = { Task { await weekStore?.load(); await timeList.load() } } }
     }
 
@@ -396,7 +392,6 @@ struct TimeHub: View {
             calendar.showMonth(focus.monthKey)
             await calendar.ensureWindow()
             if calendar.selectedDay != focus.day { await calendar.select(focus.day) }
-            syncDeviceCalendar()
         case .week:
             if timeList.weekStart != focus.weekStart { await timeList.open(week: focus.day) } else { await timeList.load() }
             if let weekStore { if weekStore.monday != focus.weekStart { await weekStore.go(to: focus.day) } else { await weekStore.load() } }
@@ -420,13 +415,6 @@ struct TimeHub: View {
             await calendar?.refreshEvaluation(day)
             if day != focus.day { await calendar?.refreshEvaluation(focus.day) }
         }
-    }
-
-    /// E1/E2: mirrors the visible plan days and the planned vacation/sick days into the calendars the user set to "Lesen + Schreiben".
-    private func syncDeviceCalendar() {
-        guard let calendar, let deviceCalendar, !deviceCalendar.preferences.writeCalendarIDs.isEmpty, !calendar.isLoading else { return }
-        let range = calendar.visibleKey.gridRange
-        deviceCalendar.sync(planDays: calendar.planDays, absences: calendar.absences, from: range.from, to: range.to, calendar: calendar.calendar) { "Arbeit: \($0.plainName)" }
     }
 }
 

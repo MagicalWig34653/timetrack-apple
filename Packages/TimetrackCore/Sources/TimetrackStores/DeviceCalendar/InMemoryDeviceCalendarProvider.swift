@@ -62,19 +62,47 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
             .sorted { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }
     }
 
-    public func apply(_ operations: [WriteOperation], calendarID: String, calendar: DayCalendar) throws {
+    @discardableResult
+    public func apply(_ operations: [WriteOperation], calendarID: String, calendar: DayCalendar) throws -> [String: String] {
         if failWrites { throw CocoaError(.fileWriteUnknown) }
         dayCalendar = calendar
+        var assigned: [String: String] = [:]
         for operation in operations {
             switch operation {
             case .create(let entry):
-                written["event-\(nextID)"] = WrittenRecord(calendarID: calendarID, entry: entry)
+                let id = "event-\(nextID)"
+                written[id] = WrittenRecord(calendarID: calendarID, entry: entry)
+                assigned[entry.key] = id
                 nextID += 1
             case .update(let id, let entry):
-                if written[id]?.calendarID == calendarID { written[id] = WrittenRecord(calendarID: calendarID, entry: entry) }
+                if written[id]?.calendarID == calendarID {
+                    written[id] = WrittenRecord(calendarID: calendarID, entry: entry)
+                    assigned[entry.key] = id
+                }
             case .delete(let id):
                 if written[id]?.calendarID == calendarID { written[id] = nil }
             }
         }
+        return assigned
+    }
+
+    // MARK: Simulating what happens outside the app (tests, UI tests)
+
+    /// The user deletes an event by hand in the Calendar app.
+    public func userDeleteEvent(_ id: String) { written[id] = nil }
+
+    /// The system hands out a new identifier for the same event (e.g. after an account sync).
+    public func changeIdentifier(of id: String) {
+        guard let record = written[id] else { return }
+        written[id] = nil
+        written["event-\(nextID)"] = record
+        nextID += 1
+    }
+
+    /// The user (or a server) moves an event to other days.
+    public func userMoveEvent(_ id: String, first: LocalDay, last: LocalDay) {
+        guard let record = written[id] else { return }
+        let entry = CalendarEntry(key: record.entry.key, firstDay: first, lastDay: last, title: record.entry.title)
+        written[id] = WrittenRecord(calendarID: record.calendarID, entry: entry)
     }
 }

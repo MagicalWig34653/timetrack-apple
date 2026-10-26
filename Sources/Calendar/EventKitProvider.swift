@@ -53,7 +53,7 @@ final class EventKitProvider: DeviceCalendarProvider {
             return DeviceEvent(id: "\(identifier)@\(Int(event.startDate.timeIntervalSince1970))", calendarID: event.calendar.calendarIdentifier,
                                title: event.title ?? "", location: event.location, start: event.startDate, end: event.endDate, isAllDay: event.isAllDay,
                                isDeclined: Self.isDeclined(event), isCancelled: event.status == .canceled,
-                               isWrittenByTimetrack: EntryMarker.key(from: event.url) != nil)
+                               isWrittenByTimetrack: EntryMarker.key(from: event.url, notes: event.notes) != nil)
         }
     }
 
@@ -78,14 +78,16 @@ final class EventKitProvider: DeviceCalendarProvider {
         let dayCalendar = DayCalendar(timeZone: .current)
         let predicate = store.predicateForEvents(withStart: from, end: to, calendars: [calendar])
         return store.events(matching: predicate).compactMap { event in
-            guard let key = EntryMarker.key(from: event.url), let id = event.eventIdentifier else { return nil }
+            guard let key = EntryMarker.key(from: event.url, notes: event.notes), let id = event.eventIdentifier else { return nil }
             let days = DeviceEventFilter.allDayDays(start: event.startDate, end: event.endDate, calendar: dayCalendar)
             return WrittenEvent(eventID: id, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: event.title ?? "")
         }
     }
 
-    func apply(_ operations: [WriteOperation], calendarID: String, calendar dayCalendar: DayCalendar) throws {
+    @discardableResult
+    func apply(_ operations: [WriteOperation], calendarID: String, calendar dayCalendar: DayCalendar) throws -> [String: String] {
         guard let target = store.calendar(withIdentifier: calendarID), target.allowsContentModifications else { throw CocoaError(.fileWriteNoPermission) }
+        var saved: [(key: String, event: EKEvent)] = []
         do {
             for operation in operations {
                 switch operation {
@@ -94,13 +96,15 @@ final class EventKitProvider: DeviceCalendarProvider {
                     event.calendar = target
                     try fill(event, with: planned, dayCalendar: dayCalendar)
                     try store.save(event, span: .thisEvent, commit: false)
+                    saved.append((planned.key, event))
                 case .update(let id, let planned):
-                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url) != nil else { continue }
+                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url, notes: event.notes) != nil else { continue }
                     try fill(event, with: planned, dayCalendar: dayCalendar)
                     try store.save(event, span: .thisEvent, commit: false)
+                    saved.append((planned.key, event))
                 case .delete(let id):
                     // Only events carrying Timetrack's marker inside the Timetrack calendar are ever removed.
-                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url) != nil else { continue }
+                    guard let event = store.event(withIdentifier: id), event.calendar.calendarIdentifier == calendarID, EntryMarker.key(from: event.url, notes: event.notes) != nil else { continue }
                     try store.remove(event, span: .thisEvent, commit: false)
                 }
             }
@@ -109,6 +113,8 @@ final class EventKitProvider: DeviceCalendarProvider {
             store.reset()
             throw error
         }
+        // Identifiers are final only after the commit.
+        return Dictionary(saved.compactMap { item in item.event.eventIdentifier.map { (item.key, $0) } }, uniquingKeysWith: { _, last in last })
     }
 
     private func fill(_ event: EKEvent, with planned: CalendarEntry, dayCalendar: DayCalendar) throws {
@@ -118,6 +124,7 @@ final class EventKitProvider: DeviceCalendarProvider {
         event.startDate = first.start
         event.endDate = last.start // all-day events end on their last day
         event.url = EntryMarker.url(forKey: planned.key)
+        event.notes = EntryMarker.notes(forKey: planned.key) // fallback marker for servers that drop the URL field
         event.availability = .free
     }
 

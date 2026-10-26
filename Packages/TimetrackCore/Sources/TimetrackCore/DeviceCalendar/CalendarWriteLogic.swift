@@ -53,6 +53,22 @@ public enum EntryMarker {
 
     public static func url(forKey key: String) -> URL? { URL(string: "\(scheme)://\(key)") }
 
+    /// The notes text of an event Timetrack writes: a short German hint plus the marker URL. Some calendar servers drop the URL field,
+    /// so the marker is also kept here (N2) and read back from either place. No user data is stored in it.
+    public static func notes(forKey key: String) -> String {
+        "Von Timetrack geschrieben. Änderungen bitte in Timetrack vornehmen.\n\(scheme)://\(key)"
+    }
+
+    /// The key from the URL field, or else from a marker token inside the notes; nil for anything not written by Timetrack.
+    public static func key(from url: URL?, notes: String?) -> String? {
+        if let key = key(from: url) { return key }
+        guard let notes else { return nil }
+        for token in notes.split(whereSeparator: \.isWhitespace) where token.hasPrefix("\(scheme)://") {
+            if let key = key(from: URL(string: String(token))) { return key }
+        }
+        return nil
+    }
+
     /// The key of a marker URL; nil for anything not written by Timetrack (or a malformed marker).
     public static func key(from url: URL?) -> String? {
         guard let url, url.scheme == scheme, let host = url.host else { return nil }
@@ -105,25 +121,7 @@ public enum CalendarWritePlanner {
     /// range and events without Timetrack's marker are never touched; duplicates of one key are removed. `managing` restricts
     /// the comparison to some key families (e.g. only absences) so the others are left alone.
     public static func operations(desired: [CalendarEntry], existing: [WrittenEvent], from: LocalDay, to: LocalDay, managing prefixes: [String] = [EntryMarker.planHost, EntryMarker.absenceHost]) -> [WriteOperation] {
-        func managed(_ key: String) -> Bool { prefixes.contains { key.hasPrefix($0 + "/") } }
-        var operations: [WriteOperation] = []
-        var kept: [String: WrittenEvent] = [:]
-        for event in existing.sorted(by: { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }) where event.lastDay >= from && event.firstDay <= to && managed(event.key) {
-            if kept[event.key] == nil { kept[event.key] = event } else { operations.append(.delete(eventID: event.eventID)) }
-        }
-        let wanted = Dictionary(desired.filter { managed($0.key) }.map { ($0.key, $0) }, uniquingKeysWith: { _, last in last })
-        for key in wanted.keys.sorted() {
-            guard let target = wanted[key] else { continue }
-            if let current = kept[key] {
-                if current.title != target.title || current.firstDay != target.firstDay || current.lastDay != target.lastDay {
-                    operations.append(.update(eventID: current.eventID, target))
-                }
-            } else {
-                operations.append(.create(target))
-            }
-        }
-        for (key, event) in kept where wanted[key] == nil { operations.append(.delete(eventID: event.eventID)) }
-        return operations.sorted { sortKey($0) < sortKey($1) }
+        CalendarReconciler.plan(desired: desired, existing: existing, records: [:], from: from, to: to, managing: prefixes).operations
     }
 
     /// Deletes every given event (the "remove everything Timetrack wrote" button). Callers only pass marker-carrying events.
@@ -131,7 +129,7 @@ public enum CalendarWritePlanner {
         existing.sorted { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }.map { .delete(eventID: $0.eventID) }
     }
 
-    private static func sortKey(_ operation: WriteOperation) -> String {
+    public static func sortKey(_ operation: WriteOperation) -> String {
         switch operation {
         case .create(let entry): "\(entry.firstDay)-1-\(entry.key)"
         case .update(let id, let entry): "\(entry.firstDay)-2-\(id)"

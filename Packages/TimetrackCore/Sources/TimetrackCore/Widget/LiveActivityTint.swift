@@ -47,7 +47,8 @@ public struct LiveActivityTintColor: Sendable, Equatable {
 
 public enum LiveActivityTint {
     /// The card background for an accent colour (given in HSB) in the dark or light appearance.
-    /// - subtle: dark graphite (brightness 0.19), saturation reduced to a third of the accent's, so only a hint of colour remains.
+    /// - subtle: N2: very dark (brightness 0.10) and only half opaque, so the card is a dark glass pane (the watch Smart Stack and the
+    ///   Lock Screen material shine through) with a hint of the accent hue. The earlier opaque graphite (0.19 at 94 %) looked far too bright on the watch.
     /// - colorful: the stronger LA3 tint.
     /// - neutral: no hue at all, plain graphite.
     public static func color(style: LiveActivityTintStyle, hue: Double, saturation: Double, brightness: Double, dark: Bool) -> LiveActivityTintColor {
@@ -58,11 +59,11 @@ public enum LiveActivityTint {
                 : LiveActivityTintColor(hue: hue, saturation: saturation * 0.45, brightness: min(1, brightness + 0.1), alpha: 0.78)
         case .subtle:
             return dark
-                ? LiveActivityTintColor(hue: hue, saturation: min(0.5, saturation * 0.35), brightness: 0.19, alpha: 0.94)
+                ? LiveActivityTintColor(hue: hue, saturation: min(0.5, saturation * 0.4), brightness: 0.10, alpha: 0.5)
                 : LiveActivityTintColor(hue: hue, saturation: saturation * 0.10, brightness: 0.96, alpha: 0.82)
         case .neutral:
             return dark
-                ? LiveActivityTintColor(hue: 0, saturation: 0, brightness: 0.18, alpha: 0.94)
+                ? LiveActivityTintColor(hue: 0, saturation: 0, brightness: 0.08, alpha: 0.5)
                 : LiveActivityTintColor(hue: 0, saturation: 0, brightness: 0.95, alpha: 0.82)
         }
     }

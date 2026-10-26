@@ -526,6 +526,32 @@ public actor APIClient: PreferencesService {
         try await send(.post, "/time/account/adjustments", body: input)
     }
 
+    /// P15 (X3, contract 0.29.0): stored adjustments, newest first; `limit` 1...100. Older servers answer 404 (no list).
+    public func listAccountAdjustments(limit: Int = 50, offset: Int = 0) async throws -> AccountAdjustmentPage {
+        try await get("/time/account/adjustments", query: [URLQueryItem(name: "limit", value: String(limit)), URLQueryItem(name: "offset", value: String(offset))])
+    }
+
+    /// Removes one adjustment (also the opening balance) and answers the recomputed account; 404 for an unknown id.
+    public func deleteAccountAdjustment(id: UUID) async throws -> TimeAccount {
+        try decode(TimeAccount.self, from: try await perform(.delete, "/time/account/adjustments/\(id.uuidString.lowercased())"))
+    }
+
+    /// Informative profile rules and sources (contract 0.29.0); older servers answer 404.
+    public func listLegalProfiles() async throws -> [LegalProfile] { try await get("/legal-profiles") }
+
+    /// Sets (or clears with nil) the number of school lessons of a day; nothing else of the day preferences changes.
+    public func setSchoolLessonCount(_ count: Int?, on date: LocalDay) async throws -> DayEvaluation {
+        struct Body: Encodable {
+            let count: Int?
+            enum CodingKeys: String, CodingKey { case schoolLessonCount }
+            func encode(to encoder: Encoder) throws {
+                var c = encoder.container(keyedBy: CodingKeys.self)
+                try c.encode(count, forKey: .schoolLessonCount)
+            }
+        }
+        return try await send(.put, "/time/days/\(date)", body: Body(count: count))
+    }
+
     /// Chart series (contract v0.28.0); older servers answer 404.
     public func getTimeStatistics(from: LocalDay, to: LocalDay, granularity: StatisticsGranularity, basis: StatisticsBasis) async throws -> TimeStatistics {
         try await get("/time/statistics", query: [

@@ -127,6 +127,10 @@ private struct TimeContent: View {
                     DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now)) {
                         editor = EditorRequest(segment: nil, day: day.date)
                     }
+                } footer: {
+                    if day.hasLegalNotes {
+                        LegalDayNotes(day: day) { await store.setSchoolLessons($0, on: day.date) }
+                    }
                 }
             }
             if !needle.isEmpty && visibleDays.isEmpty && !store.isLoading {
@@ -143,6 +147,9 @@ private struct TimeContent: View {
                 Button("command.new_entry") { newEntry() }
             } else {
                 if ids.count == 1 { Button("time.edit") { edit(ids) } }
+                if ids.count == 1, let segment = selectedSegments.first(where: { ids.contains($0.id) }), segment.needsReview, !segment.isRunning {
+                    Button(p15("review.acknowledge")) { Task { await store.acknowledge(segment) } }
+                }
                 Button("time.void", role: .destructive) { requestVoid(ids) }
             }
         } primaryAction: { ids in edit(ids) }
@@ -151,7 +158,8 @@ private struct TimeContent: View {
         .searchFocused($searchFocused)
         .inspector(isPresented: $ui.inspectorVisible) {
             SegmentInspector(segments: selectedSegments, zone: store.calendar.timeZone,
-                             edit: { edit(selection) }, void: { requestVoid(selection) })
+                             edit: { edit(selection) }, void: { requestVoid(selection) },
+                             acknowledge: { segment in _ = await store.acknowledge(segment) })
                 .inspectorColumnWidth(min: 240, ideal: 280, max: 360)
         }
         .task { await store.load() }

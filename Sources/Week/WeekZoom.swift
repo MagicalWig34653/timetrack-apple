@@ -101,13 +101,29 @@ struct WeekDayList: View {
                                         Button("time.void") { actions.void(segment, day.date) }.tint(.red)
                                         Button("time.edit") { actions.edit(segment, day.date) }.tint(.accentColor)
                                     }
+                                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                        if segment.needsReview && !segment.isRunning {
+                                            Button { Task { await store.acknowledge(segment) } } label: { Label(p15Key("review.acknowledge.short"), systemImage: "checkmark.seal") }.tint(.green)
+                                        }
+                                    }
                                     .accessibilityAction(named: Text("time.edit")) { actions.edit(segment, day.date) }
                                     .accessibilityAction(named: Text("time.void")) { actions.void(segment, day.date) }
+                                    .accessibilityActions {
+                                        if segment.needsReview && !segment.isRunning {
+                                            Button(p15("review.acknowledge")) { Task { await store.acknowledge(segment) } }
+                                        }
+                                    }
                             }
                         }
                     } header: {
                         DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now), isFuture: day.date > store.calendar.day(for: .now), isSelected: day.date == selected, isEmpty: compactEmpty,
                                   plan: week?.week?.days.first { $0.date == day.date }, canAct: canAct, actions: actions)
+                    } footer: {
+                        // P15: informative warnings and school lessons live in the footer, outside the row diff of the section.
+                        if day.hasLegalNotes {
+                            LegalDayNotes(day: day) { await store.setSchoolLessons($0, on: day.date) }
+                                .padding(.top, TT.Space.xs)
+                        }
                     }
                     .id(day.date)
                 }

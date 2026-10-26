@@ -8,6 +8,9 @@ struct WorkModelFormFields: View {
     @Binding var form: WorkModelForm
     let calendar: DayCalendar
     var showsEnd = true
+    /// P15: profiles to choose from (built-in fallback on older servers).
+    var profiles: [LegalProfile] = LegalProfile.fallback
+    var profilesFromServer = false
     /// Label of the start date ("Gültig ab" in a correction, "Neue Version gilt ab" for a new version).
     var startLabel: LocalizedStringKey = "workmodel.valid_from"
 
@@ -23,6 +26,7 @@ struct WorkModelFormFields: View {
             scheduleSection
             roundingSection
             schoolSection
+            LegalProfileSection(profileId: $form.legalProfileId, profiles: profiles, fromServer: profilesFromServer)
             breaksSection
             if form.dailyTargetSeconds != nil {
                 HintBanner("workmodel.daily_override")

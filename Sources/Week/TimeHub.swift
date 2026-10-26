@@ -219,7 +219,13 @@ struct TimeHub: View {
                 DayDetail(store: calendar, day: focus.day, absenceRequest: $absenceRequest, sheet: interceptedSheet) {
                     DayEntries(evaluation: calendar.detail, day: focus.day, zone: timeList.calendar.timeZone,
                                onEdit: { editor = EditorRequest(segment: $0, day: focus.day); touchedDay = focus.day },
-                               onVoid: { voiding = $0; touchedDay = focus.day })
+                               onVoid: { voiding = $0; touchedDay = focus.day },
+                               onAcknowledge: { segment in Task { if await timeList.acknowledge(segment) { await calendar.loadDetail() } } },
+                               setLessons: { count in
+                                   let failure = await timeList.setSchoolLessons(count, on: focus.day)
+                                   await calendar.loadDetail()
+                                   return failure
+                               })
                 }
             }
             .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
@@ -487,6 +493,10 @@ struct DayEntries: View {
     let zone: TimeZone
     let onEdit: (Segment) -> Void
     let onVoid: (Segment) -> Void
+    /// P15: clears the review marker of a flagged entry; nil hides the action.
+    var onAcknowledge: ((Segment) -> Void)?
+    /// P15: saves the school lesson count of the day (nil clears it); nil hides the picker.
+    var setLessons: ((Int?) async -> TimetrackError?)?
 
     var body: some View {
         if let evaluation, evaluation.date == day {
@@ -502,14 +512,23 @@ struct DayEntries: View {
                             .onTapGesture { onEdit(segment) }
                             .contextMenu {
                                 Button { onEdit(segment) } label: { Label("time.edit", systemImage: "pencil") }
+                                if segment.needsReview && !segment.isRunning, let onAcknowledge {
+                                    Button { onAcknowledge(segment) } label: { Label(p15Key("review.acknowledge"), systemImage: "checkmark.seal") }
+                                }
                                 Button(role: .destructive) { onVoid(segment) } label: { Label("time.void", systemImage: "xmark.circle") }
                             }
                             .accessibilityAction(named: Text("time.edit")) { onEdit(segment) }
                             .accessibilityAction(named: Text("time.void")) { onVoid(segment) }
+                            .accessibilityActions {
+                                if segment.needsReview && !segment.isRunning, let onAcknowledge {
+                                    Button(p15("review.acknowledge")) { onAcknowledge(segment) }
+                                }
+                            }
                     }
                 }
                 .accessibilityIdentifier("day.entries")
             }
+            if let setLessons, evaluation.hasLegalNotes { LegalDayNotes(day: evaluation, setLessons: setLessons) }
         }
     }
 }

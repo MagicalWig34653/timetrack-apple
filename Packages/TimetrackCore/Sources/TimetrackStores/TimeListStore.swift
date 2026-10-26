@@ -100,6 +100,29 @@ public final class TimeListStore {
         await mutate { _ = try await self.client.correctSegment(id: segment.id, correction, ifMatchVersion: segment.version) }
     }
 
+    /// P15 (X3): acknowledges the review marker (`needsReview: false`); the server bumps the version and adds a revision.
+    /// Servers before contract 0.29.0 ignore the field, so the caller may also remember the entry locally.
+    @discardableResult
+    public func acknowledge(_ segment: Segment, reason: String = "Geprüft") async -> Bool {
+        await correct(segment, SegmentCorrection(reason: reason, acknowledgeReview: true))
+    }
+
+    /// P15: records the number of school lessons (>= 45 min) of `day` (nil clears it) and reloads the week. Returns the error, nil on success.
+    public func setSchoolLessons(_ count: Int?, on day: LocalDay) async -> TimetrackError? {
+        do {
+            _ = try await client.setSchoolLessonCount(count, on: day)
+            error = nil
+            onOutcome?(.saved)
+            await load()
+            return nil
+        } catch let failure as TimetrackError {
+            if failure != .cancelled { onOutcome?(.failed) }
+            return failure
+        } catch {
+            return .cancelled
+        }
+    }
+
     /// Voids on the server, then removes the segment locally in ONE state change and returns, so the caller can dismiss its
     /// sheet before the authoritative reload (which runs afterwards and only touches the list if the result differs).
     @discardableResult

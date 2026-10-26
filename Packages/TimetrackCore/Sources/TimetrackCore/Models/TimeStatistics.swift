@@ -177,3 +177,34 @@ public struct AccountAdjustmentInput: Encodable, Sendable, Equatable {
         self.reason = reason
     }
 }
+
+/// P15 (X3, contract 0.29.0): one stored time account adjustment as listed by `GET /time/account/adjustments` (newest first).
+public struct AccountAdjustment: Codable, Sendable, Hashable, Identifiable {
+    public enum Kind: String, Codable, Sendable { case opening, correction, unknown
+        public init(from decoder: Decoder) throws { self = Kind(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .unknown }
+    }
+
+    public let id: UUID
+    public let kind: Kind
+    public let date: LocalDay
+    /// Signed.
+    public let seconds: Int
+    public let reason: String
+    public let createdAt: Date?
+
+    public init(id: UUID, kind: Kind, date: LocalDay, seconds: Int, reason: String, createdAt: Date? = nil) {
+        self.id = id; self.kind = kind; self.date = date; self.seconds = seconds; self.reason = reason; self.createdAt = createdAt
+    }
+}
+
+/// `{ items, total, limit, offset }`.
+public struct AccountAdjustmentPage: Codable, Sendable, Hashable {
+    public let items: [AccountAdjustment]
+    public let total: Int
+    public let limit: Int
+    public let offset: Int
+
+    public init(items: [AccountAdjustment], total: Int, limit: Int, offset: Int) {
+        self.items = items; self.total = total; self.limit = limit; self.offset = offset
+    }
+}

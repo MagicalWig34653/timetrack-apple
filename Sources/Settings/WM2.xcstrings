@@ -51,7 +51,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das Zeitkonto ändert sich sofort. Eine gebuchte Korrektur kann nicht gelöscht werden; du gleichst sie mit einer Gegenbuchung aus."
+            "value": "Das Zeitkonto ändert sich sofort. Eine gebuchte Korrektur kannst du unten in der Liste wieder löschen; der Saldo wird dann neu berechnet."
           }
         }
       }
@@ -62,7 +62,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eine datierte Gutschrift oder ein Abzug auf dem Zeitkonto, zum Beispiel für einen Zeitausgleich. Eine Korrektur lässt sich nicht löschen, nur mit einer Gegenbuchung ausgleichen."
+            "value": "Eine datierte Gutschrift oder ein Abzug auf dem Zeitkonto, zum Beispiel für einen Zeitausgleich. Gebuchte Korrekturen stehen unten in der Liste und lassen sich dort löschen."
           }
         }
       }
@@ -161,7 +161,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Stand deines Zeitkontos mit Anfangsstand und Korrekturen. Der Saldo ergibt sich aus den ausgewerteten Tagen; hier buchst du Anfangsstand oder eine datierte Korrektur mit Begründung."
+            "value": "Stand deines Zeitkontos mit Anfangsstand und Korrekturen. Der Saldo ergibt sich aus den ausgewerteten Tagen; hier buchst du Anfangsstand oder eine datierte Korrektur mit Begründung und siehst alle gebuchten Anpassungen."
           }
         }
       }
@@ -227,7 +227,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Das Zeitkonto zählt ab diesem Tag. Ein Anfangsstand kann nicht wieder entfernt werden."
+            "value": "Das Zeitkonto zählt ab diesem Tag. Den Anfangsstand kannst du unten in der Liste wieder löschen und neu festlegen."
           }
         }
       }
@@ -238,7 +238,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ab diesem Datum zählt das Zeitkonto. Es kann nur einen Anfangsstand geben."
+            "value": "Ab diesem Datum zählt das Zeitkonto. Es kann nur einen Anfangsstand geben; zum Ändern löschst du ihn zuerst in der Liste."
           }
         }
       }

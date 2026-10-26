@@ -1,0 +1,314 @@
+{
+  "sourceLanguage": "de",
+  "strings": {
+    "adj.confirm_message %@ %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ vom %@ wird entfernt. Der Saldo ändert sich um %@."
+          }
+        }
+      }
+    },
+    "adj.confirm_opening": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ohne Anfangsstand zählt das Zeitkonto erst wieder, wenn du einen neuen festlegst."
+          }
+        }
+      }
+    },
+    "adj.confirm_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anpassung löschen?"
+          }
+        }
+      }
+    },
+    "adj.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        }
+      }
+    },
+    "adj.delete_a11y %@ %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@ vom %@ löschen"
+          }
+        }
+      }
+    },
+    "adj.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Anpassungen gebucht."
+          }
+        }
+      }
+    },
+    "adj.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neueste zuerst. Beim Löschen berechnet der Server das Zeitkonto neu."
+          }
+        }
+      }
+    },
+    "adj.kind.correction": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrektur"
+          }
+        }
+      }
+    },
+    "adj.kind.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anpassung"
+          }
+        }
+      }
+    },
+    "adj.more": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weitere laden"
+          }
+        }
+      }
+    },
+    "adj.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebuchte Anpassungen"
+          }
+        }
+      }
+    },
+    "adj.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Server liefert keine Liste der Anpassungen (ab Vertrag 0.29.0). Es werden nur die Summen oben angezeigt."
+          }
+        }
+      }
+    },
+    "legal.day_notice": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informative Hinweise, keine Rechtsberatung. Erfasste Zeiten bleiben unverändert."
+          }
+        }
+      }
+    },
+    "legal.explain": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Profil gilt ab dem Beginn dieser Version und steuert nur die Hinweise zu Pausen, Höchstzeiten und Berufsschule. Erfasste Zeiten werden nie abgewiesen. Erwachsene in Ausbildung wählen das Erwachsenenprofil. Für einen Wechsel, zum Beispiel mit 18, legst du eine neue Version ab dem Stichtag an; frühere Tage behalten ihr Profil. Eine automatische Umstellung am Geburtstag gibt es nicht."
+          }
+        }
+      }
+    },
+    "legal.lessons": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterrichtsstunden (mind. 45 Min.)"
+          }
+        }
+      }
+    },
+    "legal.lessons.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht angegeben"
+          }
+        }
+      }
+    },
+    "legal.minor_school": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Jugendliche trägst du an Berufsschultagen die Zahl der Unterrichtsstunden (mindestens 45 Minuten) in der Tagesansicht von „Zeit“ ein; sie lässt sich nicht aus der Dauer berechnen. Ab sechs Stunden gilt einmal pro Woche eine Gutschrift von 8 Stunden, bei Blockunterricht mit mindestens 25 Stunden an fünf Tagen 40 Stunden. Das ist eine Produktannahme und fachlich noch nicht geprüft."
+          }
+        }
+      }
+    },
+    "legal.no_details": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regeln und Quellen konnte die App nicht vom Server laden (ältere Version). Die Auswahl funktioniert trotzdem."
+          }
+        }
+      }
+    },
+    "legal.notice": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Informative Hinweise, keine Rechtsberatung. Eine leere Hinweisliste bedeutet nicht, dass alles rechtskonform ist."
+          }
+        }
+      }
+    },
+    "legal.sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quellen"
+          }
+        }
+      }
+    },
+    "legal.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechtsprofil"
+          }
+        }
+      }
+    },
+    "legal.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Profil kennt die App nicht. Der Server prüft die Angabe beim Speichern."
+          }
+        }
+      }
+    },
+    "legal.warning.a11y %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinweis: %@"
+          }
+        }
+      }
+    },
+    "review.acknowledge": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als geprüft markieren"
+          }
+        }
+      }
+    },
+    "review.acknowledge.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entfernt die Prüfmarkierung. Die Zeiten bleiben unverändert."
+          }
+        }
+      }
+    },
+    "review.acknowledge.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geprüft"
+          }
+        }
+      }
+    },
+    "review.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu prüfen"
+          }
+        }
+      }
+    },
+    "review.section.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Eintrag ist zur Prüfung markiert. Wenn die Zeiten stimmen, kannst du die Markierung quittieren; eine Korrektur des Endes entfernt sie ebenfalls."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

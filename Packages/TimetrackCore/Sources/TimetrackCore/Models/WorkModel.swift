@@ -33,11 +33,13 @@ public struct WorkModel: Codable, Sendable, Hashable, Identifiable {
     public let dayBoundaryMinutes: Int?
     /// Correction counter (contract v0.16.0, sent as `If-Match`); nil on older servers, which cannot correct versions.
     public let version: Int?
+    /// Legal profile from `validFrom` on (contract 0.29.0, ADR-0028); nil on older servers and old models = `arbzg-adult-de`.
+    public let legalProfileId: String?
 
     public init(id: UUID, createdAt: Date? = nil, validFrom: LocalDay, validTo: LocalDay? = nil, timezone: String? = nil, weeklyTargetSeconds: Int,
                 workdays: [Int], dailyTargetSeconds: [String: Int]? = nil, travelCountsAsWork: Bool? = nil, roundingEnabled: Bool? = nil,
                 roundingMinutes: Int? = nil, fixedBreaks: [FixedBreak]? = nil, schoolFullDayThresholdSeconds: Int? = nil,
-                schoolCreditSeconds: Int? = nil, dayBoundaryMinutes: Int? = nil, version: Int? = nil) {
+                schoolCreditSeconds: Int? = nil, dayBoundaryMinutes: Int? = nil, version: Int? = nil, legalProfileId: String? = nil) {
         self.id = id
         self.createdAt = createdAt
         self.validFrom = validFrom
@@ -54,7 +56,11 @@ public struct WorkModel: Codable, Sendable, Hashable, Identifiable {
         self.schoolCreditSeconds = schoolCreditSeconds
         self.dayBoundaryMinutes = dayBoundaryMinutes
         self.version = version
+        self.legalProfileId = legalProfileId
     }
+
+    /// The effective profile id (nil means the adult profile).
+    public var effectiveLegalProfileId: String { legalProfileId ?? LegalProfileID.adult }
 
     /// Zone used for local days; falls back to the contract default `Europe/Berlin`.
     public var timeZone: TimeZone {
@@ -137,10 +143,12 @@ public struct WorkModelInput: Encodable, Sendable, Equatable {
     public var schoolCreditSeconds: Int?
     public var dayBoundaryMinutes: Int
     public var fixedBreaks: [FixedBreak]
+    /// P15 (contract 0.29.0): `arbzg-adult-de` or `jarbschg-minor-de`. Older servers ignore the field.
+    public var legalProfileId: String = LegalProfileID.adult
 
     private enum CodingKeys: String, CodingKey {
         case validFrom, validTo, timezone, weeklyTargetSeconds, workdays, dailyTargetSeconds, travelCountsAsWork, roundingEnabled,
-             roundingMinutes, schoolFullDayThresholdSeconds, schoolCreditSeconds, dayBoundaryMinutes, fixedBreaks
+             roundingMinutes, schoolFullDayThresholdSeconds, schoolCreditSeconds, dayBoundaryMinutes, fixedBreaks, legalProfileId
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -158,6 +166,7 @@ public struct WorkModelInput: Encodable, Sendable, Equatable {
         try c.encode(schoolCreditSeconds, forKey: .schoolCreditSeconds)
         try c.encode(dayBoundaryMinutes, forKey: .dayBoundaryMinutes)
         try c.encode(fixedBreaks, forKey: .fixedBreaks)
+        try c.encode(legalProfileId, forKey: .legalProfileId)
     }
 }
 
@@ -193,13 +202,13 @@ public struct WorkModelPreview: Decodable, Sendable, Equatable {
         "validFrom": "Gültig ab", "validTo": "Gültig bis", "timezone": "Zeitzone", "weeklyTargetSeconds": "Wochen-Soll",
         "workdays": "Arbeitstage", "dailyTargetSeconds": "Tages-Soll", "travelCountsAsWork": "Fahrtzeiten", "roundingEnabled": "Rundung",
         "roundingMinutes": "Rundung in Minuten", "schoolFullDayThresholdSeconds": "Schulschwelle", "schoolCreditSeconds": "Schulgutschrift",
-        "dayBoundaryMinutes": "Tagesgrenze", "fixedBreaks": "Feste Pausen",
+        "dayBoundaryMinutes": "Tagesgrenze", "fixedBreaks": "Feste Pausen", "legalProfileId": "Rechtsprofil",
     ]
 }
 
 /// Editable text values of a work model version (what the form fields hold) and their validation, mirroring the PWA's `work-model-form.ts`.
 public struct WorkModelForm: Sendable, Equatable {
-    public enum Field: Hashable, Sendable { case validFrom, validTo, timezone, weekly, workdays, roundingMinutes, schoolThreshold, schoolCredit, dayBoundary, fixedBreaks }
+    public enum Field: Hashable, Sendable { case validFrom, validTo, timezone, weekly, workdays, roundingMinutes, schoolThreshold, schoolCredit, dayBoundary, fixedBreaks, legalProfile }
 
     public var validFrom: LocalDay
     /// Empty = open-ended.
@@ -216,6 +225,8 @@ public struct WorkModelForm: Sendable, Equatable {
     public var fixedBreaks: [FixedBreak]
     /// Per-weekday targets are not editable here; they are carried over unchanged so a correction does not drop them.
     public var dailyTargetSeconds: [String: Int]?
+    /// P15: chosen legal profile id (see `LegalProfileID`).
+    public var legalProfileId: String
 
     public init(model: WorkModel) {
         validFrom = model.validFrom
@@ -231,6 +242,7 @@ public struct WorkModelForm: Sendable, Equatable {
         dayBoundaryMinutes = String(model.dayBoundaryMinutes ?? 0)
         fixedBreaks = model.fixedBreaks ?? []
         dailyTargetSeconds = (model.dailyTargetSeconds?.isEmpty ?? true) ? nil : model.dailyTargetSeconds
+        legalProfileId = model.effectiveLegalProfileId
     }
 
     /// Form for a new version: values come from `base` (the newest version) and it starts on `validFrom`, open-ended (WM2).
@@ -255,6 +267,7 @@ public struct WorkModelForm: Sendable, Equatable {
         dayBoundaryMinutes = "0"
         fixedBreaks = []
         dailyTargetSeconds = nil
+        legalProfileId = LegalProfileID.adult
     }
 
     static func isValidDay(_ text: String) -> Bool {
@@ -298,12 +311,13 @@ public struct WorkModelForm: Sendable, Equatable {
         let boundary = Int(dayBoundaryMinutes.trimmingCharacters(in: .whitespaces))
         if boundary == nil || !(0...719).contains(boundary!) { errors.insert(.dayBoundary) }
         if fixedBreaks.contains(where: { !Self.isValidTime($0.start) || !Self.isValidTime($0.end) || $0.start >= $0.end }) { errors.insert(.fixedBreaks) }
+        if legalProfileId.trimmingCharacters(in: .whitespaces).isEmpty { errors.insert(.legalProfile) }
         guard errors.isEmpty, let weekly, let threshold, let boundary else { return .failure(ValidationErrors(fields: errors)) }
         return .success(WorkModelInput(
             validFrom: validFrom, validTo: validTo.isEmpty ? nil : validTo, timezone: zone, weeklyTargetSeconds: weekly, workdays: workdays.sorted(),
             dailyTargetSeconds: dailyTargetSeconds, travelCountsAsWork: travelCountsAsWork, roundingEnabled: roundingEnabled,
             roundingMinutes: roundingEnabled ? (minutes ?? 15) : (Int(roundingMinutes) ?? 15), schoolFullDayThresholdSeconds: threshold,
-            schoolCreditSeconds: credit, dayBoundaryMinutes: boundary, fixedBreaks: fixedBreaks))
+            schoolCreditSeconds: credit, dayBoundaryMinutes: boundary, fixedBreaks: fixedBreaks, legalProfileId: legalProfileId))
     }
 
     public struct ValidationErrors: Error, Sendable, Equatable { public let fields: Set<Field> }

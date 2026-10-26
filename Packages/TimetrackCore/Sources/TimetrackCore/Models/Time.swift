@@ -90,17 +90,21 @@ public struct SegmentCorrection: Codable, Sendable, Hashable {
     public var reason: String
     /// H4: sends `endedAt: null` (reopen the segment, i.e. continue it). Needs backend support (contract bump); servers without it reject the request.
     public var reopen: Bool
+    /// P15 (X3, contract 0.29.0): explicit acknowledgement, sends `needsReview: false`. `true` is invalid and cannot be expressed.
+    public var acknowledgeReview: Bool
 
-    public init(startedAt: Date? = nil, endedAt: Date? = nil, kind: SegmentKind? = nil, note: String? = nil, reason: String, reopen: Bool = false) {
+    public init(startedAt: Date? = nil, endedAt: Date? = nil, kind: SegmentKind? = nil, note: String? = nil, reason: String, reopen: Bool = false,
+                acknowledgeReview: Bool = false) {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.kind = kind
         self.note = note
         self.reason = reason
         self.reopen = reopen
+        self.acknowledgeReview = acknowledgeReview
     }
 
-    private enum CodingKeys: String, CodingKey { case startedAt, endedAt, kind, note, reason }
+    private enum CodingKeys: String, CodingKey { case startedAt, endedAt, kind, note, reason, needsReview }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -110,6 +114,7 @@ public struct SegmentCorrection: Codable, Sendable, Hashable {
         note = try c.decodeIfPresent(String.self, forKey: .note)
         reason = try c.decode(String.self, forKey: .reason)
         reopen = false
+        acknowledgeReview = (try c.decodeIfPresent(Bool.self, forKey: .needsReview)) == false
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -119,6 +124,7 @@ public struct SegmentCorrection: Codable, Sendable, Hashable {
         try c.encodeIfPresent(kind, forKey: .kind)
         try c.encodeIfPresent(note, forKey: .note)
         try c.encode(reason, forKey: .reason)
+        if acknowledgeReview { try c.encode(false, forKey: .needsReview) }
     }
 }
 
@@ -148,11 +154,15 @@ public struct DayEvaluation: Codable, Sendable, Hashable, Identifiable {
     public let segments: [Segment]?
     public let note: String?
     public let breakHints: [BreakHint]
+    /// P15 (contract 0.29.0): profile in force on this day, informative warnings and the recorded number of school lessons (>= 45 min). Nil on older servers.
+    public let legalProfileId: String?
+    public let legalWarnings: [LegalWarning]?
+    public let schoolLessonCount: Int?
     public var id: LocalDay { date }
 
     public init(date: LocalDay, targetSeconds: Int = 0, rawWorkSeconds: Int = 0, evaluatedWorkSeconds: Int = 0, creditSeconds: Int = 0,
                 deltaSeconds: Int = 0, provisional: Bool = false, mark: DayMarkKind? = nil, segments: [Segment]? = nil,
-                breakHints: [BreakHint] = []) {
+                breakHints: [BreakHint] = [], legalProfileId: String? = nil, legalWarnings: [LegalWarning]? = nil, schoolLessonCount: Int? = nil) {
         self.date = date
         self.modelId = nil
         self.mark = mark
@@ -172,6 +182,9 @@ public struct DayEvaluation: Codable, Sendable, Hashable, Identifiable {
         self.segments = segments
         self.note = nil
         self.breakHints = breakHints
+        self.legalProfileId = legalProfileId
+        self.legalWarnings = legalWarnings
+        self.schoolLessonCount = schoolLessonCount
     }
 
     /// Copy of `other` with a different segment list (used for optimistic local changes).
@@ -184,18 +197,20 @@ public struct DayEvaluation: Codable, Sendable, Hashable, Identifiable {
                       rawWorkSeconds: rawWorkSeconds, breakDeductionSeconds: breakDeductionSeconds, startAdjustSeconds: startAdjustSeconds,
                       endAdjustSeconds: endAdjustSeconds, evaluatedWorkSeconds: evaluatedWorkSeconds, creditSeconds: creditSeconds,
                       deltaSeconds: deltaSeconds, evaluatedStart: evaluatedStart, evaluatedEnd: evaluatedEnd, provisional: provisional,
-                      segmentIds: segments?.map(\.id) ?? segmentIds, segments: segments, note: note, breakHints: breakHints)
+                      segmentIds: segments?.map(\.id) ?? segmentIds, segments: segments, note: note, breakHints: breakHints,
+                      legalProfileId: legalProfileId, legalWarnings: legalWarnings, schoolLessonCount: schoolLessonCount)
     }
 
     private init(date: LocalDay, modelId: UUID?, mark: DayMarkKind?, skipFixedBreaks: Bool?, targetSeconds: Int, rawWorkSeconds: Int,
                  breakDeductionSeconds: Int, startAdjustSeconds: Int, endAdjustSeconds: Int, evaluatedWorkSeconds: Int, creditSeconds: Int,
                  deltaSeconds: Int, evaluatedStart: Date?, evaluatedEnd: Date?, provisional: Bool, segmentIds: [UUID], segments: [Segment]?,
-                 note: String?, breakHints: [BreakHint]) {
+                 note: String?, breakHints: [BreakHint], legalProfileId: String?, legalWarnings: [LegalWarning]?, schoolLessonCount: Int?) {
         self.date = date; self.modelId = modelId; self.mark = mark; self.skipFixedBreaks = skipFixedBreaks; self.targetSeconds = targetSeconds
         self.rawWorkSeconds = rawWorkSeconds; self.breakDeductionSeconds = breakDeductionSeconds; self.startAdjustSeconds = startAdjustSeconds
         self.endAdjustSeconds = endAdjustSeconds; self.evaluatedWorkSeconds = evaluatedWorkSeconds; self.creditSeconds = creditSeconds
         self.deltaSeconds = deltaSeconds; self.evaluatedStart = evaluatedStart; self.evaluatedEnd = evaluatedEnd; self.provisional = provisional
         self.segmentIds = segmentIds; self.segments = segments; self.note = note; self.breakHints = breakHints
+        self.legalProfileId = legalProfileId; self.legalWarnings = legalWarnings; self.schoolLessonCount = schoolLessonCount
     }
 }
 

@@ -57,7 +57,7 @@ struct WorkModelNewSheet: View {
                 VStack(alignment: .leading, spacing: TT.Space.l) {
                     Text(wmKey("wm.new.intro")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
                     consequence
-                    WorkModelFormFields(form: $form, calendar: calendar, showsEnd: false, startLabel: wmKey("wm.new.starts"))
+                    WorkModelFormFields(form: $form, calendar: calendar, showsEnd: false, profiles: store.profiles, profilesFromServer: store.profilesFromServer, startLabel: wmKey("wm.new.starts"))
                     if let error = store.error {
                         ErrorBanner(message: WorkModelEditSheet.message(error), retryTitle: "common.dismiss") { store.error = nil }
                     }

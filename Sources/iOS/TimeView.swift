@@ -56,6 +56,14 @@ struct SegmentEditor: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: TT.Space.l) {
+                    if let segment, segment.needsReview {
+                        FormSection(p15Key("review.section"), footer: p15Key("review.section.footer")) {
+                            AcknowledgeReviewButton(segment: segment) {
+                                if await store.acknowledge(segment) { dismiss() }
+                            }
+                            .padding(TT.Space.l)
+                        }
+                    }
                     FormSection("editor.kind") {
                         KindSelector(selection: $kind).padding(TT.Space.m)
                     }

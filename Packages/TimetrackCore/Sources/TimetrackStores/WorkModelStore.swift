@@ -17,6 +17,10 @@ public final class WorkModelStore {
     }
 
     public private(set) var models: [WorkModel] = []
+    /// P15: profiles to choose from; the built-in fallback until `loadProfiles()` succeeds (servers before contract 0.29.0 have no list).
+    public private(set) var profiles: [LegalProfile] = LegalProfile.fallback
+    /// True once the server delivered the profile list (rule details and sources are only then available).
+    public private(set) var profilesFromServer = false
     public private(set) var isLoading = false
     public private(set) var preview: PreviewState = .idle
     public var error: TimetrackError?
@@ -47,6 +51,18 @@ public final class WorkModelStore {
             self.error = .cancelled
         }
     }
+
+    /// Loads the legal profiles. A failure keeps the fallback list (the choice still works; the server validates the id on save).
+    public func loadProfiles() async {
+        do {
+            let loaded = try await client.listLegalProfiles()
+            guard !loaded.isEmpty else { return }
+            profiles = loaded
+            profilesFromServer = true
+        } catch {}
+    }
+
+    public func profile(id: String) -> LegalProfile? { profiles.first { $0.id == id } }
 
     /// Debounced preview of `form` for `model` (the user keeps typing); a new call cancels the pending one.
     public func updatePreview(for model: WorkModel, form: WorkModelForm, debounce: Duration = .milliseconds(350)) {

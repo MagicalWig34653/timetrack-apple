@@ -8,6 +8,8 @@ struct SegmentInspector: View {
     let zone: TimeZone
     let edit: () -> Void
     let void: () -> Void
+    /// P15: clears the review marker of the single selected entry.
+    var acknowledge: ((Segment) async -> Void)?
 
     var body: some View {
         ScrollView {
@@ -61,7 +63,10 @@ struct SegmentInspector: View {
                 Text(verbatim: note).textSelection(.enabled).padding(TT.Space.m).frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        if segment.needsReview { StatusChip(LocalizedStringKey(AD.s("inspector.needs_review")), tone: .warning) }
+        if segment.needsReview {
+            StatusChip(LocalizedStringKey(AD.s("inspector.needs_review")), tone: .warning)
+            if let acknowledge { AcknowledgeReviewButton(segment: segment) { await acknowledge(segment) } }
+        }
         if segment.isRunning { StatusChip("today.running", tone: .accent) }
         actions
     }

@@ -40,6 +40,7 @@ struct WorkModelsScreen: View {
                 store = created
             }
             await store?.load()
+            await store?.loadProfiles()
         }
         .sheet(item: $sheet) { sheet in
             if let store {
@@ -94,6 +95,7 @@ struct WorkModelCard: View {
                     row("workmodel.workdays", Self.workdays(model.workdays))
                     row("workmodel.rounding", (model.roundingEnabled ?? true) ? "\(model.roundingMinutes ?? 15) min" : String(localized: "workmodel.off"))
                     row("workmodel.timezone", model.timezone ?? "Europe/Berlin")
+                    row(p15Key("legal.title"), model.legalProfileTitle)
                 }
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: TT.Space.s) { actions }
@@ -163,7 +165,7 @@ struct WorkModelEditSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: TT.Space.l) {
                     correctionPanel
-                    WorkModelFormFields(form: $form, calendar: calendar)
+                    WorkModelFormFields(form: $form, calendar: calendar, profiles: store.profiles, profilesFromServer: store.profilesFromServer)
                     if let error = store.error {
                         ErrorBanner(message: Self.message(error), retryTitle: "common.dismiss") { store.error = nil }
                     }
@@ -249,7 +251,7 @@ struct WorkModelEditSheet: View {
         switch error.knownCode {
         case .modelOverlap: String(localized: "workmodel.error_overlap")
         case .staleVersion: String(localized: "workmodel.error_stale")
-        default: error.germanDescription
+        default: error.germanMessage(in: .workModel)
         }
     }
 

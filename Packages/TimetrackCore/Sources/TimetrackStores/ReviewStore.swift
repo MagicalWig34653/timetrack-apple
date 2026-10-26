@@ -3,7 +3,8 @@ import Observation
 import TimetrackCore
 
 /// Q1: the entries that need a look ("n zu prüfen"), with the reason and the fix actions. Looks back `lookbackDays` days.
-/// The backend never clears `needsReview` itself, so what the user has dealt with is remembered locally (`ReviewDismissals`).
+/// Since contract 0.29.0 (X3) the backend clears `needsReview` on a correction of the end and on an explicit acknowledgement
+/// (`PATCH needsReview: false`). Older servers never do, so what the user has dealt with is also remembered locally (`ReviewDismissals`).
 @MainActor
 @Observable
 public final class ReviewStore {
@@ -135,11 +136,17 @@ public final class ReviewStore {
         if outcome.done > 0 { onOutcome?(.saved) } else if outcome.failed > 0 { onOutcome?(.failed) }
     }
 
-    /// "Passt so": the entry stays as it is. An open end proposal for it is dropped so it does not come back.
+    /// "Passt so": the entry stays as it is and the server marker is cleared (X3). An open end proposal for it is dropped so it does not
+    /// come back.
     @discardableResult
     public func confirm(_ item: ReviewItem) async -> Bool {
         await run {
             if let suggestion = item.suggestion { try? await self.client.rejectTimeSuggestion(id: suggestion.id) }
+            do {
+                _ = try await self.client.correctSegment(id: item.segment.id, SegmentCorrection(reason: "Geprüft", acknowledgeReview: true), ifMatchVersion: item.segment.version)
+            } catch let failure as TimetrackError where failure.status == 400 || failure.status == 404 {
+                // Old server or nothing to acknowledge: the local memory still hides the entry.
+            }
             self.dismissals.add(item.id)
         }
     }

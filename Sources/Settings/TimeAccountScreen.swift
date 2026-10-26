@@ -4,8 +4,8 @@ import TimetrackDesign
 import TimetrackStores
 
 /// "Zeitkonto": the balance with its opening balance and the sum of manual corrections, plus booking of an opening balance and dated corrections
-/// with a reason (PWA: Einstellungen › Zeitkonto). The contract has no list or delete endpoint for adjustments, so a booking can only be
-/// balanced by a counter-booking; the screen says so before it books.
+/// with a reason (PWA: Einstellungen › Zeitkonto). P15 (contract 0.29.0): the stored adjustments are listed and can be deleted (with a
+/// confirmation); the server recomputes the balance, which replaces the shown one. Older servers have no list.
 struct TimeAccountScreen: View {
     @Environment(AppModel.self) private var model
     @State private var store: TimeAccountStore?
@@ -16,7 +16,7 @@ struct TimeAccountScreen: View {
                 Text(wmKey("wm.account.intro")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
                 if let store {
                     if let error = store.error, !store.isSaving {
-                        ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }
+                        ErrorBanner(message: error.germanMessage(in: .accountAdjustment), retryTitle: "common.retry") { Task { await store.load() } }
                     }
                     if let account = store.account {
                         BalanceCard(account: account)
@@ -24,6 +24,7 @@ struct TimeAccountScreen: View {
                             AdjustmentForm(store: store, kind: .opening, calendar: model.dayCalendar)
                         }
                         AdjustmentForm(store: store, kind: .correction, calendar: model.dayCalendar)
+                        AdjustmentList(store: store)
                     } else if store.isLoading {
                         SkeletonList(rows: 3)
                     }
@@ -168,5 +169,74 @@ private struct AdjustmentForm: View {
         } else {
             notice = nil
         }
+    }
+}
+
+/// P15: the stored adjustments, newest first, each deletable after a confirmation that names the effect on the balance.
+private struct AdjustmentList: View {
+    let store: TimeAccountStore
+    @State private var pending: AccountAdjustment?
+
+    var body: some View {
+        FormSection(p15Key("adj.title"), footer: store.listSupported ? p15Key("adj.footer") : p15Key("adj.unsupported")) {
+            if store.listSupported {
+                if store.adjustments.isEmpty {
+                    Text(p15Key("adj.empty")).font(TTFont.meta).foregroundStyle(TT.textTertiary).padding(TT.Space.l)
+                        .accessibilityIdentifier("account.adjustments.empty")
+                }
+                ForEach(store.adjustments) { adjustment in
+                    row(adjustment)
+                }
+                if store.canLoadMore {
+                    Button { Task { await store.loadMore() } } label: { Text(p15Key("adj.more")) }
+                        .buttonStyle(.ttSecondary).disabled(store.isLoadingMore).padding(TT.Space.l)
+                        .accessibilityIdentifier("account.adjustments.more")
+                }
+            }
+        }
+        .confirmationDialog(p15("adj.confirm_title"), isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }), titleVisibility: .visible, presenting: pending) { adjustment in
+            Button(p15("adj.delete"), role: .destructive) { Task { await store.delete(adjustment) } }
+            Button("common.cancel", role: .cancel) {}
+        } message: { adjustment in
+            Text(verbatim: message(for: adjustment))
+        }
+    }
+
+    private func signed(_ seconds: Int) -> String { DurationFormat.signed(seconds).replacingOccurrences(of: "-", with: "−") }
+
+    private func title(_ adjustment: AccountAdjustment) -> String {
+        adjustment.kind == .opening ? wm("wm.account.opening") : (adjustment.kind == .correction ? p15("adj.kind.correction") : p15("adj.kind.other"))
+    }
+
+    private func message(for adjustment: AccountAdjustment) -> String {
+        let effect = signed(-adjustment.seconds)
+        let base = p15("adj.confirm_message \(title(adjustment)) \(signed(adjustment.seconds)) \(WorkModelCard.display(adjustment.date)) \(effect)")
+        return adjustment.kind == .opening ? base + " " + p15("adj.confirm_opening") : base
+    }
+
+    private func row(_ adjustment: AccountAdjustment) -> some View {
+        let deleting = store.deletingId == adjustment.id
+        return HStack(alignment: .top, spacing: TT.Space.m) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: TT.Space.s) {
+                    Text(verbatim: signed(adjustment.seconds)).font(TTFont.numeral).foregroundStyle(adjustment.seconds < 0 ? TT.danger : TT.textPrimary).monospacedDigit()
+                    StatusChip(verbatim: title(adjustment), tone: adjustment.kind == .opening ? .accent : .neutral)
+                }
+                Text(verbatim: WorkModelCard.display(adjustment.date)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                if !adjustment.reason.isEmpty { Text(verbatim: adjustment.reason).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
+            }
+            .accessibilityElement(children: .combine)
+            Spacer(minLength: 0)
+            if deleting {
+                ProgressView().frame(width: 44, height: 44)
+            } else {
+                Button(role: .destructive) { pending = adjustment } label: { Image(systemName: "trash").frame(width: 44, height: 44) }
+                    .buttonStyle(.borderless)
+                    .disabled(store.deletingId != nil)
+                    .accessibilityLabel(Text(verbatim: p15("adj.delete_a11y \(title(adjustment)) \(signed(adjustment.seconds)) \(WorkModelCard.display(adjustment.date))")))
+                    .accessibilityIdentifier("account.adjustment.delete")
+            }
+        }
+        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
     }
 }

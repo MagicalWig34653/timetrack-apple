@@ -231,6 +231,11 @@ struct VacationSettingsSheet: View {
     @State private var adjustReason = ""
     @State private var saving = false
     @State private var invalid: LocalizedStringKey?
+    @State private var companyDays: [CompanyDayRule] = CompanyDayRules.defaults
+    @State private var newDate = ""
+    @State private var newName = ""
+    @State private var newTreatment: CompanyDayTreatment = .half
+    @State private var companyProblem: String?
 
     var body: some View {
         NavigationStack {
@@ -253,6 +258,7 @@ struct VacationSettingsSheet: View {
                     FormSection("vacation.expiry", footer: "vacation.expiry_hint") {
                         TextField("vacation.expiry_placeholder", text: $expiry).padding(TT.Space.l).accessibilityIdentifier("settings.expiry")
                     }
+                    companyDaysSection
                     if let invalid { HintBanner(invalid, symbol: "exclamationmark.triangle.fill") }
                     if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.dismiss") { store.error = nil } }
                     Button("vacation.settings_save") { Task { await save() } }.buttonStyle(.ttPrimary).disabled(saving).accessibilityIdentifier("settings.save")
@@ -271,6 +277,72 @@ struct VacationSettingsSheet: View {
         #if os(macOS)
         .frame(minWidth: 520, minHeight: 640)
         #endif
+    }
+
+    // N4: company days. 24.12. and 31.12. are always listed (Keine / Halber Tag / Ganzer Tag); own rules can be added and removed.
+    private var companyDaysSection: some View {
+        VStack(alignment: .leading, spacing: TT.Space.s) {
+            ux3("n4.company.title").font(TTFont.label).foregroundStyle(TT.textSecondary).accessibilityAddTraits(.isHeader)
+            companyDaysCard
+            ux3("n4.company.hint").font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var companyDaysCard: some View {
+        FormSection {
+            ForEach(companyDays.filter(\.isBuiltInSlot)) { rule in
+                EditorRow {
+                    Picker(selection: treatmentBinding(rule), label: Text(verbatim: rule.displayName)) {
+                        ForEach(CompanyDayTreatment.selectable, id: \.self) { Text(verbatim: $0.pickerTitle).tag($0) }
+                    }
+                    .accessibilityIdentifier("settings.company.\(rule.id)")
+                }
+            }
+            ForEach(CompanyDayRules.ownRules(companyDays)) { rule in
+                HStack(spacing: TT.Space.m) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: rule.displayName).font(TTFont.body).foregroundStyle(TT.textPrimary)
+                        Text(verbatim: "\(rule.dateText) · \(rule.treatment.pickerTitle)").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    }
+                    Spacer()
+                    Button(role: .destructive) { companyDays.removeAll { $0.id == rule.id } } label: { Image(systemName: "trash") }
+                        .buttonStyle(.borderless).accessibilityLabel(ux3("n4.company.remove"))
+                }
+                .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+            }
+            TextField(ux3String("n4.company.date"), text: $newDate).padding(TT.Space.l).accessibilityIdentifier("settings.company.date")
+            TextField(ux3String("n4.company.name"), text: $newName).padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m)
+                .accessibilityIdentifier("settings.company.name")
+            EditorRow {
+                Picker(selection: $newTreatment, label: ux3("n4.company.treatment")) {
+                    ForEach(CompanyDayTreatment.selectable.filter { $0 != .none }, id: \.self) { Text(verbatim: $0.pickerTitle).tag($0) }
+                }
+            }
+            if let companyProblem { Text(verbatim: companyProblem).font(TTFont.meta).foregroundStyle(TT.warning).padding(.horizontal, TT.Space.l) }
+            Button { addCompanyRule() } label: { ux3("n4.company.add") }
+                .buttonStyle(.ttSecondary).padding(TT.Space.l).accessibilityIdentifier("settings.company.add")
+        }
+    }
+
+    private func treatmentBinding(_ rule: CompanyDayRule) -> Binding<CompanyDayTreatment> {
+        Binding(get: { companyDays.first { $0.id == rule.id }?.treatment ?? .none },
+                set: { companyDays = CompanyDayRules.setting($0, month: rule.month, day: rule.day, in: companyDays) })
+    }
+
+    private func addCompanyRule() {
+        guard let date = CompanyDayRules.parseDate(newDate) else {
+            companyProblem = (newDate.contains("29.02") ? CompanyDayRules.Problem.leapDay : .invalidDate).germanMessage
+            return
+        }
+        let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let problem = CompanyDayRules.problem(adding: date.month, day: date.day, name: name, to: companyDays) {
+            companyProblem = problem.germanMessage
+            return
+        }
+        companyProblem = nil
+        companyDays = CompanyDayRules.normalized(companyDays + [CompanyDayRule(month: date.month, day: date.day, treatment: newTreatment, name: name.isEmpty ? nil : name)])
+        newDate = ""
+        newName = ""
     }
 
     private var snapshotSection: some View {
@@ -338,6 +410,7 @@ struct VacationSettingsSheet: View {
             entitlement = HalfDayFormat.days(settings.annualEntitlementHalfDays).replacingOccurrences(of: "-", with: "")
             carry = HalfDayFormat.days(settings.carryOverByYear?[String(store.year)] ?? 0)
             expiry = settings.carryOverExpiry.map(Self.displayExpiry) ?? ""
+            companyDays = CompanyDayRules.normalized(settings.companyDays)
         }
     }
 
@@ -369,6 +442,7 @@ struct VacationSettingsSheet: View {
         carryMap[String(store.year)] = carryHalf
         new.carryOverByYear = carryMap
         new.carryOverExpiry = expiryValue
+        if new.companyDays != nil || companyDays != CompanyDayRules.defaults { new.companyDays = companyDays } // untouched defaults on an older server stay out of the PUT
         _ = await store.saveSettings(new)
     }
 }

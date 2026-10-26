@@ -60,6 +60,10 @@ struct DayStandingCard: View {
                             .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
                             .lineLimit(1).minimumScaleFactor(0.6)
                         standingLine(standing)
+                        if let holiday = store.todayHoliday {
+                            Label { Text(verbatim: holiday.displayName) } icon: { Image(systemName: "party.popper.fill").foregroundStyle(TT.kindHoliday) }
+                                .font(TTFont.meta).foregroundStyle(TT.textSecondary).accessibilityIdentifier("today.holiday")
+                        }
                         if showsOutlook { outlookBlock }
                         if day?.provisional == true || store.account?.provisional == true { ProvisionalChip() }
                     }

@@ -93,7 +93,7 @@ public struct MonthSnapshot: Hashable, Sendable, Identifiable {
             info.absences = relevantAbsences.filter { $0.startDate <= day && day <= $0.endDate }
             info.plan = planDays[day]
             var markers: [MonthMarker] = info.absences.prefix(2).map { .absence($0.kind) }
-            if info.isHoliday { markers.append(.holiday) }
+            if info.isHoliday || info.hasHalfDay { markers.append(.holiday) }
             if let plan = info.plan { markers.append(.plan(plan.mode)) }
             let parts = LocalDays.parse(day)
             return MonthCell(day: day, dayNumber: parts?.day ?? 0, inMonth: parts?.year == key.year && parts?.month == key.month,

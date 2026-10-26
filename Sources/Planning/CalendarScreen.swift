@@ -332,7 +332,7 @@ private struct DayCell: View {
     private func label(_ info: CalendarDayInfo) -> String {
         var parts = [PlanFormat.longDay(day, calendar: store.calendar)]
         if day == store.today { parts.append(String(localized: "time.today")) }
-        parts += info.holidays.map(\.name)
+        parts += info.holidays.map(\.displayName)
         parts += info.schoolHolidays.map(\.name)
         parts += info.absences.map { "\($0.kind.plainName), \($0.status.plainName)" }
         if let plan = info.plan { parts.append(String(localized: "calendar.plan_label \(plan.mode.plainName)")) }

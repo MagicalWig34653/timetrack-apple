@@ -10,7 +10,9 @@ public struct CalendarDayInfo: Sendable, Hashable {
     public var absences: [Absence] = []
     public var plan: PlanDay?
 
-    public var isHoliday: Bool { !holidays.isEmpty }
+    /// A full holiday (public holiday or `full` company day). A `half` company day stays a work day and is only a marker.
+    public var isHoliday: Bool { holidays.contains { !$0.isHalfDay } }
+    public var hasHalfDay: Bool { holidays.contains { $0.isHalfDay } }
 }
 
 /// State of the "Kalender" tab (module `planning`): month grid, selection, range selection and optimistic edits.

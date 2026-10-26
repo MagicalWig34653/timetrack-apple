@@ -420,6 +420,94 @@
         }
       }
     },
+    "n4.company.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenen Tag hinzufügen"
+          }
+        }
+      }
+    },
+    "n4.company.date": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datum (Tag.Monat., z. B. 12.06.)"
+          }
+        }
+      }
+    },
+    "n4.company.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heiligabend und Silvester können als halber oder ganzer freier Tag gelten. Bei „Halber Tag“ bleibt der Tag ein Arbeitstag mit halbem Soll, bei „Ganzer Tag“ zählt er wie ein Feiertag. Eigene Tage gelten jedes Jahr am gleichen Datum (höchstens 12 Regeln)."
+          }
+        }
+      }
+    },
+    "n4.company.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name (optional)"
+          }
+        }
+      }
+    },
+    "n4.company.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regel entfernen"
+          }
+        }
+      }
+    },
+    "n4.company.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betriebstage"
+          }
+        }
+      }
+    },
+    "n4.company.treatment": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Behandlung"
+          }
+        }
+      }
+    },
+    "n4.half_day_note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Halber Tag, halbes Soll"
+          }
+        }
+      }
+    },
     "ux3.now.details": {
       "extractionState": "manual",
       "localizations": {

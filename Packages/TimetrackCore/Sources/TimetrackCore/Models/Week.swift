@@ -51,7 +51,14 @@ public struct TimeWeekDay: Codable, Sendable, Hashable, Identifiable {
     public let provisional: Bool
     public let isToday: Bool
     public let isFuture: Bool
+    /// N4: name of the holiday or company day ("Heiligabend"), also on days without a target.
+    public let holidayName: String?
+    /// N4: `half` (mark stays `work`, target halved), `full` (mark `holiday`) or nil.
+    public let companyDayTreatment: CompanyDayTreatment?
     public var id: LocalDay { date }
+
+    /// "Heiligabend (halber Tag)" / "Neujahr"; nil without a holiday name.
+    public var holidayLabel: String? { holidayName.map { CompanyDayText.title(name: $0, treatment: companyDayTreatment) } }
 
     /// Hours shown for a day: evaluated work plus credit (school credit, paid absence), like the Zeit list.
     public var hoursSeconds: Int { workSeconds + creditSeconds }

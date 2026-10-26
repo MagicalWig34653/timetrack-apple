@@ -246,6 +246,10 @@ struct DayHeader: View {
                     Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(isSelected ? Color.accentColor : TT.textPrimary)
                     if isToday { StatusChip("time.today", tone: .accent) }
                 }
+                if let label = plan?.holidayLabel {
+                    Label { Text(verbatim: label) } icon: { Image(systemName: "party.popper.fill").foregroundStyle(TT.kindHoliday) }
+                        .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                }
                 if let line = planLine { Text(verbatim: line).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
                 if isEmpty { Text(Z2.s("day.empty")).font(TTFont.meta).foregroundStyle(TT.textTertiary) }
                 if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }

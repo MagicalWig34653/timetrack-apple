@@ -77,8 +77,8 @@ struct DayDetail<Entries: View>: View {
                 HStack(spacing: TT.Space.m) {
                     KindGlyph(symbol: entry.kind == .holiday ? "party.popper.fill" : "backpack.fill", tint: TT.kindHoliday)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(verbatim: entry.name).font(TTFont.body).foregroundStyle(TT.textPrimary)
-                        Text(entry.kind == .holiday ? "mark.holiday" : "calendar.school_holiday").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        Text(verbatim: entry.displayName).font(TTFont.body).foregroundStyle(TT.textPrimary)
+                        (entry.isHalfDay ? ux3("n4.half_day_note") : Text(entry.kind == .holiday ? "mark.holiday" : "calendar.school_holiday")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
                     }
                     Spacer()
                     if entry.source == .custom {

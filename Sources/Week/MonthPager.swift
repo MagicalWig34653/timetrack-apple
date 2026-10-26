@@ -141,7 +141,7 @@ struct MonthDayCell: View, Equatable {
     private var label: String {
         var parts = [Self.longDay(cell.day)]
         if isToday { parts.append(String(localized: "time.today")) }
-        parts += cell.info.holidays.map(\.name)
+        parts += cell.info.holidays.map(\.displayName)
         parts += cell.info.schoolHolidays.map(\.name)
         parts += cell.info.absences.map { "\($0.kind.plainName), \($0.status.plainName)" }
         if let plan = cell.info.plan { parts.append(String(localized: "calendar.plan_label \(plan.mode.plainName)")) }

@@ -204,16 +204,19 @@ public struct VacationSettings: Codable, Sendable, Hashable {
     public var carryOverByYear: [String: Int]?
     /// `MM-DD` or nil.
     public var carryOverExpiry: String?
+    /// N4: company days (24.12./31.12. and own rules). nil = not known (older server) and left out of the PUT, which keeps them unchanged.
+    public var companyDays: [CompanyDayRule]?
 
-    public init(configured: Bool? = nil, region: String = "DE-ST", annualEntitlementHalfDays: Int = 60, carryOverByYear: [String: Int]? = nil, carryOverExpiry: String? = nil) {
+    public init(configured: Bool? = nil, region: String = "DE-ST", annualEntitlementHalfDays: Int = 60, carryOverByYear: [String: Int]? = nil, carryOverExpiry: String? = nil, companyDays: [CompanyDayRule]? = nil) {
         self.configured = configured
         self.region = region
         self.annualEntitlementHalfDays = annualEntitlementHalfDays
         self.carryOverByYear = carryOverByYear
         self.carryOverExpiry = carryOverExpiry
+        self.companyDays = companyDays
     }
 
-    private enum CodingKeys: String, CodingKey { case configured, region, annualEntitlementHalfDays, carryOverByYear, carryOverExpiry }
+    private enum CodingKeys: String, CodingKey { case configured, region, annualEntitlementHalfDays, carryOverByYear, carryOverExpiry, companyDays }
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
@@ -221,6 +224,7 @@ public struct VacationSettings: Codable, Sendable, Hashable {
         try c.encode(annualEntitlementHalfDays, forKey: .annualEntitlementHalfDays)
         try c.encodeIfPresent(carryOverByYear, forKey: .carryOverByYear)
         try c.encode(carryOverExpiry, forKey: .carryOverExpiry)
+        try c.encodeIfPresent(companyDays, forKey: .companyDays)
     }
 }
 
@@ -271,11 +275,19 @@ public struct CalendarDay: Codable, Sendable, Hashable, Identifiable {
     public let name: String
     public let kind: CalendarDayKind
     public let source: CalendarDaySource
+    /// N4: set on company days (`half`/`full`); `kind` stays `holiday` so older clients still see a holiday.
+    public let companyTreatment: CompanyDayTreatment?
+
+    /// Half company day: the day stays a work day with a halved target, so it is not a full holiday.
+    public var isHalfDay: Bool { companyTreatment?.isHalfDay == true }
+    /// Name with the half-day variant: "Heiligabend (halber Tag)".
+    public var displayName: String { CompanyDayText.title(name: name, treatment: companyTreatment) }
 
     public var identity: String { id?.uuidString ?? "\(source.rawValue)-\(kind.rawValue)-\(startDate)-\(name)" }
 
-    public init(id: UUID? = nil, startDate: LocalDay, endDate: LocalDay, name: String, kind: CalendarDayKind, source: CalendarDaySource) {
+    public init(id: UUID? = nil, startDate: LocalDay, endDate: LocalDay, name: String, kind: CalendarDayKind, source: CalendarDaySource, companyTreatment: CompanyDayTreatment? = nil) {
         self.id = id
+        self.companyTreatment = companyTreatment
         self.startDate = startDate
         self.endDate = endDate
         self.name = name

@@ -14,6 +14,8 @@ public final class TodayStore {
     /// H3: context for the "Jetzt" sheet and the top of "Heute". Both are optional extras: a failed read leaves them as they were.
     /// Planned end of today (plan day), and the account's places by id (names for the running entry).
     public private(set) var plannedEnd: Date?
+    /// N4: today's holiday or company day (e.g. "Heiligabend (halber Tag)"), nil on an ordinary day.
+    public private(set) var todayHoliday: CalendarDay?
     public private(set) var places: [UUID: Place] = [:]
     private var contextDay: LocalDay?
     public private(set) var isLoading = false
@@ -158,6 +160,11 @@ public final class TodayStore {
 
     /// H3: planned end of today and the place names; read once per day, silently (not part of the day's numbers).
     private func loadContext(day: LocalDay) async {
+        // Holidays are read on every load (a changed company-day setting must show without waiting for tomorrow).
+        if let holidayList = try? await client.listHolidays(year: LocalDays.parse(day)?.year ?? 0) {
+            todayHoliday = holidayList.first { $0.kind == .holiday && $0.covers(day) }
+            changed()
+        }
         guard contextDay != day else { return }
         let planned = try? await client.listPlanDays(from: day, to: day)
         let placeList = try? await client.listPlaces()

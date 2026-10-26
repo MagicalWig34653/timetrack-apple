@@ -21,7 +21,7 @@ Neu:
 - Alte Termine aus E2 ohne Notiz-Marker werden über die URL erkannt und beim nächsten Update um die Notiz ergänzt.
 
 ## Prüfung
-- `swift test --build-system native --no-parallel` (TimetrackCore): **796 Tests bestanden** (vorher 779; neu: 1 Tint, 16 Abgleich).
+- `swift test --build-system native --no-parallel` (TimetrackCore): **796 Tests bestanden** (neu: 1 Tint, 16 Abgleich).
 - Unsignierte Builds TimetrackIOS (Simulator), TimetrackMac, TimetrackWatch: BUILD SUCCEEDED (xcodegen neu erzeugt, `CalendarAutoSync.swift` im Mac-Ziel).
 - Kein UI-Test für den Abgleich neu geschrieben; E2-UI-Tests nicht erneut gelaufen.
 

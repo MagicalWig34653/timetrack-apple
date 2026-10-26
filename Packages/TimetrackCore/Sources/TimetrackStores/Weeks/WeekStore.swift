@@ -16,15 +16,17 @@ public final class WeekStore {
     private let client: APIClient
     public let calendar: DayCalendar
     private var generation = 0
+    private let clock: () -> Date
 
-    public init(client: APIClient, calendar: DayCalendar, now: Date = .now) {
+    public init(client: APIClient, calendar: DayCalendar, now: Date? = nil) {
         self.client = client
         self.calendar = calendar
-        let today = calendar.day(for: now)
+        self.clock = { now ?? .now }
+        let today = calendar.day(for: clock())
         self.monday = LocalDays.mondayOfWeek(containing: today) ?? today
     }
 
-    public var today: LocalDay { calendar.day(for: .now) }
+    public var today: LocalDay { calendar.day(for: clock()) }
     public var sunday: LocalDay { LocalDays.adding(6, to: monday) ?? monday }
     public var isoWeek: String { IsoWeek.label(containing: monday) ?? "" }
     public var weekNumber: Int { IsoWeek.number(of: isoWeek) ?? LocalDays.isoWeek(of: monday) ?? 0 }

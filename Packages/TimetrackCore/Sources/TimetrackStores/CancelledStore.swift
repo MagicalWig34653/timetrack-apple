@@ -22,6 +22,18 @@ public enum RestoreFailure: Equatable, Sendable {
     }
 }
 
+/// SG2: outcome of restoring several cancelled entries at once; every entry is attempted, failures do not stop the rest.
+public struct BulkRestoreResult: Equatable, Sendable {
+    public struct Failure: Equatable, Sendable {
+        public let id: UUID
+        public let failure: RestoreFailure
+    }
+    public internal(set) var restored: [UUID] = []
+    public internal(set) var failed: [Failure] = []
+    public var failedIds: Set<UUID> { Set(failed.map(\.id)) }
+    public var isComplete: Bool { failed.isEmpty }
+}
+
 /// SG1: the "Storniert" bin. Lists cancelled entries page by page, restores them and deletes them permanently (single or in bulk,
 /// always with a dry-run count first; the confirmation itself is the view's job).
 @MainActor
@@ -102,6 +114,28 @@ public final class CancelledStore {
             onOutcome?(.failed)
         } catch {}
         return false
+    }
+
+    /// SG2: restores several entries, each with its own If-Match version, in the given order. Conflicts (overlap, timer running,
+    /// changed elsewhere) are collected per entry and the entry stays in the bin; the list is reloaded once at the end.
+    public func restore(_ selected: [CancelledSegment], reason: String? = nil) async -> BulkRestoreResult {
+        restoreFailure = nil
+        var result = BulkRestoreResult()
+        for item in selected {
+            do {
+                _ = try await client.restoreSegment(id: item.id, reason: reason, ifMatchVersion: item.segment.version)
+                result.restored.append(item.id)
+            } catch let failure as TimetrackError {
+                if failure == .cancelled { break }
+                let classified = RestoreFailure(failure)
+                result.failed.append(.init(id: item.id, failure: classified))
+                if case .other = classified { error = failure }
+            } catch { break }
+        }
+        if !result.restored.isEmpty { error = nil; onOutcome?(.saved) }
+        if !result.failed.isEmpty { onOutcome?(.failed) }
+        await load()
+        return result
     }
 
     public func clearRestoreFailure() { restoreFailure = nil }

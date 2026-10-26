@@ -279,6 +279,35 @@ private let purgeJSON = #"{"dryRun":true,"segments":2,"revisions":5,"suggestions
         #expect(store.restoreFailure == .timerRunning)
     }
 
+    @Test func bulkRestoreReportsPartialFailuresPerEntry() async {
+        let transport = MockTransport()
+        let store = await loaded(transport, items: 3)
+        func key(_ n: Int) -> String { "POST /api/v1/time/segments/\(uuid(n).uuidString.lowercased())/restore" }
+        transport.enqueue(key(1), body: segmentJSON(1, start: 10_000, end: 13_600, version: 2))
+        transport.enqueue(key(2), status: 409, body: #"{"error":{"code":"segment_overlap","message":"x"}}"#)
+        transport.enqueue(key(3), status: 409, body: #"{"error":{"code":"timer_already_running","message":"x"}}"#)
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([cancelledJSON(2, start: 20_000), cancelledJSON(3, start: 30_000)], total: 2))
+        let result = await store.restore(store.items)
+        #expect(result.restored == [uuid(1)])
+        #expect(result.failed.map(\.id) == [uuid(2), uuid(3)])
+        #expect(result.failed.map(\.failure) == [.overlap, .timerRunning])
+        #expect(result.failedIds == [uuid(2), uuid(3)])
+        #expect(!result.isComplete)
+        #expect(transport.requests(matching: key(1))[0].value(forHTTPHeaderField: "If-Match") == "1")
+        #expect(store.items.map(\.id) == [uuid(2), uuid(3)])
+    }
+
+    @Test func bulkRestoreOfEverythingIsComplete() async {
+        let transport = MockTransport()
+        let store = await loaded(transport)
+        for n in 1...2 { transport.enqueue("POST /api/v1/time/segments/\(uuid(n).uuidString.lowercased())/restore", body: segmentJSON(n, start: Double(n) * 10_000, end: Double(n) * 10_000 + 3_600, version: 2)) }
+        transport.set("GET /api/v1/time/segments/cancelled", body: pageJSON([], total: 0))
+        let result = await store.restore(store.items)
+        #expect(result.isComplete)
+        #expect(result.restored.count == 2)
+        #expect(store.items.isEmpty)
+    }
+
     @Test func restoreOfAnEntryChangedElsewhereReloads() async {
         let transport = MockTransport()
         let store = await loaded(transport)

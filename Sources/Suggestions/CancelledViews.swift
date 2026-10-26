@@ -15,6 +15,16 @@ struct CancelledScreen: View {
     /// The entry whose last restore was refused; the explanation sits in its own card (the list may be scrolled far from the top).
     @State private var failedId: UUID?
     @State private var note: String?
+    /// SG2: result of the last bulk restore (shown as a summary sheet when something was refused).
+    @State private var report: RestoreReport?
+    @State private var bulkRestoring = false
+
+    struct RestoreReport: Identifiable {
+        struct Line: Identifiable { let id: UUID; let title: String; let reason: String }
+        let id = UUID()
+        let restored: Int
+        let failures: [Line]
+    }
 
     struct PurgeRequest: Identifiable {
         let scope: PurgeScope
@@ -40,6 +50,9 @@ struct CancelledScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar { toolbar }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if selecting, let store = model.cancelled, !store.items.isEmpty { bulkBar(store) }
+        }
         .task { await model.cancelled?.load() }
         .refreshable { await model.cancelled?.load() }
         .sheet(item: $purge) { request in
@@ -51,6 +64,7 @@ struct CancelledScreen: View {
             }
             .environment(model)
         }
+        .sheet(item: $report) { report in RestoreReportSheet(report: report) }
         .accessibilityIdentifier("cancelled.screen")
     }
 
@@ -87,14 +101,6 @@ struct CancelledScreen: View {
 
     // MARK: Toolbar
 
-    private var bulkPlacement: ToolbarItemPlacement {
-        #if os(iOS)
-        .bottomBar
-        #else
-        .automatic
-        #endif
-    }
-
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             if let store = model.cancelled, !store.items.isEmpty {
@@ -115,18 +121,69 @@ struct CancelledScreen: View {
                 }
             }
         }
-        ToolbarItemGroup(placement: bulkPlacement) {
-            if selecting, let store = model.cancelled {
-                Button { selection = Set(store.items.map(\.id)) } label: { SG1.t("sg1.cancelled.select_all") }
-                #if os(iOS)
+    }
+
+    // MARK: Bulk bar (SG2)
+
+    /// Selection actions in a bar above the tab bar / now bar (a bottom toolbar was hidden behind them on iPhone).
+    private func bulkBar(_ store: CancelledStore) -> some View {
+        let allSelected = !store.items.isEmpty && store.items.allSatisfy { selection.contains($0.id) }
+        return VStack(spacing: TT.Space.s) {
+            HStack {
+                Text(verbatim: SG1.s("sg2.bulk.count \(selection.count)")).font(TTFont.body.weight(.semibold)).foregroundStyle(TT.textPrimary)
+                    .accessibilityIdentifier("cancelled.selected_count")
                 Spacer()
-                #endif
-                Button(role: .destructive) { purge = PurgeRequest(scope: .ids(Array(selection)), expected: selection.count) } label: {
-                    Text(verbatim: SG1.s("sg1.cancelled.purge_selected \(selection.count)"))
+                Button {
+                    selection = allSelected ? [] : Set(store.items.map(\.id))
+                } label: { allSelected ? SG1.t("sg2.bulk.select_none") : SG1.t("sg1.cancelled.select_all") }
+                    .accessibilityIdentifier("cancelled.select_all")
+            }
+            HStack(spacing: TT.Space.m) {
+                Button { restoreSelected(store) } label: {
+                    Text(verbatim: SG1.s("sg2.bulk.restore \(selection.count)")).frame(maxWidth: .infinity)
                 }
-                .disabled(selection.isEmpty)
+                .buttonStyle(.ttPrimary).disabled(selection.isEmpty || bulkRestoring || restoring != nil)
+                .accessibilityIdentifier("cancelled.restore_selected")
+                Button(role: .destructive) { purge = PurgeRequest(scope: .ids(Array(selection)), expected: selection.count) } label: {
+                    Text(verbatim: SG1.s("sg2.bulk.purge \(selection.count)")).frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.plain).foregroundStyle(selection.isEmpty ? TT.textTertiary : TT.danger)
+                .disabled(selection.isEmpty || bulkRestoring)
                 .accessibilityIdentifier("cancelled.purge_selected")
             }
+        }
+        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+        .frame(maxWidth: .infinity)
+        .background(.bar)
+        .overlay(alignment: .top) { Divider() }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("cancelled.bulkbar")
+    }
+
+    private func restoreSelected(_ store: CancelledStore) {
+        let chosen = store.items.filter { selection.contains($0.id) }
+        guard !chosen.isEmpty, !bulkRestoring else { return }
+        bulkRestoring = true
+        note = nil
+        failedId = nil
+        Task {
+            let result = await store.restore(chosen)
+            let byId = Dictionary(uniqueKeysWithValues: chosen.map { ($0.id, $0) })
+            let lines = result.failed.map { entry -> RestoreReport.Line in
+                let segment = byId[entry.id]?.segment
+                let title = segment.map {
+                    "\(PlanFormat.longDay(model.dayCalendar.day(for: $0.startedAt), calendar: model.dayCalendar)), \($0.startedAt.clockText(in: zone))"
+                } ?? ""
+                return .init(id: entry.id, title: title, reason: failureText(entry.failure))
+            }
+            if !result.restored.isEmpty {
+                note = SG1.s("sg2.bulk.restored \(result.restored.count)")
+                await refreshTime()
+            }
+            // Refused entries stay selected so the user can retry them after fixing the conflict.
+            selection = result.failedIds
+            if result.isComplete { selecting = false } else { report = RestoreReport(restored: result.restored.count, failures: lines) }
+            bulkRestoring = false
         }
     }
 
@@ -210,6 +267,46 @@ struct CancelledScreen: View {
         await model.today?.load()
         await model.timeList?.load()
         await model.review?.load()
+    }
+}
+
+/// SG2: what a bulk restore did: how many came back and which entries were refused, with the reason.
+private struct RestoreReportSheet: View {
+    let report: CancelledScreen.RestoreReport
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: TT.Space.l) {
+                    Text(verbatim: SG1.s("sg2.bulk.report.restored \(report.restored)")).font(TTFont.cardTitle).foregroundStyle(TT.success)
+                    Text(verbatim: SG1.s("sg2.bulk.report.failed \(report.failures.count)")).font(TTFont.cardTitle).foregroundStyle(TT.warning)
+                    ForEach(report.failures) { line in
+                        VStack(alignment: .leading, spacing: TT.Space.xs) {
+                            Text(verbatim: line.title).font(TTFont.body.weight(.semibold)).foregroundStyle(TT.textPrimary)
+                            HintCallout(text: line.reason, symbol: "exclamationmark.triangle.fill", tint: TT.warning)
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("cancelled.report.line")
+                    }
+                    SG1.t("sg2.bulk.report.hint").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                }
+                .padding(TT.Space.l)
+                .frame(maxWidth: 560).frame(maxWidth: .infinity)
+            }
+            .ttScreenBackground()
+            .navigationTitle(SG1.s("sg2.bulk.report.title"))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button { dismiss() } label: { SG1.t("sg1.cancelled.select_done") }.accessibilityIdentifier("cancelled.report.close") } }
+        }
+        #if os(iOS)
+        .presentationDetents([.medium, .large])
+        #else
+        .frame(minWidth: 440, minHeight: 320)
+        #endif
+        .accessibilityIdentifier("cancelled.report")
     }
 }
 

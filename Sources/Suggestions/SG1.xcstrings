@@ -584,6 +584,29 @@
         }
       }
     },
+    "sg1.purge.headline %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Eintrag wird endgültig gelöscht"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Einträge werden endgültig gelöscht"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "sg1.purge.nothing": {
       "extractionState": "manual",
       "localizations": {
@@ -793,25 +816,101 @@
         }
       }
     },
-    "sg1.purge.headline %lld": {
+    "sg2.bulk.count %lld": {
       "extractionState": "manual",
       "localizations": {
         "de": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld Eintrag wird endgültig gelöscht"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld Einträge werden endgültig gelöscht"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ausgewählt"
+          }
+        }
+      }
+    },
+    "sg2.bulk.purge %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Endgültig löschen (%lld)"
+          }
+        }
+      }
+    },
+    "sg2.bulk.report.failed %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht wiederhergestellt: %lld"
+          }
+        }
+      }
+    },
+    "sg2.bulk.report.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die nicht wiederhergestellten Einträge bleiben ausgewählt. Behebe den Grund (zum Beispiel den überschneidenden Eintrag anpassen oder den laufenden Timer beenden) und versuche es erneut."
+          }
+        }
+      }
+    },
+    "sg2.bulk.report.restored %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederhergestellt: %lld"
+          }
+        }
+      }
+    },
+    "sg2.bulk.report.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen"
+          }
+        }
+      }
+    },
+    "sg2.bulk.restore %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellen (%lld)"
+          }
+        }
+      }
+    },
+    "sg2.bulk.restored %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederhergestellt: %lld"
+          }
+        }
+      }
+    },
+    "sg2.bulk.select_none": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine auswählen"
           }
         }
       }

@@ -116,4 +116,53 @@ final class SuggestionsTrashTests: XCTestCase {
         XCTAssertTrue(waitUntil { self.count(app, "cancelled.item") == 1 }, "the deleted entry is gone")
         shot("sg1-cancelled-after")
     }
+
+    /// SG2: the selection bar must be visible and usable above the tab/now bar. Seed: 3 cancelled entries (index 2 = oldest overlaps a live entry).
+    /// Select the overlapping one and the newest: bulk restore brings back one, refuses one (it stays selected, summary sheet);
+    /// then the remaining two are selected and deleted for good with the typed word.
+    func testCancelledBulkSelectionRestoreAndPurge() throws {
+        continueAfterFailure = false
+        let app = try launch()
+        app.openMore()
+        el(app, "more.cancelled").tap()
+        XCTAssertTrue(el(app, "cancelled.item").waitForExistence(timeout: 15))
+        XCTAssertEqual(count(app, "cancelled.item"), 3)
+        el(app, "cancelled.menu").tap()
+        el(app, "cancelled.select").tap()
+        XCTAssertTrue(app.buttons["cancelled.restore_selected"].waitForExistence(timeout: 10), "bar visible")
+        let restore = app.buttons["cancelled.restore_selected"]
+        let purge = app.buttons["cancelled.purge_selected"]
+        XCTAssertTrue(restore.isHittable && purge.isHittable, "bulk actions are reachable")
+        XCTAssertFalse(restore.isEnabled, "nothing selected yet")
+        shot("sg2-bulk-empty")
+
+        let items = app.descendants(matching: .any).matching(identifier: "cancelled.item")
+        items.element(boundBy: 0).tap()
+        scrollTo(app, items.element(boundBy: 2))
+        items.element(boundBy: 2).tap()
+        XCTAssertTrue(waitUntil { restore.label == "Wiederherstellen (2)" })
+        shot("sg2-bulk-selected")
+        restore.tap()
+        XCTAssertTrue(el(app, "cancelled.report").waitForExistence(timeout: 15))
+        XCTAssertEqual(count(app, "cancelled.report.line"), 1)
+        XCTAssertTrue(app.staticTexts["Wiederhergestellt: 1"].exists)
+        shot("sg2-bulk-report")
+        app.buttons["cancelled.report.close"].tap()
+        XCTAssertTrue(waitUntil { self.count(app, "cancelled.item") == 2 }, "one entry came back")
+        XCTAssertTrue(waitUntil { restore.label == "Wiederherstellen (1)" }, "the refused entry stays selected")
+
+        app.buttons["cancelled.select_all"].tap()
+        XCTAssertTrue(waitUntil { purge.label == "Endgültig löschen (2)" })
+        purge.tap()
+        XCTAssertTrue(el(app, "purge.sheet").waitForExistence(timeout: 10))
+        XCTAssertTrue(el(app, "purge.summary").waitForExistence(timeout: 10))
+        let confirm = el(app, "purge.confirm")
+        let field = app.textFields["purge.word"].exists ? app.textFields["purge.word"] : el(app, "purge.word")
+        field.tap()
+        field.typeText("löschen")
+        XCTAssertTrue(waitUntil { confirm.isEnabled })
+        confirm.tap()
+        XCTAssertTrue(waitUntil { self.count(app, "cancelled.item") == 0 }, "both deleted")
+        shot("sg2-bulk-after")
+    }
 }

@@ -189,6 +189,36 @@ public actor APIClient: PreferencesService {
     public func listWorkModels() async throws -> [WorkModel] { try await get("/work-models") }
     public func listPlaces() async throws -> [Place] { try await get("/places") }
 
+    // MARK: - APNs devices (P14, contract v0.33.0, ADR-0030) and calendar feeds (N2, v0.31.0)
+
+    public func listPushDevices() async throws -> [PushDeviceInfo] { try await get("/me/push-devices") }
+
+    /// Idempotent over the token. 501 `push_unavailable` (APNs not configured), 409 `too_many_push_devices`, 429.
+    public func registerPushDevice(_ registration: PushDeviceRegistration) async throws -> PushDeviceInfo {
+        try await send(.post, "/me/push-devices", body: registration)
+    }
+
+    public func deletePushDevice(id: UUID) async throws {
+        try await sendVoid(.delete, "/me/push-devices/\(id.uuidString.lowercased())")
+    }
+
+    /// Generic test notification (5 per hour). 404 unknown device, 429, 501, 502 `push_failed`.
+    public func sendTestPush(deviceId: UUID) async throws {
+        _ = try await perform(.post, "/me/push-devices/\(deviceId.uuidString.lowercased())/test")
+    }
+
+    public func listCalendarFeeds() async throws -> [CalendarFeed] { try await get("/me/calendar-feeds") }
+
+    /// 201 with `token`/`path` (only here). 409 `too_many_calendar_feeds` above 10 active feeds.
+    public func createCalendarFeed(_ input: CalendarFeedInput) async throws -> CalendarFeed {
+        try await send(.post, "/me/calendar-feeds", body: input)
+    }
+
+    /// 204, idempotent; 404 for an unknown id.
+    public func revokeCalendarFeed(id: UUID) async throws {
+        try await sendVoid(.delete, "/me/calendar-feeds/\(id.uuidString.lowercased())")
+    }
+
     // MARK: - Work model correction (contract v0.16.0, ADR-0004 addendum) and system info (v0.19.0, ADR-0023)
 
     /// Replaces all editable fields of one version. `ifMatchVersion` is the model's `version` counter (412 `stale_version` when outdated).

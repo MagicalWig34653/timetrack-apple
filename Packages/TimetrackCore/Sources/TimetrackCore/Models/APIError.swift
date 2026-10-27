@@ -47,6 +47,12 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     /// Vacation request template (AB1, contract v0.25.0): no template stored (409), mapping above 64 KB (413).
     case noTemplate = "no_template"
     case mappingTooLarge = "mapping_too_large"
+    /// P14 (contract 0.33.0): APNs is not configured on the server (501), device limit reached (409), APNs refused the test push (502).
+    case pushUnavailable = "push_unavailable"
+    case tooManyPushDevices = "too_many_push_devices"
+    case pushFailed = "push_failed"
+    /// N2 (contract 0.31.0): more than 10 active calendar feeds (409).
+    case tooManyCalendarFeeds = "too_many_calendar_feeds"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

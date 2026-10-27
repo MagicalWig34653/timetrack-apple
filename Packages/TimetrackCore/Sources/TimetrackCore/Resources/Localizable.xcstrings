@@ -344,6 +344,26 @@
         }
       }
     },
+    "error.push_failed": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple hat die Test-Mitteilung nicht angenommen. Versuche es später noch einmal."
+          }
+        }
+      }
+    },
+    "error.push_unavailable": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Push-Benachrichtigungen sind auf diesem Server nicht eingerichtet."
+          }
+        }
+      }
+    },
     "error.range_too_large": {
       "localizations": {
         "de": {
@@ -437,6 +457,26 @@
         }
       }
     },
+    "error.too_many_calendar_feeds": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es gibt schon zehn aktive Kalenderabos. Widerrufe zuerst eines."
+          }
+        }
+      }
+    },
+    "error.too_many_push_devices": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es sind schon zehn Geräte für Push registriert. Entferne zuerst ein Gerät in der Web-App."
+          }
+        }
+      }
+    },
     "error.too_many_requests": {
       "localizations": {
         "de": {
@@ -479,5 +519,6 @@
         }
       }
     }
-  }
+  },
+  "version": "1.0"
 }

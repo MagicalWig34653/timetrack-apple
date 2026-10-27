@@ -29,6 +29,7 @@ struct TimetrackIOSApp: App {
         FocusSimulation.runFromEnvironment() // F3: TT_DEV_FOCUS_SIMULATE for UI tests
         #endif
         model.onOutcome = { TTHaptics.handle($0) } // user-initiated results only; the stores never report loads
+        PushBridge.shared.attach(model) // P14c: device token and silent pushes reach the model
         _model = State(initialValue: model)
         AutomationRuntime.shared.start() // L2: restores region monitoring; also runs on background launches caused by region events
     }
@@ -51,6 +52,7 @@ struct TimetrackIOSApp: App {
                 .onChange(of: scenePhase) {
                     guard scenePhase == .active else { return }
                     AutomationRuntime.shared.foregrounded()
+                    Task { await PushSupport.registerIfAuthorized() } // P14c: refreshes the APNs token when notifications are allowed (never prompts)
                     Task { await TimerLiveActivity.reconcileFromSnapshot() } // F4: a Live Activity that could not be requested in the background starts now
                     Task { await FocusEnvironment.retryPending() } // F3
                     #if DEBUG
@@ -195,6 +197,26 @@ enum AppSection: String, CaseIterable, Identifiable {
 }
 
 final class QuickActionDelegate: NSObject, UIApplicationDelegate {
+    // P14c: APNs. The silent push (`content-available`) reloads the screens' data; the completion handler is called on the main
+    // thread (same rule as the notification delegate, C1), after the work finished or the budget ran out.
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task { @MainActor in PushBridge.shared.tokenArrived(deviceToken) }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        let message = error.localizedDescription
+        Task { @MainActor in PushBridge.shared.tokenFailed(NSError(domain: "push", code: 0, userInfo: [NSLocalizedDescriptionKey: message])) }
+    }
+
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        nonisolated(unsafe) let completionHandler = completionHandler
+        Task { @MainActor in
+            let refreshed = await PushBridge.shared.handleSilentPush()
+            DispatchQueue.main.async { completionHandler(refreshed ? .newData : .noData) }
+        }
+    }
+
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         if let item = options.shortcutItem { Self.handle(item) }
         let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)

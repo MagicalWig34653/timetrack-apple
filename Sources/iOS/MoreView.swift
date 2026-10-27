@@ -87,12 +87,24 @@ struct MoreView: View {
         return rows
     }
 
+    /// Short state next to the push row (the page explains the rest).
+    private var pushValue: String? {
+        guard let push = model.push else { return nil }
+        switch push.state {
+        case .registered: return "Aktiv"
+        case .unavailable: return "Nicht angeboten"
+        case .idle, .registering: return nil
+        case .limitReached, .systemFailure, .failed: return "Problem"
+        }
+    }
+
     private var remindersGroup: some View {
         FormSection("Erinnerungen") {
             if model.isEnabled(.planning) {
                 SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
             }
             SettingsLinkRow(title: "Überstunden-Hinweise", symbol: "clock.badge.exclamationmark", id: "settings.overwork") { OverworkSettingsView() } // OT1
+            SettingsLinkRow(title: "Push-Benachrichtigungen", symbol: "bell.badge.waveform", value: pushValue, id: "settings.push") { PushSettingsPage() } // P14c
         }
     }
 
@@ -100,6 +112,7 @@ struct MoreView: View {
     private var automationGroup: some View {
         FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
             SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
+            SettingsLinkRow(title: "Kalenderabos", symbol: "calendar.badge.plus", id: "settings.feeds") { CalendarFeedsPage() } // N2/P14c: ICS subscriptions
             if model.isEnabled(.automation) { // L2/F2: hidden when the automation module is off (account or server-wide)
                 SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
                 SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }

@@ -6,6 +6,7 @@ import TimetrackStores
 
 @main
 struct TimetrackMacApp: App {
+    @NSApplicationDelegateAdaptor(MacPushDelegate.self) private var pushDelegate // P14c: APNs token and silent pushes
     @State private var model: AppModel
     @State private var ui = UIState()
     @State private var deviceCalendar = CalendarEnvironment.makeStore() // M2: device calendars (EventKit), read-only by default
@@ -18,6 +19,7 @@ struct TimetrackMacApp: App {
         let model = AppModel(auth: auth)
         model.onOutcome = { TTHaptics.handle($0) } // trackpad feedback for explicit actions only
         MacNotifications.install() // M2: answers to "Timer beenden?" / "Timer starten?"
+        PushBridge.shared.attach(model) // P14c
         _model = State(initialValue: model)
     }
 
@@ -37,6 +39,7 @@ struct TimetrackMacApp: App {
                     if ProcessInfo.processInfo.environment["TT_DEV_M2"] == "1" { await DebugSnapshots.run(model: model, ui: ui); return }
                     #endif
                     await MacBootstrap.run(model)
+                    await PushSupport.registerIfAuthorized() // P14c: never prompts; the "Push" settings tab asks
                     #if DEBUG
                     await DebugSnapshots.run(model: model, ui: ui)
                     #endif
@@ -146,5 +149,21 @@ enum MacBootstrap {
         running = true
         defer { running = false }
         await MacAutomationRuntime.shared.refreshPlaces(using: model.apiClient)
+    }
+}
+
+/// P14c: receives the APNs device token and silent pushes (`content-available`) of the Mac app.
+final class MacPushDelegate: NSObject, NSApplicationDelegate {
+    func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Task { @MainActor in PushBridge.shared.tokenArrived(deviceToken) }
+    }
+
+    func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        let message = error.localizedDescription
+        Task { @MainActor in PushBridge.shared.tokenFailed(NSError(domain: "push", code: 0, userInfo: [NSLocalizedDescriptionKey: message])) }
+    }
+
+    func application(_ application: NSApplication, didReceiveRemoteNotification userInfo: [String: Any]) {
+        Task { @MainActor in _ = await PushBridge.shared.handleSilentPush() }
     }
 }

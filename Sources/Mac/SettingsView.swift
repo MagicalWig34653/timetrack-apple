@@ -29,6 +29,10 @@ struct SettingsView: View {
                 .tabItem { Label("Aktivität", systemImage: "square.stack.3d.up") } }
             CalendarSettingsView()
                 .tabItem { Label("Kalender", systemImage: "calendar") }
+            CalendarFeedsPage()
+                .tabItem { Label("Kalenderabos", systemImage: "calendar.badge.plus") }
+            PushSettingsPage()
+                .tabItem { Label("Push", systemImage: "bell.badge.waveform") }
             AboutSettingsView()
                 .tabItem { Label("settings.about", systemImage: "info.circle") }
         }

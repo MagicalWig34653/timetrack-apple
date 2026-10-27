@@ -30,6 +30,12 @@ public final class AppModel {
     /// Created only while the `planning` module is on.
     public private(set) var planning: PlanningStore?
     public private(set) var calendar: CalendarStore?
+    /// P14: APNs registration of this device for the signed-in account (nil without `pushIdentity`, e.g. on the watch).
+    public private(set) var push: PushRegistrationStore?
+    /// P14: what this build is for APNs (platform, environment, bundle ID). Set by the app target before the first restore.
+    public var pushIdentity: PushIdentity?
+    /// P14: last device token the system handed out (hex); kept here because it can arrive before sign-in.
+    public private(set) var pushToken: String?
     public private(set) var isBusy = false
     /// Session state of clients that start from stored credentials (`restoreFast`); kept in step on all paths.
     public private(set) var lifecycle = SessionLifecycle()
@@ -143,11 +149,13 @@ public final class AppModel {
     }
 
     public func signOut() async {
+        await push?.unregister() // P14: the session is still valid here, so the server forgets this device before the cookie goes
         await auth.signOut()
         reset(to: .signedOut)
     }
 
     public func forgetServer() async {
+        await push?.unregister()
         await auth.forgetServer()
         serverURL = nil
         reset(to: .signedOut)
@@ -287,8 +295,40 @@ public final class AppModel {
         await todayStore.restorePending()
         timeList = timeListStore
         makePlanningStores(client: client, enabled: modules.isEnabled(.planning))
+        makePushStore(client: client, accountId: context.session.account.id)
         phase = .signedIn
         Task { await today?.load() }
+    }
+
+    // MARK: - Push (P14)
+
+    private func makePushStore(client: APIClient, accountId: UUID) {
+        guard let identity = pushIdentity else { push = nil; return }
+        let store = PushRegistrationStore(client: client, accountId: accountId, identity: identity)
+        push = store
+        if let pushToken { Task { await store.setToken(pushToken) } }
+    }
+
+    /// The system delivered a device token (`didRegisterForRemoteNotifications`); registers it as soon as an account is signed in.
+    public func setPushToken(_ hex: String) {
+        pushToken = hex.lowercased()
+        if let push { Task { await push.setToken(hex) } }
+    }
+
+    public func pushTokenRequestFailed(_ message: String) { push?.tokenRequestFailed(message) }
+
+    /// A silent push (`content-available`) says something changed on the server: reload what the screens show. Quick, read-only,
+    /// returns whether anything could be refreshed. Does nothing while signed out.
+    @discardableResult
+    public func refreshAfterPush() async -> Bool {
+        guard phase == .signedIn else { return false }
+        async let a: Void = today?.load() ?? ()
+        async let b: Void = timeList?.load() ?? ()
+        async let c: Void = { _ = await review?.load() }()
+        async let d: Void = planning?.load() ?? ()
+        async let e: Void = calendar?.load() ?? ()
+        _ = await (a, b, c, d, e)
+        return true
     }
 
     /// Loads the backend version data. Failures (old backend: 404) leave the section with the app version only.
@@ -351,6 +391,7 @@ public final class AppModel {
         cancelled = nil
         planning = nil
         calendar = nil
+        push = nil
         workModel = nil
         modules = ModuleSwitches()
         systemInfo = .idle

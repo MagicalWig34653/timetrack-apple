@@ -2,21 +2,28 @@ import Foundation
 
 // MARK: - Writing to calendars (planned work days, planned vacation and sick days)
 
-/// What Timetrack writes as an all-day event: a single plan day or a whole absence (one multi-day event). Only a generic title is
-/// used; notes of an absence never reach the calendar.
+/// What Timetrack writes as an event: a plan day without blocks (all-day), one plan block (timed, P13) or a whole absence (one
+/// multi-day all-day event). Only a generic title is used; notes and places of plan blocks and absences never reach the calendar.
 public struct CalendarEntry: Sendable, Equatable {
-    /// Stable identity, also the payload of the marker URL: `plan/<day>` or `absence/<uuid>`.
+    /// Stable identity, also the payload of the marker URL: `plan/<day>`, `plan/<day>/<n>` (n-th block, 1-based) or `absence/<uuid>`.
     public let key: String
     public let firstDay: LocalDay
     public let lastDay: LocalDay
     public let title: String
+    /// Minutes since local midnight of `firstDay` for a timed event (a plan block); both nil = all-day.
+    public let startMinute: Int?
+    public let endMinute: Int?
 
-    public init(key: String, firstDay: LocalDay, lastDay: LocalDay, title: String) {
+    public init(key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil) {
         self.key = key
         self.firstDay = firstDay
         self.lastDay = lastDay
         self.title = title
+        self.startMinute = startMinute
+        self.endMinute = endMinute
     }
+
+    public var isTimed: Bool { startMinute != nil && endMinute != nil }
 }
 
 /// An event Timetrack wrote earlier (recognised by its marker URL, see `EntryMarker`).
@@ -26,13 +33,18 @@ public struct WrittenEvent: Sendable, Equatable {
     public let firstDay: LocalDay
     public let lastDay: LocalDay
     public let title: String
+    /// Local start and end minute of a timed event (plan block); nil for all-day events.
+    public let startMinute: Int?
+    public let endMinute: Int?
 
-    public init(eventID: String, key: String, firstDay: LocalDay, lastDay: LocalDay, title: String) {
+    public init(eventID: String, key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil) {
         self.eventID = eventID
         self.key = key
         self.firstDay = firstDay
         self.lastDay = lastDay
         self.title = title
+        self.startMinute = startMinute
+        self.endMinute = endMinute
     }
 }
 
@@ -49,6 +61,8 @@ public enum EntryMarker {
     public static let absenceHost = "absence"
 
     public static func planKey(_ day: LocalDay) -> String { "\(planHost)/\(day)" }
+    /// Key of the n-th plan block of a day (`plan/<day>/<n>`, n starts at 1).
+    public static func planBlockKey(_ day: LocalDay, number: Int) -> String { "\(planHost)/\(day)/\(number)" }
     public static func absenceKey(_ id: UUID) -> String { "\(absenceHost)/\(id.uuidString)" }
 
     public static func url(forKey key: String) -> URL? { URL(string: "\(scheme)://\(key)") }
@@ -72,10 +86,15 @@ public enum EntryMarker {
     /// The key of a marker URL; nil for anything not written by Timetrack (or a malformed marker).
     public static func key(from url: URL?) -> String? {
         guard let url, url.scheme == scheme, let host = url.host else { return nil }
-        let last = url.lastPathComponent
+        let parts = url.path.split(separator: "/").map(String.init)
         switch host {
-        case planHost: return LocalDays.parse(last) == nil ? nil : planKey(last)
-        case absenceHost: return UUID(uuidString: last).map(absenceKey)
+        case planHost:
+            if parts.count == 1, LocalDays.parse(parts[0]) != nil { return planKey(parts[0]) }
+            if parts.count == 2, LocalDays.parse(parts[0]) != nil, let number = Int(parts[1]), number >= 1, String(number) == parts[1] {
+                return planBlockKey(parts[0], number: number)
+            }
+            return nil
+        case absenceHost: return parts.count == 1 ? UUID(uuidString: parts[0]).map(absenceKey) : nil
         default: return nil
         }
     }
@@ -99,11 +118,24 @@ public enum CalendarWritePlanner {
     /// Only days that actually mean "I work": office, home, customer, school. Days off and unknown modes are not written.
     public static func isWritten(_ mode: PlanMode) -> Bool { [.office, .home, .customer, .school].contains(mode) }
 
-    public static func desiredPlanDays(from planDays: [LocalDay: PlanDay], from: LocalDay, to: LocalDay, title: (PlanMode) -> String) -> [CalendarEntry] {
+    /// Planned work days. A day with plan blocks (P13) becomes one timed event per block (`plan/<day>/<n>`, in time order, title by
+    /// block kind, never place or note); a day without blocks stays one all-day event (`plan/<day>`).
+    public static func desiredPlanDays(from planDays: [LocalDay: PlanDay], from: LocalDay, to: LocalDay, title: (PlanMode) -> String,
+                                       blockTitle: (PlanBlockKind) -> String = PlanBlockKind.calendarTitle) -> [CalendarEntry] {
         planDays.values
             .filter { $0.date >= from && $0.date <= to && isWritten($0.mode) }
             .sorted { $0.date < $1.date }
-            .map { CalendarEntry(key: EntryMarker.planKey($0.date), firstDay: $0.date, lastDay: $0.date, title: title($0.mode)) }
+            .flatMap { day -> [CalendarEntry] in
+                let blocks = day.blocks.filter { ($0.startMinutes ?? 0) < ($0.endMinutes ?? 0) && $0.startMinutes != nil && $0.endMinutes != nil }
+                    .sorted { ($0.startMinutes ?? 0) < ($1.startMinutes ?? 0) }
+                guard !blocks.isEmpty else {
+                    return [CalendarEntry(key: EntryMarker.planKey(day.date), firstDay: day.date, lastDay: day.date, title: title(day.mode))]
+                }
+                return blocks.enumerated().map { index, block in
+                    CalendarEntry(key: EntryMarker.planBlockKey(day.date, number: index + 1), firstDay: day.date, lastDay: day.date,
+                                  title: blockTitle(block.kind), startMinute: block.startMinutes, endMinute: block.endMinutes)
+                }
+            }
     }
 
     /// Planned/approved vacation and sick days as one event per absence. Absences that do not touch `[from, to]` are skipped.

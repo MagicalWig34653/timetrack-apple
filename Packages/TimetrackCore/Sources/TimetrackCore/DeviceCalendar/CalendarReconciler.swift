@@ -9,23 +9,30 @@ public struct CalendarLedgerRecord: Codable, Sendable, Equatable {
     public var title: String
     public var firstDay: LocalDay
     public var lastDay: LocalDay
+    /// P13: local start and end minute of a timed plan block event; nil for all-day events (older ledgers decode with nil).
+    public var startMinute: Int?
+    public var endMinute: Int?
 
-    public init(eventID: String, title: String, firstDay: LocalDay, lastDay: LocalDay) {
+    public init(eventID: String, title: String, firstDay: LocalDay, lastDay: LocalDay, startMinute: Int? = nil, endMinute: Int? = nil) {
         self.eventID = eventID
         self.title = title
         self.firstDay = firstDay
         self.lastDay = lastDay
+        self.startMinute = startMinute
+        self.endMinute = endMinute
     }
 
     public init(eventID: String, entry: CalendarEntry) {
-        self.init(eventID: eventID, title: entry.title, firstDay: entry.firstDay, lastDay: entry.lastDay)
+        self.init(eventID: eventID, title: entry.title, firstDay: entry.firstDay, lastDay: entry.lastDay, startMinute: entry.startMinute, endMinute: entry.endMinute)
     }
 
     /// Whether this record describes exactly what `entry` would write (so a missing event means the user removed it by hand).
-    public func matches(_ entry: CalendarEntry) -> Bool { title == entry.title && firstDay == entry.firstDay && lastDay == entry.lastDay }
+    public func matches(_ entry: CalendarEntry) -> Bool {
+        title == entry.title && firstDay == entry.firstDay && lastDay == entry.lastDay && startMinute == entry.startMinute && endMinute == entry.endMinute
+    }
 }
 
-/// Per calendar: server item key (`absence/<uuid>`, `plan/<day>`) -> record. Local to the device, never sent anywhere. The ledger is
+/// Per calendar: server item key (`absence/<uuid>`, `plan/<day>`, `plan/<day>/<n>` per plan block) -> record. Local to the device, never sent anywhere. The ledger is
 /// an optimisation and a memory of manual deletions only: the marker on the events is the source of truth, so losing the ledger
 /// (reinstall, new device, cleared defaults) is repaired by the next reconciliation.
 public struct CalendarLedger: Codable, Sendable, Equatable {
@@ -85,7 +92,8 @@ public enum CalendarReconciler {
         for key in wanted.keys.sorted() {
             guard let target = wanted[key] else { continue }
             if let current = kept[key] {
-                if current.title != target.title || current.firstDay != target.firstDay || current.lastDay != target.lastDay {
+                if current.title != target.title || current.firstDay != target.firstDay || current.lastDay != target.lastDay
+                    || current.startMinute != target.startMinute || current.endMinute != target.endMinute {
                     result.operations.append(.update(eventID: current.eventID, target))
                 } else if records[key] != CalendarLedgerRecord(eventID: current.eventID, entry: target) {
                     result.adopt[key] = CalendarLedgerRecord(eventID: current.eventID, entry: target)

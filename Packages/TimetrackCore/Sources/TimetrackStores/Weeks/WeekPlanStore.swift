@@ -18,6 +18,9 @@ public final class WeekPlanStore {
     /// Set after a save attempt with invalid rows so the screen marks them.
     public private(set) var showProblems = false
     public var error: TimetrackError?
+    /// P13: the server accepts and returns plan blocks (API 0.35.0). Without it the planner keeps the old single window per day.
+    public private(set) var supportsBlocks = false
+    private var capabilityKnown = false
     /// Reports the result of saving (never loads).
     public var onOutcome: StoreOutcomeHandler?
     /// Called after a successful save so other screens (calendar, week overview) can reload.
@@ -30,8 +33,12 @@ public final class WeekPlanStore {
     public enum CopyResult: Sendable, Equatable { case copied, emptySource, failed }
 
     /// Without `initialMonday` the planner opens next week: planning is for weeks that have not started yet.
-    public init(client: APIClient, calendar: DayCalendar, initialMonday: LocalDay? = nil, now: Date = .now) {
+    public init(client: APIClient, calendar: DayCalendar, initialMonday: LocalDay? = nil, now: Date = .now, supportsBlocks: Bool? = nil) {
         self.client = client
+        if let supportsBlocks {
+            self.supportsBlocks = supportsBlocks
+            capabilityKnown = true
+        }
         self.calendar = calendar
         let today = calendar.day(for: now)
         let current = LocalDays.mondayOfWeek(containing: today) ?? today
@@ -68,12 +75,13 @@ public final class WeekPlanStore {
         showProblems = false
         defer { if mine == generation { isLoading = false } }
         do {
+            await resolveCapability()
             let loaded = try await client.getPlanWeek(label)
             let typical = loaded.days.map(\.targetSeconds).max() ?? 0
             let suggested = await historySuggestion(before: reference, targetSeconds: typical)
             guard mine == generation else { return }
             week = loaded
-            drafts = loaded.days.map(WeekPlan.draft(from:))
+            drafts = loaded.days.map { WeekPlan.draft(from: $0, multi: supportsBlocks) }
             baseline = drafts
             suggestion = suggested
             error = nil
@@ -89,6 +97,14 @@ public final class WeekPlanStore {
         } catch {
             return
         }
+    }
+
+    /// Reads the backend's `apiVersion` once (a failure keeps the old single-window planner and is retried on the next load).
+    private func resolveCapability() async {
+        guard !capabilityKnown else { return }
+        guard let info = try? await client.getSystemInfo() else { return }
+        supportsBlocks = PlanBlocks.isSupported(apiVersion: info.backend.apiVersion)
+        capabilityKnown = true
     }
 
     /// Average start/end of the four completed weeks before the planned week (or before this week for future weeks).
@@ -122,6 +138,38 @@ public final class WeekPlanStore {
 
     // MARK: Editing
 
+    /// Block operations of one day (P13). Every operation keeps the list ordered; the mode of the day is not changed.
+    public func addBlock(_ index: Int, kind: PlanBlockKind? = nil) {
+        guard supportsBlocks, drafts.indices.contains(index), let mode = drafts[index].mode, mode != .off else { return }
+        drafts[index].blocks = PlanBlockEditing.adding(to: drafts[index].blocks, kind: kind ?? WeekPlan.defaultKind(for: mode))
+    }
+
+    public func splitBlock(_ index: Int, at block: Int) {
+        guard drafts.indices.contains(index) else { return }
+        drafts[index].blocks = PlanBlockEditing.splitting(drafts[index].blocks, at: block)
+    }
+
+    public func deleteBlock(_ index: Int, at block: Int) {
+        guard drafts.indices.contains(index) else { return }
+        drafts[index].blocks = PlanBlockEditing.deleting(drafts[index].blocks, at: block)
+    }
+
+    public func mergeBlock(_ index: Int, at block: Int) {
+        guard drafts.indices.contains(index) else { return }
+        drafts[index].blocks = PlanBlockEditing.mergingWithNext(drafts[index].blocks, at: block)
+    }
+
+    public func updateBlock(_ index: Int, at block: Int, _ change: (inout PlanTimeBlock) -> Void) {
+        guard drafts.indices.contains(index), drafts[index].blocks.indices.contains(block) else { return }
+        change(&drafts[index].blocks[block])
+    }
+
+    /// Live hints of a day: from the draft while editing (same rule as the server).
+    public func hints(at index: Int) -> [PlanHint] {
+        guard drafts.indices.contains(index) else { return [] }
+        return WeekPlan.hints(drafts[index])
+    }
+
     public func update(_ index: Int, _ draft: DayDraft) {
         guard drafts.indices.contains(index) else { return }
         drafts[index] = draft
@@ -129,10 +177,10 @@ public final class WeekPlanStore {
 
     public func setMode(_ index: Int, _ mode: PlanMode?) {
         guard drafts.indices.contains(index), days.indices.contains(index) else { return }
-        drafts[index] = WeekPlan.withMode(drafts[index], mode, suggestion: suggestion, targetSeconds: days[index].targetSeconds)
+        drafts[index] = WeekPlan.withMode(drafts[index], mode, suggestion: suggestion, targetSeconds: days[index].targetSeconds, multi: supportsBlocks)
     }
 
-    public func applyStandard() { drafts = WeekPlan.standardWeek(days: days, current: drafts, suggestion: suggestion) }
+    public func applyStandard() { drafts = WeekPlan.standardWeek(days: days, current: drafts, suggestion: suggestion, multi: supportsBlocks) }
     public func applySame() { drafts = WeekPlan.sameForWorkdays(days: days, current: drafts) }
     public func applyClear() { drafts = WeekPlan.clearWeek(days: days, current: drafts) }
 
@@ -148,7 +196,7 @@ public final class WeekPlanStore {
         do {
             let source = try await client.getPlanWeek(previous)
             guard source.days.contains(where: { $0.plan != nil }) else { return .emptySource }
-            drafts = WeekPlan.copyWeek(source: source, days: days, current: drafts)
+            drafts = WeekPlan.copyWeek(source: source, days: days, current: drafts, multi: supportsBlocks)
             error = nil
             return .copied
         } catch {
@@ -170,9 +218,9 @@ public final class WeekPlanStore {
         isSaving = true
         defer { isSaving = false }
         do {
-            let saved = try await client.putPlanWeek(isoWeek, WeekPlan.request(drafts))
+            let saved = try await client.putPlanWeek(isoWeek, WeekPlan.request(drafts, multi: supportsBlocks))
             week = saved
-            drafts = saved.days.map(WeekPlan.draft(from:))
+            drafts = saved.days.map { WeekPlan.draft(from: $0, multi: supportsBlocks) }
             baseline = drafts
             showProblems = false
             onOutcome?(.saved)

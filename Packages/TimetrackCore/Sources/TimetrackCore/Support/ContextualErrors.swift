@@ -10,6 +10,8 @@ public enum ErrorContext: Sendable {
     case reviewAcknowledge
     /// Recording the number of school lessons of a day.
     case schoolLessons
+    /// P13: saving a plan day or week with plan blocks.
+    case planBlocks
 }
 
 extension TimetrackError {
@@ -36,6 +38,16 @@ extension TimetrackError {
             return "Der Eintrag existiert nicht mehr."
         case (.schoolLessons, .invalid?):
             return "Die Zahl der Unterrichtsstunden muss zwischen 0 und 20 liegen."
+        case (.planBlocks, .planTimeInvalid?):
+            return "Mindestens ein Planblock hat eine ungültige Uhrzeit. Beginn und Ende brauchen die Form HH:MM, das Ende muss nach dem Beginn liegen und spätestens um 23:59 sein."
+        case (.planBlocks, .planBlocksOverlap?):
+            return "Planblöcke dürfen sich nicht überschneiden und müssen der Zeit nach geordnet sein. Zwischen zwei Blöcken darf eine Lücke liegen."
+        case (.planBlocks, .planBlocksInvalid?):
+            return "Ein Tag darf höchstens 32 Planblöcke haben; ein freier Tag hat keine Blöcke."
+        case (.planBlocks, .planKindInvalid?):
+            return "Die Art eines Planblocks ist unbekannt. Wähle Arbeit, Schule, Fahrt, Büro, Homeoffice oder Kunde."
+        case (.planBlocks, .planNoteInvalid?):
+            return "Die Notiz eines Planblocks ist zu lang. Erlaubt sind höchstens 200 Zeichen."
         default:
             return germanDescription
         }

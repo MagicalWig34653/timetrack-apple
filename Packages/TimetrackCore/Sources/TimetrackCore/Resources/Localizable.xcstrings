@@ -1,6 +1,5 @@
 {
   "sourceLanguage": "de",
-  "version": "1.0",
   "strings": {
     "error.absence_overlap": {
       "extractionState": "manual",
@@ -311,6 +310,28 @@
         }
       }
     },
+    "error.plan_blocks_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Tag darf höchstens 32 Planblöcke haben, und ein freier Tag keine Blöcke."
+          }
+        }
+      }
+    },
+    "error.plan_blocks_overlap": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwei Planblöcke überschneiden sich oder sind nicht der Zeit nach geordnet."
+          }
+        }
+      }
+    },
     "error.plan_break_invalid": {
       "extractionState": "manual",
       "localizations": {
@@ -318,6 +339,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die geplante Pause muss zwischen 0 und 600 Minuten liegen und braucht Beginn und Ende."
+          }
+        }
+      }
+    },
+    "error.plan_kind_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Art eines Planblocks ist unbekannt. Wähle Arbeit, Schule, Fahrt, Büro, Homeoffice oder Kunde."
+          }
+        }
+      }
+    },
+    "error.plan_note_invalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Notiz eines Planblocks ist zu lang (höchstens 200 Zeichen)."
           }
         }
       }

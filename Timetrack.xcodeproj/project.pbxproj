@@ -43,10 +43,12 @@
 		1E4BD249E5AF00C63F021048 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6772965862EBA2B87E722C13 /* Formatters.swift */; };
 		1EDE8928219BD32D4AC74C59 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 7407DC8FE0428CE13426EE93 /* TimetrackDesign */; };
 		1FCDD3DDD5D96444D0705F65 /* ReportsSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A3358F5A886AD73594ED91 /* ReportsSupport.swift */; };
+		1FD680FED8E7D9F451C096F1 /* PlanBlocksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D68F749C0246A342C19582 /* PlanBlocksTests.swift */; };
 		20262E82CD2B7FF81BFD15D9 /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E299FCCA25A9EAA2930CF1A /* WidgetGallery.swift */; };
 		21C819F6E7A1CA1931427FAF /* WidgetSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340F4AF58707F25617DBB5DD /* WidgetSupport.swift */; };
 		221B639972E6946AC6437BD4 /* SettingsShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */; };
 		2287E67D40C9004141982206 /* TimetrackWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F133A559F1596CF467BF722A /* TimetrackWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		22EFB04232DDBEEFF8B67071 /* PlanBlockViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3452EC41F325A159933A4D /* PlanBlockViews.swift */; };
 		231C5C58B962CAECECE27D94 /* TimetrackWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57B3E3F601DC94B9F783CE4 /* TimetrackWatchApp.swift */; };
 		238491B473F682FED835B5E2 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8477364AADA1DCD3E8009749 /* WidgetViews.swift */; };
 		239165EC0EBAB514D6320BBD /* SettingsSubpages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D664773736598F0B0415370D /* SettingsSubpages.swift */; };
@@ -98,6 +100,7 @@
 		47AD0DF268F6EB803621DB3D /* IOSCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4718261B5D3BD32D401F6C /* IOSCommands.swift */; };
 		483F0360FA8F21B501EF46D5 /* ShortcutGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CE4B41F827D0E2511D0931D /* ShortcutGuideView.swift */; };
 		487D5E9F04A8F99DEC461B15 /* WeekSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BB00EFDD0035C695B5FBA4 /* WeekSupport.swift */; };
+		489CA6763C74326AB6EF8FEA /* PlanBlockViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3452EC41F325A159933A4D /* PlanBlockViews.swift */; };
 		4A39075DFC2672AEE2B3B68B /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = FB5B84D6B599FDDCA77BEE9B /* TimetrackDesign */; };
 		4AB8FD3F160096515A61C4C6 /* Vacation.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DB16BA707284487ACF177ED7 /* Vacation.xcstrings */; };
 		4B39F2471A94AEC60CDAC3E5 /* UX3.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = EB8D2E7E05CAF04885CAAC05 /* UX3.xcstrings */; };
@@ -619,9 +622,11 @@
 		DB635DB727B1C03ADC6258AB /* FrameMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameMeter.swift; sourceTree = "<group>"; };
 		DD01AD93CEB86333CE929433 /* AdaptiveShotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveShotTests.swift; sourceTree = "<group>"; };
 		DD86C35AD4525A263C1DD60D /* StatisticsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsCharts.swift; sourceTree = "<group>"; };
+		DE3452EC41F325A159933A4D /* PlanBlockViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanBlockViews.swift; sourceTree = "<group>"; };
 		DEA7E11FA68CBF10F5C0D9E7 /* WorkModelViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkModelViews.swift; sourceTree = "<group>"; };
 		DF4649CA7EFF3E2A58AB22F0 /* MacAutomationRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacAutomationRuntime.swift; sourceTree = "<group>"; };
 		E0CDA84E0B407AA96EB192CE /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		E1D68F749C0246A342C19582 /* PlanBlocksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanBlocksTests.swift; sourceTree = "<group>"; };
 		E21F1785484A3EC6DC62CD29 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E24BBA312CA476B29515F081 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParityFlowTests.swift; sourceTree = "<group>"; };
@@ -831,6 +836,7 @@
 				512629B01D497703C711B949 /* NowBarTests.swift */,
 				1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */,
 				E25AD9CBF464F355D4539401 /* ParityFlowTests.swift */,
+				E1D68F749C0246A342C19582 /* PlanBlocksTests.swift */,
 				BD7B29F2240005F50DA9A037 /* PlanningAreaTests.swift */,
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
 				AA80849DF4DEE427108120A8 /* ProfileAdjustmentsTests.swift */,
@@ -1056,6 +1062,7 @@
 			isa = PBXGroup;
 			children = (
 				020E290DA733637042202DCC /* MonthPager.swift */,
+				DE3452EC41F325A159933A4D /* PlanBlockViews.swift */,
 				4B5D4CF576559A265FF5EC78 /* PlanningArea.swift */,
 				3C7FD87BEC4B8994CC682F49 /* PlanningArea.xcstrings */,
 				2E57CC4DA2A3708A5301649E /* SharingViews.swift */,
@@ -1564,6 +1571,7 @@
 				3DE372E1109C318EE4BEEA41 /* MonthPager.swift in Sources */,
 				832FB3C2732E1E28BDFFAF68 /* OverworkScheduler.swift in Sources */,
 				BABEA509E8F910F26D9D8700 /* P15Support.swift in Sources */,
+				22EFB04232DDBEEFF8B67071 /* PlanBlockViews.swift in Sources */,
 				0EDA5EACE903627A685D6360 /* PlanSheets.swift in Sources */,
 				9C96A8BD380330346AA472B4 /* PlanningArea.swift in Sources */,
 				A0955EC7B5DB0D73E6E2AB76 /* PlanningShared.swift in Sources */,
@@ -1697,6 +1705,7 @@
 				F009EF3BCB7E602DEB9B6E93 /* OverworkScheduler.swift in Sources */,
 				2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */,
 				98D0AE269454907635F953A4 /* P15Support.swift in Sources */,
+				489CA6763C74326AB6EF8FEA /* PlanBlockViews.swift in Sources */,
 				AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */,
 				7DBBF293490EEA7074F241AD /* PlanningArea.swift in Sources */,
 				A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */,
@@ -1774,6 +1783,7 @@
 				79C2B9294AD3048F5681AD87 /* NowBarTests.swift in Sources */,
 				0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */,
 				9C1B09942FF017E11CBCD284 /* ParityFlowTests.swift in Sources */,
+				1FD680FED8E7D9F451C096F1 /* PlanBlocksTests.swift in Sources */,
 				CD270BC6F0BF891C34083444 /* PlanningAreaTests.swift in Sources */,
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
 				36A928C59201B438B8B1365B /* ProfileAdjustmentsTests.swift in Sources */,

@@ -180,7 +180,7 @@ private struct CalendarSettingsContent: View {
     private var writeSection: some View {
         VStack(alignment: .leading, spacing: TT.Space.xl) {
             FormSection("Was geschrieben wird",
-                        footer: "Gilt für alle Kalender auf „Schreiben“. Titel sind allgemein („Urlaub (geplant)“, „Krank“); Notizen, Krankschein-Stand und Zeiten stehen nie im Kalender. Timetrack ändert oder löscht nur Termine mit eigener Kennung, nie andere. Stellst du einen Kalender zurück auf „Lesen“ oder „Aus“, entfernt Timetrack die dort geschriebenen Termine.") {
+                        footer: "Gilt für alle Kalender auf „Schreiben“. Titel sind allgemein („Urlaub (geplant)“, „Krank“); Notizen, Orte und Krankschein-Stand stehen nie im Kalender. Geplante Arbeitsblöcke eines Tages erscheinen als einzelne Termine mit Uhrzeit, Tage ohne Uhrzeiten als ganztägiger Termin. Timetrack ändert oder löscht nur Termine mit eigener Kennung, nie andere. Stellst du einen Kalender zurück auf „Lesen“ oder „Aus“, entfernt Timetrack die dort geschriebenen Termine.") {
                 Toggle("Geplanten Urlaub und Krank schreiben", isOn: Binding(get: { store.preferences.writeAbsences }, set: { store.setWriteAbsences($0) }))
                     .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s).accessibilityIdentifier("calendar.write.absences")
                 Toggle("Geplante Arbeitstage schreiben", isOn: Binding(get: { store.preferences.writePlanDays }, set: { store.setWritePlanDays($0) }))

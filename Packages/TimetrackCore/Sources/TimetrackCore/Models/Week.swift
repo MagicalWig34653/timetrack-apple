@@ -34,6 +34,11 @@ public struct TimeWeekDay: Codable, Sendable, Hashable, Identifiable {
     public let targetSeconds: Int
     public let plannedSeconds: Int?
     public let planMode: PlanMode?
+    /// Contract 0.35.0 (absent for older servers): the day's plan blocks (nil without plan), non-binding plan hints and
+    /// `work + credit - effective planned duration` (nil on future and blocked days or without a planned duration).
+    public let planBlocks: [PlanTimeBlock]?
+    public let planHints: [PlanHint]?
+    public let planActualDifferenceSeconds: Int?
     public let workSeconds: Int
     public let creditSeconds: Int
     public let rawWorkSeconds: Int

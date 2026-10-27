@@ -267,6 +267,7 @@ struct DayHeader: View {
                         .font(TTFont.meta).foregroundStyle(TT.textSecondary)
                 }
                 if let line = planLine { Text(verbatim: line).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
+                planBlocksDetail
                 if isEmpty { Text(Z2.s("day.empty")).font(TTFont.meta).foregroundStyle(TT.textTertiary) }
                 if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
             }
@@ -304,6 +305,28 @@ struct DayHeader: View {
         if let mode = plan.planMode, mode != .unknown, mode != .off { parts.append(mode.plainName) }
         if let seconds = plan.plannedSeconds, seconds > 0 { parts.append(W.s("day.plan", DurationFormat.hoursMinutes(seconds))) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// P13: every plan block of a day with several blocks on its own (timeline, one line per block), the plan/actual difference and the
+    /// non-binding hints. Single-window days keep the compact plan line.
+    @ViewBuilder private var planBlocksDetail: some View {
+        if let plan {
+            if let blocks = plan.planBlocks, PlanBlockText.showsDetail(blocks) {
+                VStack(alignment: .leading, spacing: TT.Space.xxs) {
+                    PlanTimeline(blocks: blocks, height: 18, showsAxis: false).frame(maxWidth: 260)
+                    ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                        HStack(spacing: 6) {
+                            PlanKindSwatch(kind: block.kind, size: 16)
+                            Text(verbatim: PlanBlockText.line(block)).font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+                .padding(.top, 2).accessibilityIdentifier("time.plan_blocks.\(day.date)")
+            }
+            if let difference = plan.planActualDifferenceSeconds { PlanActualDifferenceChip(seconds: difference) }
+            if let hints = plan.planHints, !hints.isEmpty { PlanHintsView(hints: hints, dayTitle: nil) }
+        }
     }
 
     @ViewBuilder private var actionMenu: some View {

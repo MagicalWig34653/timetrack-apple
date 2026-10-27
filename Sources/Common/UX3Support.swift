@@ -84,6 +84,15 @@ struct DayStandingCard: View {
             VStack(alignment: .leading, spacing: TT.Space.xs) {
                 DayOutlookLines(outlook: store.outlook(now: context.date), zone: model.dayCalendar.timeZone)
                     .padding(.top, TT.Space.xs)
+                if store.plannedBlocks.count > 1 {
+                    // P13: the plan of today block by block (several blocks only; a single window is covered by the end line above).
+                    VStack(alignment: .leading, spacing: TT.Space.xs) {
+                        PlanTimeline(blocks: store.plannedBlocks, height: 16, showsAxis: false)
+                        Text(verbatim: PlanBlockText.summary(store.plannedBlocks)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .accessibilityIdentifier("today.plan_blocks")
+                }
                 ReviewChip(todaysFlagged: store.segments.filter(\.needsReview).count)
             }
         }

@@ -226,15 +226,30 @@ struct SharedViewScreen: View {
         if let plan = view.plan {
             section("share.scope.plan", empty: plan.isEmpty) {
                 ForEach(plan) { day in
-                    HStack {
-                        Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.body).foregroundStyle(TT.textPrimary)
-                        Spacer(minLength: 0)
-                        if let start = day.plannedStart, let end = day.plannedEnd {
-                            Text(verbatim: "\(start)–\(end)").font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
+                    VStack(alignment: .leading, spacing: TT.Space.xs) {
+                        HStack {
+                            Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.body).foregroundStyle(TT.textPrimary)
+                            Spacer(minLength: 0)
+                            if let blocks = day.blocks, !blocks.isEmpty {
+                                // P13: blocks carry start, end and kind only; the server never releases places or notes.
+                            } else if let start = day.plannedStart, let end = day.plannedEnd {
+                                Text(verbatim: "\(start)–\(end)").font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
+                            }
+                            Label(day.mode.plainName, systemImage: day.mode.symbol).font(TTFont.meta).foregroundStyle(day.mode.tint)
                         }
-                        Label(day.mode.plainName, systemImage: day.mode.symbol).font(TTFont.meta).foregroundStyle(day.mode.tint)
+                        if let blocks = day.blocks, !blocks.isEmpty {
+                            PlanTimeline(shared: blocks, height: 18, showsAxis: false)
+                            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                                HStack(spacing: 6) {
+                                    PlanKindSwatch(kind: block.kind, size: 16)
+                                    Text(verbatim: "\(block.start)–\(block.end) \(block.kind.title)").font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
+                                }
+                                .accessibilityElement(children: .combine)
+                            }
+                        }
                     }
                     .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("share.plan.\(day.date)")
                 }
             }
         }

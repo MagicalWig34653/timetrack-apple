@@ -41,6 +41,12 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
         var all = storedEvents
         if let dayCalendar {
             for (id, record) in written {
+                if let startMinute = record.entry.startMinute, let endMinute = record.entry.endMinute,
+                   let start = dayCalendar.instant(day: record.entry.firstDay, hour: startMinute / 60, minute: startMinute % 60),
+                   let end = dayCalendar.instant(day: record.entry.firstDay, hour: endMinute / 60, minute: endMinute % 60) {
+                    all.append(DeviceEvent(id: id, calendarID: record.calendarID, title: record.entry.title, start: start, end: end, isAllDay: false, isWrittenByTimetrack: true))
+                    continue
+                }
                 guard let first = dayCalendar.interval(of: record.entry.firstDay), let last = dayCalendar.interval(of: record.entry.lastDay) else { continue }
                 all.append(DeviceEvent(id: id, calendarID: record.calendarID, title: record.entry.title, start: first.start, end: last.end.addingTimeInterval(-1),
                                        isAllDay: true, isWrittenByTimetrack: true))
@@ -58,7 +64,8 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
 
     public func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent] {
         written.filter { $0.value.calendarID == calendarID }
-            .map { WrittenEvent(eventID: $0.key, key: $0.value.entry.key, firstDay: $0.value.entry.firstDay, lastDay: $0.value.entry.lastDay, title: $0.value.entry.title) }
+            .map { WrittenEvent(eventID: $0.key, key: $0.value.entry.key, firstDay: $0.value.entry.firstDay, lastDay: $0.value.entry.lastDay, title: $0.value.entry.title,
+                                           startMinute: $0.value.entry.startMinute, endMinute: $0.value.entry.endMinute) }
             .sorted { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }
     }
 
@@ -102,7 +109,8 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
     /// The user (or a server) moves an event to other days.
     public func userMoveEvent(_ id: String, first: LocalDay, last: LocalDay) {
         guard let record = written[id] else { return }
-        let entry = CalendarEntry(key: record.entry.key, firstDay: first, lastDay: last, title: record.entry.title)
+        let entry = CalendarEntry(key: record.entry.key, firstDay: first, lastDay: last, title: record.entry.title,
+                                  startMinute: record.entry.startMinute, endMinute: record.entry.endMinute)
         written[id] = WrittenRecord(calendarID: record.calendarID, entry: entry)
     }
 }

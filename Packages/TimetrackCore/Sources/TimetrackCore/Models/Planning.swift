@@ -308,6 +308,112 @@ public enum PlanMode: String, Codable, Sendable, Hashable, CaseIterable {
     public static let selectable: [PlanMode] = [.office, .home, .customer, .school, .off]
 }
 
+// MARK: - Plan blocks (P13, contract 0.35.0, ADR-0031)
+
+/// Kind of one plan block. Independent of the day's `PlanMode` (a day can mix school and work).
+public enum PlanBlockKind: String, Codable, Sendable, Hashable, CaseIterable {
+    case work, school, travel, office, home, customer, unknown
+
+    public init(from decoder: Decoder) throws {
+        self = PlanBlockKind(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .unknown
+    }
+
+    /// The generic calendar title of a block (no place, no note): "Arbeit: Büro", "Schule", "Fahrt".
+    public static func calendarTitle(_ kind: PlanBlockKind) -> String {
+        switch kind {
+        case .work, .unknown: "Arbeit"
+        case .school: "Schule"
+        case .travel: "Fahrt"
+        case .office: "Arbeit: Büro"
+        case .home: "Arbeit: Homeoffice"
+        case .customer: "Arbeit: Kunde"
+        }
+    }
+
+    /// The kinds a user can pick (`unknown` only exists for forward compatibility when reading).
+    public static let selectable: [PlanBlockKind] = [.work, .school, .travel, .office, .home, .customer]
+}
+
+/// One planned time window of a day: local wall-clock `HH:mm` of the plan day, no zone arithmetic.
+public struct PlanTimeBlock: Codable, Sendable, Hashable {
+    public var start: String
+    public var end: String
+    public var kind: PlanBlockKind
+    public var placeId: UUID?
+    public var note: String?
+
+    public init(start: String, end: String, kind: PlanBlockKind, placeId: UUID? = nil, note: String? = nil) {
+        self.start = start
+        self.end = end
+        self.kind = kind
+        self.placeId = placeId
+        self.note = note
+    }
+
+    private enum CodingKeys: String, CodingKey { case start, end, kind, placeId, note }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        start = try c.decode(String.self, forKey: .start)
+        end = try c.decode(String.self, forKey: .end)
+        kind = try c.decodeIfPresent(PlanBlockKind.self, forKey: .kind) ?? .unknown
+        placeId = try c.decodeIfPresent(UUID.self, forKey: .placeId)
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+    }
+
+    /// Always sends `placeId` and `note` (null when empty) so a block never keeps stale values.
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(start, forKey: .start)
+        try c.encode(end, forKey: .end)
+        try c.encode(kind, forKey: .kind)
+        try c.encode(placeId, forKey: .placeId)
+        try c.encode(note, forKey: .note)
+    }
+
+    public var startMinutes: Int? { WeekPlan.parseClock(start) }
+    public var endMinutes: Int? { WeekPlan.parseClock(end) }
+    public var durationSeconds: Int { max(0, ((endMinutes ?? 0) - (startMinutes ?? 0)) * 60) }
+}
+
+/// Non-binding planning hints of a plan day (`planHints`). The real break and legal evaluation stays with the actual times.
+public enum PlanHint: String, Codable, Sendable, Hashable, CaseIterable {
+    case breakShort = "planned_break_short"
+    case workStretchLong = "planned_work_stretch_long"
+    case breakPartShort = "planned_break_part_short"
+    case unknown
+
+    public init(from decoder: Decoder) throws {
+        self = PlanHint(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .unknown
+    }
+
+    /// German, non-binding wording; nil for hints from a newer server.
+    public var germanText: String? {
+        switch self {
+        case .breakShort: "Die geplanten Pausen sind kürzer als bei dieser Arbeitsdauer üblich (30 Min. ab 6 Std., 45 Min. ab 9 Std.)."
+        case .workStretchLong: "Am Stück sind mehr als 6 Stunden Arbeit geplant, ohne Lücke von mindestens 15 Minuten."
+        case .breakPartShort: "Eine geplante Lücke unter 15 Minuten zählt nicht als Pause."
+        case .unknown: nil
+        }
+    }
+}
+
+public enum PlanBlocks {
+    /// Contract version that introduced `blocks`.
+    public static let minimumAPIVersion = "0.35.0"
+    public static let maxCount = 32
+    public static let maxNoteLength = 200
+
+    /// True when `apiVersion` (`major.minor.patch`) is at least 0.35.0. Unknown or unparsable versions are treated as old.
+    public static func isSupported(apiVersion: String?) -> Bool {
+        guard let apiVersion else { return false }
+        func parts(_ value: String) -> [Int] { value.split(separator: ".").prefix(3).map { Int($0.prefix { $0.isNumber }) ?? -1 } }
+        let have = parts(apiVersion), need = parts(minimumAPIVersion)
+        guard have.count == 3, !have.contains(-1) else { return false }
+        return have.lexicographicallyPrecedes(need) == false
+    }
+}
+
 public struct PlanDayInput: Encodable, Sendable, Hashable {
     public var mode: PlanMode
     public var placeId: UUID?
@@ -317,32 +423,44 @@ public struct PlanDayInput: Encodable, Sendable, Hashable {
     public var plannedStart: String?
     public var plannedEnd: String?
     public var plannedBreakMinutes: Int?
+    /// Contract 0.35.0: the complete, chronologically ordered block list. When set (also `[]`), it wins over the old time fields and
+    /// those are not sent. nil = old single-window writing (servers before 0.35.0).
+    public var blocks: [PlanTimeBlock]?
 
-    public init(mode: PlanMode, placeId: UUID? = nil, note: String? = nil, plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil) {
+    public init(mode: PlanMode, placeId: UUID? = nil, note: String? = nil, plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil,
+                blocks: [PlanTimeBlock]? = nil) {
         self.mode = mode
         self.placeId = placeId
         self.note = note
         self.plannedStart = plannedStart
         self.plannedEnd = plannedEnd
         self.plannedBreakMinutes = plannedBreakMinutes
+        self.blocks = blocks
     }
 
-    /// Input that keeps everything of `plan` (used when only mode or note change).
+    /// Input that keeps everything of `plan` (used when only mode or note change). A stored block list is sent back unchanged
+    /// (so a detailed split is never flattened by a mode or note edit); mode off sends an empty list as the server demands.
     public init(keeping plan: PlanDay, mode: PlanMode? = nil, note: String?? = nil) {
-        self.init(mode: mode ?? plan.mode, placeId: plan.placeId, note: note ?? plan.note, plannedStart: plan.plannedStart,
-                  plannedEnd: plan.plannedEnd, plannedBreakMinutes: plan.plannedBreakMinutes)
+        let resolved = mode ?? plan.mode
+        let kept: [PlanTimeBlock]? = plan.blocks.isEmpty ? nil : (resolved == .off ? [] : plan.blocks)
+        self.init(mode: resolved, placeId: plan.placeId, note: note ?? plan.note, plannedStart: kept == nil ? plan.plannedStart : nil,
+                  plannedEnd: kept == nil ? plan.plannedEnd : nil, plannedBreakMinutes: kept == nil ? plan.plannedBreakMinutes : nil, blocks: kept)
     }
 
-    private enum CodingKeys: String, CodingKey { case mode, placeId, note, plannedStart, plannedEnd, plannedBreakMinutes }
+    private enum CodingKeys: String, CodingKey { case mode, placeId, note, plannedStart, plannedEnd, plannedBreakMinutes, blocks }
 
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(mode, forKey: .mode)
         try c.encode(placeId, forKey: .placeId)
         try c.encode(note, forKey: .note)
-        try c.encode(plannedStart, forKey: .plannedStart)
-        try c.encode(plannedEnd, forKey: .plannedEnd)
-        try c.encode(plannedBreakMinutes, forKey: .plannedBreakMinutes)
+        if let blocks {
+            try c.encode(blocks, forKey: .blocks)
+        } else {
+            try c.encode(plannedStart, forKey: .plannedStart)
+            try c.encode(plannedEnd, forKey: .plannedEnd)
+            try c.encode(plannedBreakMinutes, forKey: .plannedBreakMinutes)
+        }
     }
 }
 
@@ -354,14 +472,19 @@ public struct PlanDay: Codable, Sendable, Hashable, Identifiable {
     public let note: String?
     /// Contract 0.17.0 (optional, absent for older servers): planned local times `HH:mm` in the work model's zone, planned break
     /// and the read-only `plannedSeconds` (end - start - break). Used by the Live Activity for the planned end of the day.
+    /// With blocks (0.35.0) these are derived by the server: first start, last end, the gaps as break.
     public let plannedStart: String?
     public let plannedEnd: String?
     public let plannedBreakMinutes: Int?
     public let plannedSeconds: Int?
+    /// Contract 0.35.0 (empty for older servers and days without times): the ordered plan blocks and non-binding hints.
+    public let blocks: [PlanTimeBlock]
+    public let planHints: [PlanHint]
     public var id: LocalDay { date }
 
     public init(date: LocalDay, mode: PlanMode, placeId: UUID? = nil, note: String? = nil,
-                plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil, plannedSeconds: Int? = nil) {
+                plannedStart: String? = nil, plannedEnd: String? = nil, plannedBreakMinutes: Int? = nil, plannedSeconds: Int? = nil,
+                blocks: [PlanTimeBlock] = [], planHints: [PlanHint] = []) {
         self.date = date
         self.mode = mode
         self.placeId = placeId
@@ -370,7 +493,28 @@ public struct PlanDay: Codable, Sendable, Hashable, Identifiable {
         self.plannedEnd = plannedEnd
         self.plannedBreakMinutes = plannedBreakMinutes
         self.plannedSeconds = plannedSeconds
+        self.blocks = blocks
+        self.planHints = planHints
     }
+
+    private enum CodingKeys: String, CodingKey { case date, mode, placeId, note, plannedStart, plannedEnd, plannedBreakMinutes, plannedSeconds, blocks, planHints }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        date = try c.decode(LocalDay.self, forKey: .date)
+        mode = try c.decode(PlanMode.self, forKey: .mode)
+        placeId = try c.decodeIfPresent(UUID.self, forKey: .placeId)
+        note = try c.decodeIfPresent(String.self, forKey: .note)
+        plannedStart = try c.decodeIfPresent(String.self, forKey: .plannedStart)
+        plannedEnd = try c.decodeIfPresent(String.self, forKey: .plannedEnd)
+        plannedBreakMinutes = try c.decodeIfPresent(Int.self, forKey: .plannedBreakMinutes)
+        plannedSeconds = try c.decodeIfPresent(Int.self, forKey: .plannedSeconds)
+        blocks = try c.decodeIfPresent([PlanTimeBlock].self, forKey: .blocks) ?? []
+        planHints = (try c.decodeIfPresent([PlanHint].self, forKey: .planHints) ?? []).filter { $0 != .unknown }
+    }
+
+    /// Hints with a known German text only.
+    public var knownHints: [PlanHint] { planHints.filter { $0 != .unknown } }
 }
 
 /// `POST /calendar/custom-days` body.

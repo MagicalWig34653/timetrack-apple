@@ -14,6 +14,8 @@ public final class TodayStore {
     /// H3: context for the "Jetzt" sheet and the top of "Heute". Both are optional extras: a failed read leaves them as they were.
     /// Planned end of today (plan day), and the account's places by id (names for the running entry).
     public private(set) var plannedEnd: Date?
+    /// P13: today's plan blocks (empty without blocks, on a day off or for an old server).
+    public private(set) var plannedBlocks: [PlanTimeBlock] = []
     /// N4: today's holiday or company day (e.g. "Heiligabend (halber Tag)"), nil on an ordinary day.
     public private(set) var todayHoliday: CalendarDay?
     public private(set) var places: [UUID: Place] = [:]
@@ -168,7 +170,11 @@ public final class TodayStore {
         guard contextDay != day else { return }
         let planned = try? await client.listPlanDays(from: day, to: day)
         let placeList = try? await client.listPlaces()
-        if let planned { plannedEnd = PlannedDay(plan: planned.first { $0.date == day }, zone: calendar.timeZone).end }
+        if let planned {
+            let plan = planned.first { $0.date == day }
+            plannedEnd = PlannedDay(plan: plan, zone: calendar.timeZone).end
+            plannedBlocks = plan.flatMap { $0.mode == .off ? nil : $0.blocks } ?? []
+        }
         if let placeList { places = Dictionary(placeList.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }) }
         if planned != nil, placeList != nil { contextDay = day }
         changed()

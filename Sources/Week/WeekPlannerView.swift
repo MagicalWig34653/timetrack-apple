@@ -11,13 +11,17 @@ struct WeekPlannerView: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var notice: String?
+    @State private var places: [Place] = []
+    @Environment(AppModel.self) private var model
 
     private var wide: Bool { sizeClass == .regular && !typeSize.isAccessibilitySize }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
-                if let error = store.error { WeekErrorBanner(error: error) { Task { await store.load() } } }
+                if let error = store.error {
+                    ErrorBanner(message: error.germanMessage(in: .planBlocks), retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("week.error")
+                }
                 if let notice { HintBanner(LocalizedStringKey(notice)) }
                 if store.isUnavailable {
                     HintBanner("wk.week.plan_unavailable")
@@ -39,6 +43,10 @@ struct WeekPlannerView: View {
         // Re-runs when a load ends without a result (superseded by a week hand-over), so the planner is never left blank.
         .task(id: store.isLoading) { if store.week == nil && !store.isLoading && store.error == nil && !store.isUnavailable { await store.load() } }
         .refreshable { if !store.isDirty { await store.load() } }
+        .task(id: store.supportsBlocks) {
+            // Places for the block editor (optional; a failed read just hides the place menu).
+            if store.supportsBlocks, places.isEmpty, let client = model.apiClient { places = ((try? await client.listPlaces()) ?? []).filter { !$0.archived } }
+        }
     }
 
     // MARK: Total
@@ -96,6 +104,7 @@ struct WeekPlannerView: View {
         let content = ForEach(Array(store.days.enumerated()), id: \.element.id) { index, day in
             if store.drafts.indices.contains(index) {
                 PlanDayRow(day: day, draft: store.drafts[index], problem: store.showProblems ? store.problem(at: index) : nil, calendar: store.calendar,
+                           multi: store.supportsBlocks, places: places,
                            onMode: { store.setMode(index, $0) }, onChange: { store.update(index, $0) })
             }
         }
@@ -141,6 +150,8 @@ private struct PlanDayRow: View {
     let draft: DayDraft
     let problem: DraftProblem?
     let calendar: DayCalendar
+    let multi: Bool
+    let places: [Place]
     let onMode: (PlanMode?) -> Void
     let onChange: (DayDraft) -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -164,11 +175,17 @@ private struct PlanDayRow: View {
                 }
                 modePicker
                 if timed {
-                    times
+                    if multi {
+                        PlanBlockEditor(blocks: Binding(get: { draft.blocks }, set: { var d = draft; d.blocks = $0; onChange(d) }),
+                                        defaultKind: WeekPlan.defaultKind(for: draft.mode), places: places, idPrefix: "plan.blocks.\(day.date)")
+                        PlanHintsView(hints: WeekPlan.hints(draft), dayTitle: nil)
+                    } else {
+                        times
+                    }
                     TextField(W.s("plan.note"), text: Binding(get: { draft.note }, set: { var d = draft; d.note = String($0.prefix(200)); onChange(d) }))
                         .ttField().accessibilityIdentifier("plan.note.\(day.date)")
                 }
-                if let problem { Label { W.t(problemKey(problem)) } icon: { Image(systemName: "exclamationmark.triangle.fill") }.font(TTFont.meta).foregroundStyle(TT.danger) }
+                if let problem, !multi { Label { problemText(problem) } icon: { Image(systemName: "exclamationmark.triangle.fill") }.font(TTFont.meta).foregroundStyle(TT.danger) }
                 if timed, let planned, !day.isBlocked {
                     W.t("plan.planned_hours", DurationFormat.hoursMinutes(planned)).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
                 }
@@ -178,11 +195,14 @@ private struct PlanDayRow: View {
         .accessibilityIdentifier("plan.row.\(day.date)")
     }
 
-    private func problemKey(_ problem: DraftProblem) -> String {
+    private func problemText(_ problem: DraftProblem) -> Text {
         switch problem {
-        case .timesRequired: "plan.problem.times"
-        case .endBeforeStart: "plan.problem.order"
-        case .breakInvalid: "plan.problem.break"
+        case .timesRequired: W.t("plan.problem.times")
+        case .endBeforeStart: W.t("plan.problem.order")
+        case .breakInvalid: W.t("plan.problem.break")
+        case .blocksOverlap: Text(verbatim: "Planblöcke überschneiden sich oder sind nicht der Zeit nach geordnet.")
+        case .tooManyBlocks: Text(verbatim: "Höchstens \(PlanBlocks.maxCount) Planblöcke pro Tag.")
+        case .noteTooLong: Text(verbatim: "Eine Blocknotiz ist zu lang (höchstens \(PlanBlocks.maxNoteLength) Zeichen).")
         }
     }
 

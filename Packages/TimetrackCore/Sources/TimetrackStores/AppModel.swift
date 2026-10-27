@@ -331,6 +331,9 @@ public final class AppModel {
         return true
     }
 
+    /// P13: the connected backend knows plan blocks (API 0.35.0). False until the version data is loaded or on an old/unknown backend.
+    public var planBlocksSupported: Bool { PlanBlocks.isSupported(apiVersion: systemInfo.info?.backend.apiVersion) }
+
     /// Loads the backend version data. Failures (old backend: 404) leave the section with the app version only.
     public func refreshSystemInfo() async {
         guard let client = context?.client else { systemInfo = .unavailable; return }

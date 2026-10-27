@@ -58,6 +58,9 @@ struct PlanDaySheet: View {
     @State private var mode: PlanMode = .office
     @State private var note = ""
     @State private var saving = false
+    @State private var blocks: [PlanTimeBlock] = []
+    @State private var places: [Place] = []
+    @Environment(AppModel.self) private var model
 
     var body: some View {
         SheetFrame(title: "plan.sheet.plan", canSave: true, saving: saving, identifier: "plan", save: save) {
@@ -68,15 +71,25 @@ struct PlanDaySheet: View {
                         .pickerStyle(.menu).labelsHidden().accessibilityIdentifier("plan.mode")
                 }
             }
+            if model.planBlocksSupported, mode != .off {
+                FormSection("Zeitblöcke", footer: "Ein Tag kann mehrere Blöcke haben, zum Beispiel Schule am Vormittag und Arbeit am Nachmittag. Lücken dazwischen gelten als Pausen.") {
+                    PlanBlockEditor(blocks: $blocks, defaultKind: WeekPlan.defaultKind(for: mode), places: places, idPrefix: "plan.blocks").padding(TT.Space.m)
+                    PlanHintsView(hints: WeekPlan.hints(for: blocks)).padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m)
+                }
+            }
             FormSection("plan.field.note") { TextField("plan.field.note_placeholder", text: $note, axis: .vertical).lineLimit(1...3).padding(TT.Space.l).accessibilityIdentifier("plan.note") }
             if store.planDays[day] != nil {
                 Button("plan.remove", role: .destructive) { Task { if await store.removePlan(day: day) { dismiss() } } }.buttonStyle(.ttSecondary).foregroundStyle(TT.danger)
             }
-            if let error = store.error { ErrorBanner(message: error.germanDescription, retryTitle: "common.dismiss") { store.error = nil } }
+            if let error = store.error { ErrorBanner(message: error.germanMessage(in: .planBlocks), retryTitle: "common.dismiss") { store.error = nil } }
+        }
+        .task {
+            if model.systemInfo.info == nil { await model.refreshSystemInfo() }
+            if model.planBlocksSupported, places.isEmpty, let client = model.apiClient { places = ((try? await client.listPlaces()) ?? []).filter { !$0.archived } }
         }
         .onAppear {
             store.error = nil
-            if let plan = store.planDays[day] { mode = plan.mode == .unknown ? .office : plan.mode; note = plan.note ?? "" }
+            if let plan = store.planDays[day] { mode = plan.mode == .unknown ? .office : plan.mode; note = plan.note ?? ""; blocks = plan.blocks }
         }
     }
 
@@ -86,8 +99,7 @@ struct PlanDaySheet: View {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
         // PUT replaces the whole day: planned times from the week planner (K1) must be sent along.
         let stored = store.planDays[day]
-        let input = PlanDayInput(mode: mode, placeId: stored?.placeId, note: trimmed.isEmpty ? nil : trimmed, plannedStart: stored?.plannedStart,
-                                 plannedEnd: stored?.plannedEnd, plannedBreakMinutes: stored?.plannedBreakMinutes)
+        let input = WeekPlan.dayInput(mode: mode, note: trimmed.isEmpty ? nil : trimmed, stored: stored, blocks: blocks, multi: model.planBlocksSupported)
         if await store.savePlan(day: day, input) { dismiss() }
     }
 }

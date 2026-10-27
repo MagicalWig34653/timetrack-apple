@@ -36,6 +36,11 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case weekDayInvalid = "week_day_invalid"
     case planTimeInvalid = "plan_time_invalid"
     case planBreakInvalid = "plan_break_invalid"
+    /// P13 (contract 0.35.0, ADR-0031): plan block errors (all 400).
+    case planBlocksOverlap = "plan_blocks_overlap"
+    case planBlocksInvalid = "plan_blocks_invalid"
+    case planKindInvalid = "plan_kind_invalid"
+    case planNoteInvalid = "plan_note_invalid"
     /// Plan shares (PL1): unknown recipient (404), second share to the same account (409), share to oneself (400).
     case recipientNotFound = "recipient_not_found"
     case shareExists = "share_exists"

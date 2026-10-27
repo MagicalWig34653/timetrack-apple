@@ -80,7 +80,21 @@ public struct SharedView: Codable, Sendable, Hashable {
         public let plannedEnd: String?
         public let plannedBreakMinutes: Int?
         public let plannedSeconds: Int?
+        /// Contract 0.35.0: only start, end and kind; the server never releases places or notes.
+        public let blocks: [Block]?
         public var id: LocalDay { date }
+
+        public struct Block: Codable, Sendable, Hashable {
+            public let start: String
+            public let end: String
+            public let kind: PlanBlockKind
+
+            public init(start: String, end: String, kind: PlanBlockKind) {
+                self.start = start
+                self.end = end
+                self.kind = kind
+            }
+        }
     }
 
     public struct ActualDay: Codable, Sendable, Hashable, Identifiable {

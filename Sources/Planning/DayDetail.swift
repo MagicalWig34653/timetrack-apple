@@ -140,7 +140,6 @@ struct DayDetail<Entries: View>: View {
                         if let note = plan.note, !note.isEmpty { Text(verbatim: note).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
                         if !plan.blocks.isEmpty, plan.mode != .off {
                             // P13: each plan block on its own; the timeline shows the gaps.
-                            PlanTimeline(blocks: plan.blocks, height: 18, showsAxis: false).padding(.vertical, 2)
                             ForEach(Array(plan.blocks.enumerated()), id: \.offset) { _, block in
                                 HStack(spacing: 6) {
                                     PlanKindSwatch(kind: block.kind, size: 16)

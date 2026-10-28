@@ -35,6 +35,9 @@ struct TimeHub: View {
     @State private var planningArea = false
     @State private var reportsWeek: ReportWeekRef?
     @State private var pendingNavigation: PendingNavigation?
+    /// V5: horizontal offset of the week content while the finger drags or the page slides.
+    @State private var weekDrag: CGFloat = 0
+    @State private var weekSwitching = false
     @Namespace private var selectionSpace
 
     struct PendingNavigation: Identifiable {
@@ -76,9 +79,12 @@ struct TimeHub: View {
                        pickerContent: { calendar.map { store in MonthPicker(store: store) { picker = false; jump(to: store.visibleKey) } } })
                 .padding(.horizontal, TT.Space.l)
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+                .weekSwipeArea()
             if let calendar, zoom == .month, calendar.isRangeMode { rangeBar(calendar).padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s) }
             content
         }
+        .environment(\.weekSwipe, zoom == .week && !isPlanning ? weekSwipeHandler : nil)
+        .background { weekKeyboardShortcuts }
         .ttScreenBackground()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbar }
@@ -266,6 +272,8 @@ struct TimeHub: View {
                             startPlanning: { navigate { withAnimation(animation) { focus.isPlanning = true } } },
                             actions: dayActions)
             }
+            .offset(x: weekDrag)
+            .opacity(1 - min(abs(Double(weekDrag)) / 200, 0.7))
         }
     }
 
@@ -337,6 +345,55 @@ struct TimeHub: View {
         switch zoom {
         case .month: withAnimation(animation) { pagerPosition = (pagerPosition ?? focus.monthKey.index) + count }
         case .week: navigate { withAnimation(animation) { focus.shiftWeeks(count) } }
+        }
+    }
+
+    // MARK: - Week swipe (V5)
+
+    private var weekSwipeHandler: WeekSwipeHandler {
+        WeekSwipeHandler(
+            changed: { translation in
+                guard !reduceMotion, !weekSwitching, WeekSwipe.tracks(translationX: translation.width, translationY: translation.height) else { return }
+                weekDrag = translation.width * 0.35 // damped: the content follows the finger but never leaves the screen
+            },
+            ended: { translation, predictedX in
+                if let count = WeekSwipe.shift(translationX: translation.width, translationY: translation.height, predictedEndX: predictedX) {
+                    switchWeek(count)
+                } else if weekDrag != 0 {
+                    withAnimation(animation) { weekDrag = 0 }
+                }
+            },
+            shift: { switchWeek($0) })
+    }
+
+    /// Slides the current week out, switches (same `focus.shiftWeeks` as the arrow buttons) and slides the new week in from the other side.
+    private func switchWeek(_ count: Int) {
+        guard zoom == .week, !isPlanning, !weekSwitching else { weekDrag = 0; return }
+        TTHaptics.play(.selection)
+        guard !reduceMotion else { step(count); return }
+        weekSwitching = true
+        withAnimation(.easeIn(duration: 0.12)) { weekDrag = count > 0 ? -90 : 90 }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(120))
+            var noAnimation = Transaction(animation: nil)
+            noAnimation.disablesAnimations = true
+            withTransaction(noAnimation) {
+                focus.shiftWeeks(count)
+                weekDrag = count > 0 ? 90 : -90
+            }
+            withAnimation(.spring(duration: 0.3, bounce: 0.15)) { weekDrag = 0 }
+            weekSwitching = false
+        }
+    }
+
+    /// iPad keyboard (also iPad apps on a Mac): Command + arrow keys switch the week.
+    @ViewBuilder private var weekKeyboardShortcuts: some View {
+        if zoom == .week && !isPlanning {
+            HStack {
+                Button("") { switchWeek(-1) }.keyboardShortcut(.leftArrow, modifiers: .command)
+                Button("") { switchWeek(1) }.keyboardShortcut(.rightArrow, modifiers: .command)
+            }
+            .opacity(0).allowsHitTesting(false).accessibilityHidden(true)
         }
     }
 

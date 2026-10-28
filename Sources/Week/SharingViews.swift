@@ -238,7 +238,6 @@ struct SharedViewScreen: View {
                             Label(day.mode.plainName, systemImage: day.mode.symbol).font(TTFont.meta).foregroundStyle(day.mode.tint)
                         }
                         if let blocks = day.blocks, !blocks.isEmpty {
-                            PlanTimeline(shared: blocks, height: 18, showsAxis: false)
                             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                                 HStack(spacing: 6) {
                                     PlanKindSwatch(kind: block.kind, size: 16)

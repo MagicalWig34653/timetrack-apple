@@ -87,7 +87,6 @@ struct DayStandingCard: View {
                 if store.plannedBlocks.count > 1 {
                     // P13: the plan of today block by block (several blocks only; a single window is covered by the end line above).
                     VStack(alignment: .leading, spacing: TT.Space.xs) {
-                        PlanTimeline(blocks: store.plannedBlocks, height: 16, showsAxis: false)
                         Text(verbatim: PlanBlockText.summary(store.plannedBlocks)).font(TTFont.meta).foregroundStyle(TT.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }

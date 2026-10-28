@@ -204,6 +204,7 @@
 		84A92D323190F9DF91BA8586 /* PushSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154C3255C3D1530359998F8 /* PushSupport.swift */; };
 		8611EE85B32D8607C5746B60 /* StatisticsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD86C35AD4525A263C1DD60D /* StatisticsCharts.swift */; };
 		8656DBB1DB476691EBE8FD5F /* TimetrackProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */; };
+		87448175BE4156B41F44A9D5 /* WeekSwipeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF04B7C34525D7FE5BD508C6 /* WeekSwipeTests.swift */; };
 		88AA4A388F027B2AFDC18830 /* PushSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154C3255C3D1530359998F8 /* PushSupport.swift */; };
 		8E79B55E54A49104CB2ADC34 /* DayDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52D0F9CF21A4E4FE73E0851 /* DayDetail.swift */; };
 		8F1B9DDA1BFD7984C10FCD9B /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C994C099357497A50E66E11 /* CalendarSettingsView.swift */; };
@@ -647,6 +648,7 @@
 		EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackProvider.swift; sourceTree = "<group>"; };
 		EDDA3D3AF17289B8F42E7594 /* TimetrackMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackMacApp.swift; sourceTree = "<group>"; };
 		EE856B5EA18565180559244C /* CalendarDayDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayDemo.swift; sourceTree = "<group>"; };
+		EF04B7C34525D7FE5BD508C6 /* WeekSwipeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekSwipeTests.swift; sourceTree = "<group>"; };
 		EF3020493852D34BCE225751 /* WeekZoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekZoom.swift; sourceTree = "<group>"; };
 		EF9AA59F7A893666CBE8FA97 /* TimetrackMonogramT.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackMonogramT.icon; sourceTree = "<group>"; };
 		F133A559F1596CF467BF722A /* TimetrackWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimetrackWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -854,6 +856,7 @@
 				E771F3E3F4B4C20FB8F4E03D /* VacationReminderTests.swift */,
 				A26EC5EFE411EDA7F5D3BD1E /* VacationV3Tests.swift */,
 				0714180ED72A5FF957695CC5 /* VoidSegmentTests.swift */,
+				EF04B7C34525D7FE5BD508C6 /* WeekSwipeTests.swift */,
 				D8008229515AD5E7F5DCE042 /* WeekVacationTests.swift */,
 				48843BF591F80976EBC50B84 /* WorkModelStatsTests.swift */,
 			);
@@ -1801,6 +1804,7 @@
 				AF65F3440AC015F904519C17 /* VacationReminderTests.swift in Sources */,
 				D5B68985AACA36CBD71D2C0B /* VacationV3Tests.swift in Sources */,
 				EB04C4EF93BF5AB64C1FD5E5 /* VoidSegmentTests.swift in Sources */,
+				87448175BE4156B41F44A9D5 /* WeekSwipeTests.swift in Sources */,
 				047DB10873C68BD6C43702BE /* WeekVacationTests.swift in Sources */,
 				D9E3AAE53D5CF2011F96B5C5 /* WorkModelStatsTests.swift in Sources */,
 			);

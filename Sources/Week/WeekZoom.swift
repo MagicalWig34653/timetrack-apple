@@ -16,6 +16,44 @@ struct DayActions {
     var customDay: (LocalDay) -> Void
 }
 
+// MARK: - Week swipe (V5)
+
+/// Horizontal paging of the week zoom. Attached to the header, the day strip, the week summary and the day headers, never to the
+/// entry rows, so the row swipe actions ("Als geprüft markieren", "Stornieren") keep their gestures.
+struct WeekSwipeHandler {
+    var changed: (CGSize) -> Void
+    var ended: (CGSize, CGFloat) -> Void
+    var shift: (Int) -> Void
+}
+
+private struct WeekSwipeKey: EnvironmentKey { nonisolated(unsafe) static let defaultValue: WeekSwipeHandler? = nil }
+extension EnvironmentValues {
+    var weekSwipe: WeekSwipeHandler? {
+        get { self[WeekSwipeKey.self] }
+        set { self[WeekSwipeKey.self] = newValue }
+    }
+}
+
+private struct WeekSwipeArea: ViewModifier {
+    @Environment(\.weekSwipe) private var handler
+
+    func body(content: Content) -> some View {
+        if let handler {
+            content
+                .simultaneousGesture(DragGesture(minimumDistance: 16)
+                    .onChanged { handler.changed($0.translation) }
+                    .onEnded { handler.ended($0.translation, $0.predictedEndTranslation.width) })
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// Lets a drag that starts on this view switch the week (only active inside the week zoom).
+    func weekSwipeArea() -> some View { modifier(WeekSwipeArea()) }
+}
+
 /// The seven days of the week as a strip: the anchor day is marked, a tap moves the anchor (and scrolls the list to it).
 struct WeekStrip: View {
     let weekStart: LocalDay
@@ -24,6 +62,7 @@ struct WeekStrip: View {
     let today: LocalDay
     let namespace: Namespace.ID
     let select: (LocalDay) -> Void
+    @Environment(\.weekSwipe) private var handler
 
     var body: some View {
         HStack(spacing: 0) {
@@ -52,6 +91,10 @@ struct WeekStrip: View {
                 .accessibilityIdentifier("strip.\(day)")
             }
         }
+        .weekSwipeArea()
+        .accessibilityElement(children: .contain)
+        .accessibilityAction(named: Text(verbatim: "Nächste Woche")) { handler?.shift(1) }
+        .accessibilityAction(named: Text(verbatim: "Vorige Woche")) { handler?.shift(-1) }
     }
 
     private func markDot(_ mark: DayMarkKind) -> Color {
@@ -175,6 +218,7 @@ struct WeekSummaryCard: View {
                 ViewThatFits(in: .horizontal) { footer(spacing: TT.Space.m, vertical: false); footer(spacing: TT.Space.xs, vertical: true) }
             }
         }
+        .weekSwipeArea()
     }
 
     @ViewBuilder private func footer(spacing: CGFloat, vertical: Bool) -> some View {
@@ -296,6 +340,8 @@ struct DayHeader: View {
         }
         .textCase(nil)
         .padding(.vertical, 2)
+        .contentShape(.rect)
+        .weekSwipeArea()
     }
 
     /// "Büro · 8 Std. 24 Min. geplant" next to the actual time, so planned and recorded sit in one place.
@@ -307,22 +353,15 @@ struct DayHeader: View {
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
-    /// P13: every plan block of a day with several blocks on its own (timeline, one line per block), the plan/actual difference and the
+    /// P13: the plan blocks of a day with several blocks as one text line (V5: no timeline bar), the plan/actual difference and the
     /// non-binding hints. Single-window days keep the compact plan line.
     @ViewBuilder private var planBlocksDetail: some View {
         if let plan {
             if let blocks = plan.planBlocks, PlanBlockText.showsDetail(blocks) {
-                VStack(alignment: .leading, spacing: TT.Space.xxs) {
-                    PlanTimeline(blocks: blocks, height: 18, showsAxis: false).frame(maxWidth: 260)
-                    ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
-                        HStack(spacing: 6) {
-                            PlanKindSwatch(kind: block.kind, size: 16)
-                            Text(verbatim: PlanBlockText.line(block)).font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
-                }
-                .padding(.top, 2).accessibilityIdentifier("time.plan_blocks.\(day.date)")
+                // V5: no timeline bar in the week list; the blocks are one quiet text line (the bar looked odd to the user).
+                Text(verbatim: PlanBlockText.summary(blocks)).font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("time.plan_blocks.\(day.date)")
             }
             if let difference = plan.planActualDifferenceSeconds { PlanActualDifferenceChip(seconds: difference) }
             if let hints = plan.planHints, !hints.isEmpty { PlanHintsView(hints: hints, dayTitle: nil) }

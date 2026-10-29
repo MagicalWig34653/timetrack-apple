@@ -69,6 +69,7 @@ final class WeekStoreCache {
 struct WeekPlannerScreen: View {
     var monday: LocalDay?
     @Environment(AppModel.self) private var model
+    @Environment(\.deviceCalendar) private var deviceCalendar
     @State private var pendingShift: Int?
 
     var body: some View {
@@ -82,6 +83,12 @@ struct WeekPlannerScreen: View {
                                   previous: { requestShift(store, -1) }, next: { requestShift(store, 1) }, current: { requestOpen(store, store.currentMonday) })
                         .padding(.horizontal, TT.Space.l)
                     WeekPlannerView(store: store, overview: cache.weekStore(client, calendar: model.dayCalendar))
+                }
+                .onAppear {
+                    store.onSaved = {
+                        Task { await cache.weekStore(client, calendar: model.dayCalendar).load() }
+                        if let deviceCalendar { CalendarAutoSync.shared.request(model: model, deviceCalendar: deviceCalendar) } // AUD3
+                    }
                 }
                 .task { if let monday, store.monday != LocalDays.mondayOfWeek(containing: monday) { await store.open(monday: monday) } }
                 .alert(W.s("leave.title"), isPresented: Binding(get: { pendingShift != nil }, set: { if !$0 { pendingShift = nil } })) {

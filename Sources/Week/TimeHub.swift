@@ -19,6 +19,7 @@ struct TimeHub: View {
     let calendar: CalendarStore?
 
     @Environment(AppModel.self) private var model
+    @Environment(\.deviceCalendar) private var deviceCalendar
     @Environment(\.horizontalSizeClass) private var sizeClass
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -120,7 +121,11 @@ struct TimeHub: View {
         .onChange(of: focus) { syncStores() }
         .onChange(of: pagerPosition) { _, new in pagerSettled(new) }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await reloadAll() } } }
-        .onAppear { planStore?.onSaved = { Task { await weekStore?.load(); await timeList.load() } } }
+        .onAppear { planStore?.onSaved = {
+            Task { await weekStore?.load(); await timeList.load() }
+            // AUD3: write the saved plan back to the device calendar without waiting for the next foreground.
+            if let deviceCalendar { CalendarAutoSync.shared.request(model: model, deviceCalendar: deviceCalendar) }
+        } }
     }
 
     // MARK: - Header and toolbar
@@ -528,10 +533,10 @@ struct ZoomHeader<PickerContent: View>: View {
             Spacer(minLength: TT.Space.s)
             GlassEffectContainer(spacing: 8) {
                 HStack(spacing: 8) {
-                    Button(action: previous) { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+                    Button(action: previous) { Image(systemName: "chevron.left").frame(width: 44, height: 44).contentShape(.rect) }
                         .glassEffect(.regular.interactive(), in: .circle)
                         .accessibilityLabel(Text(opensPicker ? "calendar.previous_month" : "time.previous_week")).accessibilityIdentifier("calendar.prev")
-                    Button(action: next) { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+                    Button(action: next) { Image(systemName: "chevron.right").frame(width: 44, height: 44).contentShape(.rect) }
                         .glassEffect(.regular.interactive(), in: .circle)
                         .accessibilityLabel(Text(opensPicker ? "calendar.next_month" : "time.next_week")).accessibilityIdentifier("calendar.next")
                 }

@@ -14,7 +14,7 @@ public protocol DeviceCalendarProvider: AnyObject {
     /// Finds or creates the dedicated "Timetrack" calendar and returns its identifier.
     func ensureTimetrackCalendar(existingID: String?) throws -> String
     /// Events in one calendar that carry Timetrack's marker URL (and only those).
-    func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent]
+    func writtenEvents(calendarID: String, from: Date, to: Date, calendar: DayCalendar) -> [WrittenEvent]
     /// Applies the operations in one commit and returns the event identifier of every created or updated entry (by entry key),
     /// read after the commit because EventKit may assign or change identifiers on save.
     @discardableResult
@@ -351,7 +351,7 @@ public final class DeviceCalendarStore {
         let desiredAbsences = preferences.writeAbsences ? CalendarWritePlanner.desiredAbsences(absences, from: absenceWindow.from, to: absenceWindow.to) : []
         var created = 0, updated = 0, deleted = 0
         for target in targets {
-            let existing = provider.writtenEvents(calendarID: target.id, from: start, to: end)
+            let existing = provider.writtenEvents(calendarID: target.id, from: start, to: end, calendar: calendar)
             var records = ledger.records(for: target.id)
             let absencePlan = CalendarReconciler.plan(desired: desiredAbsences, existing: existing, records: records, from: absenceWindow.from, to: absenceWindow.to, managing: [EntryMarker.absenceHost])
             let planPlan = CalendarReconciler.plan(desired: desiredPlan, existing: existing, records: records, from: planWindow.from, to: planWindow.to, managing: [EntryMarker.planHost])
@@ -420,7 +420,7 @@ public final class DeviceCalendarStore {
     private func removeWritten(inCalendar id: String, dayCalendar: DayCalendar, now: Date = .now) -> Int {
         let start = now.addingTimeInterval(-2 * 366 * 86_400)
         let end = now.addingTimeInterval(2 * 366 * 86_400)
-        let existing = provider.writtenEvents(calendarID: id, from: start, to: end)
+        let existing = provider.writtenEvents(calendarID: id, from: start, to: end, calendar: dayCalendar)
         let operations = CalendarWritePlanner.removalOperations(for: existing)
         guard !operations.isEmpty else { return 0 }
         do {

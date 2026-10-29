@@ -46,6 +46,20 @@ public struct WrittenEvent: Sendable, Equatable {
         self.startMinute = startMinute
         self.endMinute = endMinute
     }
+
+    /// Builds the record of a device event, reading its instants in `calendar`'s zone (the zone the events were WRITTEN in, i.e. the
+    /// work model's; the device zone would shift minutes and day borders while travelling).
+    public static func reading(eventID: String, key: String, title: String, isAllDay: Bool, start: Date, end: Date, calendar: DayCalendar) -> WrittenEvent {
+        if !isAllDay, key.split(separator: "/").count == 3 {
+            // P13: a plan block is a timed event on one day.
+            let from = calendar.hourAndMinute(of: start), to = calendar.hourAndMinute(of: end)
+            let day = calendar.day(for: start)
+            return WrittenEvent(eventID: eventID, key: key, firstDay: day, lastDay: day, title: title,
+                                startMinute: from.hour * 60 + from.minute, endMinute: to.hour * 60 + to.minute)
+        }
+        let days = DeviceEventFilter.allDayDays(start: start, end: end, calendar: calendar)
+        return WrittenEvent(eventID: eventID, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: title)
+    }
 }
 
 public enum WriteOperation: Sendable, Equatable {

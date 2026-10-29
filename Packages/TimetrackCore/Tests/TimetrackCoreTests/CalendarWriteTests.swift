@@ -335,3 +335,25 @@ struct CalendarWriteStoreTests {
         #expect(storage.load().selectedCalendarIDs == ["work", "private"])
     }
 }
+
+/// AUD3 finding 4: written events must be read in the zone they were written in (work model), not the device zone.
+@Suite struct WrittenEventZoneTests {
+    private let berlin = DayCalendar(timeZone: TimeZone(identifier: "Europe/Berlin")!)
+    private let tokyo = DayCalendar(timeZone: TimeZone(identifier: "Asia/Tokyo")!)
+
+    @Test func timedBlockReadsBackIdenticallyInTheWritingZone() {
+        let start = berlin.instant(day: "2026-10-19", hour: 8, minute: 30)!, end = berlin.instant(day: "2026-10-19", hour: 12, minute: 0)!
+        let key = "plan/2026-10-19/0"
+        let right = WrittenEvent.reading(eventID: "e", key: key, title: "", isAllDay: false, start: start, end: end, calendar: berlin)
+        #expect(right.startMinute == 8 * 60 + 30 && right.endMinute == 12 * 60 && right.firstDay == "2026-10-19")
+        // the device zone would see a shifted day and minutes: exactly the churn the zone parameter prevents
+        let wrong = WrittenEvent.reading(eventID: "e", key: key, title: "", isAllDay: false, start: start, end: end, calendar: tokyo)
+        #expect(wrong.startMinute != right.startMinute)
+    }
+
+    @Test func allDayAbsenceKeepsItsDaysInTheWritingZone() {
+        let start = berlin.instant(day: "2026-10-19", hour: 0, minute: 0)!, end = berlin.instant(day: "2026-10-21", hour: 0, minute: 0)!
+        let event = WrittenEvent.reading(eventID: "e", key: "absence/x", title: "", isAllDay: true, start: start, end: end, calendar: berlin)
+        #expect(event.firstDay == "2026-10-19" && event.lastDay == "2026-10-20")
+    }
+}

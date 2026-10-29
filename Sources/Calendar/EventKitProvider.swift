@@ -73,21 +73,13 @@ final class EventKitProvider: DeviceCalendarProvider {
         return calendar.calendarIdentifier
     }
 
-    func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent] {
+    func writtenEvents(calendarID: String, from: Date, to: Date, calendar dayCalendar: DayCalendar) -> [WrittenEvent] {
         guard let calendar = store.calendar(withIdentifier: calendarID) else { return [] }
-        let dayCalendar = DayCalendar(timeZone: .current)
         let predicate = store.predicateForEvents(withStart: from, end: to, calendars: [calendar])
         return store.events(matching: predicate).compactMap { event in
             guard let key = EntryMarker.key(from: event.url, notes: event.notes), let id = event.eventIdentifier else { return nil }
-            if !event.isAllDay, key.split(separator: "/").count == 3 {
-                // P13: a plan block is a timed event on one day.
-                let start = dayCalendar.hourAndMinute(of: event.startDate), end = dayCalendar.hourAndMinute(of: event.endDate)
-                let day = dayCalendar.day(for: event.startDate)
-                return WrittenEvent(eventID: id, key: key, firstDay: day, lastDay: day, title: event.title ?? "",
-                                    startMinute: start.hour * 60 + start.minute, endMinute: end.hour * 60 + end.minute)
-            }
-            let days = DeviceEventFilter.allDayDays(start: event.startDate, end: event.endDate, calendar: dayCalendar)
-            return WrittenEvent(eventID: id, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: event.title ?? "")
+            return WrittenEvent.reading(eventID: id, key: key, title: event.title ?? "", isAllDay: event.isAllDay,
+                                        start: event.startDate, end: event.endDate, calendar: dayCalendar)
         }
     }
 

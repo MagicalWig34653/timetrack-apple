@@ -62,7 +62,7 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
         return timetrackCalendarID
     }
 
-    public func writtenEvents(calendarID: String, from: Date, to: Date) -> [WrittenEvent] {
+    public func writtenEvents(calendarID: String, from: Date, to: Date, calendar: DayCalendar) -> [WrittenEvent] {
         written.filter { $0.value.calendarID == calendarID }
             .map { WrittenEvent(eventID: $0.key, key: $0.value.entry.key, firstDay: $0.value.entry.firstDay, lastDay: $0.value.entry.lastDay, title: $0.value.entry.title,
                                            startMinute: $0.value.entry.startMinute, endMinute: $0.value.entry.endMinute) }

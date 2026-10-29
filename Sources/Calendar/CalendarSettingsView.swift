@@ -48,6 +48,7 @@ struct CalendarSettingsView: View {
 private struct CalendarSettingsContent: View {
     let store: DeviceCalendarStore
     let openSettings: () -> Void
+    @Environment(AppModel.self) private var model
     @State private var confirmRemoval = false
 
     var body: some View {
@@ -211,7 +212,7 @@ private struct CalendarSettingsContent: View {
             }
         }
         .confirmationDialog("Alle von Timetrack geschriebenen Termine entfernen?", isPresented: $confirmRemoval, titleVisibility: .visible) {
-            Button("Termine entfernen", role: .destructive) { store.removeAllWritten(calendar: DayCalendar(timeZone: .current)) }
+            Button("Termine entfernen", role: .destructive) { store.removeAllWritten(calendar: model.dayCalendar) }
                 .accessibilityIdentifier("calendar.remove.confirm")
             Button("Abbrechen", role: .cancel) {}
         } message: {

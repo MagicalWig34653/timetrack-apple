@@ -214,6 +214,7 @@
 		91072A71DC15FAD1BB67143F /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
 		9138C7BDD813C4E6F854B8A3 /* LocationIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CD0513317393D3CB5C87EE /* LocationIntents.swift */; };
 		91683C5391B9DDD69881B495 /* MacCompanion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D013998FFF3B0A9A133100 /* MacCompanion.swift */; };
+		920DC368151508E1344856D7 /* NowBarExtremeTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D02F91CC48E6CDC6BD657B /* NowBarExtremeTypeTests.swift */; };
 		929402AD847AD1E15005297F /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
 		93E1BABAC7C79B32FA183BF7 /* TimePolishShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C3C3ECA98BB99EF568CE7C1 /* TimePolishShotTests.swift */; };
 		9427A0DD14A8B2BD1CCF75E4 /* WeekPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4CCDCEC47454447400107A /* WeekPlannerView.swift */; };
@@ -536,6 +537,7 @@
 		71DB92BD63CCEB84C12C7634 /* MacPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferences.swift; sourceTree = "<group>"; };
 		7258FFA9682C41F91725088D /* TimetrackClockDark.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackClockDark.icon; sourceTree = "<group>"; };
 		7326FE57D070687C02A5F334 /* WM2.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = WM2.xcstrings; sourceTree = "<group>"; };
+		74D02F91CC48E6CDC6BD657B /* NowBarExtremeTypeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowBarExtremeTypeTests.swift; sourceTree = "<group>"; };
 		74F2B113E432CCEAB8720173 /* AbsenceEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbsenceEditor.swift; sourceTree = "<group>"; };
 		76C8907D23E29502AA63505D /* TimetrackWidgetMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackWidgetMac.entitlements; sourceTree = "<group>"; };
 		78DD4C2BA0562A54AC28CCE5 /* MacStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacStrings.swift; sourceTree = "<group>"; };
@@ -834,6 +836,7 @@
 				521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */,
 				D8725765AFF6EDE5CAF09B9E /* H3ShotTests.swift */,
 				6CCCCFA3BE5F6455EA695589 /* MoreNavigation.swift */,
+				74D02F91CC48E6CDC6BD657B /* NowBarExtremeTypeTests.swift */,
 				A6F6ED87EE6346157550ADA8 /* NowBarLargeTypeTests.swift */,
 				512629B01D497703C711B949 /* NowBarTests.swift */,
 				1C85D0F00399C0BAA67E41FF /* OverworkNotificationTests.swift */,
@@ -1782,6 +1785,7 @@
 				1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */,
 				4114985EE705769FC54341D8 /* H3ShotTests.swift in Sources */,
 				801AB62BA6D81DF863EA905C /* MoreNavigation.swift in Sources */,
+				920DC368151508E1344856D7 /* NowBarExtremeTypeTests.swift in Sources */,
 				AC3E143F3D070F28237F67E8 /* NowBarLargeTypeTests.swift in Sources */,
 				79C2B9294AD3048F5681AD87 /* NowBarTests.swift in Sources */,
 				0054AF515788D3EBFC3C65C8 /* OverworkNotificationTests.swift in Sources */,

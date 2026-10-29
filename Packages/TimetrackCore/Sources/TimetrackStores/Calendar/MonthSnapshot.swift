@@ -57,6 +57,43 @@ public enum MonthMarker: Hashable, Sendable {
     case plan(PlanMode)
 }
 
+/// U2: one simple coloured pill under the date number of the vertical month list (like the events of the iOS calendar).
+public struct MonthPill: Hashable, Sendable {
+    public enum Kind: Hashable, Sendable {
+        case holiday
+        case absence(AbsenceKind)
+        case plan(PlanMode)
+    }
+
+    public let kind: Kind
+    /// Planned or requested absences are drawn as outline only; taken/approved ones are filled.
+    public let tentative: Bool
+    /// Holiday name (the view shortens it); nil for the other kinds.
+    public let text: String?
+
+    /// Pills in priority order: absences first (vacation, sick, ...), then the holiday, then the plan mode (off and unknown are no pill).
+    public static func pills(for info: CalendarDayInfo) -> [MonthPill] {
+        var result: [MonthPill] = info.absences.map {
+            MonthPill(kind: .absence($0.kind), tentative: $0.status == .planned || $0.status == .requested, text: nil)
+        }
+        if info.isHoliday || info.hasHalfDay, let name = (info.holidays.first { !$0.isHalfDay } ?? info.holidays.first)?.displayName {
+            result.append(MonthPill(kind: .holiday, tentative: false, text: name))
+        }
+        if let plan = info.plan, plan.mode != .off, plan.mode != .unknown {
+            result.append(MonthPill(kind: .plan(plan.mode), tentative: false, text: nil))
+        }
+        return result
+    }
+
+    /// What fits into a cell with `capacity` pill slots: when more exist, the last slot becomes "+n" (`hidden` counts what is not shown).
+    public static func visible(_ pills: [MonthPill], capacity: Int) -> (shown: [MonthPill], hidden: Int) {
+        guard capacity > 0 else { return ([], pills.count) }
+        guard pills.count > capacity else { return (pills, 0) }
+        let shown = Array(pills.prefix(capacity - 1))
+        return (shown, pills.count - shown.count)
+    }
+}
+
 /// One cell of the month grid: everything the view needs, computed once (never in the scroll path).
 public struct MonthCell: Hashable, Sendable, Identifiable {
     public let day: LocalDay
@@ -65,6 +102,10 @@ public struct MonthCell: Hashable, Sendable, Identifiable {
     public let isWeekend: Bool
     public let isHoliday: Bool
     public let markers: [MonthMarker]
+    /// U2: pills of the vertical month list.
+    public let pills: [MonthPill]
+    /// U2: evaluated work plus credit of the day (0 when nothing was recorded or the day is not loaded); drives the "worked" dot.
+    public let workedSeconds: Int
     public let info: CalendarDayInfo
     public var id: LocalDay { day }
 }
@@ -79,7 +120,15 @@ public struct MonthSnapshot: Hashable, Sendable, Identifiable {
 
     public var rows: [[MonthCell]] { stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0..<min($0 + 7, cells.count)]) } }
 
-    public static func build(key: MonthKey, holidays: [CalendarDay], absences: [Absence], planDays: [LocalDay: PlanDay]) -> MonthSnapshot {
+    /// U2: the weeks that contain at least one day of the month (4 to 6 rows with their ISO week numbers), for the vertical list.
+    public var monthRows: [(week: Int, cells: [MonthCell])] {
+        rows.enumerated().compactMap { index, row in
+            row.contains { $0.inMonth } ? (weekNumbers.indices.contains(index) ? weekNumbers[index] : 0, row) : nil
+        }
+    }
+
+    public static func build(key: MonthKey, holidays: [CalendarDay], absences: [Absence], planDays: [LocalDay: PlanDay],
+                             evaluations: [LocalDay: DayEvaluation] = [:]) -> MonthSnapshot {
         let days = key.gridDays
         let range = (days.first ?? "", days.last ?? "")
         // Only entries touching the grid take part in the per-cell scan.
@@ -97,7 +146,8 @@ public struct MonthSnapshot: Hashable, Sendable, Identifiable {
             if let plan = info.plan { markers.append(.plan(plan.mode)) }
             let parts = LocalDays.parse(day)
             return MonthCell(day: day, dayNumber: parts?.day ?? 0, inMonth: parts?.year == key.year && parts?.month == key.month,
-                             isWeekend: (LocalDays.isoWeekday(day) ?? 1) >= 6, isHoliday: info.isHoliday, markers: Array(markers.prefix(3)), info: info)
+                             isWeekend: (LocalDays.isoWeekday(day) ?? 1) >= 6, isHoliday: info.isHoliday, markers: Array(markers.prefix(3)),
+                             pills: MonthPill.pills(for: info), workedSeconds: evaluations[day].map { $0.evaluatedWorkSeconds + $0.creditSeconds } ?? 0, info: info)
         }
         let weeks = stride(from: 0, to: days.count, by: 7).map { LocalDays.isoWeek(of: days[$0]) ?? 0 }
         return MonthSnapshot(key: key, cells: cells, weekNumbers: weeks)

@@ -26,7 +26,7 @@ public final class CalendarStore {
     public private(set) var absences: [Absence] = [] { didSet { dataVersion += 1 } }
     public private(set) var planDays: [LocalDay: PlanDay] = [:] { didSet { dataVersion += 1 } }
     /// Evaluated days (with their entries) of the loaded window: the day details of the month zoom read from here (Z2).
-    public private(set) var evaluations: [LocalDay: DayEvaluation] = [:]
+    public private(set) var evaluations: [LocalDay: DayEvaluation] = [:] { didSet { dataVersion += 1 } }
     /// Changes whenever holidays, absences or plan change; page snapshots are valid for one version.
     public private(set) var dataVersion = 0
     public private(set) var detail: DayEvaluation?
@@ -298,7 +298,7 @@ public final class CalendarStore {
         if let cached = snapshots[key], cached.version == version { return cached.snapshot }
         let clock = ContinuousClock()
         let started = clock.now
-        let built = MonthSnapshot.build(key: key, holidays: holidays, absences: absences, planDays: planDays)
+        let built = MonthSnapshot.build(key: key, holidays: holidays, absences: absences, planDays: planDays, evaluations: evaluations)
         let elapsed = clock.now - started
         metrics.snapshotBuilds += 1
         metrics.lastSnapshotSeconds = Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18

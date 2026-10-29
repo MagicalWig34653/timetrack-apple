@@ -201,3 +201,88 @@ import Testing
         #expect(store.metrics.windowMisses == 0, "paging month by month never waits for data")
     }
 }
+
+/// U2: pills and worked flag of the vertical month list.
+@Suite struct MonthPillTests {
+    private func absence(_ kind: AbsenceKind, _ status: String, _ day: LocalDay) -> Absence {
+        let json = #"{"id":"\#(UUID().uuidString)","version":1,"kind":"\#(kind.rawValue)","startDate":"\#(day)","endDate":"\#(day)","status":"\#(status)","countedHalfDays":2}"#
+        return try! JSONCoding.makeDecoder().decode(Absence.self, from: Data(json.utf8))
+    }
+
+    @Test func pillsFollowPriorityAndSkipOffPlans() {
+        let holiday = CalendarDay(startDate: "2026-10-20", endDate: "2026-10-20", name: "Feiertag X", kind: .holiday, source: .builtin)
+        let plan = PlanDay(date: "2026-10-20", mode: .office, placeId: nil, note: nil)
+        let off = PlanDay(date: "2026-10-21", mode: .off, placeId: nil, note: nil)
+        let snapshot = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: [holiday],
+                                           absences: [absence(.vacation, "approved", "2026-10-20"), absence(.sick, "planned", "2026-10-20"), absence(.vacation, "planned", "2026-10-21")],
+                                           planDays: ["2026-10-20": plan, "2026-10-21": off])
+        let busy = snapshot.cells.first { $0.day == "2026-10-20" }!
+        #expect(busy.pills.map(\.kind) == [.absence(.vacation), .absence(.sick), .holiday, .plan(.office)])
+        #expect(busy.pills[0].tentative == false && busy.pills[1].tentative == true)
+        #expect(busy.pills[2].text == "Feiertag X")
+        let quiet = snapshot.cells.first { $0.day == "2026-10-21" }!
+        #expect(quiet.pills.map(\.kind) == [.absence(.vacation)], "mode off is no pill")
+        #expect(snapshot.cells.first { $0.day == "2026-10-22" }?.pills.isEmpty == true)
+    }
+
+    @Test func overflowTurnsTheLastSlotIntoACount() {
+        let pills = (0..<4).map { _ in MonthPill(kind: .holiday, tentative: false, text: nil) }
+        let two = MonthPill.visible(pills, capacity: 2)
+        #expect(two.shown.count == 1 && two.hidden == 3, "one pill plus '+3'")
+        let all = MonthPill.visible(Array(pills.prefix(2)), capacity: 2)
+        #expect(all.shown.count == 2 && all.hidden == 0)
+        #expect(MonthPill.visible(pills, capacity: 0).hidden == 4)
+        #expect(MonthPill.visible([], capacity: 3).shown.isEmpty)
+    }
+
+    @Test func monthRowsCoverOnlyTheWeeksOfTheMonth() {
+        // February 2027 starts on a Monday and has 28 days: exactly four rows.
+        let february = MonthSnapshot.build(key: MonthKey(year: 2027, month: 2), holidays: [], absences: [], planDays: [:])
+        #expect(february.monthRows.count == 4)
+        #expect(february.monthRows.first?.cells.first?.day == "2027-02-01")
+        // October 2026 spans five weeks (28 Sep to 1 Nov).
+        let october = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: [], absences: [], planDays: [:])
+        #expect(october.monthRows.count == 5)
+        #expect(october.monthRows.map(\.week) == [40, 41, 42, 43, 44])
+        // A 31-day month starting on a Sunday needs six rows.
+        let may = MonthSnapshot.build(key: MonthKey(year: 2026, month: 3), holidays: [], absences: [], planDays: [:])
+        #expect(may.monthRows.count == 6)
+    }
+}
+
+/// U2: scroll geometry of the vertical month list.
+@Suite struct MonthListLayoutTests {
+    private let layout = MonthListLayout(first: MonthKey(year: 2026, month: 9), count: 6, rowHeight: 80, headerHeight: 40)
+
+    @Test func sectionsStackWithTheirRowCounts() {
+        // Sep 2026: Tue 1st, 30 days -> 5 rows; Oct: 5 rows; Nov (Sun 1st): 6 rows; Dec: 5; Jan 2027: Fri 1st, 31 days -> 5; Feb 2027: 4.
+        #expect(MonthKey(year: 2026, month: 9).weekRows == 5)
+        #expect(MonthKey(year: 2026, month: 3).weekRows == 6)
+        #expect(MonthKey(year: 2027, month: 2).weekRows == 4)
+        #expect(layout.offset(of: MonthKey(year: 2026, month: 9)) == 0)
+        #expect(layout.offset(of: MonthKey(year: 2026, month: 10)) == 440)
+        let rows: Double = 30
+        #expect(layout.contentHeight == 240 + rows * 80)
+    }
+
+    @Test func offsetMapsToTheMonthUnderTheHeader() {
+        let october = layout.offset(of: MonthKey(year: 2026, month: 10))
+        #expect(layout.key(atOffset: 0) == MonthKey(year: 2026, month: 9))
+        #expect(layout.key(atOffset: october - 0.5) == MonthKey(year: 2026, month: 9))
+        #expect(layout.key(atOffset: october) == MonthKey(year: 2026, month: 10))
+        #expect(layout.key(atOffset: -200) == MonthKey(year: 2026, month: 9), "rubber band above the list")
+        #expect(layout.key(atOffset: 1_000_000) == MonthKey(year: 2027, month: 2), "rubber band below the list")
+        // The probe lies below the header: a month whose header only just appeared at the bottom is not "the visible month" yet.
+        #expect(layout.visibleKey(atOffset: october - 200) == MonthKey(year: 2026, month: 9))
+        #expect(layout.visibleKey(atOffset: october - 30) == MonthKey(year: 2026, month: 10))
+    }
+
+    @Test func dayOffsetsPointAtTheWeekRow() {
+        let october = layout.offset(of: MonthKey(year: 2026, month: 10))
+        // Oct 2026: first row is the week of Mon 28 Sep (contains Thu 1 Oct), the next row starts Mon 5 Oct.
+        #expect(layout.offset(of: "2026-10-01") == october + 40)
+        #expect(layout.offset(of: "2026-10-05") == october + 120)
+        #expect(layout.offset(of: "2026-10-29") == october + 360)
+        #expect(layout.offset(of: "2030-01-01") == nil)
+    }
+}

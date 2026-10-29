@@ -113,13 +113,13 @@ final class NowBarTests: XCTestCase {
     func testMoreCollectsSettingsAutomationAndReminders() {
         app.openMore()
         XCTAssertTrue(el("more.settings").waitForExistence(timeout: 10))
-        XCTAssertTrue(el("settings.overwork").exists, "reminders group")
-        XCTAssertTrue(el("settings.calendar").exists, "automation and calendar group")
+        XCTAssertFalse(el("settings.overwork").exists, "U3: reminders live in Einstellungen only")
+        XCTAssertFalse(el("settings.calendar").exists, "U3: calendar settings live in Einstellungen only")
         shot("ux3-more")
         el("more.settings").tap()
         XCTAssertTrue(el("settings.sign_out").waitForExistence(timeout: 10))
         XCTAssertTrue(el("settings.appearance").exists, "S2 structure intact")
-        XCTAssertFalse(el("settings.automation").exists, "automation moved to Mehr")
+        XCTAssertTrue(el("settings.overwork").exists, "U3: reminders group in Einstellungen")
     }
 
     func testDayCardExplainsTermsAndShowsNoFalseDeficit() {

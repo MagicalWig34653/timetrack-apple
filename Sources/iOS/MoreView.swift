@@ -3,8 +3,8 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// UX3: "Mehr" replaces the "Einstellungen" tab as the place for everything that is not part of the daily path: areas the app does not
-/// have natively yet (they open the web app), reminders, automation and the settings themselves. The S2 settings pages stay as they are.
+/// U3: "Mehr" is the launcher for features that are not part of the daily path (Prüfen, Storniert, Statistik, Berichtsheft, Orte, Web areas).
+/// Everything that is configured (account, appearance, work, reminders, calendar, automation, Focus, info) lives in "Einstellungen" only.
 struct MoreView: View {
     @Environment(AppModel.self) private var model
     @State private var showReview = false
@@ -12,13 +12,11 @@ struct MoreView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
-                AccountCard()
                 reviewGroup
                 evaluationGroup
                 reportsGroup
                 webAreas
-                remindersGroup
-                automationGroup
+                placesGroup
                 FormSection("App") {
                     SettingsLinkRow(title: "Einstellungen", symbol: "gearshape", id: "more.settings") { SettingsView() }
                 }
@@ -87,35 +85,11 @@ struct MoreView: View {
         return rows
     }
 
-    /// Short state next to the push row (the page explains the rest).
-    private var pushValue: String? {
-        guard let push = model.push else { return nil }
-        switch push.state {
-        case .registered: return "Aktiv"
-        case .unavailable: return "Nicht angeboten"
-        case .idle, .registering: return nil
-        case .limitReached, .systemFailure, .failed: return "Problem"
-        }
-    }
-
-    private var remindersGroup: some View {
-        FormSection("Erinnerungen") {
-            if model.isEnabled(.planning) {
-                SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
-            }
-            SettingsLinkRow(title: "Überstunden-Hinweise", symbol: "clock.badge.exclamationmark", id: "settings.overwork") { OverworkSettingsView() } // OT1
-            SettingsLinkRow(title: "Push-Benachrichtigungen", symbol: "bell.badge.waveform", value: pushValue, id: "settings.push") { PushSettingsPage() } // P14c
-        }
-    }
-
-    /// What the app does on its own or with other apps: device calendars, location automation, Focus filter (moved here from the settings, S2).
-    private var automationGroup: some View {
-        FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
-            SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
-            SettingsLinkRow(title: "Kalenderabos", symbol: "calendar.badge.plus", id: "settings.feeds") { CalendarFeedsPage() } // N2/P14c: ICS subscriptions
-            if model.isEnabled(.automation) { // L2/F2: hidden when the automation module is off (account or server-wide)
-                SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
-                SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
+    /// U3: places are a feature (list, archive, per-place automation mode); the global automation switches are in the settings.
+    @ViewBuilder private var placesGroup: some View {
+        if model.isEnabled(.automation) {
+            FormSection("Orte", footer: "Deine Orte und was die Automatik dort tut. Archivierte Orte werden von der Automatik ignoriert.") {
+                SettingsLinkRow(title: "Orte und Automatik", symbol: "mappin.and.ellipse", id: "more.places") { AutomationSettingsView() }
             }
         }
     }

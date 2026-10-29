@@ -21,6 +21,8 @@ struct SettingsView: View {
                 AccountCard()
                 appearanceGroup
                 workGroup
+                remindersGroup
+                automationGroup
                 devicesGroup
                 technicalGroup
                 sessionActions
@@ -51,6 +53,40 @@ struct SettingsView: View {
             SettingsLinkRow(title: wmKey("wm.account.title"), symbol: "plusminus.circle", id: "settings.timeaccount") { TimeAccountScreen() } // WM2
             if model.isEnabled(.planning) {
                 VacationEntitlementRow()
+            }
+        }
+    }
+
+    /// Short state next to the push row (the page explains the rest).
+    private var pushValue: String? {
+        guard let push = model.push else { return nil }
+        switch push.state {
+        case .registered: return "Aktiv"
+        case .unavailable: return "Nicht angeboten"
+        case .idle, .registering: return nil
+        case .limitReached, .systemFailure, .failed: return "Problem"
+        }
+    }
+
+    /// U3: reminders (moved here from "Mehr"; the single place for them).
+    private var remindersGroup: some View {
+        FormSection("Erinnerungen") {
+            if model.isEnabled(.planning) {
+                SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
+            }
+            SettingsLinkRow(title: "Überstunden-Hinweise", symbol: "clock.badge.exclamationmark", id: "settings.overwork") { OverworkSettingsView() } // OT1
+            SettingsLinkRow(title: "Push-Benachrichtigungen", symbol: "bell.badge.waveform", value: pushValue, id: "settings.push") { PushSettingsPage() } // P14c
+        }
+    }
+
+    /// U3: device calendars, location automation switches and the Focus filter (moved here from "Mehr").
+    private var automationGroup: some View {
+        FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
+            SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
+            SettingsLinkRow(title: "Kalenderabos", symbol: "calendar.badge.plus", id: "settings.feeds") { CalendarFeedsPage() }
+            if model.isEnabled(.automation) {
+                SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
+                SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
             }
         }
     }

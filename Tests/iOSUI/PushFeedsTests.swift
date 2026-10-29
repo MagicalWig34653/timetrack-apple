@@ -33,7 +33,7 @@ final class PushFeedsTests: XCTestCase {
     func testCalendarFeedCreateShowLinkAndRevoke() throws {
         continueAfterFailure = false
         let app = try launch()
-        app.openMore()
+        app.openSettings()
         let row = el(app, "settings.feeds")
         XCTAssertTrue(row.waitForExistence(timeout: 15))
         scrollTo(app, row)
@@ -88,7 +88,7 @@ final class PushFeedsTests: XCTestCase {
             return false
         }
         defer { removeUIInterruptionMonitor(monitor) }
-        app.openMore()
+        app.openSettings()
         let row = el(app, "settings.push")
         XCTAssertTrue(row.waitForExistence(timeout: 15))
         scrollTo(app, row)

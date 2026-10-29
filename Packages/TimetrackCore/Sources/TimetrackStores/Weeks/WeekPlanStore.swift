@@ -29,6 +29,10 @@ public final class WeekPlanStore {
     private let client: APIClient
     public let calendar: DayCalendar
     private var generation = 0
+    /// Bumped whenever another week is opened; a save that finishes under a different epoch must not touch the visible week.
+    private var weekEpoch = 0
+    /// Week switch requested while a save was running; performed after a successful save, dropped after a failed one.
+    private var pendingOpen: LocalDay?
 
     public enum CopyResult: Sendable, Equatable { case copied, emptySource, failed }
 
@@ -128,6 +132,12 @@ public final class WeekPlanStore {
     }
 
     public func open(monday target: LocalDay) async {
+        // Never switch weeks under a running PUT: queue the switch, `save()` performs it afterwards.
+        if isSaving {
+            pendingOpen = LocalDays.mondayOfWeek(containing: target) ?? target
+            return
+        }
+        weekEpoch += 1
         monday = LocalDays.mondayOfWeek(containing: target) ?? target
         week = nil
         drafts = []
@@ -216,22 +226,35 @@ public final class WeekPlanStore {
             return false
         }
         isSaving = true
-        defer { isSaving = false }
+        // Remember what was sent and for which week: the response only applies if the same week is still shown.
+        let sent = drafts
+        let epoch = weekEpoch
+        let label = isoWeek
+        let succeeded: Bool
         do {
-            let saved = try await client.putPlanWeek(isoWeek, WeekPlan.request(drafts, multi: supportsBlocks))
-            week = saved
-            drafts = saved.days.map { WeekPlan.draft(from: $0, multi: supportsBlocks) }
-            baseline = drafts
-            showProblems = false
+            let saved = try await client.putPlanWeek(label, WeekPlan.request(sent, multi: supportsBlocks))
+            if epoch == weekEpoch {
+                week = saved
+                let serverDrafts = saved.days.map { WeekPlan.draft(from: $0, multi: supportsBlocks) }
+                // Edits made while the PUT ran stay in the drafts (and the plan stays unsaved); only the baseline moves.
+                if drafts == sent { drafts = serverDrafts }
+                baseline = serverDrafts
+                showProblems = false
+            }
             onOutcome?(.saved)
             onSaved?()
-            return true
+            succeeded = true
         } catch {
             if let failure = error as? TimetrackError, failure != .cancelled {
                 self.error = failure
                 onOutcome?(.failed)
             }
-            return false
+            succeeded = false
         }
+        isSaving = false
+        let queued = pendingOpen
+        pendingOpen = nil
+        if succeeded, let queued, queued != monday { await open(monday: queued) }
+        return succeeded
     }
 }

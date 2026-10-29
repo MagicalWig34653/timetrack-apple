@@ -347,3 +347,54 @@ private final class RetryTransport: HTTPTransport, @unchecked Sendable {
         return (Data(#"{"from":"2026-05-01","to":"2026-07-31","budget":{"entitlementDays":30,"takenDays":0,"plannedDays":0,"remainingDays":30},"suggestions":[]}"#.utf8), HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!)
     }
 }
+
+/// AUD3 finding 1: a slow PUT must neither overwrite edits made meanwhile nor write into another week.
+@Suite @MainActor struct WeekPlanSaveRaceTests {
+    private let calendar = DayCalendar(timeZone: TimeZone(identifier: "Europe/Berlin")!)
+    private let now = ISO8601DateFormatter().date(from: "2026-10-21T10:00:00Z")!
+
+    private func loadedStore(_ transport: MockTransport) async -> WeekPlanStore {
+        transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: WeekFixtures.planWeek)
+        transport.enqueue("GET /api/v1/time/weeks/2026-W43", status: 500, body: "{}")
+        let store = WeekPlanStore(client: Fixtures.client(transport), calendar: calendar, now: now)
+        await store.load()
+        return store
+    }
+
+    @Test func editsMadeWhileSavingSurvive() async {
+        let transport = MockTransport()
+        let store = await loadedStore(transport)
+        transport.enqueue("PUT /api/v1/plan/weeks/2026-W44", body: WeekFixtures.planWeek)
+        store.setMode(2, .home)
+        let gate = transport.hold("PUT /api/v1/plan/weeks/2026-W44")
+        let saving = Task { await store.save() }
+        while !store.isSaving { await Task.yield() }
+        store.setMode(3, .office) // edited while the PUT is in flight
+        let edited = store.drafts
+        gate.release()
+        #expect(await saving.value)
+        #expect(store.drafts == edited)
+        #expect(store.isDirty)
+        #expect(!store.isSaving)
+    }
+
+    @Test func weekSwitchDuringSaveIsQueuedAndNeverCrossesWeeks() async {
+        let transport = MockTransport()
+        let store = await loadedStore(transport)
+        transport.enqueue("PUT /api/v1/plan/weeks/2026-W44", body: WeekFixtures.planWeek)
+        transport.enqueue("GET /api/v1/plan/weeks/2026-W45", status: 404, body: #"{"error":{"code":"not_found","message":"x"}}"#)
+        transport.enqueue("GET /api/v1/time/weeks/2026-W44", status: 500, body: "{}")
+        store.setMode(2, .home)
+        let gate = transport.hold("PUT /api/v1/plan/weeks/2026-W44")
+        let saving = Task { await store.save() }
+        while !store.isSaving { await Task.yield() }
+        await store.shiftWeeks(1) // must not switch yet
+        #expect(store.monday == "2026-10-26" && store.isoWeek == "2026-W44")
+        gate.release()
+        #expect(await saving.value)
+        // the queued switch ran after the save; nothing of W44 leaked into W45
+        #expect(store.monday == "2026-11-02" && store.week == nil && store.drafts.isEmpty)
+        #expect(transport.requests(matching: "PUT /api/v1/plan/weeks/2026-W44").count == 1)
+        #expect(transport.requests(matching: "PUT /api/v1/plan/weeks/2026-W45").isEmpty)
+    }
+}

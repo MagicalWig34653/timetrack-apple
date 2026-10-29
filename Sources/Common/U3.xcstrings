@@ -1,0 +1,39 @@
+{
+  "sourceLanguage": "de",
+  "version": "1.0",
+  "strings": {
+    "u3.conflict.keep": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weiterlaufen lassen"
+          }
+        }
+      }
+    },
+    "u3.conflict.switch %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zu %@ wechseln"
+          }
+        }
+      }
+    },
+    "u3.conflict.title %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läuft bereits: %@ seit %@"
+          }
+        }
+      }
+    }
+  }
+}

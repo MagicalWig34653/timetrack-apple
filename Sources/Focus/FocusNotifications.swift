@@ -104,7 +104,11 @@ final class FocusNotifications: NSObject, UNUserNotificationCenterDelegate, Send
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                             withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         nonisolated(unsafe) let completionHandler = completionHandler
-        DispatchQueue.main.async { completionHandler([.banner, .list]) }
+        DispatchQueue.main.async {
+            // U3: a notification arriving while the app is open (e.g. "timer started at <place>") may mean the timer changed on the server.
+            NotificationCenter.default.post(name: .ttTimerChangedExternally, object: nil)
+            completionHandler([.banner, .list])
+        }
     }
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,

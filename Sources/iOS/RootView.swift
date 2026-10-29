@@ -104,6 +104,7 @@ struct MainView: View {
         // SG1: the badge on "Heute" and "Mehr" needs the count from the first moment, not only after the chip or banner appeared.
         .task { await model.review?.load() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await model.review?.load() } } }
+        .timerFreshness(model: model) // U3: running timer on every tab: foreground, polling, notifications, 409 notice
     }
 }
 

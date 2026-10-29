@@ -287,3 +287,38 @@ struct CalendarReconcilerTests {
         #expect(storage.load() == ledger)
     }
 }
+
+extension CalendarReconcileTests {
+    // U3: "Jetzt synchronisieren" reports what happened.
+    @Test func syncNowReportsCountsAndTime() async {
+        let (store, _, _) = await makeStore()
+        let source = FakeSource()
+        source.absences = [absence(idA, .vacation, .planned, "2026-11-02", "2026-11-03")]
+        #expect(store.lastSyncReport == nil && store.lastSyncAt == nil && !store.isSyncing)
+        let report = await store.syncNow(source: source, calendar: berlin) { "Arbeit: \($0.rawValue)" }
+        #expect(report == .synced(created: 1, updated: 0, deleted: 0))
+        #expect(store.lastSyncAt != nil && !store.isSyncing)
+        source.absences = []
+        let second = await store.syncNow(source: source, calendar: berlin) { "Arbeit: \($0.rawValue)" }
+        #expect(second == .synced(created: 0, updated: 0, deleted: 1))
+    }
+
+    @Test func syncNowReportsUnreachableServerWithoutChangingAnything() async {
+        let (store, provider, _) = await makeStore()
+        let source = FakeSource()
+        source.absences = [absence(idA, .vacation, .planned, "2026-11-02", "2026-11-03")]
+        await store.syncNow(source: source, calendar: berlin) { "Arbeit: \($0.rawValue)" }
+        let before = provider.written.count
+        source.fail = true
+        let report = await store.syncNow(source: source, calendar: berlin) { "Arbeit: \($0.rawValue)" }
+        #expect(report == .serverUnreachable)
+        #expect(provider.written.count == before)
+    }
+
+    @Test func syncNowWithoutWriteCalendarSaysNothingToWrite() async {
+        let provider = InMemoryDeviceCalendarProvider(access: .full, calendars: calendars, events: [])
+        let store = DeviceCalendarStore(provider: provider, storage: MemoryCalendarPreferencesStorage(), ledgerStorage: MemoryCalendarLedgerStorage())
+        let report = await store.syncNow(source: FakeSource(), calendar: berlin) { $0.rawValue }
+        #expect(report == .nothingToWrite)
+    }
+}

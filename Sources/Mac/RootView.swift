@@ -77,7 +77,7 @@ struct MainView: View {
         }
         // A module switched off while its screen is open falls back to "Heute".
         .onChange(of: model.isEnabled(.reports)) { if !model.isEnabled(.reports), ui.selection == .reports { ui.selection = .today } }
-        .onReceive(NotificationCenter.default.publisher(for: .ttTimerChangedExternally)) { _ in Task { await model.today?.load() } }
+        .timerFreshness(model: model) // U3: foreground, polling, notifications, 409 notice
         // AUD3: "Heute" reloads when the app becomes active (timer started on another device) and after midnight.
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in Task { await model.today?.load() } }
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in Task { await model.today?.load() } }

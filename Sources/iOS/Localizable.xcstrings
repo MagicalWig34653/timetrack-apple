@@ -991,6 +991,17 @@
         }
       }
     },
+    "attention.server": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Server hat diese Aktion mehrfach nicht angenommen. Du kannst es erneut versuchen oder sie verwerfen."
+          }
+        }
+      }
+    },
     "attention.changed": {
       "extractionState": "manual",
       "localizations": {

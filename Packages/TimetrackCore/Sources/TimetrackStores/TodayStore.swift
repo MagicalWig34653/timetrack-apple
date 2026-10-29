@@ -197,12 +197,17 @@ public final class TodayStore {
         changed()
         if result.needsAttention > 0, let refused = attention.last?.attention {
             // Surface the conflict (409 segment_overlap / 412 stale_version) and show the real state instead of guessing.
-            error = .api(status: refused.status, code: refused.code ?? "conflict", message: "Fortführen nicht mehr möglich")
+            let isServerFailure = refused.status >= 500 || refused.status == 429
+            error = .api(status: refused.status, code: refused.code ?? "conflict",
+                         message: isServerFailure ? "Der Server hat die gespeicherte Aktion mehrfach nicht angenommen" : "Fortführen nicht mehr möglich")
+        } else if result.correctionFailed > 0 {
+            // AUD3: the entry is booked, but with the time of delivery; the user should know and can correct it.
+            error = .api(status: 409, code: "backdate_refused", message: "Die Uhrzeit konnte nicht auf den Zeitpunkt des Tastendrucks zurückgesetzt werden")
         }
         if result.delivered > 0 || result.needsAttention > 0, reload {
             let surfaced = error
             await load(deferAccount: true)
-            if result.needsAttention > 0, error == nil { error = surfaced }
+            if result.needsAttention > 0 || result.correctionFailed > 0, error == nil { error = surfaced }
         } else if result.unauthorized {
             error = .api(status: 401, code: APIErrorCode.unauthorized.rawValue, message: "Unauthorized")
         }

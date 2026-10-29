@@ -162,7 +162,8 @@ private extension WidgetSnapshot {
         await queue.enqueue(QueuedTimerAction(command: .start(.work)))
         #expect(await queue.drain(client: Fixtures.client(transport)).offline)
         transport.set("POST /api/v1/time/timer/start", status: 409, body: #"{"error":{"code":"timer_already_running","message":"x"}}"#)
-        let result = await queue.drain(client: Fixtures.client(transport))
+        // AUD3: the 503 set a backoff; the retry happens after it
+        let result = await queue.drain(client: Fixtures.client(transport), now: Date.now.addingTimeInterval(3_600))
         #expect(result.dropped == 1 && result.remaining == 0)
     }
 

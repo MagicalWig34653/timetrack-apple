@@ -113,6 +113,8 @@ private struct AttentionSheet: View {
                                 actionTitle(action).font(TTFont.cardTitle)
                                 if action.attention?.status == 412 {
                                     Text("attention.changed").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                                } else if (action.attention?.status ?? 0) >= 500 || action.attention?.status == 429 {
+                                    Text("attention.server").font(TTFont.meta).foregroundStyle(TT.textSecondary)
                                 } else {
                                     Text("attention.conflict").font(TTFont.meta).foregroundStyle(TT.textSecondary)
                                 }

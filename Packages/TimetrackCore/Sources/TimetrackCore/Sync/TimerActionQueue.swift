@@ -38,6 +38,11 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     /// another account are purged. `nil` = written without an account context (extensions, entries from before X4); the queue
     /// adopts such entries for the account that is bound when it first sees them.
     public var accountId: UUID?
+    /// AUD3: consecutive deliveries the server answered with 5xx/429. After `maxServerFailures` the entry moves to `attention`
+    /// instead of blocking the queue forever. Absent in entries written earlier.
+    public var serverFailures: Int?
+    /// AUD3: no delivery attempt before this time (backoff after a 5xx/429); later entries wait behind it to keep the order.
+    public var retryNotBefore: Date?
 
     public struct Attention: Codable, Sendable, Equatable {
         public let status: Int
@@ -71,7 +76,15 @@ public actor TimerActionQueue {
         public var unauthorized = false
         /// Delayed "Fortführen" entries that hit a conflict (409/412) and wait for the user's decision (kept in the queue).
         public var needsAttention = 0
+        /// AUD3: deliveries whose backdating correction (move back to the press time) was refused for good; the action itself is booked,
+        /// but with the time of delivery. The caller tells the user.
+        public var correctionFailed = 0
     }
+
+    /// AUD3: after this many server failures (5xx/429) in a row an entry waits for the user instead of blocking the queue.
+    public static let maxServerFailures = 5
+    /// AUD3: backoff before the next attempt after n server failures: 30 s, 60 s, 120 s ... capped at 15 minutes.
+    static func backoff(afterFailures n: Int) -> TimeInterval { min(900, 30 * pow(2, Double(max(0, n - 1)))) }
 
     /// Deliveries later than this after the button press are corrected to the press time.
     public static let backdateThreshold: TimeInterval = 20
@@ -111,6 +124,8 @@ public actor TimerActionQueue {
     public func retry(id: UUID) -> Bool {
         guard let index = entries.firstIndex(where: { $0.id == id && $0.attention != nil }) else { return false }
         entries[index].attention = nil
+        entries[index].serverFailures = nil
+        entries[index].retryNotBefore = nil
         persist()
         return true
     }
@@ -185,8 +200,10 @@ public actor TimerActionQueue {
         while let action = entries.first(where: { $0.attention == nil && (account == nil ? $0.accountId == nil : ($0.accountId == nil || $0.accountId == account)) }) {
             // The bound account may change while a delivery is in flight (sign-out/sign-in): stop instead of delivering for the wrong one.
             if let account, let current = boundAccount, current != account { break }
+            // Backoff after a server failure: the order must hold, so everything behind this entry waits too.
+            if let notBefore = action.retryNotBefore, notBefore > now { result.offline = true; break }
             do {
-                try await deliver(action, client: client, now: now)
+                if try await deliver(action, client: client, now: now) == .correctionRefused { result.correctionFailed += 1 }
                 result.delivered += 1
             } catch let error as TimetrackError where error.isNetworkError || error == .cancelled {
                 result.offline = error.isNetworkError
@@ -205,6 +222,19 @@ public actor TimerActionQueue {
             } catch let error as TimetrackError where Self.isAlreadyApplied(error) {
                 result.dropped += 1
             } catch let error as TimetrackError where (error.status ?? 0) >= 500 || error.status == 429 {
+                // AUD3: bounded retry with backoff. A permanent 5xx/429 must not hold back the whole queue forever.
+                guard let index = entries.firstIndex(where: { $0.id == action.id }) else { break }
+                let failures = (entries[index].serverFailures ?? 0) + 1
+                entries[index].serverFailures = failures
+                if failures >= Self.maxServerFailures {
+                    entries[index].attention = .init(status: error.status ?? 500, code: error.code)
+                    entries[index].retryNotBefore = nil
+                    persist()
+                    result.needsAttention += 1
+                    continue
+                }
+                entries[index].retryNotBefore = now.addingTimeInterval(Self.backoff(afterFailures: failures))
+                persist()
                 result.offline = true
                 break
             } catch {
@@ -229,21 +259,38 @@ public actor TimerActionQueue {
         error.code == APIErrorCode.timerAlreadyRunning.rawValue || error.code == APIErrorCode.noRunningTimer.rawValue
     }
 
-    private func deliver(_ action: QueuedTimerAction, client: APIClient, now: Date) async throws {
+    private enum Delivery { case done, correctionRefused }
+
+    /// Books the action. The backdating correction (move the booking back to the press time) is part of the delivery: a network or
+    /// server failure of the correction throws, so the entry stays and is retried (the action itself is idempotent over its id and
+    /// returns the same segment). A correction the server refuses for good (4xx) no longer vanishes silently: it is reported.
+    private func deliver(_ action: QueuedTimerAction, client: APIClient, now: Date) async throws -> Delivery {
         let late = now.timeIntervalSince(action.queuedAt) > Self.backdateThreshold
         switch action.command {
         case .start(let kind):
             let segment = try await client.startTimer(clientEventId: action.id, kind: kind, placeId: action.placeId)
             if late, segment.startedAt > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
-                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(startedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestartet"), ifMatchVersion: segment.version)
+                return try await backdate(client: client, segment: segment, SegmentCorrection(startedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestartet"))
             }
         case .resume(let target):
             _ = try await Self.resume(target, client: client, clientEventId: action.id)
         case .stop:
             let segment = try await client.stopTimer(clientEventId: action.id)
             if late, let end = segment.endedAt, end > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
-                _ = try? await client.correctSegment(id: segment.id, SegmentCorrection(endedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestoppt"), ifMatchVersion: segment.version)
+                return try await backdate(client: client, segment: segment, SegmentCorrection(endedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestoppt"))
             }
+        }
+        return .done
+    }
+
+    private func backdate(client: APIClient, segment: Segment, _ correction: SegmentCorrection) async throws -> Delivery {
+        do {
+            _ = try await client.correctSegment(id: segment.id, correction, ifMatchVersion: segment.version)
+            return .done
+        } catch let error as TimetrackError where error.isNetworkError || error == .cancelled || error.isUnauthorized || (error.status ?? 0) >= 500 || error.status == 429 {
+            throw error
+        } catch {
+            return .correctionRefused
         }
     }
 

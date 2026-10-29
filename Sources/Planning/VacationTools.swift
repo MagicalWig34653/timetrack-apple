@@ -149,7 +149,7 @@ struct AbsenceFilterBar: View {
             Spacer(minLength: TT.Space.s)
             if options.hasFilters {
                 Text(verbatim: VT.s("filter.count", shown, store.absences.count)).font(TTFont.meta).monospacedDigit().foregroundStyle(TT.textSecondary)
-                Button { store.listOptions = options.resettingFilters() } label: { Image(systemName: "xmark.circle.fill").frame(width: 32, height: 32) }
+                Button { store.listOptions = options.resettingFilters() } label: { Image(systemName: "xmark.circle.fill").frame(width: 44, height: 44).contentShape(.rect) }
                     .buttonStyle(.borderless).foregroundStyle(TT.textSecondary)
                     .accessibilityLabel(Text(verbatim: VT.s("filter.reset"))).accessibilityIdentifier("absence.filter.reset")
             }

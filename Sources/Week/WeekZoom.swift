@@ -378,7 +378,7 @@ struct DayHeader: View {
                     Button { actions.absence(kind, day.date) } label: { Label(kind.actionKey, systemImage: kind.ttSymbol) }
                 }
                 Button { actions.customDay(day.date) } label: { Label("plan.short.custom_day", systemImage: "flag") }
-            } label: { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical).frame(minWidth: 32, minHeight: 32) }
+            } label: { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical).frame(minWidth: 44, minHeight: 44).contentShape(.rect) }
                 .accessibilityLabel(Text("time.add_to_day \(title)")).accessibilityIdentifier("time.add.\(day.date)")
         } else {
             Button { actions.add(day.date) } label: { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical) }

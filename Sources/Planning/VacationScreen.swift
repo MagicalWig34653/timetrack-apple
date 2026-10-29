@@ -83,12 +83,12 @@ private struct VacationContent: View {
 
     private var yearSwitcher: some View {
         HStack {
-            Button { Task { await store.shiftYears(-1) } } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+            Button { Task { await store.shiftYears(-1) } } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44).contentShape(.rect) }
                 .accessibilityLabel(Text("vacation.previous_year"))
             Spacer()
             Text(verbatim: String(store.year)).font(TTFont.sectionTitle).monospacedDigit().foregroundStyle(TT.textPrimary).accessibilityIdentifier("vacation.year")
             Spacer()
-            Button { Task { await store.shiftYears(1) } } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+            Button { Task { await store.shiftYears(1) } } label: { Image(systemName: "chevron.right").frame(width: 44, height: 44).contentShape(.rect) }
                 .accessibilityLabel(Text("vacation.next_year"))
         }
         .buttonStyle(.borderless).padding(.horizontal, TT.Space.s)

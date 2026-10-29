@@ -132,10 +132,10 @@ private struct CalendarContent: View {
             Spacer(minLength: TT.Space.s)
             GlassEffectContainer(spacing: 8) {
                 HStack(spacing: 8) {
-                    Button { shift(-1) } label: { Image(systemName: "chevron.left").frame(width: 40, height: 40) }
+                    Button { shift(-1) } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44).contentShape(.rect) }
                         .glassEffect(.regular.interactive(), in: .circle)
                         .accessibilityLabel(Text("calendar.previous_month")).accessibilityIdentifier("calendar.prev")
-                    Button { shift(1) } label: { Image(systemName: "chevron.right").frame(width: 40, height: 40) }
+                    Button { shift(1) } label: { Image(systemName: "chevron.right").frame(width: 44, height: 44).contentShape(.rect) }
                         .glassEffect(.regular.interactive(), in: .circle)
                         .accessibilityLabel(Text("calendar.next_month")).accessibilityIdentifier("calendar.next")
                 }

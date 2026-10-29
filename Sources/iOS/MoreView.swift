@@ -69,7 +69,7 @@ struct MoreView: View {
         if let url = model.serverURL, !rows.isEmpty {
             FormSection("Im Web", footer: "Diese Bereiche gibt es noch nicht in der App. Sie öffnen die Web-App auf deinem Server.") {
                 ForEach(rows, id: \.id) { row in
-                    Link(destination: url) {
+                    Link(destination: url.appending(path: row.path)) { // AUD3: the PWA route of the page, not the start page
                         SettingsRowLabel(title: row.title, symbol: row.symbol, value: nil, chevron: "arrow.up.right")
                     }
                     .buttonStyle(.plain)
@@ -80,9 +80,9 @@ struct MoreView: View {
         }
     }
 
-    private var webRows: [(id: String, title: LocalizedStringKey, symbol: String)] {
-        var rows: [(id: String, title: LocalizedStringKey, symbol: String)] = []
-        if model.isEnabled(.transfer) { rows.append(("more.export", "Auswertung und Export", "square.and.arrow.up")) }
+    private var webRows: [(id: String, title: LocalizedStringKey, symbol: String, path: String)] {
+        var rows: [(id: String, title: LocalizedStringKey, symbol: String, path: String)] = []
+        if model.isEnabled(.transfer) { rows.append(("more.export", "Auswertung und Export", "square.and.arrow.up", "export")) }
         // Freigaben exist natively since PL1 (Zeit › Mehr); they join this list when "Planung" is merged (UX3 follow-up).
         return rows
     }

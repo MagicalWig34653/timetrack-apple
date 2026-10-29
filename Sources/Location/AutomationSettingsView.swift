@@ -269,6 +269,7 @@ struct AutomationSettingsView: View {
 struct PlaceAutomationRow: View {
     let store: AutomationStore
     let place: Place
+    @State private var confirmArchive = false
 
     private var mode: AutomationMode { store.mode(of: place) }
     private var automationAvailable: Bool { store.canAutomate(place) }
@@ -312,8 +313,23 @@ struct PlaceAutomationRow: View {
                 Label("Kurzbefehl erstellen", systemImage: "square.stack.3d.up").font(TTFont.label)
             }
             .accessibilityIdentifier("automation.place.shortcut.\(place.name)")
+            // U3: archive (the web app has it too). Existing entries keep their place; the automation stops watching it.
+            Button(role: .destructive) { confirmArchive = true } label: {
+                Label("Ort archivieren", systemImage: "archivebox").font(TTFont.label)
+            }
+            .disabled(store.isBusy)
+            .accessibilityLabel(Text("Ort \(place.name) archivieren"))
+            .accessibilityHint(Text("Fragt vorher nach. Der Ort wird nicht mehr für die Automatik verwendet."))
+            .accessibilityIdentifier("automation.place.archive.\(place.name)")
         }
         .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+        .confirmationDialog("„\(place.name)“ archivieren?", isPresented: $confirmArchive, titleVisibility: .visible) {
+            Button("Archivieren", role: .destructive) { Task { await store.archive(place) } }
+                .accessibilityIdentifier("automation.place.archive.confirm")
+            Button("Abbrechen", role: .cancel) {}
+        } message: {
+            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Archivierte Orte erscheinen nicht mehr in der App; zurückholen lässt sich ein Ort derzeit nicht.")
+        }
     }
 
     private func hint(_ text: String, symbol: String, tone: Color) -> some View {

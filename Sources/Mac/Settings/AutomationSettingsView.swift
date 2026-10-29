@@ -10,6 +10,7 @@ struct MacAutomationSettingsView: View {
     @State private var store: AutomationStore?
     @State private var companion = MacCompanion.shared
     @State private var showingNewPlace = false
+    @State private var archiving: Place? // U3
 
     var body: some View {
         Form {
@@ -73,8 +74,16 @@ struct MacAutomationSettingsView: View {
                     }
                     if !store.canAutomate(place) { Text("Ohne Koordinaten: in der Web-App ergänzen.").font(TTFont.meta).foregroundStyle(TT.textSecondary) }
                 }
+                .contextMenu { Button("Ort archivieren …", systemImage: "archivebox", role: .destructive) { archiving = place } }
+                .accessibilityAction(named: Text("Ort archivieren")) { archiving = place }
             }
             Button { showingNewPlace = true } label: { Label("Ort am aktuellen Standort anlegen…", systemImage: "plus.circle") }
+        }
+        .confirmationDialog("„\(archiving?.name ?? "")“ archivieren?", isPresented: Binding(get: { archiving != nil }, set: { if !$0 { archiving = nil } }), titleVisibility: .visible) {
+            Button("Archivieren", role: .destructive) { if let place = archiving { Task { await store.archive(place) } }; archiving = nil }
+            Button("Abbrechen", role: .cancel) { archiving = nil }
+        } message: {
+            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Zurückholen lässt sich ein archivierter Ort derzeit nicht.")
         }
         Section {
             Stepper("Wartezeit nach Ankunft: \(store.config.dwellMinutes) Min", value: Binding(get: { store.config.dwellMinutes }, set: { v in Task { await store.setDwellMinutes(v) } }), in: AutomationConfig.dwellRange)

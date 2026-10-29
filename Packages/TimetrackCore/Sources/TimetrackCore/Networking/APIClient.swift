@@ -252,6 +252,10 @@ public actor APIClient: PreferencesService {
         try await send(.put, "/places/\(id.uuidString.lowercased())", body: input)
     }
 
+    /// U3: `DELETE /places/{id}` archives the place (existing segments keep their reference; archived places are no longer listed and
+    /// the automation ignores them). The contract has no way to list or restore archived places.
+    public func archivePlace(id: UUID) async throws { try await sendVoid(.delete, "/places/\(id.uuidString.lowercased())") }
+
     public func listDeviceTokens() async throws -> [DeviceToken] { try await get("/me/device-tokens") }
 
     /// The clear text token is in the answer only once; the caller must store it immediately.

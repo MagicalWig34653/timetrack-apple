@@ -178,6 +178,38 @@ public final class AutomationStore {
         if mode != .off { await ensureDeviceToken() }
     }
 
+    /// U3: archives the place on the server and stops watching it at once (region, arrival state and pending leave are dropped by the
+    /// engine when the place disappears from its list). A failure leaves the place in the list and shows the error.
+    @discardableResult
+    public func archive(_ place: Place) async -> Bool {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            try await client.archivePlace(id: place.id)
+            places.removeAll { $0.id == place.id }
+            await engine.setPlaces(places)
+            await refreshFromEngine()
+            onConfigurationChanged?()
+            error = nil
+            onOutcome?(.deleted)
+            return true
+        } catch let failure as TimetrackError {
+            if failure.status == 404 { // already archived elsewhere (web app): the list was stale
+                places.removeAll { $0.id == place.id }
+                await engine.setPlaces(places)
+                await refreshFromEngine()
+                onConfigurationChanged?()
+                error = nil
+                return true
+            }
+            error = failure
+            onOutcome?(.failed)
+        } catch {
+            self.error = .cancelled
+        }
+        return false
+    }
+
     private func save(_ operation: @Sendable () async throws -> Place) async {
         isBusy = true
         defer { isBusy = false }

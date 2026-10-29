@@ -22,7 +22,6 @@ struct VacationScreen: View {
 private struct VacationContent: View {
     let store: PlanningStore
     @Environment(\.horizontalSizeClass) private var sizeClass
-    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var request: AbsenceRequest?
     #if os(macOS)
     @State private var showSettings = false // iOS reaches these settings from Einstellungen (S2)
@@ -40,9 +39,8 @@ private struct VacationContent: View {
                 if let error = store.error, request == nil { ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("error.banner") }
                 if store.settings?.configured == false { HintBanner("vacation.not_configured") }
                 #if os(iOS)
-                ListCard { // R3: two slim entries instead of cards
+                ListCard { // U3: reminders live in Einstellungen only
                     VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
-                    VacationReminderLink() // R3: reminders to submit planned vacation
                 }
                 #endif
                 if wide {
@@ -96,28 +94,7 @@ private struct VacationContent: View {
 
     @ViewBuilder private var balance: some View {
         if let balance = store.balance {
-            VStack(alignment: .leading, spacing: TT.Space.s) {
-                SectionHeader("vacation.balance")
-                Card {
-                    let ring = VacationRingSegments(balance)
-                    VStack(alignment: .leading, spacing: TT.Space.l) {
-                        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.l)) : AnyLayout(HStackLayout(spacing: TT.Space.xl))
-                        layout {
-                            VacationRing(segments: ring) // V3: booked solid, planned hatched
-                                .frame(width: 96, height: 96)
-                            VStack(alignment: .leading, spacing: TT.Space.xs) {
-                                Text("vacation.available").font(TTFont.label).foregroundStyle(TT.textSecondary)
-                                Text("vacation.days \(HalfDayFormat.days(balance.availableHalfDays))")
-                                    .font(.system(.largeTitle, design: .rounded, weight: .semibold)).monospacedDigit().foregroundStyle(TT.textPrimary)
-                                    .accessibilityIdentifier("vacation.available.value")
-                                Text("vacation.after_planned_short \(HalfDayFormat.days(balance.availableAfterPlannedHalfDays))").font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                            }
-                        }
-                        VacationRingLegend(segments: ring) // V3
-                    }
-                    .accessibilityElement(children: .combine)
-                }
-            }
+            VacationAccountCard(balance: balance, absences: store.absences, settings: store.settings) // U3
         } else if store.isLoading {
             SkeletonList(rows: 3)
         }

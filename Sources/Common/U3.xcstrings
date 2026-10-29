@@ -34,6 +34,138 @@
           }
         }
       }
+    },
+    "u3.vac.adjust": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Korrekturen"
+          }
+        }
+      }
+    },
+    "u3.vac.after_planned %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach allem Geplanten: %@ Tage"
+          }
+        }
+      }
+    },
+    "u3.vac.approved": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genehmigt"
+          }
+        }
+      }
+    },
+    "u3.vac.carry": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Übertrag aus dem Vorjahr"
+          }
+        }
+      }
+    },
+    "u3.vac.entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jahresanspruch"
+          }
+        }
+      }
+    },
+    "u3.vac.expiry %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Übertrag verfällt am %@"
+          }
+        }
+      }
+    },
+    "u3.vac.free": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "u3.vac.left": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbleibender Urlaub"
+          }
+        }
+      }
+    },
+    "u3.vac.over %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Tage mehr geplant als verfügbar"
+          }
+        }
+      }
+    },
+    "u3.vac.planned": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplant"
+          }
+        }
+      }
+    },
+    "u3.vac.requested": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beantragt"
+          }
+        }
+      }
+    },
+    "u3.vac.taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genommen"
+          }
+        }
+      }
     }
   }
 }

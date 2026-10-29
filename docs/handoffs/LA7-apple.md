@@ -16,7 +16,7 @@ Der Nutzer-Screenshot zeigt eine helle graugrüne, durchscheinende Karte. Die T�
 - Galerie `LiveActivityWatchPreview` (`TT_DEV_WIDGET_GALLERY=running-live TT_DEV_LA_WATCH=1`): laufend, pausiert, Fahrt, ohne Plan, 45/41 mm, großzügig, Accessibility 3, Always-On (laufend/pausiert), alles auf Schwarz. Lange Ortsnamen kommen in der Karte nicht vor (nur Art/Status/Ende); Kürzung wird mit Accessibility 3 gezeigt.
 
 ## Prüfung
-Kerntests (`swift test --build-system native --no-parallel`): 896 bestanden. Unsignierte Builds: TimetrackIOS (Simulator, enthält die Watch-App) und TimetrackMac: BUILD SUCCEEDED. Letzte Änderung danach (Beschriftung zeigt den Statustext erst ab 165 pt Kartenbreite, damit "Feierabend hh:mm" bei 160 pt nicht abgeschnitten wird): Wiederholungsbuild wegen Rechnerlast nicht abgewartet. Screenshots `docs/screenshots/la7-watch-running.png` / `la7-watch-green.png` zeigen den Stand davor (45-mm-Karte mit abgeschnittenem Feierabend).
+Kerntests (`swift test --build-system native --no-parallel`): 896 bestanden. Unsignierte Builds: TimetrackIOS (Simulator, enthält die Watch-App) und TimetrackMac: BUILD SUCCEEDED. Nach der letzten Änderung (Statustext erst ab 165 pt Kartenbreite, damit "Feierabend" bei 160 pt nicht abgeschnitten wird) erneut gebaut: BUILD SUCCEEDED. Screenshots: `docs/screenshots/la7-watch-running.png`, `la7-watch-green.png`.
 
 ## Nicht am Gerät geprüft
 - Ob die Uhr die helle Variante wirklich aus dem dynamischen Farbwert gezogen hat (Hypothese passt rechnerisch, ist aber nicht per Konsole belegt) und ob der deckende Ton jetzt ankommt; Fallback ist der selbst gezeichnete Hintergrund.

@@ -52,17 +52,25 @@ public final class TimeListStore {
     public var weekTargetSeconds: Int { days.reduce(0) { $0 + $1.targetSeconds } }
 
     private var loadGeneration = 0
+    /// Weeks seen so far, shown at once when switching back (always revalidated by `load()`); the previous week otherwise stays visible.
+    private var weekCache: [LocalDay: [DayEvaluation]] = [:]
 
     public func load() async {
         loadGeneration += 1
         let generation = loadGeneration
         isLoading = true
+        let requested = weekStart
         defer { if generation == loadGeneration { isLoading = false } }
         do {
             let fresh = try await client.listDays(from: weekStart, to: weekEnd).sorted { $0.date < $1.date }
             // A newer load (or an optimistic change) owns the state; and an unchanged result must not trigger a list update.
             guard generation == loadGeneration else { return }
             if fresh != days { days = fresh }
+            weekCache[requested] = fresh
+            if weekCache.count > 8 {
+                let distance = { (key: LocalDay) in abs(LocalDays.daysBetween(key, requested) ?? 0) }
+                if let far = weekCache.keys.max(by: { distance($0) < distance($1) }) { weekCache[far] = nil }
+            }
             error = nil
         } catch let failure as TimetrackError {
             if generation == loadGeneration, failure != .cancelled { error = failure }
@@ -73,6 +81,7 @@ public final class TimeListStore {
 
     public func shiftWeeks(_ count: Int) async {
         weekStart = LocalDays.adding(7 * count, to: weekStart) ?? weekStart
+        if let cached = weekCache[weekStart] { days = cached }
         await load()
     }
 
@@ -80,6 +89,7 @@ public final class TimeListStore {
     public func open(week day: LocalDay) async {
         guard let monday = LocalDays.mondayOfWeek(containing: day), monday != weekStart else { return }
         weekStart = monday
+        if let cached = weekCache[monday] { days = cached }
         await load()
     }
 

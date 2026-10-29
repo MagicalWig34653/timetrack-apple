@@ -398,3 +398,44 @@ private final class RetryTransport: HTTPTransport, @unchecked Sendable {
         #expect(transport.requests(matching: "PUT /api/v1/plan/weeks/2026-W45").isEmpty)
     }
 }
+
+/// AUD3 finding 9: switching weeks keeps the previous week visible (stale-while-revalidate) and caches neighbors.
+@Suite @MainActor struct WeekStoreStaleTests {
+    private let calendar = DayCalendar(timeZone: TimeZone(identifier: "Europe/Berlin")!)
+    private let now = ISO8601DateFormatter().date(from: "2026-10-21T10:00:00Z")!
+
+    private func tw(_ label: String) -> String { WeekFixtures.timeWeek.replacingOccurrences(of: #""week":"2026-W44""#, with: #""week":"\#(label)""#) }
+
+    @Test func previousWeekStaysVisibleUntilTheNewOneArrives() async {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/time/weeks/2026-W43", body: tw("2026-W43"))
+        let store = WeekStore(client: Fixtures.client(transport), calendar: calendar, now: now)
+        await store.load()
+        #expect(store.week?.week == "2026-W43" && !store.isStale)
+        transport.enqueue("GET /api/v1/time/weeks/2026-W44", body: tw("2026-W44"))
+        let gate = transport.hold("GET /api/v1/time/weeks/2026-W44")
+        let shifting = Task { await store.shiftWeeks(1) }
+        while !store.isLoading { await Task.yield() }
+        #expect(store.week?.week == "2026-W43" && store.isStale) // not emptied
+        gate.release()
+        await shifting.value
+        #expect(store.week?.week == "2026-W44" && !store.isStale)
+    }
+
+    @Test func cachedWeekShowsAtOnceAndNeighborIsPrefetched() async {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/time/weeks/2026-W43", body: tw("2026-W43"))
+        transport.enqueue("GET /api/v1/time/weeks/2026-W44", body: tw("2026-W44"))
+        transport.enqueue("GET /api/v1/time/weeks/2026-W45", body: tw("2026-W45"))
+        let store = WeekStore(client: Fixtures.client(transport), calendar: calendar, now: now)
+        await store.load()
+        await store.shiftWeeks(1) // loads W44 and prefetches W45
+        #expect(transport.requests(matching: "GET /api/v1/time/weeks/2026-W45").count == 1)
+        let gate = transport.hold("GET /api/v1/time/weeks/2026-W45")
+        let shifting = Task { await store.shiftWeeks(1) }
+        while !store.isLoading { await Task.yield() }
+        #expect(store.week?.week == "2026-W45" && !store.isStale) // from the cache, revalidation still pending
+        gate.release()
+        await shifting.value
+    }
+}

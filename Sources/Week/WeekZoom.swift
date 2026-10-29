@@ -211,7 +211,7 @@ struct WeekSummaryCard: View {
                 .accessibilityElement(children: .combine)
                 if expanded, let loaded = week?.week {
                     Divider()
-                    WeekBalanceDetails(week: loaded).transition(.opacity.combined(with: .move(edge: .top)))
+                    WeekBalanceDetails(week: loaded).opacity(week?.isStale == true ? 0.4 : 1).transition(.opacity.combined(with: .move(edge: .top)))
                 } else if expanded, week?.isUnavailable == true {
                     HintBanner("wk.week.unavailable")
                 }

@@ -18,6 +18,7 @@ private struct NowBarContent: View {
         @Environment(\.tabViewBottomAccessoryPlacement) private var placement
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.ttTheme) private var theme
+    @Environment(\.dynamicTypeSize) private var typeSize
     @AppStorage("ios.lastKind") private var lastKindRaw = SegmentKind.work.rawValue
     /// H3: height the system gives the capsule (measured), so the buttons nest concentrically inside its rounded ends.
     @State private var barHeight: CGFloat = 48
@@ -30,7 +31,8 @@ private struct NowBarContent: View {
         SegmentKind(rawValue: lastKindRaw).flatMap { SegmentKind.selectable.contains($0) ? $0 : nil } ?? .work
     }
 
-    private var inline: Bool { placement == .inline }
+    /// The capsule has a fixed system height: at accessibility sizes the bar shows icons only (full text stays in the accessibility labels).
+    private var inline: Bool { placement == .inline || typeSize.isAccessibilitySize }
     private var visual: CGFloat { min(controlHeight, max(24, barHeight - 12)) }
     /// Gap between the drawn control and the capsule edge: equal above, below and at the trailing end (concentric nesting).
     private var inset: CGFloat { max(5, (barHeight - visual) / 2) }
@@ -41,6 +43,7 @@ private struct NowBarContent: View {
         }
         // H3: the system capsule has fully rounded ends (radius = height / 2). Text starts further in than the controls, which sit
         // `inset` from the top, bottom and trailing edge, so inner and outer curvature are concentric.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
         .padding(.leading, barHeight / 2 - 4)
         .padding(.trailing, inset)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

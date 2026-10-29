@@ -112,11 +112,18 @@ private struct SummaryTiles: View {
 
     var body: some View {
         let totals = data.statistics.totals
+        VStack(alignment: .leading, spacing: TT.Space.s) {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: TT.Space.m)], spacing: TT.Space.m) {
             tile("wm.stats.tile_target", StatsFormat.hm(totals.targetToDateSeconds), id: "stats.tile.target")
             tile("wm.stats.tile_worked", StatsFormat.hm(totals.workedSeconds), id: "stats.tile.worked")
             tile("wm.stats.tile_delta", StatsFormat.signed(totals.deltaSeconds), id: "stats.tile.delta", tone: totals.deltaSeconds < 0 ? TT.danger : TT.textPrimary)
             tile("wm.stats.tile_balance", data.balance.last.map { StatsFormat.signed($0.seconds) } ?? "–", id: "stats.tile.balance")
+        }
+        // C3: balances and differences count through yesterday; today's difference is shown apart.
+        if data.statistics.includesToday == false, let today = data.statistics.todayDeltaSeconds {
+            Text(verbatim: u3String("c3.today_flows \(StatsFormat.signed(today))")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                .accessibilityIdentifier("stats.today")
+        }
         }
     }
 

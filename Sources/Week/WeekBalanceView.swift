@@ -16,9 +16,13 @@ struct WeekBalanceDetails: View {
             let columns = [GridItem(.adaptive(minimum: typeSize.isAccessibilitySize ? 240 : 140), spacing: TT.Space.m, alignment: .top)]
             LazyVGrid(columns: columns, alignment: .leading, spacing: TT.Space.m) {
                 SummaryTile(title: W.s("sum.target"), value: DurationFormat.hoursMinutes(s.targetSeconds), caption: s.targetToDateSeconds < s.targetSeconds ? W.s("sum.target_to_date", DurationFormat.hoursMinutes(s.targetToDateSeconds)) : W.s("sum.target_full"))
-                SummaryTile(title: W.s("sum.balance"), value: DurationFormat.signed(s.balanceSeconds), caption: W.s(s.targetToDateSeconds < s.targetSeconds ? "sum.balance_running" : "sum.balance_past"),
+                SummaryTile(title: W.s("sum.balance"), value: DurationFormat.signed(s.balanceSeconds), caption: W.s(s.includesToday == false ? "sum.balance_completed" : (s.targetToDateSeconds < s.targetSeconds ? "sum.balance_running" : "sum.balance_past")),
                             tint: s.balanceSeconds < 0 ? TT.warning : (s.balanceSeconds > 0 ? TT.success : TT.textPrimary))
                 SummaryTile(title: W.s("sum.account"), value: DurationFormat.signed(s.accountBalanceAfterSeconds), caption: W.s("sum.account_before", DurationFormat.signed(s.accountBalanceBeforeSeconds)))
+            }
+            if let today = s.separateTodayDeltaSeconds {
+                Text(verbatim: u3String("c3.today_flows \(DurationFormat.signed(today))")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    .accessibilityIdentifier("week.summary.today")
             }
             if let comparison = WeekOverview.planComparison(week.days) {
                 W.t("sum.plan_line", DurationFormat.hoursMinutes(comparison.planned), DurationFormat.hoursMinutes(comparison.actual)).font(TTFont.meta).foregroundStyle(TT.textSecondary)

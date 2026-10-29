@@ -83,14 +83,22 @@ struct AbsenceEditorSheet: View {
                         EditorRow { Toggle("plan.field.half_start", isOn: $halfStart) }
                         EditorRow { Toggle("plan.field.half_end", isOn: $halfEnd) }
                     }
-                    FormSection("plan.field.status", footer: kind == .vacation ? "plan.field.status_hint" : "plan.field.status_hint_other") {
-                        EditorRow {
-                            Picker("plan.field.status", selection: Binding(get: { status }, set: { status = $0; statusTouched = true })) {
-                                ForEach(AbsenceStatus.options(for: kind, keeping: editing?.status), id: \.self) { Text($0.pickerKey).tag($0) }
+                    if kind == .vacation {
+                        FormSection("plan.field.status", footer: "plan.field.status_hint") {
+                            EditorRow {
+                                Picker("plan.field.status", selection: Binding(get: { status }, set: { status = $0; statusTouched = true })) {
+                                    ForEach(AbsenceStatus.options(for: kind, keeping: editing?.status), id: \.self) { Text($0.pickerKey).tag($0) }
+                                }
+                                .pickerStyle(.menu).labelsHidden()
+                                .accessibilityIdentifier("absence.status")
                             }
-                            .pickerStyle(.menu).labelsHidden()
-                            .accessibilityIdentifier("absence.status")
                         }
+                    } else if editing?.status == .cancelled {
+                        Text("absence.status.cancelled").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                    } else {
+                        // ADR-0032: sick, exempt and other absences have no request flow; the server records them as "erfasst".
+                        Text("plan.field.status_recorded").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            .accessibilityIdentifier("absence.status.recorded")
                     }
                     if kind == .sick { documentSection }
                     FormSection("plan.field.note") {
@@ -125,7 +133,7 @@ struct AbsenceEditorSheet: View {
             applyDefaultStatus()
         }
         .onChange(of: kind) {
-            if !AbsenceStatus.options(for: kind, keeping: editing?.status).contains(status) { status = defaultStatus }
+            if kind == .vacation, !AbsenceStatus.options(for: kind, keeping: editing?.status).contains(status) { status = defaultStatus }
         }
         .confirmationDialog("plan.delete.title", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("plan.delete.confirm", role: .destructive) {
@@ -194,6 +202,12 @@ struct AbsenceEditorSheet: View {
         }
     }
 
+    /// Vacation sends the picked status. Every other kind never sends an approval status: an existing valid status (e.g. cancelled,
+    /// recorded) is kept, anything else is omitted so the server records it ("erfasst").
+    private var statusToSend: AbsenceStatus? {
+        kind == .vacation ? status : editing?.status.sendable(for: kind)
+    }
+
     private var defaultStatus: AbsenceStatus { start <= actions.today ? .taken : .planned }
 
     private func applyDefaultStatus() {
@@ -233,7 +247,7 @@ struct AbsenceEditorSheet: View {
         let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
         let isSick = kind == .sick
         let input = AbsenceInput(
-            kind: kind, startDate: start, endDate: end, halfDayStart: halfStart, halfDayEnd: halfEnd, status: status,
+            kind: kind, startDate: start, endDate: end, halfDayStart: halfStart, halfDayEnd: halfEnd, status: statusToSend,
             note: trimmed.isEmpty ? nil : trimmed,
             documentStatus: isSick ? documentStatus : .notNeeded,
             documentSubmittedOn: isSick && documentStatus == .submitted ? submittedOn : nil,

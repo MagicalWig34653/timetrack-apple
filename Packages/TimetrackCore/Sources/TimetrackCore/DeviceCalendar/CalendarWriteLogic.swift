@@ -122,7 +122,7 @@ public enum AbsenceCalendarTitle {
         case (.vacation, .planned): "Urlaub (geplant)"
         case (.vacation, .approved): "Urlaub (genehmigt)"
         case (.vacation, .taken): "Urlaub"
-        case (.sick, .planned), (.sick, .approved), (.sick, .taken): "Krank"
+        case (.sick, .recorded), (.sick, .planned), (.sick, .approved), (.sick, .taken): "Krank"
         default: nil
         }
     }

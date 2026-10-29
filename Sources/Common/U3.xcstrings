@@ -2,6 +2,17 @@
   "sourceLanguage": "de",
   "version": "1.0",
   "strings": {
+    "c3.today_flows %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute: %@, fließt morgen ein"
+          }
+        }
+      }
+    },
     "u3.conflict.keep": {
       "extractionState": "manual",
       "localizations": {

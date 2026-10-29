@@ -8,12 +8,43 @@ public enum AbsenceKind: String, Codable, Sendable, Hashable {
     }
 }
 
+/// Absence status (contract 0.36.0, ADR-0032). `recorded` ("erfasst") is the status of sick, exempt and other absences; the request
+/// flow (`requested`, `approved`, `rejected`, `taken`) exists for vacation only. Decoding is tolerant: any unknown or missing value
+/// becomes `.unknown` and never breaks a list, week or calendar.
 public enum AbsenceStatus: String, Codable, Sendable, Hashable {
-    case planned, requested, approved, rejected, cancelled, taken, unknown
+    case planned, requested, approved, rejected, cancelled, taken, recorded, unknown
 
     public init(from decoder: Decoder) throws {
-        self = AbsenceStatus(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .unknown
+        let raw = try? decoder.singleValueContainer().decode(String.self)
+        self = raw.flatMap(AbsenceStatus.init(rawValue:)) ?? .unknown
     }
+
+    /// Statuses the backend accepts for a kind: vacation has the full workflow, sick and exempt only `recorded|cancelled`,
+    /// everything else `planned|recorded|cancelled`.
+    public static func valid(for kind: AbsenceKind) -> [AbsenceStatus] {
+        switch kind {
+        case .vacation: [.planned, .requested, .approved, .rejected, .cancelled, .taken]
+        case .sick, .excused: [.recorded, .cancelled]
+        case .other, .unknown: [.planned, .recorded, .cancelled]
+        }
+    }
+
+    public func isValid(for kind: AbsenceKind) -> Bool { Self.valid(for: kind).contains(self) }
+
+    /// The status the server assigns when the client omits it: `planned` for vacation, otherwise `recorded`.
+    public static func serverDefault(for kind: AbsenceKind) -> AbsenceStatus { kind == .vacation ? .planned : .recorded }
+
+    /// The status to send for `kind`, or nil to omit it (the server then applies its default). Never sends an approval status for a
+    /// non-vacation kind: legacy `approved`/`taken`/`requested` become `recorded`, anything invalid is omitted.
+    public func sendable(for kind: AbsenceKind) -> AbsenceStatus? {
+        if self == .unknown { return nil }
+        if isValid(for: kind) { return self }
+        if kind != .vacation, [.approved, .taken, .requested].contains(self) { return .recorded }
+        return nil
+    }
+
+    /// True for the request/approval workflow, which only vacation uses.
+    public var isApprovalFlow: Bool { [.requested, .approved, .rejected, .taken].contains(self) }
 }
 
 public enum DocumentStatus: String, Codable, Sendable, Hashable, CaseIterable {
@@ -78,7 +109,7 @@ public struct Absence: Codable, Sendable, Hashable, Identifiable {
         endDate = try c.decode(LocalDay.self, forKey: .endDate)
         halfDayStart = try c.decodeIfPresent(Bool.self, forKey: .halfDayStart)
         halfDayEnd = try c.decodeIfPresent(Bool.self, forKey: .halfDayEnd)
-        status = try c.decode(AbsenceStatus.self, forKey: .status)
+        status = try c.decodeIfPresent(AbsenceStatus.self, forKey: .status) ?? .unknown
         note = try c.decodeIfPresent(String.self, forKey: .note)
         countedHalfDays = try c.decode(Int.self, forKey: .countedHalfDays)
         documentStatus = try c.decodeIfPresent(DocumentStatus.self, forKey: .documentStatus)
@@ -144,7 +175,8 @@ public struct AbsenceInput: Encodable, Sendable, Hashable {
     public var endDate: LocalDay
     public var halfDayStart: Bool
     public var halfDayEnd: Bool
-    public var status: AbsenceStatus
+    /// Optional (contract 0.36.0): nil omits the key and the server applies its per-kind default.
+    public var status: AbsenceStatus?
     public var note: String?
     public var documentStatus: DocumentStatus
     public var documentSubmittedOn: LocalDay?
@@ -152,7 +184,7 @@ public struct AbsenceInput: Encodable, Sendable, Hashable {
     public var documentReferenceEnd: LocalDay?
 
     public init(kind: AbsenceKind, startDate: LocalDay, endDate: LocalDay, halfDayStart: Bool = false, halfDayEnd: Bool = false,
-                status: AbsenceStatus, note: String? = nil, documentStatus: DocumentStatus = .notNeeded, documentSubmittedOn: LocalDay? = nil,
+                status: AbsenceStatus?, note: String? = nil, documentStatus: DocumentStatus = .notNeeded, documentSubmittedOn: LocalDay? = nil,
                 documentReferenceStart: LocalDay? = nil, documentReferenceEnd: LocalDay? = nil) {
         self.kind = kind
         self.startDate = startDate
@@ -169,7 +201,7 @@ public struct AbsenceInput: Encodable, Sendable, Hashable {
 
     public init(_ absence: Absence) {
         self.init(kind: absence.kind, startDate: absence.startDate, endDate: absence.endDate, halfDayStart: absence.halfDayStart ?? false,
-                  halfDayEnd: absence.halfDayEnd ?? false, status: absence.status, note: absence.note,
+                  halfDayEnd: absence.halfDayEnd ?? false, status: absence.status.sendable(for: absence.kind), note: absence.note,
                   documentStatus: absence.documentStatus ?? .notNeeded, documentSubmittedOn: absence.documentSubmittedOn,
                   documentReferenceStart: absence.documentReferenceStart, documentReferenceEnd: absence.documentReferenceEnd)
     }
@@ -186,7 +218,7 @@ public struct AbsenceInput: Encodable, Sendable, Hashable {
         try c.encode(endDate, forKey: .endDate)
         try c.encode(halfDayStart, forKey: .halfDayStart)
         try c.encode(halfDayEnd, forKey: .halfDayEnd)
-        try c.encode(status, forKey: .status)
+        try c.encodeIfPresent(status == .unknown ? nil : status, forKey: .status)
         try c.encode(note, forKey: .note)
         try c.encode(documentStatus, forKey: .documentStatus)
         try c.encode(documentSubmittedOn, forKey: .documentSubmittedOn)

@@ -104,10 +104,12 @@ extension AbsenceKind {
 }
 
 extension AbsenceStatus {
-    /// Statuses the editor offers: vacation has the full request flow, everything else only planned/taken (ADR-0005).
+    /// Statuses the editor offers. Only vacation has a picker (full request flow, ADR-0032); sick, exempt and other absences are
+    /// "erfasst" and offer no choice.
     static func options(for kind: AbsenceKind, keeping current: AbsenceStatus?) -> [AbsenceStatus] {
-        var list: [AbsenceStatus] = kind == .vacation ? [.planned, .requested, .approved, .taken] : [.planned, .taken]
-        if let current, current != .unknown, !list.contains(current) { list.append(current) }
+        guard kind == .vacation else { return [] }
+        var list: [AbsenceStatus] = [.planned, .requested, .approved, .taken]
+        if let current, current != .unknown, current.isValid(for: .vacation), !list.contains(current) { list.append(current) }
         return list
     }
 
@@ -117,6 +119,7 @@ extension AbsenceStatus {
         case .requested: String(localized: "absence.status.requested")
         case .approved: String(localized: "absence.status.approved")
         case .taken: String(localized: "absence.status.taken")
+        case .recorded: String(localized: "absence.status.recorded")
         case .rejected: String(localized: "absence.status.rejected")
         case .cancelled: String(localized: "absence.status.cancelled")
         case .unknown: String(localized: "absence.status.unknown")
@@ -129,6 +132,7 @@ extension AbsenceStatus {
         case .requested: "plan.status.requested"
         case .approved: "plan.status.approved"
         case .taken: "plan.status.taken"
+        case .recorded: "plan.status.recorded"
         case .rejected: "plan.status.rejected"
         case .cancelled: "plan.status.cancelled"
         case .unknown: "plan.status.unknown"
@@ -137,7 +141,7 @@ extension AbsenceStatus {
 
     var tone: TTTone {
         switch self {
-        case .approved, .taken: .success
+        case .approved, .taken, .recorded: .success
         case .planned, .requested: .accent
         case .rejected, .cancelled: .danger
         case .unknown: .neutral

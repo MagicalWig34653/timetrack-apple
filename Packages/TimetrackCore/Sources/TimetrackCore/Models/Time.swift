@@ -221,8 +221,18 @@ public struct TimeAccount: Codable, Sendable, Hashable {
     public let openingSeconds: Int
     public let adjustmentSeconds: Int
     public let provisional: Bool
+    /// Contract 0.36.0: `false` = the balance counts through yesterday; nil = an older server whose balance still included today.
+    public let includesToday: Bool?
+    /// Contract 0.36.0: today's difference (not yet in the balance); nil when `asOf` is before today or the account has not started.
+    public let todayDeltaSeconds: Int?
 
-    public init(asOf: LocalDay, accountStart: LocalDay? = nil, balanceSeconds: Int, openingSeconds: Int = 0, adjustmentSeconds: Int = 0, provisional: Bool = false) {
+    /// True when today's difference is reported separately and flows into the balance tomorrow.
+    public var reportsTodaySeparately: Bool { includesToday == false && todayDeltaSeconds != nil }
+
+    public init(asOf: LocalDay, accountStart: LocalDay? = nil, balanceSeconds: Int, openingSeconds: Int = 0, adjustmentSeconds: Int = 0, provisional: Bool = false,
+                includesToday: Bool? = nil, todayDeltaSeconds: Int? = nil) {
+        self.includesToday = includesToday
+        self.todayDeltaSeconds = todayDeltaSeconds
         self.asOf = asOf
         self.accountStart = accountStart
         self.balanceSeconds = balanceSeconds

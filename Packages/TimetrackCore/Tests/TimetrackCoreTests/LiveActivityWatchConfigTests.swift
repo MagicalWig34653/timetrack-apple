@@ -34,7 +34,7 @@ struct LiveActivityWatchConfigTests {
         #expect(source.contains("@unknown default"))
         #expect(source.contains("@Environment(\\.activityFamily)"))
         // The family switch must name .small explicitly (no wildcard sharing a branch with it), see Apple forum thread 776101.
-        #expect(source.contains("case .small: LiveActivitySmall(state: state)"))
+        #expect(source.contains("case .small:") && source.contains("LiveActivitySmall(state: state)"))
         #expect(!source.contains("case .small, _"))
     }
 

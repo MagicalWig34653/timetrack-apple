@@ -88,4 +88,15 @@ struct LiveActivityTintTests {
         UserDefaults(suiteName: suite)?.set("unicorn", forKey: LiveActivityTintStore.key)
         #expect(store.read() == .subtle)
     }
+
+    @Test func watchCardIsOpaqueAndDarkForEveryStyle() {
+        // LA7: the watch card must not depend on the appearance or on transparency; white text keeps >= 12:1 over any backdrop.
+        for style in LiveActivityTintStyle.allCases {
+            let color = LiveActivityTint.watchCard(style: style, hue: teal.hue, saturation: teal.sat, brightness: teal.bri)
+            #expect(color.alpha == 1, "\(style)")
+            #expect(color.brightness <= 0.22, "\(style)")
+            #expect(color.whiteTextContrast(overGrey: 0.9) >= 12, "\(style)")
+        }
+        #expect(LiveActivityTint.watchCard(style: .subtle, hue: 0.48, saturation: 0.8, brightness: 0.85).hue == 0.48)
+    }
 }

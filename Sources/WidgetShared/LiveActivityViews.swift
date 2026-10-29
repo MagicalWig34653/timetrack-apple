@@ -333,87 +333,147 @@ struct IslandMinimal: View {
     var body: some View { IslandCompactLeading(state: state) }
 }
 
-/// LA6: round icon button for the Smart Stack. 32 pt circle (tap target a little larger than the drawn circle), neutral translucent
-/// fill for Pause/Weiter and a solid danger fill for Stopp. The glass look is a translucent fill plus a hairline, not `.buttonStyle(.glass)`
-/// (whose intrinsic insets and 44 pt minimum height pushed the content up in LA2). Always-On: outline only, no fill.
+/// LA7: round icon button for the Smart Stack. The drawn circle is `diameter`; the tap frame is `hit` (as large as the card allows).
+/// Pause/Weiter is a translucent white fill, Stopp the solid danger fill; both carry a hairline. Always-On: outline only.
 private struct SmartStackButtonLabel: View {
     let symbol: String
     let fill: Color
     let dimmed: Bool
-    var diameter: CGFloat = 30
+    var diameter: CGFloat = 32
+    var hit: CGFloat = 36
 
     var body: some View {
-        Image(systemName: symbol).font(.system(size: diameter * 0.42, weight: .bold)).foregroundStyle(.white.opacity(dimmed ? 0.7 : 1))
+        Image(systemName: symbol).font(.system(size: diameter * 0.42, weight: .bold)).foregroundStyle(.white.opacity(dimmed ? 0.75 : 1))
             .frame(width: diameter, height: diameter)
             .background(dimmed ? Color.clear : fill, in: .circle)
-            .overlay { Circle().strokeBorder(.white.opacity(dimmed ? 0.35 : 0.22), lineWidth: 0.75) }
-            .padding(1)
-            .contentShape(.circle)
+            .overlay { Circle().strokeBorder(.white.opacity(dimmed ? 0.4 : 0.25), lineWidth: 0.75) }
+            .frame(width: hit, height: hit)
+            .contentShape(.rect)
     }
 }
 
 /// Smart Stack on the paired watch (`supplementalActivityFamilies([.small, .medium])`): the system mirrors the activity and runs the
 /// intents on the iPhone.
 ///
-/// LA6 redesign. Measured on a 49 mm watch the card is only about 175 x 73 pt (not the 100 pt assumed in LA3), so the previous
-/// four-part stack (status line, clock + buttons, bar, caption) had no room and its content sat on the card edge. Now: inner padding of
-/// 12 / 8 pt, row 1 clock (leading, 22 pt rounded, monospaced digits) and two 32 pt buttons, row 2 a slim 4 pt bar with rounded caps,
-/// row 3 one caption line (kind symbol and state on the left, Feierabend on the right, 11 pt). Fixed point sizes (no Dynamic Type
-/// growth) keep the content inside a fixed-height card. Only constructs LA2 used (scaled font, plain stacks); no `ViewThatFits`/`fixedSize`.
+/// LA7 card. Root cause of the bright card (LA6/N2 still showed grey-green): the tint was a dynamic `UIColor` that resolved to its light
+/// variant on the watch and was translucent. Now the family `.small` gets `LiveActivityTint.watchCard` (static, opaque, dark; see
+/// `LiveActivityContent`) and the view paints the same colour itself (forum workaround for `activityBackgroundTint` not applying).
+/// Layout for the usual 175 x 73 pt card (hierarchy top to bottom): caption row (state icon and label left, planned end right, 11 pt),
+/// clock (rounded, semibold, white, monospaced digits, 22 pt) with two round buttons (32 pt drawn, 36 pt tap frame; 44 pt does not fit
+/// a 73 pt card next to the clock), a 5 pt accent capsule. A card at least 92 pt tall (larger watches, taller layouts) switches to the
+/// roomy layout: 34 pt clock and two full-width 44 pt capsule buttons. Fixed point sizes (a card has a fixed height).
 struct LiveActivitySmall: View {
     let state: LiveActivityTarget
     @Environment(\.isLuminanceReduced) private var dimmed
 
     var body: some View {
-        // `Text(timerInterval:)` truncates instead of shrinking, so the clock size is picked from the card width (three tiers) rather than scaled.
+        // `Text(timerInterval:)` truncates instead of shrinking, so the clock size is picked from the card size (tiers), not scaled.
         GeometryReader { proxy in
             let width = proxy.size.width
-            let tier: (clock: CGFloat, button: CGFloat) = width >= 170 ? (22, 30) : (width >= 150 ? (19, 28) : (17, 26))
-            content(clock: tier.clock, button: tier.button, showsState: width >= 150)
-                .frame(width: width, height: proxy.size.height, alignment: .center)
+            Group {
+                if proxy.size.height >= 92 { roomy(width: width) } else { compact(width: width) }
+            }
+            .frame(width: width, height: proxy.size.height, alignment: .center)
         }
+        .background(state.watchCardColor.ignoresSafeArea())
     }
 
-    private func content(clock: CGFloat, button: CGFloat, showsState: Bool) -> some View {
-        let theme = state.theme
-        return VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 6) {
-                LiveWorkedClock(state: state)
-                    .font(.system(size: clock, weight: .semibold, design: .rounded)).foregroundStyle(.white)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                Spacer(minLength: 2)
-                smallButtons(theme, diameter: button)
-            }
-            if state.plannedSeconds != nil {
-                LiveProgress(state: state)
-                    .frame(height: 4).clipShape(.capsule)
-            }
+    // MARK: compact
+
+    private func compact(width: CGFloat) -> some View {
+        let tier: (clock: CGFloat, button: CGFloat, hit: CGFloat) = width >= 170 ? (22, 32, 36) : (width >= 150 ? (20, 30, 33) : (18, 28, 30))
+        return VStack(alignment: .leading, spacing: 2) {
+            caption(showsState: width >= 165)
             HStack(spacing: 4) {
-                LiveKindIcon(state: state, size: 12, badge: false).font(.system(size: 11, weight: .semibold))
-                if showsState { state.stateTitle }
-                Spacer(minLength: 4)
-                if state.plannedSeconds != nil { LiveEndLabel(state: state) }
+                clock(size: tier.clock)
+                Spacer(minLength: 0)
+                buttons(diameter: tier.button, hit: tier.hit)
             }
-            .font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(0.88))
-            .lineLimit(1).minimumScaleFactor(0.75)
+            .frame(height: tier.hit)
+            capsule(height: 5)
+        }
+        .padding(.horizontal, 12).padding(.vertical, 5)
+    }
+
+    // MARK: roomy
+
+    private func roomy(width: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            caption(showsState: true)
+            clock(size: width >= 170 ? 34 : 30)
+            capsule(height: 6)
+            wideButtons
         }
         .padding(.horizontal, 12).padding(.vertical, 8)
     }
-}
 
-private extension LiveActivitySmall {
-    @ViewBuilder func smallButtons(_ theme: TTTheme, diameter: CGFloat) -> some View {
+    // MARK: parts
+
+    private var ink: Color { .white.opacity(dimmed ? 0.9 : 1) }
+
+    private func clock(size: CGFloat) -> some View {
+        LiveWorkedClock(state: state)
+            .font(.system(size: size, weight: .semibold, design: .rounded)).foregroundStyle(ink)
+            .lineLimit(1).minimumScaleFactor(0.6)
+    }
+
+    /// State icon and label on the left, planned end (or estimate) on the right; both truncate tidily.
+    private func caption(showsState: Bool) -> some View {
         HStack(spacing: 4) {
+            LiveKindIcon(state: state, size: 12, badge: false).font(.system(size: 11, weight: .semibold))
+            if showsState { state.stateTitle.layoutPriority(1) }
+            Spacer(minLength: 6)
+            if state.plannedSeconds != nil { LiveEndLabel(state: state).foregroundStyle(.white.opacity(dimmed ? 0.7 : 0.82)) }
+        }
+        .font(.system(size: 11, weight: .medium, design: .rounded)).foregroundStyle(.white.opacity(dimmed ? 0.9 : 0.92))
+        .lineLimit(1).truncationMode(.tail).minimumScaleFactor(0.8)
+    }
+
+    /// Accent capsule: the system bar clipped to a capsule (hides its end knob) on a faint track.
+    @ViewBuilder private func capsule(height: CGFloat) -> some View {
+        if state.plannedSeconds != nil {
+            LiveProgress(state: state)
+                .frame(height: height).clipShape(.capsule)
+                .background(.white.opacity(0.16), in: .capsule)
+                .opacity(dimmed ? 0.7 : 1)
+        }
+    }
+
+    private func buttons(diameter: CGFloat, hit: CGFloat) -> some View {
+        HStack(spacing: 2) {
             if state.isPaused {
-                Button(intent: WidgetResumeTimerIntent()) { SmartStackButtonLabel(symbol: "play.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter) }
+                Button(intent: WidgetResumeTimerIntent()) { SmartStackButtonLabel(symbol: "play.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter, hit: hit) }
                     .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.resume", table: "Widget")))
             } else {
-                Button(intent: WidgetPauseTimerIntent()) { SmartStackButtonLabel(symbol: "pause.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter) }
+                Button(intent: WidgetPauseTimerIntent()) { SmartStackButtonLabel(symbol: "pause.fill", fill: .white.opacity(0.24), dimmed: dimmed, diameter: diameter, hit: hit) }
                     .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.pause", table: "Widget")))
             }
-            Button(intent: WidgetStopTimerIntent()) { SmartStackButtonLabel(symbol: "stop.fill", fill: TT.dangerFill.opacity(0.92), dimmed: dimmed, diameter: diameter) }
+            Button(intent: WidgetStopTimerIntent()) { SmartStackButtonLabel(symbol: "stop.fill", fill: TT.dangerFill.opacity(0.92), dimmed: dimmed, diameter: diameter, hit: hit) }
                 .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.stop", table: "Widget")))
         }
+    }
+
+    /// Roomy layout: two capsules of 44 pt height sharing the width.
+    private var wideButtons: some View {
+        HStack(spacing: 6) {
+            if state.isPaused {
+                Button(intent: WidgetResumeTimerIntent()) { wideLabel("play.fill", .white.opacity(0.24)) }
+                    .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.resume", table: "Widget")))
+            } else {
+                Button(intent: WidgetPauseTimerIntent()) { wideLabel("pause.fill", .white.opacity(0.24)) }
+                    .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.pause", table: "Widget")))
+            }
+            Button(intent: WidgetStopTimerIntent()) { wideLabel("stop.fill", TT.dangerFill.opacity(0.92)) }
+                .buttonStyle(.plain).accessibilityLabel(Text(LocalizedStringResource("w.stop", table: "Widget")))
+        }
+    }
+
+    private func wideLabel(_ symbol: String, _ fill: Color) -> some View {
+        Image(systemName: symbol).font(.system(size: 16, weight: .bold)).foregroundStyle(.white.opacity(dimmed ? 0.75 : 1))
+            .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
+            .background(dimmed ? Color.clear : fill, in: .capsule)
+            .overlay { Capsule().strokeBorder(.white.opacity(dimmed ? 0.4 : 0.25), lineWidth: 0.75) }
+            .contentShape(.capsule)
     }
 }
 
@@ -429,6 +489,16 @@ extension LiveActivityTarget {
             let tint = LiveActivityTint.color(style: style, hue: hue, saturation: sat, brightness: bri, dark: traits.userInterfaceStyle == .dark)
             return UIColor(hue: tint.hue, saturation: tint.saturation, brightness: tint.brightness, alpha: tint.alpha)
         })
+    }
+}
+
+extension LiveActivityTarget {
+    /// LA7: the watch card colour: static, opaque and dark (see `LiveActivityTint.watchCard`), same hue logic as `backgroundTint`.
+    var watchCardColor: Color {
+        var hue: CGFloat = 0, sat: CGFloat = 0, bri: CGFloat = 0, alpha: CGFloat = 0
+        UIColor(theme.accent).resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark)).getHue(&hue, saturation: &sat, brightness: &bri, alpha: &alpha)
+        let tint = LiveActivityTint.watchCard(style: activeTintStyle, hue: hue, saturation: sat, brightness: bri)
+        return Color(uiColor: UIColor(hue: tint.hue, saturation: tint.saturation, brightness: tint.brightness, alpha: tint.alpha))
     }
 }
 
@@ -474,38 +544,40 @@ struct LiveActivityPreview: View {
     }
 }
 
-/// Smart Stack card approximations. LA6: the real card measured about 175 x 73 pt on a 49 mm watch (screenshot of Build 36), so the
-/// cards here are that size (41 mm and 45 mm scaled by screen width), plus a taller card, large Dynamic Type, Always-On and `.medium`.
-/// The system draws the card itself (material tinted with `backgroundTint`); the gallery fakes it with the tint over mid grey.
+/// Smart Stack card gallery (LA7). Cards are 175 x 73 pt (49 mm, measured), 160 x 73 and 148 x 68 (estimates), 175 x 100 (roomy),
+/// shown for running, paused, travel, no plan, estimate, Accessibility 3 and Always-On. The card paints its own opaque dark colour
+/// (`watchCardColor`), so the black backdrop here is the real situation, not an approximation.
 struct LiveActivityWatchPreview: View {
     let state: LiveActivityTarget
 
-    private func card(_ title: String, _ width: CGFloat, _ height: CGFloat = 73, size: DynamicTypeSize = .large, dimmed: Bool = false) -> some View {
+    private func card(_ title: String, _ target: LiveActivityTarget, _ width: CGFloat, _ height: CGFloat = 73, size: DynamicTypeSize = .large, dimmed: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(verbatim: "\(title) (\(Int(width)) x \(Int(height)))").font(.caption2).foregroundStyle(.secondary)
-            LiveActivitySmall(state: state)
+            LiveActivitySmall(state: target)
                 .environment(\.dynamicTypeSize, size)
                 .environment(\.isLuminanceReduced, dimmed)
                 .frame(width: width, height: height, alignment: .top)
-                .background(dimmed ? AnyShapeStyle(Color.black) : AnyShapeStyle(state.backgroundTint), in: .rect(cornerRadius: 22))
-                .background(Color(white: 0.34), in: .rect(cornerRadius: 22))
+                .background(dimmed ? Color.black : Color.clear)
                 .clipShape(.rect(cornerRadius: 22))
         }
     }
 
     var body: some View {
+        let running = LiveActivityTarget.sample(paused: false, kind: state.kind, planned: true, accentHex: state.accentHex, iconStyle: state.iconStyle, tintStyle: state.tintStyle)
+        let paused = LiveActivityTarget.sample(paused: true, kind: state.kind, planned: true, accentHex: state.accentHex, iconStyle: state.iconStyle, tintStyle: state.tintStyle)
+        let noPlan = LiveActivityTarget.sample(paused: false, kind: state.kind, planned: false, accentHex: state.accentHex, iconStyle: state.iconStyle, tintStyle: state.tintStyle)
+        let travel = LiveActivityTarget.sample(paused: false, kind: .travel, planned: true, accentHex: state.accentHex, tintStyle: state.tintStyle)
         VStack(alignment: .leading, spacing: 8) {
-            card("49 mm", 175); card("45 mm", 160); card("41 mm", 148, 68)
-            card("49 mm, tall", 175, 100)
-            card("49 mm, Accessibility 3", 175, size: .accessibility3); card("41 mm, xSmall", 148, 68, size: .xSmall)
-            card("49 mm, Always-On", 175, dimmed: true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: ".medium (Banner)").font(.caption2).foregroundStyle(.secondary)
-                LiveActivityBanner(state: state).frame(width: 198)
-                    .background(state.backgroundTint, in: .rect(cornerRadius: 22)).background(Color(white: 0.34), in: .rect(cornerRadius: 22))
-            }
+            card("49 mm running", running, 175); card("49 mm paused", paused, 175)
+            card("49 mm travel", travel, 175); card("49 mm no plan", noPlan, 175)
+            card("45 mm", running, 160); card("41 mm", running, 148, 68)
+            card("49 mm roomy", running, 175, 100)
+            card("49 mm, Accessibility 3", paused, 175, size: .accessibility3)
+            card("49 mm, Always-On", running, 175, dimmed: true)
+            card("49 mm, Always-On paused", paused, 175, dimmed: true)
         }
         .environment(\.colorScheme, .dark)
+        .padding(8).background(Color.black)
     }
 }
 #endif

@@ -40,7 +40,6 @@ struct TimetrackLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TimerActivityAttributes.self) { context in
             LiveActivityContent(state: context.state)
-                .activityBackgroundTint(context.state.backgroundTint)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) { IslandExpandedLeading(state: context.state) }
@@ -68,10 +67,15 @@ private struct LiveActivityContent: View {
     let state: LiveActivityTarget
 
     var body: some View {
+        // LA7: the watch card gets a static, opaque dark tint (the dynamic translucent one rendered as a bright grey-green card there);
+        // the system action colour is white so its controls stay legible on it. iPhone Lock Screen keeps the Q1/N2 tint.
         switch family {
-        case .small: LiveActivitySmall(state: state)
-        case .medium: LiveActivityBanner(state: state)
-        @unknown default: LiveActivityBanner(state: state)
+        case .small:
+            LiveActivitySmall(state: state)
+                .activityBackgroundTint(state.watchCardColor)
+                .activitySystemActionForegroundColor(.white)
+        case .medium: LiveActivityBanner(state: state).activityBackgroundTint(state.backgroundTint)
+        @unknown default: LiveActivityBanner(state: state).activityBackgroundTint(state.backgroundTint)
         }
     }
 }

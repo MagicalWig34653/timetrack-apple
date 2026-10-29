@@ -69,6 +69,19 @@ public enum LiveActivityTint {
     }
 }
 
+extension LiveActivityTint {
+    /// LA7: the watch Smart Stack card. Static (never a dynamic colour: the card is drawn by the system with a trait collection that
+    /// need not match the iPhone, which resolved the light variant) and fully opaque (a translucent tint over the system card material
+    /// rendered as bright grey-green). Always dark, with a hint of the accent hue unless neutral.
+    public static func watchCard(style: LiveActivityTintStyle, hue: Double, saturation: Double, brightness: Double) -> LiveActivityTintColor {
+        switch style {
+        case .colorful: LiveActivityTintColor(hue: hue, saturation: min(0.75, saturation), brightness: max(0.14, min(0.22, brightness * 0.26)), alpha: 1)
+        case .subtle: LiveActivityTintColor(hue: hue, saturation: min(0.5, saturation * 0.4), brightness: 0.11, alpha: 1)
+        case .neutral: LiveActivityTintColor(hue: 0, saturation: 0, brightness: 0.10, alpha: 1)
+        }
+    }
+}
+
 /// The choice, stored in the App Group like the icon style. Local to this device.
 public struct LiveActivityTintStore: Sendable {
     public static let key = "liveactivity.tint.v1"

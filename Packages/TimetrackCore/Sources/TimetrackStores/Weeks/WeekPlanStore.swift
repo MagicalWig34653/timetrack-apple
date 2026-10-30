@@ -21,6 +21,12 @@ public final class WeekPlanStore {
     /// P13: the server accepts and returns plan blocks (API 0.35.0). Without it the planner keeps the old single window per day.
     public private(set) var supportsBlocks = false
     private var capabilityKnown = false
+    /// U2: undo history of the draft list (snapshots before each edit; the baseline is never touched).
+    public private(set) var undoStack: [[DayDraft]] = []
+    public private(set) var redoStack: [[DayDraft]] = []
+    public static let undoLimit = 50
+    public var canUndo: Bool { !undoStack.isEmpty }
+    public var canRedo: Bool { !redoStack.isEmpty }
     /// Reports the result of saving (never loads).
     public var onOutcome: StoreOutcomeHandler?
     /// Called after a successful save so other screens (calendar, week overview) can reload.
@@ -87,6 +93,7 @@ public final class WeekPlanStore {
             week = loaded
             drafts = loaded.days.map { WeekPlan.draft(from: $0, multi: supportsBlocks) }
             baseline = drafts
+            clearHistory()
             suggestion = suggested
             error = nil
             isUnavailable = false
@@ -187,14 +194,105 @@ public final class WeekPlanStore {
 
     public func setMode(_ index: Int, _ mode: PlanMode?) {
         guard drafts.indices.contains(index), days.indices.contains(index) else { return }
+        record()
         drafts[index] = WeekPlan.withMode(drafts[index], mode, suggestion: suggestion, targetSeconds: days[index].targetSeconds, multi: supportsBlocks)
     }
 
-    public func applyStandard() { drafts = WeekPlan.standardWeek(days: days, current: drafts, suggestion: suggestion, multi: supportsBlocks) }
-    public func applySame() { drafts = WeekPlan.sameForWorkdays(days: days, current: drafts) }
-    public func applyClear() { drafts = WeekPlan.clearWeek(days: days, current: drafts) }
+    // MARK: U2 history and grid edits
+
+    private func clearHistory() { undoStack = []; redoStack = [] }
+
+    /// Remembers the current drafts before an edit (one entry per user action, also for a whole drag).
+    public func record() {
+        guard undoStack.last != drafts else { return }
+        undoStack.append(drafts)
+        if undoStack.count > Self.undoLimit { undoStack.removeFirst() }
+        redoStack = []
+    }
+
+    public func undo() {
+        guard let previous = undoStack.popLast() else { return }
+        redoStack.append(drafts)
+        drafts = previous
+        showProblems = false
+    }
+
+    public func redo() {
+        guard let next = redoStack.popLast() else { return }
+        undoStack.append(drafts)
+        drafts = next
+    }
+
+    private func editable(_ index: Int) -> Bool { drafts.indices.contains(index) && days.indices.contains(index) && !days[index].isBlocked }
+
+    /// Paints a block into day `index` (the new block wins over what it covers). Returns the index of the new block, nil when refused.
+    @discardableResult
+    public func paintBlock(_ index: Int, range: MinuteRange, kind: PlanBlockKind, placeId: UUID? = nil) -> Int? {
+        guard supportsBlocks, editable(index), let placed = PlanGridEdit.paint(drafts[index], range: range, kind: kind, placeId: placeId) else { return nil }
+        record()
+        drafts[index] = placed.draft
+        return placed.index
+    }
+
+    /// Moves a block (possibly to another day); returns its new index in the target day.
+    @discardableResult
+    public func moveBlock(from index: Int, at block: Int, toDay target: Int, range: MinuteRange) -> Int? {
+        guard supportsBlocks, editable(index), editable(target), drafts[index].blocks.indices.contains(block) else { return nil }
+        if index == target {
+            guard let placed = PlanGridEdit.move(drafts[index], at: block, to: range) else { return nil }
+            record()
+            drafts[index] = placed.draft
+            return placed.index
+        }
+        var moved = drafts[index].blocks[block]
+        moved.start = WeekPlan.formatClock(range.start)
+        moved.end = WeekPlan.formatClock(range.end)
+        guard let placed = PlanGridEdit.place(drafts[target], block: moved) else { return nil }
+        record()
+        drafts[target] = placed.draft
+        drafts[index] = PlanGridEdit.erase(drafts[index], at: block)
+        return placed.index
+    }
+
+    public func resizeBlock(_ index: Int, at block: Int, edge: PlanGrid.Edge, to minute: Int, step: Int = PlanGrid.snapMinutes) {
+        guard editable(index), let resized = PlanGridEdit.resize(drafts[index], at: block, edge: edge, to: minute, step: step), resized != drafts[index] else { return }
+        record()
+        drafts[index] = resized
+    }
+
+    public func eraseBlock(_ index: Int, at block: Int) {
+        guard editable(index), drafts[index].blocks.indices.contains(block) else { return }
+        record()
+        drafts[index] = PlanGridEdit.erase(drafts[index], at: block)
+    }
+
+    /// Changes kind, place and note of one block as one undo step.
+    public func setBlockDetails(_ index: Int, at block: Int, kind: PlanBlockKind, placeId: UUID?, note: String?) {
+        guard editable(index), drafts[index].blocks.indices.contains(block) else { return }
+        record()
+        drafts[index].blocks[block].kind = kind
+        drafts[index].blocks[block].placeId = placeId
+        let trimmed = note.map { String($0.prefix(PlanBlocks.maxNoteLength)) }
+        drafts[index].blocks[block].note = (trimmed?.isEmpty ?? true) ? nil : trimmed
+    }
+
+    /// Copies the plan of day `source` onto the given other days (blocked days are skipped); returns the days that took it.
+    @discardableResult
+    public func copyDay(_ source: Int, to targets: [Int]) -> [Int] {
+        guard drafts.indices.contains(source) else { return [] }
+        let accepted = targets.filter { $0 != source && editable($0) }
+        guard !accepted.isEmpty else { return [] }
+        record()
+        for target in accepted { drafts[target] = PlanGridEdit.copy(drafts[source], to: drafts[target].date) }
+        return accepted
+    }
+
+    public func applyStandard() { record(); drafts = WeekPlan.standardWeek(days: days, current: drafts, suggestion: suggestion, multi: supportsBlocks) }
+    public func applySame() { record(); drafts = WeekPlan.sameForWorkdays(days: days, current: drafts) }
+    public func applyClear() { record(); drafts = WeekPlan.clearWeek(days: days, current: drafts) }
 
     public func discard() {
+        clearHistory()
         drafts = baseline
         showProblems = false
         error = nil
@@ -206,6 +304,7 @@ public final class WeekPlanStore {
         do {
             let source = try await client.getPlanWeek(previous)
             guard source.days.contains(where: { $0.plan != nil }) else { return .emptySource }
+            record()
             drafts = WeekPlan.copyWeek(source: source, days: days, current: drafts, multi: supportsBlocks)
             error = nil
             return .copied
@@ -239,6 +338,7 @@ public final class WeekPlanStore {
                 // Edits made while the PUT ran stay in the drafts (and the plan stays unsaved); only the baseline moves.
                 if drafts == sent { drafts = serverDrafts }
                 baseline = serverDrafts
+                clearHistory()
                 showProblems = false
             }
             onOutcome?(.saved)

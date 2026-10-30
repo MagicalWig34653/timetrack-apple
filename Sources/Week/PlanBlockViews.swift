@@ -67,7 +67,7 @@ enum PlanBlockText {
 
 // MARK: - Pattern
 
-private struct PlanPatternOverlay: View {
+struct PlanPatternOverlay: View {
     let pattern: PlanBlockPattern
 
     var body: some View {

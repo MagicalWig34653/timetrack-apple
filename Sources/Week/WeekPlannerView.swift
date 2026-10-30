@@ -17,6 +17,44 @@ struct WeekPlannerView: View {
     private var wide: Bool { sizeClass == .regular && !typeSize.isAccessibilitySize }
 
     var body: some View {
+        if store.supportsBlocks && store.week != nil && !store.isUnavailable && !typeSize.isAccessibilitySize {
+            graphical
+        } else {
+            list
+        }
+    }
+
+    /// U2: the graphical planner (days as columns, time axis, paint/move/resize); the list below stays for old servers and huge type.
+    private var graphical: some View {
+        VStack(spacing: 0) {
+            if let error = store.error {
+                ErrorBanner(message: error.germanMessage(in: .planBlocks), retryTitle: "common.retry") { Task { await store.load() } }.accessibilityIdentifier("week.error")
+                    .padding(.horizontal, TT.Space.l)
+            }
+            if let notice { HintBanner(LocalizedStringKey(notice)).padding(.horizontal, TT.Space.l) }
+            if store.isPast { HintBanner("wk.week.past_hint").padding(.horizontal, TT.Space.l) }
+            compactTotal
+            PlanGridPlanner(store: store, places: places)
+        }
+        .ttScreenBackground()
+        .safeAreaInset(edge: .bottom) { saveBar }
+        .task(id: store.supportsBlocks) {
+            if store.supportsBlocks, places.isEmpty, let client = model.apiClient { places = ((try? await client.listPlaces()) ?? []).filter { !$0.archived } }
+        }
+    }
+
+    private var compactTotal: some View {
+        let totals = store.totals
+        return HStack(spacing: TT.Space.s) {
+            W.t("plan.total_text", DurationFormat.hoursMinutes(totals.plannedSeconds), DurationFormat.hoursMinutes(totals.targetSeconds))
+                .font(TTFont.numeral).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.6).accessibilityIdentifier("plan.total")
+            Spacer(minLength: 0)
+            StatusChip(verbatim: differenceText(totals.differenceSeconds), tone: totals.differenceSeconds == 0 ? .success : (totals.differenceSeconds < 0 ? .warning : .accent))
+        }
+        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.xs)
+    }
+
+    private var list: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.l) {
                 if let error = store.error {

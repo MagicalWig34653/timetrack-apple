@@ -230,6 +230,43 @@ struct PlanBlocksStoreTests {
         #expect(!store.isDirty)
     }
 
+    @Test func gridEditsAreUndoableAndSkipBlockedDays() async {
+        let transport = MockTransport()
+        let store = store(transport, apiVersion: "0.35.0")
+        transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: BlockFixtures.planWeek())
+        await store.load()
+        #expect(!store.canUndo)
+        let before = store.drafts
+        // paint over the lunch gap on the Wednesday: the two blocks stay, a third appears between them
+        #expect(store.paintBlock(2, range: MinuteRange(start: 12 * 60, end: 13 * 60), kind: .school) == 1)
+        #expect(store.drafts[2].blocks.count == 3 && store.isDirty && store.canUndo)
+        store.resizeBlock(2, at: 1, edge: .end, to: 13 * 60 + 30)
+        #expect(store.drafts[2].blocks[1].end == "13:00", "the neighbour at 13:00 stops the resize")
+        #expect(store.undoStack.count == 1, "a clamped resize that changes nothing is no undo step")
+        store.undo()
+        #expect(store.drafts == before && !store.isDirty && !store.canUndo)
+        store.redo()
+        #expect(store.drafts[2].blocks.count == 3 && !store.canRedo && store.canUndo)
+        // an edit after undo drops the redo history
+        store.undo()
+        store.eraseBlock(2, at: 0)
+        #expect(!store.canRedo && store.drafts[2].blocks.count == 1)
+        store.undo()
+        // copy: the blocked day (Tuesday, index 1) does not take the plan
+        let taken = store.copyDay(2, to: [1, 3, 4, 2])
+        #expect(taken == [3, 4])
+        #expect(store.drafts[3].blocks == store.drafts[2].blocks && store.drafts[3].date != store.drafts[2].date)
+        #expect(store.paintBlock(1, range: MinuteRange(start: 540, end: 600), kind: .work) == nil, "blocked day")
+        // moving a block to another day removes it from the source
+        let count = store.drafts[2].blocks.count
+        #expect(store.moveBlock(from: 2, at: 0, toDay: 5, range: MinuteRange(start: 9 * 60, end: 11 * 60)) == 0)
+        #expect(store.drafts[2].blocks.count == count - 1 && store.drafts[5].blocks.count == 1)
+        store.setBlockDetails(5, at: 0, kind: .customer, placeId: nil, note: "  Beratung ")
+        #expect(store.drafts[5].blocks[0].kind == .customer && store.drafts[5].blocks[0].note == "  Beratung ".prefix(200).description)
+        store.discard()
+        #expect(store.drafts == before && !store.canUndo)
+    }
+
     @Test func overlapIsCaughtLocallyAndSendsNothing() async {
         let transport = MockTransport()
         let store = store(transport, apiVersion: "0.35.0")

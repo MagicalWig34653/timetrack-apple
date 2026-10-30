@@ -263,7 +263,6 @@ struct PlanGridPlanner: View {
         .focusable()
         .focused($gridFocused)
         .onKeyPress(keys: [.upArrow, .downArrow, .leftArrow, .rightArrow, .delete, .deleteForward, .return, .escape]) { press in handleKey(press) }
-        .accessibilityIdentifier("plan.grid")
     }
 
     private func hourLines(h: (start: Int, end: Int), width: CGFloat) -> some View {

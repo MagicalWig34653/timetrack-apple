@@ -1,0 +1,26 @@
+# U2-apple – Zeit-Tab: Wochenansicht, Wochenplaner wie PWA, vertikale Monatsliste
+
+Branch `u2-time-ui` (Worktree `timetrack-apple-wt/u2`, von `main`, Build 55). Nicht gemergt, nicht gepusht, nichts hochgeladen, Build-Nummer unverändert. Nutzerrückmeldung: Woche „viel zu viel Text“ und Animation folgt nicht dem Finger; Wochenplanung soll wie die PWA bedienbar sein; Monat „Rahmen des heutigen Tages verhält sich komisch“, besser vertikale Liste mit Pillen wie iOS Kalender.
+
+## Monat (vertikale Liste)
+- `MonthList` (`Sources/Week/MonthPager.swift`): `ScrollView` + `LazyVStack(pinnedViews: .sectionHeaders)`, ein Abschnitt je Monat (36 Monate vor/36 nach heute) mit klebendem Kopf, Wochenzeilen fester Höhe (84 pt iPhone, 112 pt iPad). Kein horizontales Paging mehr, kein Rahmen um heute: heute = gefüllter Akzentkreis auf der Zahl, gewählt = dunkler Kreis.
+- Zelle: Zahl, grüner Punkt bei erfasster Zeit, bis zu 2 (iPad 3) Pillen mit Kürzung, danach „+n“. Pillen: Abwesenheit (geplant/beantragt nur Umriss), Feiertag (Name), Plan-Art. Tage der Nachbarmonate in der Zeile sind leer (jeder Monat zeichnet nur seine Tage).
+- Tipp auf einen Tag öffnet das bestehende Tagesblatt (`DayDetail` + Einträge) als Sheet (Detents medium/groß); Bereichsmodus (lang drücken) unverändert. Schwebender „Heute“-Knopf, wenn der heutige Monat nicht sichtbar ist; Pfeile und Monatswahl springen per Offset.
+- Kern (testbar): `MonthPill` (Priorität, Überlauf), `MonthCell.pills/workedSeconds`, `MonthSnapshot.monthRows`, `MonthListLayout` (Offset ↔ Monat ohne Messung, Sprungziele), `MonthKey.weekRows`. `CalendarStore` baut Snapshots jetzt auch bei Auswertungsänderung neu.
+
+## Woche
+- Pro Tag nur noch: Wochentag + Datum, Ist (und Differenz), eine Pille (Feiertag, Abwesenheit oder Plan-Art), Plus-Menü. Planzeile, Blöcke, Hinweise, Plan/Ist-Chip, gesetzliche Hinweise wandern ins Tagesblatt (Tipp auf den Tageskopf, dasselbe Sheet wie im Monat).
+- `WeekPages`: horizontal paginierender `ScrollView` (Wochen als Seiten, ±260), die Seite folgt dem Finger 1:1, Schnappen nach Geschwindigkeit, Gummiband an den Enden, Nachbarwoche sichtbar. Die Seiten sind Listen, Zeilen-Wischaktionen bleiben. Nur die aktive Seite ist live, Nachbarn zeigen den Cache (`TimeListStore.cachedDays`, `prefetch(week:)`). Pfeile, „Heute“, Tagesleiste (VoiceOver-Aktionen) und Cmd+Pfeil scrollen die Seite. Die V5-Drag-Mechanik (`weekSwipeArea`) ist entfernt; `WeekSwipe` im Kern bleibt ungenutzt bestehen.
+
+## Wochenplaner wie PWA
+- `PlanGridPlanner` (`PlanGridView.swift`): Tage als Spalten (iPad 7, iPhone 3 mit Tagesleiste zum Verschieben des Fensters), Zeitachse, Stundenlinien, sichtbare Stunden wachsen um Blöcke. Pinsel (Arbeit/Schule/Fahrt/Büro/Homeoffice/Kunde, Farbe + Symbol + Muster), Antippen einer leeren Stelle malt 1 h, gedrückt halten und ziehen malt eine Spanne (15-Minuten-Raster, Vorschau), Block gedrückt halten und ziehen verschiebt (auch auf andere Tage), Griffe oben/unten ändern Beginn/Ende (stoppt an Nachbarn und 15 Min), Tippen öffnet das Blattchen (`PlanBlockSheet`: Art, Zeiten, Ort, Notiz, Teilen, Verbinden, Löschen). Tagesart-Chips je Spalte, „Tag kopieren nach …“, Wochenmenü (Standardwoche, ersten Tag für alle, Vorwoche, leeren), Rückgängig/Wiederholen (Cmd+Z), Planungshinweise unter dem Raster, Speichern-Leiste unverändert atomar. Gesperrte Tage (Feiertag/Urlaub/Krank) schraffiert und nicht bemalbar. iPad: Zeiger-Hover mit Uhrzeitlinie, Tastatur (Pfeile verschieben, Option+Pfeil Ende, Shift = 5 Min, Entf, Return, Esc). VoiceOver: je Block Aktionen (Bearbeiten, Viertelstunde früher/später, Beginn/Ende ±15, Löschen), je Spalte (Block hinzufügen, Tag kopieren).
+- Kern: `PlanGrid` / `PlanGridEdit` (Port von `grid.ts`/`grid-edit.ts`: Snap, Malen, Verschieben, Größe, Block „gewinnt“ und schneidet Nachbarn), `WeekPlanStore` mit Undo/Redo, `paintBlock/moveBlock/resizeBlock/eraseBlock/setBlockDetails/copyDay`. Alte Server (< 0.35.0) und Accessibility-Schriftgrößen behalten die bisherige Listenbedienung.
+- Nicht übernommen aus der PWA: Mehrfachauswahl/Lasso, Zwischenablage, Folgewochen-Dialog.
+
+## Prüfung
+- Kerntests `swift test --build-system native --no-parallel`: 914 grün vor dem letzten Schritt (+25: `MonthPillTests`, `MonthListLayoutTests`, `PlanGridTests`, Store-Test Undo/Kopieren/Verschieben).
+- UI-Tests gegen Wegwerf-Backend (Seed `seed-p13.py`, Simulator iPhone 18 Pro): `U2ShotTests` (Monat scrollen, Kopf wechselt, „Heute“-Knopf, Tag öffnet Sheet; Bilder; Planer malen/rückgängig), `WeekSwipeTests` (Wischen auf den Seiten wechselt die Woche) bestanden, soweit im Abschnitt „Offen“ nicht anders vermerkt.
+- Bilder `docs/screenshots/u2-before-*` und `u2-after-*` (verkleinert).
+
+## Offen / ungeprüft
+Gefühl auf dem Gerät (Paging, Ziehen im Planer, Haptik), iPad-Hover und Tastatur, VoiceOver-Aktionen nur gebaut, große Schrift im Monat (Zelle gedeckelt), Mac (Zeitansicht ist dort eine andere Oberfläche, nur gebaut). Ziehen auf dem iPhone-Raster scrollt nach Systemverhalten, Malen braucht kurzes Halten. Monatsliste reicht ±3 Jahre; weitere Sprünge über Planungsbereich. Der Tagesblatt-Wechsel von Sheet zu Editor/Planblatt (zwei Sheets nacheinander) wurde nur für „Zeitabschnitt“ gezielt umgangen, andere Ketten im Simulator nicht geprüft.

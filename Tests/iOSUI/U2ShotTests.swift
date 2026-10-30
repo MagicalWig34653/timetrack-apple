@@ -74,4 +74,24 @@ final class U2ShotTests: XCTestCase {
         sleep(2)
         shot("month-sheet")
     }
+
+    /// U2: planner: a tap on an empty column paints a block (undo available), the block sheet opens on tap, undo restores the plan.
+    func testPlannerPaintsAndUndoes() throws {
+        try launch(zoom: "week")
+        el("week.plan").tap()
+        XCTAssertTrue(el("plan.undo").waitForExistence(timeout: 15))
+        XCTAssertFalse(el("plan.undo").isEnabled)
+        el("plan.window.4").tap()
+        sleep(1)
+        let column = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'plan.col.'")).element(boundBy: 1)
+        _ = column.waitForExistence(timeout: 10)
+        XCTAssertTrue(column.exists)
+        column.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.2)).tap()
+        XCTAssertTrue(el("plan.undo").waitForExistence(timeout: 5))
+        XCTAssertTrue(el("plan.undo").isEnabled, "painting is an undoable edit")
+        XCTAssertTrue(el("plan.save").isEnabled)
+        shot("planner-painted")
+        el("plan.undo").tap()
+        XCTAssertFalse(el("plan.undo").isEnabled)
+    }
 }

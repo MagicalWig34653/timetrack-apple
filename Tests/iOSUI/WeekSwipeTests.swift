@@ -35,13 +35,13 @@ final class WeekSwipeTests: XCTestCase {
         sleep(2)
         shot("week-before")
         // Swipe left on the strip = next week.
-        stripElement().swipeLeft()
+        el("week.pages").swipeLeft()
         XCTAssertTrue(waitForTitle(notEqualTo: start), "swipe left did not change the week")
         let next = title()
         sleep(1)
         shot("week-next")
         // Swipe right = back.
-        stripElement().swipeRight()
+        el("week.pages").swipeRight()
         XCTAssertTrue(waitForTitle(equalTo: start), "swipe right did not return to the first week")
         XCTAssertNotEqual(next, start)
         // The buttons keep working.

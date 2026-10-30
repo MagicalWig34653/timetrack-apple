@@ -79,6 +79,18 @@ public final class TimeListStore {
         }
     }
 
+    /// U2: the days of a week the store has seen (nil otherwise). The paging week view draws neighbour pages from here.
+    public func cachedDays(forWeek monday: LocalDay) -> [DayEvaluation]? {
+        monday == weekStart && !days.isEmpty ? days : weekCache[monday]
+    }
+
+    /// U2: reads a neighbour week into the cache without touching the shown week; silent on failure.
+    public func prefetch(week monday: LocalDay) async {
+        guard monday != weekStart, weekCache[monday] == nil, let end = LocalDays.adding(6, to: monday),
+              let fresh = try? await client.listDays(from: monday, to: end) else { return }
+        weekCache[monday] = fresh.sorted { $0.date < $1.date }
+    }
+
     public func shiftWeeks(_ count: Int) async {
         weekStart = LocalDays.adding(7 * count, to: weekStart) ?? weekStart
         if let cached = weekCache[weekStart] { days = cached }

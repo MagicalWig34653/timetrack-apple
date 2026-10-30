@@ -26,7 +26,12 @@ struct TimeHub: View {
     @AppStorage("time.zoom") private var storedZoom = TimeZoom.month.rawValue
 
     @State private var focus: TimeFocus
-    @State private var pagerPosition: Int?
+    /// U2: the vertical month list: scroll position, month under the header and the day whose detail sheet is open.
+    @State private var monthScroll = ScrollPosition(edge: .top)
+    @State private var visibleMonth: MonthKey
+    @State private var monthSheetDay: LocalDay?
+    /// False until the list has jumped to its initial month; the scroll callbacks of the first layout pass must not overwrite it.
+    @State private var monthPositioned = false
     @State private var editor: EditorRequest?
     @State private var voiding: Segment?
     @State private var touchedDay: LocalDay?
@@ -36,9 +41,8 @@ struct TimeHub: View {
     @State private var planningArea = false
     @State private var reportsWeek: ReportWeekRef?
     @State private var pendingNavigation: PendingNavigation?
-    /// V5: horizontal offset of the week content while the finger drags or the page slides.
-    @State private var weekDrag: CGFloat = 0
-    @State private var weekSwitching = false
+    /// U2: week index (relative to the current week) of the paging week view.
+    @State private var weekPage: Int?
     @Namespace private var selectionSpace
 
     struct PendingNavigation: Identifiable {
@@ -53,7 +57,8 @@ struct TimeHub: View {
         let zoom: TimeZoom = calendar == nil ? .week : stored
         let today = timeList.calendar.day(for: .now)
         _focus = State(initialValue: TimeFocus(zoom: zoom, day: today))
-        _pagerPosition = State(initialValue: MonthKey(day: today)?.index)
+        _weekPage = State(initialValue: 0)
+        _visibleMonth = State(initialValue: MonthKey(day: today) ?? MonthKey(year: 2026, month: 1))
     }
 
     // MARK: - Derived
@@ -70,7 +75,11 @@ struct TimeHub: View {
         return WeekStoreCache.shared.planStore(client, calendar: model.dayCalendar)
     }
     private var isPlanning: Bool { zoom == .week && focus.isPlanning && planStore != nil }
-    private var rowHeight: CGFloat { wide ? 84 : 48 }
+    private var rowHeight: CGFloat { wide ? 112 : 84 }
+    private var monthLayout: MonthListLayout {
+        let current = MonthKey(day: today) ?? visibleMonth
+        return MonthListLayout(first: current.adding(-36), count: 73, rowHeight: rowHeight, headerHeight: 44)
+    }
 
     // MARK: - Body
 
@@ -80,11 +89,9 @@ struct TimeHub: View {
                        pickerContent: { calendar.map { store in MonthPicker(store: store) { picker = false; jump(to: store.visibleKey) } } })
                 .padding(.horizontal, TT.Space.l)
                 .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-                .weekSwipeArea()
             if let calendar, zoom == .month, calendar.isRangeMode { rangeBar(calendar).padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s) }
             content
         }
-        .environment(\.weekSwipe, zoom == .week && !isPlanning ? weekSwipeHandler : nil)
         .background { weekKeyboardShortcuts }
         .ttScreenBackground()
         .navigationBarTitleDisplayMode(.inline)
@@ -107,6 +114,7 @@ struct TimeHub: View {
                 Task { try? await Task.sleep(for: .milliseconds(450)); planStoreOpen(monday) }
             }
         }
+        .modifier(DaySheet(hub: self))
         .modifier(CalendarSheets(calendar: calendar, absenceRequest: $absenceRequest, sheet: $sheet))
         .alert(W.s("leave.title"), isPresented: Binding(get: { pendingNavigation != nil }, set: { if !$0 { pendingNavigation = nil } })) {
             Button(W.s("leave.discard"), role: .destructive) {
@@ -119,8 +127,11 @@ struct TimeHub: View {
         } message: { W.t("leave.message") }
         .task(id: zoom) { await load() }
         .onChange(of: focus) { syncStores() }
-        .onChange(of: pagerPosition) { _, new in pagerSettled(new) }
-        .onChange(of: scenePhase) { if scenePhase == .active { Task { await reloadAll() } } }
+        .onChange(of: focus.weekStart) { if weekPage != focusWeekIndex { weekPage = focusWeekIndex } }
+        .onChange(of: monthSheetDay) { daySheetOpened() }
+        .onChange(of: sheet?.id) { _, new in if new != nil { monthSheetDay = nil } }
+        .onChange(of: absenceRequest?.id) { _, new in if new != nil { monthSheetDay = nil } }
+                .onChange(of: scenePhase) { if scenePhase == .active { Task { await reloadAll() } } }
         .onAppear { planStore?.onSaved = {
             Task { await weekStore?.load(); await timeList.load() }
             // AUD3: write the saved plan back to the device calendar without waiting for the next foreground.
@@ -132,14 +143,14 @@ struct TimeHub: View {
 
     private var headerTitle: String {
         switch zoom {
-        case .month: PlanFormat.monthName(focus.monthKey.month, calendar: timeList.calendar)
+        case .month: PlanFormat.monthName(visibleMonth.month, calendar: timeList.calendar)
         case .week: W.s("nav.kw", LocalDays.isoWeek(of: focus.weekStart) ?? 0)
         }
     }
 
     private var headerSubtitle: String {
         switch zoom {
-        case .month: String(focus.monthKey.year)
+        case .month: String(visibleMonth.year)
         case .week: weekRangeText(start: focus.weekStart, end: focus.weekEnd, calendar: timeList.calendar)
         }
     }
@@ -191,65 +202,86 @@ struct TimeHub: View {
     }
 
     private func monthContent(_ calendar: CalendarStore) -> some View {
-        Group {
-            if wide {
-                HStack(alignment: .top, spacing: TT.Space.xl) {
-                    VStack(alignment: .leading, spacing: TT.Space.m) { grid(calendar); Legend(); Spacer(minLength: 0) }.frame(maxWidth: 640)
-                    detailScroll(calendar).frame(maxWidth: .infinity)
-                }
-                .padding(.horizontal, TT.Space.l).frame(maxWidth: 1200).frame(maxWidth: .infinity)
-            } else {
-                VStack(spacing: TT.Space.s) {
-                    grid(calendar).padding(.horizontal, TT.Space.l)
-                    detailScroll(calendar)
-                }
-            }
-        }
-    }
-
-    private func grid(_ calendar: CalendarStore) -> some View {
-        gridBody(calendar).dynamicTypeSize(...DynamicTypeSize.xxxLarge) // fixed row heights: the grid is capped, the details below scale
-    }
-
-    private func gridBody(_ calendar: CalendarStore) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 Text("calendar.week_short").frame(width: 26).accessibilityHidden(true)
                 ForEach(PlanFormat.weekdayHeaders, id: \.self) { Text(verbatim: String($0.prefix(2))).frame(maxWidth: .infinity) }
             }
-            .font(TTFont.eyebrow).foregroundStyle(TT.textTertiary).padding(.bottom, TT.Space.xs)
-            MonthPager(store: calendar, position: $pagerPosition, selected: focus.day, rowHeight: rowHeight, namespace: selectionSpace,
-                       onTap: { tap($0, in: calendar) }, onLongPress: { calendar.beginRange(at: $0); TTHaptics.play(.tap) })
+            .font(TTFont.eyebrow).foregroundStyle(TT.textTertiary).padding(.vertical, TT.Space.xs).padding(.horizontal, TT.Space.s)
+            MonthList(store: calendar, layout: monthLayout, position: $monthScroll, selected: focus.day,
+                      onVisibleMonth: { key in if monthPositioned, key != visibleMonth { visibleMonth = key; monthVisibleChanged(key) } },
+                      onTap: { tap($0, in: calendar) }, onLongPress: { calendar.beginRange(at: $0); TTHaptics.play(.tap) })
+                .padding(.horizontal, TT.Space.s)
+                .frame(maxWidth: wide ? 1100 : .infinity).frame(maxWidth: .infinity)
+                .overlay(alignment: .bottomTrailing) { jumpToToday }
+        }
+        .task {
+            monthPositioned = false
+            jumpMonth(to: visibleMonth, animated: false)
+            try? await Task.sleep(for: .milliseconds(250))
+            monthPositioned = true
         }
     }
 
-    /// Details of the selected day: the same sections as one day of the week zoom, plus the actions. The grid above stays put.
-    private func detailScroll(_ calendar: CalendarStore) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TT.Space.m) {
-                DayDetail(store: calendar, day: focus.day, absenceRequest: $absenceRequest, sheet: interceptedSheet) {
-                    DayEntries(evaluation: calendar.detail, day: focus.day, zone: timeList.calendar.timeZone,
-                               onEdit: { editor = EditorRequest(segment: $0, day: focus.day); touchedDay = focus.day },
-                               onVoid: { voiding = $0; touchedDay = focus.day },
-                               onAcknowledge: { segment in Task { if await timeList.acknowledge(segment) { await calendar.loadDetail() } } },
-                               setLessons: { count in
-                                   let failure = await timeList.setSchoolLessons(count, on: focus.day)
-                                   await calendar.loadDetail()
-                                   return failure
-                               })
-                }
-            }
-            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
-            .frame(maxWidth: wide ? .infinity : TT.contentWidth, alignment: .leading)
-            .frame(maxWidth: .infinity)
+    /// Floating "Heute" button, shown only when today's month is not the one on screen.
+    @ViewBuilder private var jumpToToday: some View {
+        if visibleMonth != MonthKey(day: today) {
+            Button { goToToday() } label: { Label("Heute", systemImage: "arrow.uturn.backward").font(TTFont.label).padding(.horizontal, TT.Space.m).frame(minHeight: 44) }
+                .glassEffect(.regular.interactive(), in: .capsule)
+                .padding(TT.Space.l).padding(.bottom, 56)
+                .accessibilityIdentifier("month.jump_today")
         }
-        .refreshable { await calendar.load(); await calendar.loadDetail() }
+    }
+
+    private func jumpMonth(to key: MonthKey, animated: Bool) {
+        let layout = monthLayout
+        let y = layout.offset(of: layout.contains(key) ? key : (MonthKey(day: today) ?? key))
+        if animated && !reduceMotion { withAnimation(.smooth(duration: 0.45)) { monthScroll.scrollTo(y: y) } } else { monthScroll.scrollTo(y: y) }
+    }
+
+    /// The day detail sheet of both zooms.
+    fileprivate func daySheet(_ calendar: CalendarStore) -> some View {
+        ScrollView { detailBody(calendar, day: monthSheetDay ?? focus.day).padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m) }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .accessibilityIdentifier("month.day_sheet")
+    }
+
+    fileprivate var daySheetBinding: Binding<Bool> { Binding(get: { monthSheetDay != nil }, set: { if !$0 { monthSheetDay = nil } }) }
+
+    fileprivate func daySheetOpened() {
+        guard let day = monthSheetDay, let calendar else { return }
+        calendar.showMonth(MonthKey(day: day) ?? calendar.visibleKey)
+        Task { await calendar.ensureWindow(); await calendar.select(day) }
+    }
+
+    private func monthVisibleChanged(_ key: MonthKey) {
+        guard let calendar else { return }
+        calendar.showMonth(key)
+        Task { await calendar.ensureWindow() }
+    }
+
+    /// Details of one day (the month list opens them in a sheet): the same sections as one day of the week zoom, plus the actions.
+    private func detailBody(_ calendar: CalendarStore, day: LocalDay) -> some View {
+        VStack(alignment: .leading, spacing: TT.Space.m) {
+            DayDetail(store: calendar, day: day, absenceRequest: $absenceRequest, sheet: interceptedSheet) {
+                DayEntries(evaluation: calendar.detail, day: day, zone: timeList.calendar.timeZone,
+                           onEdit: { editor = EditorRequest(segment: $0, day: day); touchedDay = day },
+                           onVoid: { voiding = $0; touchedDay = day },
+                           onAcknowledge: { segment in Task { if await timeList.acknowledge(segment) { await calendar.loadDetail() } } },
+                           setLessons: { count in
+                               let failure = await timeList.setSchoolLessons(count, on: day)
+                               await calendar.loadDetail()
+                               return failure
+                           })
+            }
+        }
     }
 
     /// "Zeitabschnitt" in the day actions opens the same editor as everywhere else (no second form for entries).
     private var interceptedSheet: Binding<PlanSheet?> {
         Binding(get: { sheet }, set: { newValue in
-            if case .manualEntry(let day)? = newValue { editor = EditorRequest(segment: nil, day: day); touchedDay = day } else { sheet = newValue }
+            if case .manualEntry(let day)? = newValue { monthSheetDay = nil; editor = EditorRequest(segment: nil, day: day); touchedDay = day } else { sheet = newValue }
         })
     }
 
@@ -267,19 +299,35 @@ struct TimeHub: View {
             }
         } else {
             VStack(spacing: 0) {
-                WeekStrip(weekStart: focus.weekStart, days: timeList.days, selected: focus.day, today: today, namespace: selectionSpace) { day in
+                WeekStrip(weekStart: focus.weekStart, days: timeList.days, selected: focus.day, today: today, namespace: selectionSpace, select: { day in
                     TTHaptics.play(.selection)
                     withAnimation(animation) { focus.select(day) }
-                }
+                }, shift: { switchWeek($0) })
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge) // seven columns cannot grow with accessibility sizes
                 .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.xs)
-                WeekDayList(store: timeList, week: weekStore, selected: focus.day, canPlan: planStore != nil, canAct: calendar != nil,
-                            startPlanning: { navigate { withAnimation(animation) { focus.isPlanning = true } } },
-                            actions: dayActions)
+                WeekPages(store: timeList, week: weekStore, focus: focus, position: $weekPage, canPlan: planStore != nil, canAct: calendar != nil,
+                          startPlanning: { navigate { withAnimation(animation) { focus.isPlanning = true } } }, actions: dayActions,
+                          openDay: { openDayDetail($0) }, settled: { weekPageSettled($0) })
             }
-            .offset(x: weekDrag)
-            .opacity(1 - min(abs(Double(weekDrag)) / 200, 0.7))
         }
+    }
+
+    /// The tap on a day header of the week list opens the day detail (plan, hints, warnings, entries) in the same sheet as the month list.
+    private func openDayDetail(_ day: LocalDay) {
+        guard calendar != nil else { return }
+        TTHaptics.play(.selection)
+        focus.select(day)
+        monthSheetDay = day
+    }
+
+    private var weekAnchor: LocalDay { LocalDays.mondayOfWeek(containing: today) ?? focus.weekStart }
+    private var focusWeekIndex: Int { WeekPages.index(of: focus.weekStart, anchor: weekAnchor) }
+
+    /// A swipe came to rest on another week page: the anchor follows (same path as the arrow buttons).
+    private func weekPageSettled(_ index: Int) {
+        guard zoom == .week, !isPlanning, index != focusWeekIndex else { return }
+        TTHaptics.play(.selection)
+        focus.shiftWeeks(index - focusWeekIndex)
     }
 
     private var dayActions: DayActions {
@@ -333,7 +381,7 @@ struct TimeHub: View {
         navigate {
             withAnimation(animation) { focus.setZoom(new) }
             storedZoom = new.rawValue
-            if new == .month { pagerPosition = focus.monthKey.index }
+            if new == .month { visibleMonth = focus.monthKey }
         }
     }
 
@@ -341,54 +389,26 @@ struct TimeHub: View {
         TTHaptics.play(.softTap)
         navigate {
             withAnimation(animation) { focus.goToToday(today) }
-            if zoom == .month { withAnimation(animation) { pagerPosition = focus.monthKey.index } }
+            if zoom == .month { visibleMonth = focus.monthKey; jumpMonth(to: focus.monthKey, animated: true) }
         }
     }
 
     private func step(_ count: Int) {
         TTHaptics.play(.softTap)
         switch zoom {
-        case .month: withAnimation(animation) { pagerPosition = (pagerPosition ?? focus.monthKey.index) + count }
-        case .week: navigate { withAnimation(animation) { focus.shiftWeeks(count) } }
+        case .month: jumpMonth(to: visibleMonth.adding(count), animated: true)
+        case .week: switchWeek(count)
         }
     }
 
-    // MARK: - Week swipe (V5)
+    // MARK: - Week paging (U2)
 
-    private var weekSwipeHandler: WeekSwipeHandler {
-        WeekSwipeHandler(
-            changed: { translation in
-                guard !reduceMotion, !weekSwitching, WeekSwipe.tracks(translationX: translation.width, translationY: translation.height) else { return }
-                weekDrag = translation.width * 0.35 // damped: the content follows the finger but never leaves the screen
-            },
-            ended: { translation, predictedX in
-                if let count = WeekSwipe.shift(translationX: translation.width, translationY: translation.height, predictedEndX: predictedX) {
-                    switchWeek(count)
-                } else if weekDrag != 0 {
-                    withAnimation(animation) { weekDrag = 0 }
-                }
-            },
-            shift: { switchWeek($0) })
-    }
-
-    /// Slides the current week out, switches (same `focus.shiftWeeks` as the arrow buttons) and slides the new week in from the other side.
+    /// Arrows, "Heute", keyboard and VoiceOver: scroll the page view; the settled position then moves the anchor.
     private func switchWeek(_ count: Int) {
-        guard zoom == .week, !isPlanning, !weekSwitching else { weekDrag = 0; return }
+        guard zoom == .week, !isPlanning else { return }
         TTHaptics.play(.selection)
-        guard !reduceMotion else { step(count); return }
-        weekSwitching = true
-        withAnimation(.easeIn(duration: 0.12)) { weekDrag = count > 0 ? -90 : 90 }
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(120))
-            var noAnimation = Transaction(animation: nil)
-            noAnimation.disablesAnimations = true
-            withTransaction(noAnimation) {
-                focus.shiftWeeks(count)
-                weekDrag = count > 0 ? 90 : -90
-            }
-            withAnimation(.spring(duration: 0.3, bounce: 0.15)) { weekDrag = 0 }
-            weekSwitching = false
-        }
+        let target = max(-WeekPages.reach, min(WeekPages.reach, (weekPage ?? focusWeekIndex) + count))
+        if reduceMotion { weekPage = target } else { withAnimation(.smooth(duration: 0.35)) { weekPage = target } }
     }
 
     /// iPad keyboard (also iPad apps on a Mac): Command + arrow keys switch the week.
@@ -404,7 +424,7 @@ struct TimeHub: View {
 
     private func jump(to key: MonthKey) {
         TTHaptics.play(.selection)
-        withAnimation(animation) { pagerPosition = key.index }
+        jumpMonth(to: key, animated: true)
     }
 
     private func tap(_ day: LocalDay, in calendar: CalendarStore) {
@@ -416,13 +436,7 @@ struct TimeHub: View {
         }
         TTHaptics.play(.selection)
         withAnimation(animation) { focus.select(day) }
-    }
-
-    /// The pager came to rest on another month: the anchor moves into it (today when visible, otherwise the 1st).
-    private func pagerSettled(_ index: Int?) {
-        guard zoom == .month, let index, index != focus.monthKey.index else { return }
-        TTHaptics.play(.selection)
-        withAnimation(animation) { focus.move(toMonth: MonthKey(index: index), preferring: today) }
+        monthSheetDay = day
     }
 
     /// The planning area ("Kommende Wochen") hands a week over: it opens in the planning mode of the week zoom.
@@ -441,8 +455,7 @@ struct TimeHub: View {
         switch focus.zoom {
         case .month:
             guard let calendar else { return }
-            calendar.showMonth(focus.monthKey)
-            if pagerPosition != focus.monthKey.index { withAnimation(animation) { pagerPosition = focus.monthKey.index } }
+            calendar.showMonth(visibleMonth)
             if calendar.selectedDay != focus.day { Task { await calendar.select(focus.day) } }
             Task { await calendar.ensureWindow() }
         case .week:
@@ -475,6 +488,7 @@ struct TimeHub: View {
     }
 
     /// After an entry was created, corrected or voided: the week list, the week figures and the month's copy of the day are refreshed.
+    fileprivate func refreshAfterEditPublic() { refreshAfterEdit() }
     private func refreshAfterEdit() {
         let day = touchedDay ?? focus.day
         Task {
@@ -595,3 +609,15 @@ struct DayEntries: View {
     }
 }
 #endif
+
+private struct DaySheet: ViewModifier {
+    let hub: TimeHub
+
+    func body(content: Content) -> some View {
+        if let calendar = hub.calendar {
+            content.sheet(isPresented: hub.daySheetBinding, onDismiss: hub.refreshAfterEditPublic) { hub.daySheet(calendar) }
+        } else {
+            content
+        }
+    }
+}

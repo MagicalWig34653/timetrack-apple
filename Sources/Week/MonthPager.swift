@@ -9,40 +9,43 @@ enum Z2Motion {
     static func spring(reduceMotion: Bool) -> Animation { reduceMotion ? .easeInOut(duration: 0.15) : .spring(duration: 0.38, bounce: 0.18) }
 }
 
-/// Horizontal month pager (Z2). Every month is a page of a lazy paging scroll view, so the grid follows the finger instead of
-/// jumping after the gesture; pages are cheap because they only read the immutable `MonthSnapshot`s that the store prefetched.
-struct MonthPager: View {
+/// U2: vertical, continuously scrolling month list (like the iOS calendar). Month sections with a sticky header, week rows of fixed
+/// height, so the geometry is a pure function (`MonthListLayout`): the month at the top follows from the scroll offset and a jump is
+/// an offset. Cells only read the immutable `MonthSnapshot`s of the store; the "today" mark is a circle on the number, no frame.
+struct MonthList: View {
     let store: CalendarStore
-    @Binding var position: Int?
+    let layout: MonthListLayout
+    @Binding var position: ScrollPosition
     let selected: LocalDay?
-    let rowHeight: CGFloat
-    let namespace: Namespace.ID
+    let onVisibleMonth: (MonthKey) -> Void
     let onTap: (LocalDay) -> Void
     let onLongPress: (LocalDay) -> Void
-
-    /// ±40 years around today are reachable by swiping; the picker covers other years by jumping (the window then moves).
-    private let reach = 480
-
-    static func height(rowHeight: CGFloat) -> CGFloat { rowHeight * 6 + 6 }
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        let anchor = MonthKey(day: store.today)?.index ?? 0
-        ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
-                ForEach((anchor - reach)...(anchor + reach), id: \.self) { index in
-                    MonthPageView(snapshot: store.snapshot(for: MonthKey(index: index)), today: store.today, selected: store.isRangeMode ? nil : selected,
-                                  range: rangeBounds, rowHeight: rowHeight, namespace: namespace, onTap: onTap, onLongPress: onLongPress)
-                        .containerRelativeFrame(.horizontal)
-                        .accessibilityHidden(index != store.visibleKey.index)
-                        .id(index)
+        let capacity = layout.rowHeight >= 100 ? 3 : 2
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: .sectionHeaders) {
+                ForEach(layout.keys) { key in
+                    let snapshot = store.snapshot(for: key)
+                    Section {
+                        ForEach(snapshot.monthRows, id: \.cells[0].day) { row in
+                            MonthWeekRow(week: row.week, cells: row.cells, today: store.today, selected: store.isRangeMode ? nil : selected,
+                                         range: rangeBounds, rowHeight: layout.rowHeight, capacity: capacity, onTap: onTap, onLongPress: onLongPress)
+                                .equatable()
+                        }
+                    } header: {
+                        MonthSectionHeader(key: key, calendar: store.calendar, height: layout.headerHeight)
+                    }
                 }
             }
-            .scrollTargetLayout()
         }
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $position, anchor: .leading)
+        .scrollPosition($position)
         .scrollIndicators(.hidden)
-        .frame(height: Self.height(rowHeight: rowHeight))
+        .onScrollGeometryChange(for: Double.self) { $0.contentOffset.y + $0.contentInsets.top } action: { _, offset in
+            onVisibleMonth(layout.visibleKey(atOffset: offset))
+        }
+        .accessibilityIdentifier("month.list")
     }
 
     private var rangeBounds: ClosedRange<LocalDay>? {
@@ -51,73 +54,88 @@ struct MonthPager: View {
     }
 }
 
-/// One month: six fixed-height rows with the ISO week number in front, so the page never changes height between months.
-struct MonthPageView: View, Equatable {
-    let snapshot: MonthSnapshot
+struct MonthSectionHeader: View {
+    let key: MonthKey
+    let calendar: DayCalendar
+    let height: CGFloat
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(verbatim: PlanFormat.monthName(key.month, calendar: calendar)).font(.system(.title3, weight: .bold)).foregroundStyle(TT.textPrimary)
+            Text(verbatim: String(key.year)).font(.system(.title3)).foregroundStyle(Color.accentColor)
+            Spacer()
+        }
+        .padding(.horizontal, TT.Space.l)
+        .frame(height: height).frame(maxWidth: .infinity)
+        .background(.bar)
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// One week row: ISO week number in front and seven day cells.
+struct MonthWeekRow: View, Equatable {
+    let week: Int
+    let cells: [MonthCell]
     let today: LocalDay
     let selected: LocalDay?
     let range: ClosedRange<LocalDay>?
     let rowHeight: CGFloat
-    let namespace: Namespace.ID
+    let capacity: Int
     let onTap: (LocalDay) -> Void
     let onLongPress: (LocalDay) -> Void
 
-    nonisolated static func == (lhs: MonthPageView, rhs: MonthPageView) -> Bool {
-        lhs.snapshot == rhs.snapshot && lhs.today == rhs.today && lhs.selected == rhs.selected && lhs.range == rhs.range && lhs.rowHeight == rhs.rowHeight
+    private var selectedInRow: LocalDay? { selected.flatMap { day in cells.contains { $0.day == day } ? day : nil } }
+
+    nonisolated static func == (l: MonthWeekRow, r: MonthWeekRow) -> Bool {
+        l.week == r.week && l.cells == r.cells && l.today == r.today && l.range == r.range && l.rowHeight == r.rowHeight
+            && l.capacity == r.capacity && l.selectedInRow == r.selectedInRow
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            ForEach(0..<6, id: \.self) { row in
-                Divider().overlay(TT.textTertiary.opacity(0.25))
-                HStack(spacing: 0) {
-                    Text(verbatim: snapshot.weekNumbers.indices.contains(row) ? String(snapshot.weekNumbers[row]) : "")
-                        .font(.caption2).foregroundStyle(TT.textTertiary).frame(width: 26)
-                        .accessibilityLabel(Text("calendar.week_label \(snapshot.weekNumbers.indices.contains(row) ? snapshot.weekNumbers[row] : 0)"))
-                    ForEach(0..<7, id: \.self) { column in
-                        let cell = snapshot.cells[row * 7 + column]
-                        MonthDayCell(cell: cell, isToday: cell.day == today, selected: cell.day == selected, inRange: range?.contains(cell.day) ?? false,
-                                     rowHeight: rowHeight, namespace: namespace)
-                            .equatable()
-                            .onTapGesture { onTap(cell.day) }
-                            .onLongPressGesture(minimumDuration: 0.45) { onLongPress(cell.day) }
-                            .accessibilityAddTraits(.isButton)
-                            .accessibilityIdentifier("day.\(cell.day)")
-                            .accessibilityAction(named: Text("plan.action.range")) { onLongPress(cell.day) }
-                    }
-                }
-                .frame(height: rowHeight)
+        HStack(spacing: 0) {
+            Text(verbatim: String(week)).font(.caption2).foregroundStyle(TT.textTertiary).frame(width: 26)
+                .accessibilityLabel(Text("calendar.week_label \(week)"))
+            ForEach(cells) { cell in
+                MonthDayCell(cell: cell, isToday: cell.day == today, selected: cell.day == selected, inRange: range?.contains(cell.day) ?? false, capacity: capacity)
+                    .contentShape(.rect)
+                    .onTapGesture { onTap(cell.day) }
+                    .onLongPressGesture(minimumDuration: 0.45) { onLongPress(cell.day) }
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityIdentifier("day.\(cell.day)")
+                    .accessibilityAction(named: Text("plan.action.range")) { onLongPress(cell.day) }
             }
         }
+        .frame(height: rowHeight)
+        .overlay(alignment: .top) { Divider().overlay(TT.textTertiary.opacity(0.25)) }
     }
 }
 
-/// One day of the grid: number (today = accent circle, selection = inverted circle that glides between days) and up to three dots.
-struct MonthDayCell: View, Equatable {
+/// One day: number (today = filled accent circle, selected = dark circle), worked dot and up to two/three simple pills.
+struct MonthDayCell: View {
     let cell: MonthCell
     let isToday: Bool
     let selected: Bool
     let inRange: Bool
-    let rowHeight: CGFloat
-    let namespace: Namespace.ID
+    let capacity: Int
     @Environment(\.colorScheme) private var scheme
-
-    nonisolated static func == (lhs: MonthDayCell, rhs: MonthDayCell) -> Bool {
-        lhs.cell == rhs.cell && lhs.isToday == rhs.isToday && lhs.selected == rhs.selected && lhs.inRange == rhs.inRange && lhs.rowHeight == rhs.rowHeight
-    }
 
     var body: some View {
         VStack(spacing: 3) {
-            number
             HStack(spacing: 3) {
-                ForEach(Array(cell.markers.enumerated()), id: \.offset) { _, marker in Circle().fill(marker.tint).frame(width: 6, height: 6) }
+                number
+                if cell.workedSeconds > 0 { Circle().fill(TT.success).frame(width: 5, height: 5).accessibilityHidden(true) }
             }
-            .frame(height: 7)
+            .padding(.top, 4)
+            pills
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(inRange ? Color.accentColor.opacity(0.22) : .clear, in: .rect(cornerRadius: 10))
-        .opacity(cell.inMonth ? 1 : 0.5)
-        .contentShape(.rect)
+        .padding(.horizontal, 1)
+        .background(inRange ? Color.accentColor.opacity(0.22) : .clear, in: .rect(cornerRadius: 8))
+        .opacity(cell.inMonth ? 1 : 0)
+        .allowsHitTesting(cell.inMonth)
+        .accessibilityHidden(!cell.inMonth)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: label))
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -125,31 +143,78 @@ struct MonthDayCell: View, Equatable {
 
     @ViewBuilder private var number: some View {
         let text = Text(verbatim: String(cell.dayNumber))
-            .font(.system(.title3, design: .default, weight: isToday || selected ? .semibold : .regular)).monospacedDigit()
-            .frame(width: 36, height: 36)
+            .font(.system(.callout, weight: isToday || selected ? .semibold : .regular)).monospacedDigit()
+            .frame(width: 28, height: 28)
         if isToday {
-            text.foregroundStyle(Color.white).glassEffect(.regular.tint(Color.accentColor), in: .circle)
-                .overlay { if selected { Circle().strokeBorder(TT.textPrimary.opacity(0.9), lineWidth: 2).matchedGeometryEffect(id: "selection", in: namespace) } }
+            text.foregroundStyle(Color.white).background(Circle().fill(Color.accentColor))
         } else if selected {
-            text.foregroundStyle(scheme == .dark ? Color.black : Color.white)
-                .background { Circle().fill(TT.textPrimary).matchedGeometryEffect(id: "selection", in: namespace) }
+            text.foregroundStyle(scheme == .dark ? Color.black : Color.white).background(Circle().fill(TT.textPrimary))
         } else {
-            text.foregroundStyle(cell.isHoliday ? TT.kindHoliday : (cell.inMonth ? (cell.isWeekend ? TT.textSecondary : TT.textPrimary) : TT.textTertiary))
+            text.foregroundStyle(cell.isHoliday ? TT.kindHoliday : (cell.isWeekend ? TT.textSecondary : TT.textPrimary))
         }
     }
 
+    @ViewBuilder private var pills: some View {
+        let split = MonthPill.visible(cell.pills, capacity: capacity)
+        VStack(spacing: 2) {
+            ForEach(Array(split.shown.enumerated()), id: \.offset) { _, pill in MonthPillView(pill: pill) }
+            if split.hidden > 0 {
+                Text(verbatim: "+\(split.hidden)").font(.system(size: 10, weight: .semibold)).foregroundStyle(TT.textSecondary).frame(height: 14)
+            }
+        }
+        .dynamicTypeSize(...DynamicTypeSize.large)
+    }
+
     private var label: String {
-        var parts = [Self.longDay(cell.day)]
+        var parts = [MonthCellLabel.longDay(cell.day)]
         if isToday { parts.append(String(localized: "time.today")) }
         parts += cell.info.holidays.map(\.displayName)
         parts += cell.info.schoolHolidays.map(\.name)
         parts += cell.info.absences.map { "\($0.kind.plainName), \($0.status.plainName)" }
         if let plan = cell.info.plan { parts.append(String(localized: "calendar.plan_label \(plan.mode.plainName)")) }
+        if cell.workedSeconds > 0 { parts.append("erfasst \(DurationFormat.hoursMinutes(cell.workedSeconds))") }
         return parts.joined(separator: ", ")
     }
 }
 
-extension MonthDayCell {
+/// A simple coloured pill with a short text; planned/requested absences are outlined instead of filled.
+struct MonthPillView: View {
+    let pill: MonthPill
+
+    var body: some View {
+        let tint = pill.kind.tint
+        Text(verbatim: pill.title)
+            .font(.system(size: 10, weight: .semibold)).lineLimit(1).truncationMode(.tail)
+            .foregroundStyle(pill.tentative ? tint : Color.white)
+            .padding(.horizontal, 4).frame(maxWidth: .infinity).frame(height: 14)
+            .background { if pill.tentative { RoundedRectangle(cornerRadius: 4).strokeBorder(tint, lineWidth: 1) } else { RoundedRectangle(cornerRadius: 4).fill(tint) } }
+            .padding(.horizontal, 1)
+    }
+}
+
+extension MonthPill {
+    var title: String {
+        switch kind {
+        case .holiday: text ?? "Feiertag"
+        case .absence(let kind): kind.plainName
+        case .plan(let mode): mode.plainName
+        }
+    }
+}
+
+extension MonthPill.Kind {
+    var tint: Color {
+        switch self {
+        case .holiday: TT.kindHoliday
+        case .absence(let kind): kind.ttTint
+        case .plan(let mode): mode.tint
+        }
+    }
+}
+
+enum MonthCellLabel {}
+
+extension MonthCellLabel {
     /// "Montag, 20. Oktober": a calendar date has no time zone, so the label is formatted in UTC from the day string.
     static func longDay(_ day: LocalDay) -> String {
         guard let p = LocalDays.parse(day) else { return day }

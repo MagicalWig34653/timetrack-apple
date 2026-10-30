@@ -16,44 +16,6 @@ struct DayActions {
     var customDay: (LocalDay) -> Void
 }
 
-// MARK: - Week swipe (V5)
-
-/// Horizontal paging of the week zoom. Attached to the header, the day strip, the week summary and the day headers, never to the
-/// entry rows, so the row swipe actions ("Als geprüft markieren", "Stornieren") keep their gestures.
-struct WeekSwipeHandler {
-    var changed: (CGSize) -> Void
-    var ended: (CGSize, CGFloat) -> Void
-    var shift: (Int) -> Void
-}
-
-private struct WeekSwipeKey: EnvironmentKey { nonisolated(unsafe) static let defaultValue: WeekSwipeHandler? = nil }
-extension EnvironmentValues {
-    var weekSwipe: WeekSwipeHandler? {
-        get { self[WeekSwipeKey.self] }
-        set { self[WeekSwipeKey.self] = newValue }
-    }
-}
-
-private struct WeekSwipeArea: ViewModifier {
-    @Environment(\.weekSwipe) private var handler
-
-    func body(content: Content) -> some View {
-        if let handler {
-            content
-                .simultaneousGesture(DragGesture(minimumDistance: 16)
-                    .onChanged { handler.changed($0.translation) }
-                    .onEnded { handler.ended($0.translation, $0.predictedEndTranslation.width) })
-        } else {
-            content
-        }
-    }
-}
-
-extension View {
-    /// Lets a drag that starts on this view switch the week (only active inside the week zoom).
-    func weekSwipeArea() -> some View { modifier(WeekSwipeArea()) }
-}
-
 /// The seven days of the week as a strip: the anchor day is marked, a tap moves the anchor (and scrolls the list to it).
 struct WeekStrip: View {
     let weekStart: LocalDay
@@ -62,7 +24,7 @@ struct WeekStrip: View {
     let today: LocalDay
     let namespace: Namespace.ID
     let select: (LocalDay) -> Void
-    @Environment(\.weekSwipe) private var handler
+    let shift: (Int) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -86,15 +48,14 @@ struct WeekStrip: View {
                 .contentShape(.rect)
                 .onTapGesture { select(day) }
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text(verbatim: MonthDayCell.longDay(day)))
+                .accessibilityLabel(Text(verbatim: MonthCellLabel.longDay(day)))
                 .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
                 .accessibilityIdentifier("strip.\(day)")
             }
         }
-        .weekSwipeArea()
         .accessibilityElement(children: .contain)
-        .accessibilityAction(named: Text(verbatim: "Nächste Woche")) { handler?.shift(1) }
-        .accessibilityAction(named: Text(verbatim: "Vorige Woche")) { handler?.shift(-1) }
+        .accessibilityAction(named: Text(verbatim: "Nächste Woche")) { shift(1) }
+        .accessibilityAction(named: Text(verbatim: "Vorige Woche")) { shift(-1) }
     }
 
     private func markDot(_ mark: DayMarkKind) -> Color {
@@ -109,26 +70,32 @@ struct WeekStrip: View {
 struct WeekDayList: View {
     let store: TimeListStore
     let week: WeekStore?
+    /// U2: one page of the paging week view. Only the current page is live; neighbours show cached days (or a skeleton).
+    let monday: LocalDay
+    let pageDays: [DayEvaluation]?
+    let isCurrent: Bool
     let selected: LocalDay
     let canPlan: Bool
     let canAct: Bool
     let startPlanning: () -> Void
     let actions: DayActions
+    let openDay: (LocalDay) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ScrollViewReader { proxy in
             List {
-                WeekSummaryCard(store: store, week: week, canPlan: canPlan, startPlanning: startPlanning)
+                WeekSummaryCard(days: pageDays ?? [], weekEnd: LocalDays.adding(6, to: monday) ?? monday, today: store.calendar.day(for: .now),
+                                week: isCurrent ? week : nil, canPlan: canPlan && isCurrent, startPlanning: startPlanning)
                     .listRowBackground(Color.clear).listRowInsets(.init(top: 0, leading: 0, bottom: 4, trailing: 0)).listRowSeparator(.hidden)
-                if let error = store.error {
+                if isCurrent, let error = store.error {
                     ErrorBannerView(error: error) { Task { await store.load() } }
                         .listRowBackground(Color.clear).listRowSeparator(.hidden)
                 }
-                if store.days.isEmpty && store.isLoading {
+                if pageDays == nil || (isCurrent && pageDays?.isEmpty == true && store.isLoading) {
                     SkeletonList(rows: 3).listRowBackground(Color.clear).listRowInsets(.init()).listRowSeparator(.hidden)
                 }
-                ForEach(store.days) { day in
+                ForEach(pageDays ?? []) { day in
                     let compactEmpty = day.isPlainEmpty
                     Section {
                         // One ForEach with stable unique ids per section (no static row next to it): keeps the List diff consistent.
@@ -160,13 +127,7 @@ struct WeekDayList: View {
                         }
                     } header: {
                         DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now), isFuture: day.date > store.calendar.day(for: .now), isSelected: day.date == selected, isEmpty: compactEmpty,
-                                  plan: week?.week?.days.first { $0.date == day.date }, canAct: canAct, actions: actions)
-                    } footer: {
-                        // P15: informative warnings and school lessons live in the footer, outside the row diff of the section.
-                        if day.hasLegalNotes {
-                            LegalDayNotes(day: day) { await store.setSchoolLessons($0, on: day.date) }
-                                .padding(.top, TT.Space.xs)
-                        }
+                                  plan: week?.week?.days.first { $0.date == day.date }, canAct: canAct && isCurrent, actions: actions, open: { openDay(day.date) })
                     }
                     .id(day.date)
                 }
@@ -176,9 +137,10 @@ struct WeekDayList: View {
             .listSectionSpacing(TT.Space.s)
             .contentMargins(.top, TT.Space.xs, for: .scrollContent)
             // Data refreshes must not compete with row animations (A9: crash in the collection view's batch update).
-            .transaction(value: store.days) { $0.animation = nil }
-            .refreshable { await store.load(); await week?.load(); TTHaptics.play(.softTap) }
+            .transaction(value: pageDays) { $0.animation = nil }
+            .refreshable { if isCurrent { await store.load(); await week?.load(); TTHaptics.play(.softTap) } }
             .onChange(of: selected) { _, day in
+                guard isCurrent else { return }
                 withAnimation(reduceMotion ? nil : .smooth(duration: 0.3)) { proxy.scrollTo(day, anchor: .top) }
             }
         }
@@ -187,7 +149,9 @@ struct WeekDayList: View {
 
 /// Week figures once: actual against target with progress; the balance (Zeitkonto, target to date, plan, averages) unfolds below.
 struct WeekSummaryCard: View {
-    let store: TimeListStore
+    let days: [DayEvaluation]
+    let weekEnd: LocalDay
+    let today: LocalDay
     let week: WeekStore?
     let canPlan: Bool
     let startPlanning: () -> Void
@@ -196,8 +160,8 @@ struct WeekSummaryCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let done = store.weekEvaluatedSeconds
-        let target = store.weekTargetSeconds
+        let done = days.reduce(0) { $0 + $1.evaluatedWorkSeconds + $1.creditSeconds }
+        let target = days.reduce(0) { $0 + $1.targetSeconds }
         Card {
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 ProgressBar(progress: target > 0 ? Double(done) / Double(target) : 0)
@@ -218,7 +182,6 @@ struct WeekSummaryCard: View {
                 ViewThatFits(in: .horizontal) { footer(spacing: TT.Space.m, vertical: false); footer(spacing: TT.Space.xs, vertical: true) }
             }
         }
-        .weekSwipeArea()
     }
 
     @ViewBuilder private func footer(spacing: CGFloat, vertical: Bool) -> some View {
@@ -247,7 +210,7 @@ struct WeekSummaryCard: View {
 extension WeekSummaryCard {
     /// F10: a week that is not over yet is not "behind": show what is left in a neutral tone; only a finished week warns.
     @ViewBuilder fileprivate func weekChip(done: Int, target: Int) -> some View {
-        let over = store.weekEnd < store.calendar.day(for: .now)
+        let over = weekEnd < today
         if over || done >= target {
             StatusChip(verbatim: DurationFormat.signed(done - target), tone: deltaTone(done - target))
         } else {
@@ -282,7 +245,9 @@ struct EmptyDayRow: View {
     }
 }
 
-/// Section header of one day: title, plan line, actual/target, and the day's actions.
+/// Section header of one day, reduced to the essentials (U2): weekday and date, worked time against target with the difference, one compact
+/// pill for the kind of day (holiday, absence or plan mode) and the add menu. Plan details, hints and warnings live in the day detail
+/// that opens on a tap.
 struct DayHeader: View {
     let day: DayEvaluation
     let calendar: DayCalendar
@@ -293,6 +258,7 @@ struct DayHeader: View {
     let plan: TimeWeekDay?
     let canAct: Bool
     let actions: DayActions
+    let open: () -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
@@ -301,70 +267,37 @@ struct DayHeader: View {
                                                 targetSeconds: day.targetSeconds, hasStarted: !(day.segments ?? []).isEmpty)
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: TT.Space.xs)) : AnyLayout(HStackLayout(alignment: .center, spacing: TT.Space.s))
         layout {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
-                    Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(isSelected ? Color.accentColor : TT.textPrimary)
-                    if isToday { StatusChip("time.today", tone: .accent) }
-                }
-                if let label = plan?.holidayLabel {
-                    Label { Text(verbatim: label) } icon: { Image(systemName: "party.popper.fill").foregroundStyle(TT.kindHoliday) }
-                        .font(TTFont.meta).foregroundStyle(TT.textSecondary)
-                }
-                if let line = planLine { Text(verbatim: line).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
-                planBlocksDetail
-                if isEmpty { Text(Z2.s("day.empty")).font(TTFont.meta).foregroundStyle(TT.textTertiary) }
-                if day.provisional { Text("common.provisional").font(.caption2).foregroundStyle(TT.textSecondary) }
+            HStack(spacing: 6) {
+                Text(verbatim: dayTitle(day.date, calendar: calendar)).font(TTFont.cardTitle).foregroundStyle(isSelected || isToday ? Color.accentColor : TT.textPrimary).lineLimit(1)
+                if let pill = DayKindPill.of(day: day, plan: plan) { pill }
             }
             if !typeSize.isAccessibilitySize { Spacer(minLength: TT.Space.xs) }
-            if isFuture || (isEmpty && done == 0 && isToday) {
-                if day.targetSeconds > 0 { Text(Z2.s("day.target_only \(DurationFormat.hoursMinutes(day.targetSeconds))")).font(TTFont.numeralSmall).foregroundStyle(TT.textTertiary) }
-            } else if day.targetSeconds > 0 || done > 0 {
-                VStack(alignment: typeSize.isAccessibilitySize ? .leading : .trailing, spacing: 2) {
-                    Text("time.day_total \(DurationFormat.hoursMinutes(done)) \(DurationFormat.hoursMinutes(day.targetSeconds))")
-                        .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
-                    switch delta {
-                    case .hidden: EmptyView()
-                    case .open(let seconds):
-                        Text(Z2.s("week.open_left \(DurationFormat.hoursMinutes(seconds))"))
-                            .font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
-                    case .deficit(let seconds):
-                        Text(verbatim: DurationFormat.signed(-seconds))
-                            .font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.warning)
-                    case .surplus(let seconds):
-                        Text(verbatim: DurationFormat.signed(seconds))
-                            .font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.success)
-                    }
-                }
-            }
+            figures(done: done, delta: delta)
             actionMenu
         }
         .textCase(nil)
         .padding(.vertical, 2)
         .contentShape(.rect)
-        .weekSwipeArea()
+        .onTapGesture(perform: open)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(Text(verbatim: "Öffnet die Tagesdetails"))
+        .accessibilityIdentifier("time.day.\(day.date)")
     }
 
-    /// "Büro · 8 Std. 24 Min. geplant" next to the actual time, so planned and recorded sit in one place.
-    private var planLine: String? {
-        guard let plan, plan.planMode != nil || plan.plannedSeconds != nil else { return nil }
-        var parts: [String] = []
-        if let mode = plan.planMode, mode != .unknown, mode != .off { parts.append(mode.plainName) }
-        if let seconds = plan.plannedSeconds, seconds > 0 { parts.append(W.s("day.plan", DurationFormat.hoursMinutes(seconds))) }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    /// P13: the plan blocks of a day with several blocks as one text line (V5: no timeline bar), the plan/actual difference and the
-    /// non-binding hints. Single-window days keep the compact plan line.
-    @ViewBuilder private var planBlocksDetail: some View {
-        if let plan {
-            if let blocks = plan.planBlocks, PlanBlockText.showsDetail(blocks) {
-                // V5: no timeline bar in the week list; the blocks are one quiet text line (the bar looked odd to the user).
-                Text(verbatim: PlanBlockText.summary(blocks)).font(TTFont.meta).foregroundStyle(TT.textSecondary).monospacedDigit()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("time.plan_blocks.\(day.date)")
+    @ViewBuilder private func figures(done: Int, delta: DayDeltaPolicy.Presentation) -> some View {
+        if isFuture || (isEmpty && done == 0 && isToday) {
+            if day.targetSeconds > 0 { Text(Z2.s("day.target_only \(DurationFormat.hoursMinutes(day.targetSeconds))")).font(TTFont.numeralSmall).foregroundStyle(TT.textTertiary) }
+        } else if day.targetSeconds > 0 || done > 0 {
+            HStack(spacing: 6) {
+                Text(verbatim: DurationFormat.hoursMinutes(done)).font(TTFont.numeralSmall).foregroundStyle(TT.textPrimary)
+                switch delta {
+                case .hidden: EmptyView()
+                case .open(let seconds): Text(verbatim: "−" + DurationFormat.hoursMinutes(seconds)).font(TTFont.numeralSmall).foregroundStyle(TT.textSecondary)
+                case .deficit(let seconds): Text(verbatim: DurationFormat.signed(-seconds)).font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.warning)
+                case .surplus(let seconds): Text(verbatim: DurationFormat.signed(seconds)).font(TTFont.numeralSmall.weight(.semibold)).foregroundStyle(TT.success)
+                }
             }
-            if let difference = plan.planActualDifferenceSeconds { PlanActualDifferenceChip(seconds: difference) }
-            if let hints = plan.planHints, !hints.isEmpty { PlanHintsView(hints: hints, dayTitle: nil) }
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -384,6 +317,44 @@ struct DayHeader: View {
             Button { actions.add(day.date) } label: { Image(systemName: "plus.circle.fill").imageScale(.large).symbolRenderingMode(.hierarchical) }
                 .buttonStyle(.borderless).accessibilityLabel(Text("time.add_to_day \(title)"))
         }
+    }
+}
+
+/// U2: the one compact marker of a day in the week list: holiday, absence mark or the plan mode, in this order.
+struct DayKindPill: View {
+    let text: String
+    let symbol: String
+    let tint: Color
+
+    static func of(day: DayEvaluation, plan: TimeWeekDay?) -> DayKindPill? {
+        if let label = plan?.holidayLabel { return DayKindPill(text: label, symbol: "party.popper.fill", tint: TT.kindHoliday) }
+        if let mark = day.mark, mark != .unmarked, mark != .unknown {
+            return DayKindPill(text: String(localized: markKeyString(mark)), symbol: markSymbol(mark), tint: markTint(mark))
+        }
+        if let mode = plan?.planMode, mode != .off, mode != .unknown { return DayKindPill(text: mode.plainName, symbol: mode.symbol, tint: mode.tint) }
+        return nil
+    }
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: symbol).imageScale(.small).accessibilityHidden(true)
+            Text(verbatim: text).lineLimit(1)
+        }
+        .font(.system(.caption2, weight: .semibold)).foregroundStyle(tint)
+        .padding(.horizontal, 7).padding(.vertical, 3)
+        .background(tint.opacity(0.16), in: .capsule)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private func markKeyString(_ mark: DayMarkKind) -> String.LocalizationValue {
+    switch mark {
+    case .holiday: "mark.holiday"
+    case .vacation: "mark.vacation"
+    case .sick: "mark.sick"
+    case .excused: "mark.excused"
+    case .schoolCredit: "mark.school_credit"
+    case .unmarked, .unknown: "time.no_entries"
     }
 }
 #endif

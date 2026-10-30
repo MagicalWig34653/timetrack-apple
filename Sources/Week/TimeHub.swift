@@ -608,7 +608,6 @@ struct DayEntries: View {
         }
     }
 }
-#endif
 
 private struct DaySheet: ViewModifier {
     let hub: TimeHub
@@ -621,3 +620,4 @@ private struct DaySheet: ViewModifier {
         }
     }
 }
+#endif

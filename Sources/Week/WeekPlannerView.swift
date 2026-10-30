@@ -17,11 +17,15 @@ struct WeekPlannerView: View {
     private var wide: Bool { sizeClass == .regular && !typeSize.isAccessibilitySize }
 
     var body: some View {
+        #if os(iOS)
         if store.supportsBlocks && store.week != nil && !store.isUnavailable && !typeSize.isAccessibilitySize {
             graphical
         } else {
             list
         }
+        #else
+        list
+        #endif
     }
 
     /// U2: the graphical planner (days as columns, time axis, paint/move/resize); the list below stays for old servers and huge type.
@@ -34,7 +38,9 @@ struct WeekPlannerView: View {
             if let notice { HintBanner(LocalizedStringKey(notice)).padding(.horizontal, TT.Space.l) }
             if store.isPast { HintBanner("wk.week.past_hint").padding(.horizontal, TT.Space.l) }
             compactTotal
+            #if os(iOS)
             PlanGridPlanner(store: store, places: places)
+            #endif
         }
         .ttScreenBackground()
         .safeAreaInset(edge: .bottom) { saveBar }

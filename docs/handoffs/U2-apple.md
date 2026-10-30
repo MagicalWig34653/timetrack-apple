@@ -18,8 +18,8 @@ Branch `u2-time-ui` (Worktree `timetrack-apple-wt/u2`, von `main`, Build 55). Ni
 - Nicht übernommen aus der PWA: Mehrfachauswahl/Lasso, Zwischenablage, Folgewochen-Dialog.
 
 ## Prüfung
-- Kerntests `swift test --build-system native --no-parallel`: 914 grün vor dem letzten Schritt (+25: `MonthPillTests`, `MonthListLayoutTests`, `PlanGridTests`, Store-Test Undo/Kopieren/Verschieben).
-- UI-Tests gegen Wegwerf-Backend (Seed `seed-p13.py`, Simulator iPhone 18 Pro): `U2ShotTests` (Monat scrollen, Kopf wechselt, „Heute“-Knopf, Tag öffnet Sheet; Bilder; Planer malen/rückgängig), `WeekSwipeTests` (Wischen auf den Seiten wechselt die Woche) bestanden, soweit im Abschnitt „Offen“ nicht anders vermerkt.
+- Kerntests `swift test --build-system native --no-parallel`: 914 grün (+25: `MonthPillTests`, `MonthListLayoutTests`, `PlanGridTests`, Store-Test Undo/Kopieren/Verschieben).
+- UI-Tests gegen Wegwerf-Backend (Seed `seed-p13.py`, Simulator iPhone 18 Pro): `U2ShotTests` (Monat scrollen, Kopf wechselt, „Heute“-Knopf, Tag öffnet Sheet; Bilder; Planer malen/rückgängig), `WeekSwipeTests` (Wischen auf den Seiten wechselt die Woche) bestanden (Planer-Test nutzt die Wochenaktion „Woche leeren“ und Rückgängig; Malen per Touch ist nur durch Kerntests abgedeckt, XCUITest traf die Spalten nicht verlässlich). Builds unsigniert iOS, macOS, watchOS grün.
 - Bilder `docs/screenshots/u2-before-*` und `u2-after-*` (verkleinert).
 
 ## Offen / ungeprüft

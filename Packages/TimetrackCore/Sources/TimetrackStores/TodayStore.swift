@@ -35,6 +35,15 @@ public final class TodayStore {
     public private(set) var attention: [QueuedTimerAction] = []
     /// True after the first successful server load of this store.
     public private(set) var hasLoadedLive = false
+    /// U3: a start was refused because a timer already runs (started elsewhere: location automation, link, watch, web). The running timer
+    /// is on screen after the reload; this notice only exists when the user asked for a different kind and may want to switch ("Wechseln").
+    public struct TimerConflict: Sendable, Equatable {
+        public let running: Segment
+        public let requested: SegmentKind
+    }
+    public private(set) var conflict: TimerConflict?
+    public func clearConflict() { conflict = nil }
+
     /// Last cached display state (App Group snapshot), shown until live data arrives.
     private var cachedSnapshot: WidgetSnapshot?
 
@@ -160,6 +169,46 @@ public final class TodayStore {
         await loadContext(day: today)
     }
 
+    /// U3: cheap check for a timer started or stopped elsewhere (location automation on the server, link, watch, web): one request; only when
+    /// the running entry differs from what is shown, the full `load` follows. Skips while a load or an own action is in flight.
+    public func refreshRunning() async {
+        guard !isLoading else { return }
+        let epoch = actionEpoch
+        let generation = loadGeneration
+        let latest: Segment?
+        do { latest = try await client.currentTimer() } catch { return } // an unreachable server changes nothing
+        guard epoch == actionEpoch, generation == loadGeneration, !isLoading else { return }
+        // A queued (not yet delivered) action is shown on top of the live state; it must not be wiped by a stale read.
+        guard pending.isEmpty else { return }
+        if !hasLoadedLive || latest?.id != running?.id || latest?.version != running?.version || latest?.endedAt != running?.endedAt {
+            await load(deferAccount: true)
+        }
+    }
+
+    /// U3: "Wechseln": ends the timer that runs and starts `kind` instead.
+    public func switchRunning(to kind: SegmentKind) async {
+        conflict = nil
+        if running != nil { await stop() }
+        guard running == nil, error == nil else { return }
+        await start(kind: kind)
+    }
+
+    /// U3: after a 409 `timer_already_running` the server state is read; true when a timer really runs (no error is shown then).
+    private func resolveAlreadyRunning(requested: SegmentKind?) async -> Bool {
+        await load(deferAccount: true)
+        guard let running else { return false }
+        if let requested, requested != running.kind { conflict = TimerConflict(running: running, requested: requested) }
+        return true
+    }
+
+    private static func requestedKind(of command: QueuedTimerAction.Command) -> SegmentKind? {
+        switch command {
+        case .start(let kind): kind
+        case .resume(let target): target.kind
+        default: nil
+        }
+    }
+
     /// H3: planned end of today and the place names; read once per day, silently (not part of the day's numbers).
     private func loadContext(day: LocalDay) async {
         // Holidays are read on every load (a changed company-day setting must show without waiting for tomorrow).
@@ -214,6 +263,7 @@ public final class TodayStore {
     }
 
     public func start(kind: SegmentKind = .work) async {
+        conflict = nil
         actionEpoch += 1
         defer { actionEpoch += 1 }
         let eventId = UUID()
@@ -224,7 +274,7 @@ public final class TodayStore {
             }
             return
         }
-        await perform(success: .timerStarted) {
+        await perform(success: .timerStarted, requested: kind) {
             let segment = try await retryOnNetworkError { try await client.startTimer(clientEventId: eventId, kind: kind) }
             self.running = segment
         }
@@ -275,7 +325,7 @@ public final class TodayStore {
             if pending.contains(where: { $0.id == eventId }) { continueNotice = .queued }
             return running != nil || continueNotice == .queued
         }
-        await perform(success: .timerStarted) {
+        await perform(success: .timerStarted, requested: target.kind) {
             let result = try await retryOnNetworkError { try await TimerActionQueue.resume(target, client: client, clientEventId: eventId, startNewOnly: startNew) }
             self.running = result.segment
             self.continueNotice = result.mode == .reopened ? .reopened : .startedNew
@@ -352,6 +402,8 @@ public final class TodayStore {
         } catch let thrown as TimetrackError {
             if thrown.isNetworkError || (thrown.status ?? 0) >= 500 || thrown.status == 429 {
                 await enqueue(action, queue: queue, success: success)
+            } else if thrown.knownCode == .timerAlreadyRunning, await resolveAlreadyRunning(requested: Self.requestedKind(of: action.command)) {
+                // U3: not a failure; the timer that runs is shown now.
             } else {
                 if thrown != .cancelled { onOutcome?(.failed) }
                 await load(deferAccount: true)
@@ -371,7 +423,7 @@ public final class TodayStore {
         onOutcome?(success)
     }
 
-    private func perform(success: StoreOutcome, _ action: () async throws -> Void) async {
+    private func perform(success: StoreOutcome, requested: SegmentKind? = nil, _ action: () async throws -> Void) async {
         var failure: TimetrackError?
         do {
             try await action()
@@ -381,6 +433,7 @@ public final class TodayStore {
         } catch {
             failure = .cancelled
         }
+        if let failure, failure.knownCode == .timerAlreadyRunning, await resolveAlreadyRunning(requested: requested) { return }
         if let failure, failure != .cancelled { onOutcome?(.failed) }
         await load()
         if let failure { error = failure }

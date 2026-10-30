@@ -178,6 +178,7 @@ final class AutomationRuntime {
             await replan(force: false)
             await scheduleChecks()
             await store?.refreshFromEngine()
+            NotificationCenter.default.post(name: .ttTimerChangedExternally, object: nil) // U3: events were delivered, the server may have started a timer
         }
     }
 
@@ -196,6 +197,7 @@ final class AutomationRuntime {
         }
         await scheduleChecks()
         await store?.refreshFromEngine()
+        NotificationCenter.default.post(name: .ttTimerChangedExternally, object: nil) // U3
     }
 
     /// Applies the monitored-region plan. Skipped when nothing relevant changed (a significant change is frequent).

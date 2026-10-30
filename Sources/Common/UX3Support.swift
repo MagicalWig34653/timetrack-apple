@@ -72,7 +72,10 @@ struct DayStandingCard: View {
                 .accessibilityElement(children: .combine)
             }
             if showsBalance {
-                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0), symbol: "clock.arrow.circlepath")
+                StatTile("today.balance", value: DurationFormat.signed(store.account?.balanceSeconds ?? 0),
+                         caption: store.account.flatMap { $0.reportsTodaySeparately ? $0.todayDeltaSeconds : nil }
+                             .map { LocalizedStringKey(u3String("c3.today_flows \(DurationFormat.signed($0))")) },
+                         symbol: "clock.arrow.circlepath")
                     .accessibilityIdentifier("today.balance")
             }
         }

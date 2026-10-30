@@ -276,6 +276,17 @@
         }
       }
     },
+    "absence.status.recorded": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "erfasst"
+          }
+        }
+      }
+    },
     "absence.status.rejected": {
       "extractionState": "manual",
       "localizations": {
@@ -991,17 +1002,6 @@
         }
       }
     },
-    "attention.server": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Server hat diese Aktion mehrfach nicht angenommen. Du kannst es erneut versuchen oder sie verwerfen."
-          }
-        }
-      }
-    },
     "attention.changed": {
       "extractionState": "manual",
       "localizations": {
@@ -1075,6 +1075,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "attention.server": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Server hat diese Aktion mehrfach nicht angenommen. Du kannst es erneut versuchen oder sie verwerfen."
           }
         }
       }
@@ -3026,13 +3037,13 @@
         }
       }
     },
-    "plan.field.status_hint_other": {
+    "plan.field.status_recorded": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geplant für künftige Tage, genommen für vergangene."
+            "value": "Wird als „erfasst“ gespeichert."
           }
         }
       }
@@ -3319,6 +3330,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geplant"
+          }
+        }
+      }
+    },
+    "plan.status.recorded": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erfasst"
           }
         }
       }
@@ -5816,6 +5838,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Saldo"
+          }
+        }
+      }
+    },
+    "wk.sum.balance_completed": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ist minus Soll bis gestern (Heute folgt morgen)"
           }
         }
       }

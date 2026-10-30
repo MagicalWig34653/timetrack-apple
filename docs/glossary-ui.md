@@ -18,7 +18,9 @@ Festgelegt vom Entwickler (Nutzerentscheidung: Wortwahl liegt beim Entwickler, e
 | **Zeitkonto** | Mehr- und Minderzeit insgesamt; plus heißt Guthaben. | Saldo, Überstundenkonto |
 | **vorläufig** | Der Tag ist nicht abgeschlossen; Pausen und Rundung können sich noch ändern. Per Tipp erklärt. | unvollständig, ungültig |
 | **Feierabend** | Geplantes Ende des Arbeitstags (Live Activity). | Planende |
-| **Mehr** | Sammelbereich (Berichtsheft unter „Ausbildung“, Auswertung und Export, Freigaben, Erinnerungen, Automatik, Einstellungen). | Einstellungen (als Tabname) |
+| **Mehr** | Startpunkt für Funktionen (U3): Zu prüfen, Storniert, Statistik, Berichtsheft („Ausbildung“), Orte und Automatik, Bereiche „Im Web“, eine Zeile „Einstellungen“. Enthält keine Einstellungen und keine Kontokarte. Auf dem iPad ist „Mehr“ ein Eintrag der Seitenleiste, auf dem Mac gibt es die Funktionen als eigene Seitenleisteneinträge. | Einstellungen (als Tabname) |
+| **Einstellungen** | Eine echte Einstellungsseite (U3): Konto, Darstellung, Arbeit (Arbeitsmodell, Zeitkonto, Urlaubsanspruch), Erinnerungen (Urlaub, Überstunden, Push), Automatik und Kalender (Kalender, Kalenderabos, Standortautomatik, Fokus-Filter), Apple Watch, Info, Abmelden. Erinnerungen stehen nur hier, nicht auf dem Urlaub-Tab. Mac: Fenster „Einstellungen“ (⌘,). | Mehr (als Titel) |
+| **Ort archivieren** | Entfernt einen Ort aus der App (Backend: archiviert); die Automatik ignoriert ihn, gebuchte Zeiten behalten ihren Ort. Mit Rückfrage; Wiederherstellen gibt der Vertrag nicht her. | löschen |
 | **Berichtsheft** | Wochenbericht der Ausbildung (BH1): pro Woche Einträge mit Lernfeld, Zeit und Notizen; Status der Woche „Entwurf“/„Erledigt“ (nur Markierung). „Berichtszeit“ ist die Summe der Einträge und nicht „Gearbeitet“. Aktion „Für IHK-Portal kopieren“. | Bericht (allein), Tätigkeitsnachweis |
 | **Lernfeld** | Eigene Liste des Kontos (Nummer optional, Name); Einträge behalten den Namen als Momentaufnahme. | Fach, Kategorie |
 | **Quellen** | Notizen und Dateien einer Berichtswoche als Material; nie geteilt. | Anhänge (die gehören zu Abwesenheiten) |

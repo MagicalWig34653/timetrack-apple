@@ -145,11 +145,18 @@ public struct TimeStatistics: Codable, Sendable, Hashable {
     public let accountStart: LocalDay?
     /// Account balance at the end of the day before `from` (baseline of the curve); nil before the account starts.
     public let openingBalanceSeconds: Int?
+    /// Contract 0.36.0: `false` = differences and balances count through yesterday; nil for older servers.
+    public let includesToday: Bool?
+    /// Contract 0.36.0: today's difference when today lies within the range; nil otherwise.
+    public let todayDeltaSeconds: Int?
     public let buckets: [StatisticsBucket]
     public let totals: StatisticsTotals
 
     public init(from: LocalDay, to: LocalDay, granularity: StatisticsGranularity, basis: StatisticsBasis, timezone: String = "Europe/Berlin",
-                accountStart: LocalDay? = nil, openingBalanceSeconds: Int? = nil, buckets: [StatisticsBucket], totals: StatisticsTotals) {
+                accountStart: LocalDay? = nil, openingBalanceSeconds: Int? = nil, includesToday: Bool? = nil, todayDeltaSeconds: Int? = nil,
+                buckets: [StatisticsBucket], totals: StatisticsTotals) {
+        self.includesToday = includesToday
+        self.todayDeltaSeconds = todayDeltaSeconds
         self.from = from
         self.to = to
         self.granularity = granularity

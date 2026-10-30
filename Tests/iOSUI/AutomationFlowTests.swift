@@ -21,7 +21,7 @@ final class AutomationFlowTests: XCTestCase {
         app.launchArguments = ["-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
         XCTAssertTrue(app.startControl.waitForExistence(timeout: 20))
-        app.openMore()
+        app.openSettings()
         XCTAssertTrue(el("settings.automation").waitForExistence(timeout: 10))
         el("settings.automation").tap()
         XCTAssertTrue(el("automation.master").waitForExistence(timeout: 10))

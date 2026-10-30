@@ -30,7 +30,7 @@ public struct AbsenceListOptions: Codable, Sendable, Hashable {
     /// Kinds the user can pick (the unknown value is never a filter choice).
     public static let kindChoices: [AbsenceKind] = [.vacation, .sick, .excused, .other]
     /// Statuses shown in the list (rejected and cancelled are hidden by the store).
-    public static let statusChoices: [AbsenceStatus] = [.planned, .requested, .approved, .taken]
+    public static let statusChoices: [AbsenceStatus] = [.planned, .requested, .approved, .taken, .recorded]
 
     /// Number of active filters (sorting does not count).
     public var activeFilterCount: Int {
@@ -114,6 +114,7 @@ public struct AbsenceListOptions: Codable, Sendable, Hashable {
         case .requested: 1
         case .approved: 2
         case .taken: 3
+        case .recorded: 3
         case .rejected: 4
         case .cancelled: 5
         case .unknown: 6

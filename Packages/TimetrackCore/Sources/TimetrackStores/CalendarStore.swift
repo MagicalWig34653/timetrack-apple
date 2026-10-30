@@ -419,7 +419,7 @@ public final class CalendarStore {
     public func saveAbsence(_ input: AbsenceInput, editing: Absence?) async -> Absence? {
         let before = absences
         let draft = Absence(id: editing?.id ?? UUID(), version: editing?.version ?? 0, kind: input.kind, startDate: input.startDate, endDate: input.endDate,
-                            halfDayStart: input.halfDayStart, halfDayEnd: input.halfDayEnd, status: input.status, note: input.note,
+                            halfDayStart: input.halfDayStart, halfDayEnd: input.halfDayEnd, status: input.status ?? AbsenceStatus.serverDefault(for: input.kind), note: input.note,
                             countedHalfDays: editing?.countedHalfDays ?? 0, documentStatus: input.documentStatus,
                             documentSubmittedOn: input.documentSubmittedOn, documentReferenceStart: input.documentReferenceStart,
                             documentReferenceEnd: input.documentReferenceEnd)

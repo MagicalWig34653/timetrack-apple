@@ -24,6 +24,19 @@ public struct TimeWeekAbsence: Codable, Sendable, Hashable {
     public let kind: AbsenceKind
     public let status: AbsenceStatus
     public let halfDay: Bool
+
+    private enum CodingKeys: String, CodingKey { case kind, status, halfDay }
+
+    public init(kind: AbsenceKind, status: AbsenceStatus, halfDay: Bool) {
+        self.kind = kind; self.status = status; self.halfDay = halfDay
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try c.decode(AbsenceKind.self, forKey: .kind)
+        status = try c.decodeIfPresent(AbsenceStatus.self, forKey: .status) ?? .unknown
+        halfDay = try c.decodeIfPresent(Bool.self, forKey: .halfDay) ?? false
+    }
 }
 
 public struct TimeWeekDay: Codable, Sendable, Hashable, Identifiable {
@@ -67,6 +80,7 @@ public struct TimeWeekDay: Codable, Sendable, Hashable, Identifiable {
 
     /// Hours shown for a day: evaluated work plus credit (school credit, paid absence), like the Zeit list.
     public var hoursSeconds: Int { workSeconds + creditSeconds }
+
 }
 
 public struct TimeWeekLongestDay: Codable, Sendable, Hashable {
@@ -79,8 +93,12 @@ public struct TimeWeekSummary: Codable, Sendable, Hashable {
     public let targetToDateSeconds: Int
     public let workSeconds: Int
     public let creditSeconds: Int
-    /// Sum of the day balances up to today.
+    /// Sum of the day balances of the completed days (through yesterday since contract 0.36.0; older servers included today).
     public let balanceSeconds: Int
+    /// Contract 0.36.0: `false` = `balanceSeconds`/`targetToDateSeconds` exclude today; nil for older servers.
+    public let includesToday: Bool?
+    /// Contract 0.36.0: today's balance (flows in tomorrow); nil when the week does not contain today.
+    public let todayDeltaSeconds: Int?
     public let plannedSeconds: Int?
     public let accountBalanceBeforeSeconds: Int
     public let accountBalanceAfterSeconds: Int
@@ -100,6 +118,9 @@ public struct TimeWeekSummary: Codable, Sendable, Hashable {
     public let provisional: Bool
 
     public var hoursSeconds: Int { workSeconds + creditSeconds }
+
+    /// Today's difference when reported separately.
+    public var separateTodayDeltaSeconds: Int? { includesToday == false ? todayDeltaSeconds : nil }
 }
 
 public struct TimeWeek: Codable, Sendable, Hashable {

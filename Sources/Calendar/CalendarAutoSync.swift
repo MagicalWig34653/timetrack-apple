@@ -11,12 +11,15 @@ final class CalendarAutoSync {
     static let shared = CalendarAutoSync()
     private var pending: Task<Void, Never>?
 
+    /// Title of a plan-day event ("Arbeit: Büro"); shared by the automatic run and "Jetzt synchronisieren".
+    static func planTitle(_ mode: PlanMode) -> String { "Arbeit: \(mode.plainName)" }
+
     func request(model: AppModel, deviceCalendar: DeviceCalendarStore, delay: Duration = .milliseconds(800)) {
         pending?.cancel()
         pending = Task {
             try? await Task.sleep(for: delay)
             guard !Task.isCancelled, model.phase == .signedIn, let client = model.apiClient, !deviceCalendar.preferences.writeCalendarIDs.isEmpty else { return }
-            await deviceCalendar.syncAll(source: client, calendar: model.dayCalendar) { "Arbeit: \($0.plainName)" }
+            await deviceCalendar.syncAll(source: client, calendar: model.dayCalendar, planTitle: Self.planTitle)
         }
     }
 }

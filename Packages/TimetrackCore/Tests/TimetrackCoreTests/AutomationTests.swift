@@ -704,6 +704,54 @@ private func makeEngine(clock: Clock, sender: FakeSender?, location: FakeLocatio
         #expect(json["automationMode"] as? String == "suggest")
     }
 
+    // U3: archiving a place.
+    @Test func archiveSendsDeleteDropsThePlaceAndStopsWatchingIt() async throws {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/places", body: "[\(Self.placeJSON)]")
+        transport.enqueue("DELETE /api/v1/places/aaaaaaaa-0000-4000-8000-000000000001", status: 204)
+        let (store, engine) = try await makeStore(transport)
+        await store.load()
+        let place = try #require(store.places.first)
+        #expect(await store.archive(place))
+        #expect(store.places.isEmpty)
+        #expect(store.plan.monitored.isEmpty)
+        #expect(await engine.snapshot.places.isEmpty)
+        #expect(store.error == nil)
+    }
+
+    @Test func archiveFailureKeepsThePlaceAndShowsTheError() async throws {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/places", body: "[\(Self.placeJSON)]")
+        transport.enqueue("DELETE /api/v1/places/aaaaaaaa-0000-4000-8000-000000000001", status: 500, body: #"{"error":{"code":"internal","message":"x"}}"#)
+        let (store, engine) = try await makeStore(transport)
+        await store.load()
+        #expect(await store.archive(store.places[0]) == false)
+        #expect(store.places.count == 1)
+        #expect(await engine.snapshot.places.count == 1)
+        #expect(store.error != nil)
+    }
+
+    @Test func archivingAnAlreadyArchivedPlaceCountsAsDone() async throws {
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/places", body: "[\(Self.placeJSON)]")
+        transport.enqueue("DELETE /api/v1/places/aaaaaaaa-0000-4000-8000-000000000001", status: 404, body: #"{"error":{"code":"not_found","message":"x"}}"#)
+        let (store, _) = try await makeStore(transport)
+        await store.load()
+        #expect(await store.archive(store.places[0]))
+        #expect(store.places.isEmpty && store.error == nil)
+    }
+
+    @Test func archivedPlacesAreNeverAutomated() async throws {
+        // A server that does list an archived place (future contract) must not make the app watch it.
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/places", body: "[\(Self.placeJSON.replacingOccurrences(of: "\"archived\":false", with: "\"archived\":true"))]")
+        let (store, engine) = try await makeStore(transport)
+        await store.load()
+        #expect(store.places.isEmpty)
+        #expect(store.plan.monitored.isEmpty)
+        #expect(await engine.snapshot.places.isEmpty)
+    }
+
     @Test func settingsAreClampedAndPersistedInTheEngine() async throws {
         let transport = MockTransport()
         let (store, engine) = try await makeStore(transport)

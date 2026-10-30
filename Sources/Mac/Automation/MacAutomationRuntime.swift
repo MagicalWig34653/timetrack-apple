@@ -159,11 +159,6 @@ final class MacAutomationRuntime {
     }
 }
 
-extension Notification.Name {
-    /// A timer was started or stopped outside the stores (notification action, leave-stop); the model reloads "Heute".
-    static let ttTimerChangedExternally = Notification.Name("de.linolaske.timetrack.timerChangedExternally")
-}
-
 /// Identifiers shared by the Mac notifications (presence questions and the L4 leave question).
 enum MacNotificationID {
     static let stopCategory = "de.linolaske.timetrack.mac.stop.category"

@@ -62,6 +62,10 @@ private struct BalanceCard: View {
                         .accessibilityIdentifier("account.balance")
                     if account.provisional { StatusChip(verbatim: wm("wm.account.provisional"), tone: .neutral) }
                 }
+                if account.reportsTodaySeparately, let today = account.todayDeltaSeconds {
+                    Text(verbatim: u3String("c3.today_flows \(DurationFormat.signed(today).replacingOccurrences(of: "-", with: "−"))"))
+                        .font(TTFont.meta).foregroundStyle(TT.textSecondary).accessibilityIdentifier("account.today")
+                }
                 Text(account.accountStart.map { wm("wm.account.since \(WorkModelCard.display($0))") } ?? wm("wm.account.no_start"))
                     .font(TTFont.meta).foregroundStyle(TT.textSecondary)
                 VStack(spacing: 0) {

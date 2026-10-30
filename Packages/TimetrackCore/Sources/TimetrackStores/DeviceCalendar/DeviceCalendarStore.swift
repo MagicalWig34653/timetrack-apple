@@ -99,6 +99,16 @@ public struct MemoryCalendarPreferencesStorage: CalendarPreferencesStorage, @unc
     public func save(_ preferences: CalendarPreferences) { box.value = preferences }
 }
 
+/// U3: what the last full synchronisation did, for the "Jetzt synchronisieren" button on the settings page.
+public enum CalendarSyncReport: Sendable, Equatable {
+    case synced(created: Int, updated: Int, deleted: Int)
+    /// No calendar is set to "Schreiben" (or no write access): nothing was written.
+    case nothingToWrite
+    /// The server could not be read; nothing was changed in any calendar.
+    case serverUnreachable
+    case writeFailed
+}
+
 public enum CalendarWriteResult: Sendable, Equatable {
     case written(created: Int, updated: Int, deleted: Int)
     case skipped
@@ -129,8 +139,13 @@ public final class DeviceCalendarStore {
     private let storage: CalendarPreferencesStorage
     private let ledgerStorage: CalendarLedgerStorage
     private var ledger: CalendarLedger
-    private var isSyncing = false
+    /// True while a full synchronisation runs (the settings page shows progress and disables the button).
+    public private(set) var isSyncing = false
+    /// U3: result and time of the last completed full synchronisation (automatic or "Jetzt synchronisieren").
+    public private(set) var lastSyncReport: CalendarSyncReport?
+    public private(set) var lastSyncAt: Date?
     private var syncRequested = false
+    private var serverReadFailed = false
 
     /// N2: windows of a full reconciliation. Absences reach a year back and two years ahead (so a vacation that moved or was
     /// cancelled is corrected no matter which month is open); plan days (optional, many) a month back and about four months ahead.
@@ -309,9 +324,24 @@ public final class DeviceCalendarStore {
         var result = CalendarWriteResult.skipped
         repeat {
             syncRequested = false
+            serverReadFailed = false
             result = await runFullSync(source: source, calendar: calendar, now: now, planTitle: planTitle)
         } while syncRequested
+        switch result {
+        case .written(let created, let updated, let deleted): lastSyncReport = .synced(created: created, updated: updated, deleted: deleted)
+        case .failed: lastSyncReport = .writeFailed
+        case .skipped: lastSyncReport = serverReadFailed ? .serverUnreachable : .nothingToWrite
+        }
+        lastSyncAt = .now
         return result
+    }
+
+    /// U3: "Jetzt synchronisieren": runs a full reconciliation immediately and returns its report. A run that is already in progress is
+    /// not doubled; its report is returned when the running one finished (the extra run it triggers keeps the data current).
+    @discardableResult
+    public func syncNow(source: CalendarSyncSource, calendar: DayCalendar, planTitle: @escaping (PlanMode) -> String) async -> CalendarSyncReport? {
+        await syncAll(source: source, calendar: calendar, planTitle: planTitle)
+        return lastSyncReport
     }
 
     private func runFullSync(source: CalendarSyncSource, calendar: DayCalendar, now: Date, planTitle: (PlanMode) -> String) async -> CalendarWriteResult {
@@ -332,6 +362,7 @@ public final class DeviceCalendarStore {
                 for day in try await source.calendarPlanDays(from: planWindow.from, to: planWindow.to) { planDays[day.date] = day }
             }
         } catch {
+            serverReadFailed = true
             lastWrite = .skipped
             return .skipped
         }

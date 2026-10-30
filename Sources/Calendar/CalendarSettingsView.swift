@@ -195,6 +195,7 @@ private struct CalendarSettingsContent: View {
                         .padding(.horizontal, TT.Space.l).padding(.bottom, TT.Space.m).accessibilityIdentifier("calendar.write.result")
                 }
             }
+            syncSection
             FormSection("Aufräumen") {
                 VStack(alignment: .leading, spacing: TT.Space.m) {
                     if !store.hasTimetrackCalendar {
@@ -217,6 +218,57 @@ private struct CalendarSettingsContent: View {
             Button("Abbrechen", role: .cancel) {}
         } message: {
             Text("Es werden nur Termine gelöscht, die Timetrack selbst geschrieben hat. Deine eigenen Termine bleiben unberührt.")
+        }
+    }
+
+    // MARK: Sync now (U3)
+
+    private var syncSection: some View {
+        FormSection("Synchronisation", footer: "Timetrack gleicht die geschriebenen Termine automatisch ab: beim Öffnen der App und nach Änderungen an Urlaub oder Plan. Mit dem Knopf startest du den Abgleich sofort. Ist der Server nicht erreichbar, ändert Timetrack nichts in deinen Kalendern.") {
+            VStack(alignment: .leading, spacing: TT.Space.m) {
+                Button { syncNow() } label: {
+                    HStack(spacing: TT.Space.s) {
+                        if store.isSyncing { ProgressView().controlSize(.small) } else { Image(systemName: "arrow.triangle.2.circlepath") }
+                        Text(store.isSyncing ? "Synchronisiere …" : "Jetzt synchronisieren")
+                    }
+                }
+                .buttonStyle(.ttSecondary)
+                .disabled(store.isSyncing || store.writeCalendars.isEmpty || model.apiClient == nil)
+                .accessibilityIdentifier("calendar.sync.now")
+                .accessibilityHint(Text("Gleicht die von Timetrack geschriebenen Termine sofort mit dem Server ab."))
+                VStack(alignment: .leading, spacing: TT.Space.xs) {
+                    if let at = store.lastSyncAt {
+                        Text("Zuletzt synchronisiert: \(at.formatted(.relative(presentation: .named))) (\(at.formatted(date: .omitted, time: .shortened)))")
+                            .font(TTFont.meta).foregroundStyle(TT.textSecondary).accessibilityIdentifier("calendar.sync.time")
+                    } else {
+                        Text("Noch nicht synchronisiert seit dem Start der App.").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            .accessibilityIdentifier("calendar.sync.time")
+                    }
+                    if let report = store.lastSyncReport {
+                        Text(verbatim: reportText(report)).font(TTFont.meta)
+                            .foregroundStyle(report == .serverUnreachable || report == .writeFailed ? TT.danger : TT.textSecondary)
+                            .accessibilityIdentifier("calendar.sync.result")
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
+            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+        }
+    }
+
+    private func syncNow() {
+        guard let client = model.apiClient else { return }
+        TTHaptics.play(.softTap)
+        Task { await store.syncNow(source: client, calendar: model.dayCalendar, planTitle: CalendarAutoSync.planTitle) }
+    }
+
+    private func reportText(_ report: CalendarSyncReport) -> String {
+        switch report {
+        case .synced(let created, let updated, let deleted):
+            created + updated + deleted == 0 ? "Alles aktuell, nichts zu ändern." : "\(created) neu, \(updated) geändert, \(deleted) entfernt."
+        case .nothingToWrite: "Es steht kein Kalender auf „Schreiben“, es wurde nichts geschrieben."
+        case .serverUnreachable: "Der Server war nicht erreichbar. Es wurde nichts geändert."
+        case .writeFailed: store.message ?? "Das Schreiben in den Kalender ist fehlgeschlagen."
         }
     }
 

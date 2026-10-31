@@ -270,3 +270,24 @@ public struct Place: Codable, Sendable, Hashable, Identifiable {
         self.confirmAfterSeconds = confirmAfterSeconds
     }
 }
+
+/// Which places `GET /places` returns (contract 0.39.0): `true` only archived ones, `all` active and archived.
+public enum PlaceArchiveFilter: String, Sendable, CaseIterable {
+    case archivedOnly = "true"
+    case all
+}
+
+/// Decides how to treat the answer of an archive request on servers that may predate contract 0.39.0.
+public enum PlaceArchiveSupport {
+    /// 404 (route unknown) or 400 (parameter rejected) means the server has no archive view: hide the feature.
+    /// Other failures (network, 5xx, 401) say nothing about support.
+    public static func isUnsupported(_ error: TimetrackError) -> Bool {
+        error.status == 404 || error.status == 400
+    }
+
+    /// An old server ignoring the parameter returns the active list; keep only entries flagged archived so a restore is never offered
+    /// for a place that is not archived.
+    public static func archivedOnly(_ places: [Place]) -> [Place] {
+        places.filter(\.archived).sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+}

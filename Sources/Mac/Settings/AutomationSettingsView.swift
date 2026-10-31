@@ -28,6 +28,7 @@ struct MacAutomationSettingsView: View {
             store = created
             created.status = MacAutomationRuntime.shared.service.status
             await created.load()
+            await created.loadArchived() // AUD3-B: probes support (contract 0.39.0)
         }
         .sheet(isPresented: $showingNewPlace) { if let store { MacNewPlaceSheet(store: store) } }
     }
@@ -83,7 +84,23 @@ struct MacAutomationSettingsView: View {
             Button("Archivieren", role: .destructive) { if let place = archiving { Task { await store.archive(place) } }; archiving = nil }
             Button("Abbrechen", role: .cancel) { archiving = nil }
         } message: {
-            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Zurückholen lässt sich ein archivierter Ort derzeit nicht.")
+            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Archivierte Orte lassen sich unten wiederherstellen.")
+        }
+        if store.archiveSupported == true {
+            Section {
+                if store.archivedPlaces.isEmpty { Text("Keine archivierten Orte.").foregroundStyle(TT.textSecondary) }
+                ForEach(store.archivedPlaces) { place in
+                    HStack {
+                        Text(verbatim: place.name)
+                        Spacer()
+                        Button("Wiederherstellen") { Task { await store.restore(place) } }
+                            .disabled(store.isBusy)
+                            .accessibilityLabel(Text("Ort \(place.name) wiederherstellen"))
+                    }
+                }
+            } header: { Text("Archivierte Orte") } footer: {
+                Text("Wiederhergestellte Orte erscheinen wieder in der Liste; ihre Automatik-Einstellung bleibt erhalten.")
+            }
         }
         Section {
             Stepper("Wartezeit nach Ankunft: \(store.config.dwellMinutes) Min", value: Binding(get: { store.config.dwellMinutes }, set: { v in Task { await store.setDwellMinutes(v) } }), in: AutomationConfig.dwellRange)

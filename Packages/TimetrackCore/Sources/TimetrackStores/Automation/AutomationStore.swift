@@ -38,6 +38,10 @@ public enum AutomationSecretKey {
 @Observable
 public final class AutomationStore {
     public private(set) var places: [Place] = []
+    /// AUD3-B: archived places (contract 0.39.0), filled by `loadArchived()`.
+    public private(set) var archivedPlaces: [Place] = []
+    /// `nil` until the first archive request; `false` when the server predates 0.39.0 (the UI hides the archive then).
+    public private(set) var archiveSupported: Bool?
     public private(set) var state = AutomationState()
     public private(set) var queuedCount = 0
     public private(set) var plan = MonitorPlan(monitored: [], omitted: [], smallRadius: [])
@@ -192,6 +196,7 @@ public final class AutomationStore {
             onConfigurationChanged?()
             error = nil
             onOutcome?(.deleted)
+            if archiveSupported == true { await loadArchived() } // AUD3-B: the place now shows up in the archive
             return true
         } catch let failure as TimetrackError {
             if failure.status == 404 { // already archived elsewhere (web app): the list was stale
@@ -202,6 +207,51 @@ public final class AutomationStore {
                 error = nil
                 return true
             }
+            error = failure
+            onOutcome?(.failed)
+        } catch {
+            self.error = .cancelled
+        }
+        return false
+    }
+
+    // MARK: - Archive (AUD3-B, contract 0.39.0)
+
+    /// Loads the archived places; on 400/404 (older server) the archive is marked unsupported and hidden.
+    public func loadArchived() async {
+        do {
+            archivedPlaces = PlaceArchiveSupport.archivedOnly(try await client.listPlaces(archived: .archivedOnly))
+            archiveSupported = true
+        } catch let failure as TimetrackError {
+            if PlaceArchiveSupport.isUnsupported(failure) {
+                archiveSupported = false
+                archivedPlaces = []
+            } else {
+                error = failure
+            }
+        } catch {
+            self.error = .cancelled
+        }
+    }
+
+    /// Restores an archived place: it moves from the archive into the active list and the automation watches it again
+    /// (its saved mode is kept by the server). A failure leaves both lists unchanged.
+    @discardableResult
+    public func restore(_ place: Place) async -> Bool {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let restored = try await client.restorePlace(id: place.id)
+            archivedPlaces.removeAll { $0.id == place.id }
+            if let index = places.firstIndex(where: { $0.id == restored.id }) { places[index] = restored } else { places.append(restored) }
+            await engine.setPlaces(places)
+            await refreshFromEngine()
+            onConfigurationChanged?()
+            error = nil
+            onOutcome?(.saved)
+            return true
+        } catch let failure as TimetrackError {
+            if failure.status == 404 { archivedPlaces.removeAll { $0.id == place.id } } // gone or foreign: the list was stale
             error = failure
             onOutcome?(.failed)
         } catch {

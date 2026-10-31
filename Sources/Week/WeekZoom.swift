@@ -325,9 +325,16 @@ struct DayKindPill: View {
     let text: String
     let symbol: String
     let tint: Color
+    var isHalf = false
+    var accessibilityText: String?
 
     static func of(day: DayEvaluation, plan: TimeWeekDay?) -> DayKindPill? {
-        if let label = plan?.holidayLabel { return DayKindPill(text: label, symbol: "party.popper.fill", tint: TT.kindHoliday) }
+        if let name = plan?.holidayName {
+            let note = HolidayNote(name: name, treatment: plan?.companyDayTreatment)
+            // A half company day keeps its work mark: flag symbol, "½" and a dashed outline instead of colour alone.
+            return DayKindPill(text: note.badge, symbol: note.isHalfDay ? "flag.fill" : "party.popper.fill", tint: TT.kindHoliday,
+                               isHalf: note.isHalfDay, accessibilityText: note.isHalfDay ? note.hint : nil)
+        }
         if let mark = day.mark, mark != .unmarked, mark != .unknown {
             return DayKindPill(text: String(localized: markKeyString(mark)), symbol: markSymbol(mark), tint: markTint(mark))
         }
@@ -343,7 +350,28 @@ struct DayKindPill: View {
         .font(.system(.caption2, weight: .semibold)).foregroundStyle(tint)
         .padding(.horizontal, 7).padding(.vertical, 3)
         .background(tint.opacity(0.16), in: .capsule)
-        .accessibilityElement(children: .combine)
+        .overlay { if isHalf { Capsule().strokeBorder(tint, style: StrokeStyle(lineWidth: 1, dash: [3, 2])) } }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: accessibilityText ?? text))
+    }
+}
+
+/// AUD3-B: chip of a half company day in the planner header ("Heiligabend ½", dashed outline, spoken hint).
+struct HolidayNoteChip: View {
+    let note: HolidayNote
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: "flag.fill").imageScale(.small).accessibilityHidden(true)
+            Text(verbatim: note.badge).lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .font(.system(.caption2, weight: .semibold)).foregroundStyle(TT.kindHoliday)
+        .padding(.horizontal, 5).padding(.vertical, 2)
+        .background(TT.kindHoliday.opacity(0.16), in: .capsule)
+        .overlay { Capsule().strokeBorder(TT.kindHoliday, style: StrokeStyle(lineWidth: 1, dash: [3, 2])) }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: note.hint))
+        .accessibilityIdentifier("plan.holiday.half")
     }
 }
 

@@ -12,6 +12,9 @@ public final class WeekPlanStore {
     public private(set) var drafts: [DayDraft] = []
     public private(set) var baseline: [DayDraft] = []
     public private(set) var suggestion = WeekPlan.fallbackWindow(targetSeconds: 27_720)
+    /// AUD3-B: holiday / company day names of the shown week (best effort; empty when the calendar cannot be read).
+    public private(set) var holidayNotes: [LocalDay: HolidayNote] = [:]
+    @ObservationIgnored private var holidayYears: [Int: [CalendarDay]] = [:]
     public private(set) var isLoading = false
     public private(set) var isSaving = false
     public private(set) var isUnavailable = false
@@ -97,6 +100,7 @@ public final class WeekPlanStore {
             suggestion = suggested
             error = nil
             isUnavailable = false
+            await loadHolidayNotes(monday: reference, generation: mine)
         } catch let failure as TimetrackError {
             guard mine == generation, failure != .cancelled else { return }
             if failure.status == 404, failure.knownCode != .moduleDisabled {
@@ -138,6 +142,17 @@ public final class WeekPlanStore {
         await open(monday: moved)
     }
 
+    /// Reads the years the week touches (cached per year) and derives the day notes; a failure leaves the planner as before.
+    private func loadHolidayNotes(monday reference: LocalDay, generation mine: Int) async {
+        let sundayOfWeek = LocalDays.adding(6, to: reference) ?? reference
+        let years = Set([LocalDays.parse(reference)?.year, LocalDays.parse(sundayOfWeek)?.year].compactMap { $0 })
+        for year in years where holidayYears[year] == nil {
+            if let list = try? await client.listHolidays(year: year) { holidayYears[year] = list }
+        }
+        guard mine == generation else { return }
+        holidayNotes = HolidayNote.notes(from: reference, in: years.flatMap { holidayYears[$0] ?? [] })
+    }
+
     public func open(monday target: LocalDay) async {
         // Never switch weeks under a running PUT: queue the switch, `save()` performs it afterwards.
         if isSaving {
@@ -147,6 +162,7 @@ public final class WeekPlanStore {
         weekEpoch += 1
         monday = LocalDays.mondayOfWeek(containing: target) ?? target
         week = nil
+        holidayNotes = [:]
         drafts = []
         baseline = []
         error = nil

@@ -10,6 +10,8 @@ public final class VacationPlannerStore {
     public private(set) var data: VacationSuggestions?
     /// Filters the shown data was fetched with.
     public private(set) var applied: VacationPlannerFilters?
+    /// AUD3-B: the absences created by the last `take` (also after a partial result), for "Urlaubsantrag erstellen".
+    public private(set) var createdAbsences: [Absence] = []
     public private(set) var isLoading = false
     public private(set) var isUnavailable = false
     public var error: TimetrackError?
@@ -107,9 +109,11 @@ public final class VacationPlannerStore {
         let blocks = VacationPlanner.blocks(for: suggestion)
         guard let first = blocks.first, let last = blocks.last else { return .nothingToBook }
         var done = 0
+        createdAbsences = []
         do {
             for block in blocks {
-                _ = try await client.createAbsence(AbsenceInput(kind: .vacation, startDate: block.start, endDate: block.end, status: .planned))
+                let created = try await client.createAbsence(AbsenceInput(kind: .vacation, startDate: block.start, endDate: block.end, status: .planned))
+                createdAbsences.append(created)
                 done += 1
             }
         } catch {

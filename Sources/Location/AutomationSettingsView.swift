@@ -11,6 +11,7 @@ struct AutomationSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var store: AutomationStore?
     @State private var showingNewPlace = false
+    @State private var showingArchive = false
 
     var body: some View {
         ScrollView {
@@ -34,6 +35,7 @@ struct AutomationSettingsView: View {
             let created = AutomationRuntime.shared.store(for: client)
             store = created
             await created.load()
+            await created.loadArchived() // AUD3-B: probes support (contract 0.39.0); older servers hide the archive
         }
         .onChange(of: scenePhase) {
             if scenePhase == .active, let store {
@@ -54,6 +56,7 @@ struct AutomationSettingsView: View {
         }
         permissionSection(store)
         placesSection(store)
+        if store.archiveSupported == true { archivedPlacesSection(store) }
         timingSection(store)
         shortcutsSection(store)
         tokenSection(store)
@@ -130,6 +133,35 @@ struct AutomationSettingsView: View {
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("automation.place.new")
+        }
+    }
+
+    /// AUD3-B: archived places (contract 0.39.0) with "Wiederherstellen"; hidden on servers without the archive.
+    private func archivedPlacesSection(_ store: AutomationStore) -> some View {
+        FormSection("Archivierte Orte", footer: "Wiederhergestellte Orte erscheinen wieder in der Liste; ihre Automatik-Einstellung bleibt erhalten.") {
+            DisclosureGroup(isExpanded: $showingArchive) {
+                if store.archivedPlaces.isEmpty {
+                    Text("Keine archivierten Orte.").font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                        .accessibilityIdentifier("automation.archive.empty")
+                }
+                ForEach(store.archivedPlaces) { place in
+                    HStack {
+                        Text(verbatim: place.name).font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
+                        Spacer()
+                        Button("Wiederherstellen") { Task { await store.restore(place) } }
+                            .font(TTFont.label)
+                            .disabled(store.isBusy)
+                            .accessibilityLabel(Text("Ort \(place.name) wiederherstellen"))
+                            .accessibilityIdentifier("automation.place.restore.\(place.name)")
+                    }
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.s)
+                }
+            } label: {
+                Label("Archivierte Orte (\(store.archivedPlaces.count))", systemImage: "archivebox").font(TTFont.label)
+            }
+            .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
+            .accessibilityIdentifier("automation.archive.toggle")
         }
     }
 
@@ -328,7 +360,7 @@ struct PlaceAutomationRow: View {
                 .accessibilityIdentifier("automation.place.archive.confirm")
             Button("Abbrechen", role: .cancel) {}
         } message: {
-            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Archivierte Orte erscheinen nicht mehr in der App; zurückholen lässt sich ein Ort derzeit nicht.")
+            Text("Die Automatik ignoriert den Ort danach. Bereits gebuchte Zeiten behalten ihren Ort. Archivierte Orte findest du unter „Archivierte Orte“ und kannst sie dort wiederherstellen (Server ab Version 0.39).")
         }
     }
 

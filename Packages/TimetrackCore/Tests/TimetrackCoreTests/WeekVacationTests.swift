@@ -283,6 +283,7 @@ extension PlanWeek {
         #expect(result == .booked(blocks: 1, first: "2026-05-22", last: "2026-05-22"))
         let sent = transport.requests(matching: "POST /api/v1/absences")
         #expect(sent.count == 1)
+        #expect(store.createdAbsences.map(\.id.uuidString) == ["11111111-1111-4111-8111-111111111111"]) // AUD3-B: offered for the request PDF
         let body = sent[0].httpBody.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
         #expect(body?["kind"] as? String == "vacation" && body?["status"] as? String == "planned" && body?["startDate"] as? String == "2026-05-22")
         // budget overrun needs its own acknowledgement

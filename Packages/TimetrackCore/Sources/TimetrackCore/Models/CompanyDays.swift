@@ -67,6 +67,47 @@ public enum CompanyDayText {
     }
 }
 
+extension CompanyDayText {
+    /// Accessible explanation like the PWA's `holidayHint`: "Heiligabend – halber Betriebstag, Soll halbiert".
+    public static func hint(name: String, treatment: CompanyDayTreatment?) -> String {
+        switch treatment {
+        case .half: "\(name) – halber Betriebstag, Soll halbiert"
+        case .full: "\(name) – Betriebstag, wie ein Feiertag"
+        default: name
+        }
+    }
+}
+
+/// What a day of the week planner/list says about its holiday or company day (AUD3-B, ADR-0029).
+public struct HolidayNote: Sendable, Hashable {
+    public let name: String
+    public let treatment: CompanyDayTreatment?
+
+    public init(name: String, treatment: CompanyDayTreatment?) {
+        self.name = name
+        self.treatment = treatment
+    }
+
+    /// A half company day stays a work day: target halved, at most half a vacation day.
+    public var isHalfDay: Bool { treatment?.isHalfDay == true }
+    /// Chip text: "Heiligabend ½" for half days, the plain name otherwise.
+    public var badge: String { isHalfDay ? "\(name) ½" : name }
+    public var hint: String { CompanyDayText.hint(name: name, treatment: treatment) }
+
+    /// Notes for the seven days from `monday` out of the year lists of `GET /calendar/holidays` (kind holiday only).
+    /// A full holiday wins over a half company day on the same date.
+    public static func notes(from monday: LocalDay, in holidays: [CalendarDay]) -> [LocalDay: HolidayNote] {
+        var result: [LocalDay: HolidayNote] = [:]
+        for offset in 0..<7 {
+            guard let day = LocalDays.adding(offset, to: monday) else { continue }
+            let matching = holidays.filter { $0.kind == .holiday && $0.startDate <= day && day <= $0.endDate }
+            guard let chosen = matching.first(where: { !$0.isHalfDay }) ?? matching.first else { continue }
+            result[day] = HolidayNote(name: chosen.name, treatment: chosen.companyTreatment)
+        }
+        return result
+    }
+}
+
 /// One fixed month/day rule of `VacationSettings.companyDays`.
 public struct CompanyDayRule: Codable, Sendable, Hashable, Identifiable {
     public var month: Int

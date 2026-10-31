@@ -202,7 +202,7 @@ struct PlanGridPlanner: View {
                 ForEach(Array(visible), id: \.self) { i in dayHeader(i).frame(width: colW) }
             }
         }
-        .frame(height: 70)
+        .frame(height: store.holidayNotes.values.contains { $0.isHalfDay } ? 88 : 70)
         .padding(.top, 2)
     }
 
@@ -212,6 +212,10 @@ struct PlanGridPlanner: View {
         let planned = day.flatMap { $0.isBlocked ? 0 : draft.flatMap { WeekPlan.plannedSeconds($0) } } ?? 0
         return VStack(spacing: 2) {
             Text(verbatim: day.map { dayTitle($0.date, calendar: store.calendar) } ?? "").font(TTFont.meta.weight(.semibold)).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.7)
+            if let day, !day.isBlocked, let note = store.holidayNotes[day.date], note.isHalfDay {
+                // AUD3-B (ADR-0029): half company day: still plannable, target halved; never colour alone (½ and dashed outline).
+                HolidayNoteChip(note: note)
+            }
             if let day, !day.isBlocked {
                 Menu {
                     Button { store.setMode(i, nil) } label: { Text(verbatim: "Kein Plan") }
@@ -229,8 +233,8 @@ struct PlanGridPlanner: View {
                 }
                 .accessibilityLabel(Text(verbatim: "Tagesart \(dayTitle(day.date, calendar: store.calendar))"))
                 .accessibilityIdentifier("plan.mode.\(day.date)")
-            } else if let blocked = day?.blockedBy {
-                Text(verbatim: blocked.label).font(.system(.caption2)).foregroundStyle(TT.textSecondary).lineLimit(2).minimumScaleFactor(0.7).frame(minHeight: 30)
+            } else if let day, let blocked = day.blockedBy {
+                Text(verbatim: blocked == .holiday ? (store.holidayNotes[day.date]?.name ?? blocked.label) : blocked.label).font(.system(.caption2)).foregroundStyle(TT.textSecondary).lineLimit(2).minimumScaleFactor(0.7).frame(minHeight: 30)
             }
             Text(verbatim: planned > 0 ? DurationFormat.hoursMinutes(planned) : "").font(.system(.caption2)).monospacedDigit().foregroundStyle(TT.textSecondary)
         }
@@ -350,9 +354,10 @@ struct PlanGridPlanner: View {
     private func columnLabel(_ i: Int) -> String {
         guard let day = store.days[safe: i], let draft = store.drafts[safe: i] else { return "" }
         let title = MonthCellLabel.longDay(day.date)
-        if let blocked = day.blockedBy { return "\(title), \(blocked.label), gesperrt" }
+        if let blocked = day.blockedBy { return "\(title), \(blocked == .holiday ? (store.holidayNotes[day.date]?.name ?? blocked.label) : blocked.label), gesperrt" }
+        let halfHint = store.holidayNotes[day.date].flatMap { $0.isHalfDay ? ", \($0.hint)" : nil } ?? ""
         let planned = WeekPlan.plannedSeconds(draft).map { "geplant \(DurationFormat.hoursMinutes($0))" } ?? "kein Plan"
-        return "\(title), \(draft.mode?.plainName ?? "frei"), \(planned), \(draft.blocks.count) Blöcke"
+        return "\(title)\(halfHint), \(draft.mode?.plainName ?? "frei"), \(planned), \(draft.blocks.count) Blöcke"
     }
 
     // MARK: Block

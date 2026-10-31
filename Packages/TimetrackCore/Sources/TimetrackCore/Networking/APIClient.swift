@@ -195,6 +195,18 @@ public actor APIClient: PreferencesService {
     public func listWorkModels() async throws -> [WorkModel] { try await get("/work-models") }
     public func listPlaces() async throws -> [Place] { try await get("/places") }
 
+    /// AUD3-B (contract 0.39.0): `GET /places?archived=true|all`. Servers older than 0.39.0 ignore the parameter or reject it
+    /// (400/404); callers treat that as "archive not available" (see `PlaceArchiveSupport`).
+    public func listPlaces(archived filter: PlaceArchiveFilter) async throws -> [Place] {
+        try await get("/places", query: [URLQueryItem(name: "archived", value: filter.rawValue)])
+    }
+
+    /// AUD3-B (contract 0.39.0): `POST /places/{id}/restore` answers the restored place (idempotent; 404 for a foreign or unknown id
+    /// and on servers without the route).
+    public func restorePlace(id: UUID) async throws -> Place {
+        try await send(.post, "/places/\(id.uuidString.lowercased())/restore", body: Empty())
+    }
+
     // MARK: - APNs devices (P14, contract v0.33.0, ADR-0030) and calendar feeds (N2, v0.31.0)
 
     public func listPushDevices() async throws -> [PushDeviceInfo] { try await get("/me/push-devices") }
@@ -353,7 +365,7 @@ public actor APIClient: PreferencesService {
     }
 
     /// U3: `DELETE /places/{id}` archives the place (existing segments keep their reference; archived places are no longer listed and
-    /// the automation ignores them). The contract has no way to list or restore archived places.
+    /// the automation ignores them). Since contract 0.39.0 `listPlaces(archived:)` and `restorePlace` bring them back.
     public func archivePlace(id: UUID) async throws { try await sendVoid(.delete, "/places/\(id.uuidString.lowercased())") }
 
     public func listDeviceTokens() async throws -> [DeviceToken] { try await get("/me/device-tokens") }

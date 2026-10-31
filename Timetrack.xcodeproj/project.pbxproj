@@ -69,6 +69,7 @@
 		2C39DB43DDDA0B442A248B6D /* TimetrackWidgetMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */; };
 		2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */; };
 		2E16F1E67DF6B39F85C6BC5B /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
+		2EE430D74FEF512CA95B8127 /* ProfilePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86BA31543CA39F3739D2043 /* ProfilePage.swift */; };
 		2F85187B902C40C214900927 /* TimetrackWidgetMac.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6AFED35FEDDDCA6FF903C27A /* TimetrackWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2FB49DC004BD2DC6AB785B48 /* ReportCopySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BA66F292A56DEB5E6CF5A1 /* ReportCopySheet.swift */; };
 		305AE3BD8A638B02FECC7D80 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00CEADF7DB2FF6603875D8 /* RootView.swift */; };
@@ -137,6 +138,7 @@
 		58A0E8B2EB31981A504312B4 /* TimetrackPrimary.icon in Resources */ = {isa = PBXBuildFile; fileRef = 339A59817C8526A4C2981217 /* TimetrackPrimary.icon */; };
 		59EAFBE4C2F2122E57147C64 /* ContinueLastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */; };
 		5A14693BBFE7131A61C43614 /* MacNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = A152217F44B868843420B561 /* MacNotifications.swift */; };
+		5AC278E672263B930994E43B /* AccountSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517B014722BD13F69E95899F /* AccountSupport.swift */; };
 		5B5AD0E8B38489D9DD8718D8 /* ActivitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CDC9683EB9749C9200A726 /* ActivitySettingsView.swift */; };
 		5BCF283FF6DA81A919024588 /* Z2.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A8BD17D1D30165B37BD0647 /* Z2.xcstrings */; };
 		5D9B9C20637004A003D445CB /* CalendarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89BAC948362FFE19A0D3AF9 /* CalendarScreen.swift */; };
@@ -292,6 +294,7 @@
 		C2724CD4E883D38438A32A78 /* AppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6E8EEB9A124779C6977A95 /* AppearanceView.swift */; };
 		C2DC9E677C879BE44779F5D1 /* LearningFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA365EBA653DE3CA5C24A14 /* LearningFieldsView.swift */; };
 		C396A1DF046B2D4027690D95 /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
+		C416630D03456EAB6BD03D68 /* AccountSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517B014722BD13F69E95899F /* AccountSupport.swift */; };
 		C58D2277C63056DEB3EB553F /* ReportCopySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BA66F292A56DEB5E6CF5A1 /* ReportCopySheet.swift */; };
 		C5F53D83EC8C94AFA44D91D2 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 8B1C4EF1FB7F7021FD68BECF /* TimetrackStores */; };
 		C5FE21F448AF752E9992B34B /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = D5ABC4A98D257C9ACD688EBF /* TimetrackStores */; };
@@ -313,6 +316,7 @@
 		D7250D20380AAB8E59A258F8 /* TimeHub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486DE3E098A8C22CB2E4DC2C /* TimeHub.swift */; };
 		D840C1B598C5E3EB19625DBC /* TimerControlRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE23C37A37C9E12F463E83FD /* TimerControlRunner.swift */; };
 		D981A9A375725A78282C2CBB /* WorkModelFormFields.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A55CC9B36824AAC0B02DE27 /* WorkModelFormFields.swift */; };
+		D9B2770AC89BEDD00EC603D9 /* ProfilePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86BA31543CA39F3739D2043 /* ProfilePage.swift */; };
 		D9E3AAE53D5CF2011F96B5C5 /* WorkModelStatsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48843BF591F80976EBC50B84 /* WorkModelStatsTests.swift */; };
 		DA08AB1F30635F5944F657B7 /* TimetrackCheck.icon in Resources */ = {isa = PBXBuildFile; fileRef = 094ED82C8094FCBF9DE1C0FE /* TimetrackCheck.icon */; };
 		DA8AB80A43F878124D24FFA5 /* ReportsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9095E9D69FAAC47C44398BF /* ReportsTests.swift */; };
@@ -529,6 +533,7 @@
 		4FB2A52DD3CB4C5FA9AE43EF /* EventKitProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitProvider.swift; sourceTree = "<group>"; };
 		50795DBED761A3E05E3C02F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		512629B01D497703C711B949 /* NowBarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowBarTests.swift; sourceTree = "<group>"; };
+		517B014722BD13F69E95899F /* AccountSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSupport.swift; sourceTree = "<group>"; };
 		521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusFilterTests.swift; sourceTree = "<group>"; };
 		52A3358F5A886AD73594ED91 /* ReportsSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsSupport.swift; sourceTree = "<group>"; };
 		56BAC6516C9D6BDE4ACEFDB9 /* SuggestionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionViews.swift; sourceTree = "<group>"; };
@@ -608,6 +613,7 @@
 		B761C2EA9067E60DEF3A5F52 /* FocusNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusNotifications.swift; sourceTree = "<group>"; };
 		B7F011F68766315CA396856B /* TimetrackIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackIOSApp.swift; sourceTree = "<group>"; };
 		B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverworkSettingsView.swift; sourceTree = "<group>"; };
+		B86BA31543CA39F3739D2043 /* ProfilePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePage.swift; sourceTree = "<group>"; };
 		B8D7F38D8D61DEC777E6B0A8 /* UX3Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UX3Support.swift; sourceTree = "<group>"; };
 		B971A56FC5DF66A6FD49DDCC /* TimetrackMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackMac.entitlements; sourceTree = "<group>"; };
 		B9FD72ECC0D1BDFB75745274 /* ComplicationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationView.swift; sourceTree = "<group>"; };
@@ -1007,7 +1013,9 @@
 			isa = PBXGroup;
 			children = (
 				48532679BA93CAFBAFCAE3DA /* AboutSection.swift */,
+				517B014722BD13F69E95899F /* AccountSupport.swift */,
 				3061E0EA891E5B9750570E1D /* CalendarFeedsPage.swift */,
+				B86BA31543CA39F3739D2043 /* ProfilePage.swift */,
 				63C0BF7958ADC0FE6705FC6C /* PushSettingsPage.swift */,
 				B154C3255C3D1530359998F8 /* PushSupport.swift */,
 				C63D37A417C54D0AF163D20E /* TimeAccountScreen.swift */,
@@ -1575,6 +1583,7 @@
 				711DA7DA7385A54A94FB11C3 /* AboutSection.swift in Sources */,
 				3C8482B599387AB3F8B0EAF4 /* AbsenceAttachmentsSheet.swift in Sources */,
 				B99817312B3946FFF46592DD /* AbsenceEditor.swift in Sources */,
+				5AC278E672263B930994E43B /* AccountSupport.swift in Sources */,
 				5B5AD0E8B38489D9DD8718D8 /* ActivitySettingsView.swift in Sources */,
 				B1B5DE9EBB1CA581CBFC6AB3 /* ActivityView.swift in Sources */,
 				7A1A89FC0DEAB330D006740C /* AutomationSettingsView.swift in Sources */,
@@ -1616,6 +1625,7 @@
 				0EDA5EACE903627A685D6360 /* PlanSheets.swift in Sources */,
 				9C96A8BD380330346AA472B4 /* PlanningArea.swift in Sources */,
 				A0955EC7B5DB0D73E6E2AB76 /* PlanningShared.swift in Sources */,
+				D9B2770AC89BEDD00EC603D9 /* ProfilePage.swift in Sources */,
 				FD0CA9E1073E9D14C6995F9B /* PushSettingsPage.swift in Sources */,
 				88AA4A388F027B2AFDC18830 /* PushSupport.swift in Sources */,
 				F02063BE4EA09E026CC5BA88 /* QuickAbsenceRow.swift in Sources */,
@@ -1710,6 +1720,7 @@
 				ADCD599E9DF61F9DBA0647A9 /* AboutSection.swift in Sources */,
 				0280FFA8B5483607E8268C75 /* AbsenceAttachmentsSheet.swift in Sources */,
 				FD1804AC47A4D131DC85E6C2 /* AbsenceEditor.swift in Sources */,
+				C416630D03456EAB6BD03D68 /* AccountSupport.swift in Sources */,
 				E413DFDF380467B041048E50 /* AppIconSettingsSection.swift in Sources */,
 				C2724CD4E883D38438A32A78 /* AppearanceView.swift in Sources */,
 				F11D5311CB8F6DC19256E1A5 /* AutomationRuntime.swift in Sources */,
@@ -1756,6 +1767,7 @@
 				AB1EE66FB69211AFC5C678EB /* PlanSheets.swift in Sources */,
 				7DBBF293490EEA7074F241AD /* PlanningArea.swift in Sources */,
 				A4622FA488234E56FA7154BB /* PlanningShared.swift in Sources */,
+				2EE430D74FEF512CA95B8127 /* ProfilePage.swift in Sources */,
 				A950D632BA78A6421504D780 /* PushSettingsPage.swift in Sources */,
 				84A92D323190F9DF91BA8586 /* PushSupport.swift in Sources */,
 				441DC2D5FBD277B97AF63CEA /* QuickAbsenceRow.swift in Sources */,

@@ -60,6 +60,12 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case tooManyCalendarFeeds = "too_many_calendar_feeds"
     /// AUD3-A (contract 0.26.0): more than 20 active trigger links (409).
     case tooManyTriggerLinks = "too_many_trigger_links"
+    /// AUD3-A (profile, recovery and identities, contracts 0.13.0, 0.36.0 and OIDC): e-mail already confirmed by another account (409),
+    /// no account e-mail yet (409), e-mail recovery only for the account e-mail (409), the last way to sign in cannot be removed (409).
+    case emailTaken = "email_taken"
+    case accountEmailMissing = "account_email_missing"
+    case recoveryEmailMustBeAccountEmail = "recovery_email_must_be_account_email"
+    case lastLoginMethod = "last_login_method"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

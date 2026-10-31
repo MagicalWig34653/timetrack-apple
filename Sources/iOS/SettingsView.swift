@@ -19,6 +19,7 @@ struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 AccountCard()
+                accountGroup
                 appearanceGroup
                 workGroup
                 remindersGroup
@@ -38,6 +39,13 @@ struct SettingsView: View {
     }
 
     // MARK: - Groups (S2). Each group is a small computed property so later rows (for example vacation reminders) slot in as one line.
+
+    /// AUD3-A: profile of the account (name, e-mail).
+    private var accountGroup: some View {
+        FormSection {
+            SettingsLinkRow(title: "Profil", symbol: "person.crop.circle", id: "settings.profile") { ProfilePage() }
+        }
+    }
 
     /// Look of the app: accent, scheme, glow, app icon, haptics (the haptic level lives on that page).
     private var appearanceGroup: some View {

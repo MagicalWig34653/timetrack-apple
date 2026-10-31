@@ -219,6 +219,31 @@ public actor APIClient: PreferencesService {
         try await sendVoid(.delete, "/me/calendar-feeds/\(id.uuidString.lowercased())")
     }
 
+    // MARK: - Profile (AUD3-A, contract v0.13.0)
+
+    public func getProfile() async throws -> Profile { try await get("/me/profile") }
+
+    /// Display name only (1 to 80 characters after trimming); the handle never changes.
+    public func updateProfileName(_ name: String) async throws -> Profile {
+        struct Body: Encodable { let displayName: String }
+        return try await send(.patch, "/me/profile", body: Body(displayName: name))
+    }
+
+    /// Sends a confirmation code to the new address (202). Needs a fresh session (403 `reauth_required`); 501 without mail; 429.
+    public func requestProfileEmailChange(email: String) async throws {
+        struct Body: Encodable { let email: String }
+        try await sendVoid(.put, "/me/profile/email", body: Body(email: email))
+    }
+
+    /// 400 `invalid_code`; 409 `email_taken` (the request is consumed then).
+    public func verifyProfileEmail(code: String) async throws -> Profile {
+        struct Body: Encodable { let code: String }
+        return try await send(.post, "/me/profile/email/verify", body: Body(code: code))
+    }
+
+    /// Fresh session needed. Also switches e-mail recovery off.
+    public func removeProfileEmail() async throws { try await sendVoid(.delete, "/me/profile/email") }
+
     // MARK: - Trigger links (AUD3-A, contract v0.26.0, ADR-0027)
 
     public func listTriggerLinks() async throws -> [TriggerLink] { try await get("/me/trigger-links") }

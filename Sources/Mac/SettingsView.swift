@@ -17,6 +17,8 @@ struct SettingsView: View {
         TabView {
             GeneralSettingsView()
                 .tabItem { Label("settings.general", systemImage: "gearshape") }
+            ProfilePage()
+                .tabItem { Label("Profil", systemImage: "person.crop.circle") }
             AppearanceSettingsView()
                 .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
             WorkSettingsView()

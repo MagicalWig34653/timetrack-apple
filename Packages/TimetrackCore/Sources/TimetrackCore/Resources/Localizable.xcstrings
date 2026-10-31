@@ -12,6 +12,17 @@
         }
       }
     },
+    "error.account_email_missing": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es ist noch keine Kontomail hinterlegt. Trage sie zuerst im Profil ein."
+          }
+        }
+      }
+    },
     "error.bad_request": {
       "localizations": {
         "de": {
@@ -80,6 +91,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Antwort des Servers wurde nicht verstanden."
+          }
+        }
+      }
+    },
+    "error.email_taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diese E-Mail-Adresse wird bereits von einem anderen Konto verwendet. Die Änderung wurde nicht übernommen."
           }
         }
       }
@@ -173,6 +195,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Die Kalenderwoche ist ungültig."
+          }
+        }
+      }
+    },
+    "error.last_login_method": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das ist deine letzte Anmeldemethode. Richte zuerst einen Passkey oder eine andere Verknüpfung ein."
           }
         }
       }
@@ -434,6 +467,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dieses Konto wurde nicht gefunden. Prüfe den Kontonamen."
+          }
+        }
+      }
+    },
+    "error.recovery_email_must_be_account_email": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wiederherstellung nutzt die Kontomail. Ändere die Adresse im Profil."
           }
         }
       }

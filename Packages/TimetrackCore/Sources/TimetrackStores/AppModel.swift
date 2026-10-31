@@ -130,6 +130,28 @@ public final class AppModel {
         await run { auth in try await auth.signInWithSessionCookie(server: try AuthService.normalizeServerURL(serverInput), cookieValue: cookie) }
     }
 
+    /// AUD3-A: keeps the account card in step after the display name was saved on the profile page.
+    public func applyDisplayName(_ name: String) {
+        guard let account else { return }
+        self.account = Account(id: account.id, handle: account.handle, displayName: name, role: account.role, preferences: account.preferences)
+    }
+
+    /// AUD3-A: a fresh passkey sign-in on the current server (the server asks for one before e-mail changes, new passkeys and the like,
+    /// 403 `reauth_required`). Replaces the session in place; returns the failure, nil on success (a cancelled prompt is reported too).
+    public func reauthenticate() async -> TimetrackError? {
+        guard let url = serverURL else { return .invalidServerURL }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            await adopt(try await auth.signInWithPasskey(server: url))
+            return nil
+        } catch let error as TimetrackError {
+            return error
+        } catch {
+            return .cancelled
+        }
+    }
+
     public func addPasskey(name: String?) async {
         guard let context else { return }
         await run { auth in try await auth.addPasskey(context: context, name: name) }

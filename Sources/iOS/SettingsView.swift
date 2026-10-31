@@ -40,10 +40,10 @@ struct SettingsView: View {
 
     // MARK: - Groups (S2). Each group is a small computed property so later rows (for example vacation reminders) slot in as one line.
 
-    /// AUD3-A: profile of the account (name, e-mail).
+    /// AUD3-A: profile, passkeys, recovery, linked sign-ins and sessions behind one row.
     private var accountGroup: some View {
         FormSection {
-            SettingsLinkRow(title: "Profil", symbol: "person.crop.circle", id: "settings.profile") { ProfilePage() }
+            SettingsLinkRow(title: "Konto und Sicherheit", symbol: "person.badge.shield.checkmark", id: "settings.account_security") { AccountSecurityPage() }
         }
     }
 

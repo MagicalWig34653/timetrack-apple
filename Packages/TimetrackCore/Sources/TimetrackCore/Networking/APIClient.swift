@@ -57,6 +57,12 @@ public actor APIClient: PreferencesService {
 
     private func perform(_ method: Method, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, headers: [String: String] = [:],
                          progress: (@Sendable (Double) -> Void)? = nil) async throws -> Data {
+        try await performWithStatus(method, path, query: query, body: body, headers: headers, progress: progress).data
+    }
+
+    /// Same as `perform`, but also tells which success status answered (a few calls mean different things for 202 and 204).
+    private func performWithStatus(_ method: Method, _ path: String, query: [URLQueryItem] = [], body: Data? = nil, headers: [String: String] = [:],
+                                   progress: (@Sendable (Double) -> Void)? = nil) async throws -> (data: Data, status: Int) {
         var refreshedCSRF = false
         var unavailableRetries = 0
         while true {
@@ -72,7 +78,7 @@ public actor APIClient: PreferencesService {
                 if error.code == .cancelled { throw TimetrackError.cancelled }
                 throw TimetrackError.network(error.code)
             }
-            if (200..<300).contains(response.statusCode) { return data }
+            if (200..<300).contains(response.statusCode) { return (data, response.statusCode) }
             let failure = parseError(status: response.statusCode, data: data)
             // A rejected CSRF token means the request was not processed: refresh the token once and replay.
             if failure.code == APIErrorCode.csrfInvalid.rawValue, method != .get, !refreshedCSRF, path != "/auth/session" {
@@ -218,6 +224,61 @@ public actor APIClient: PreferencesService {
     public func revokeCalendarFeed(id: UUID) async throws {
         try await sendVoid(.delete, "/me/calendar-feeds/\(id.uuidString.lowercased())")
     }
+
+    // MARK: - Passkeys, recovery, identities, sessions (AUD3-A, contract v0.36.0)
+
+    public func listPasskeys() async throws -> [Passkey] { try await get("/me/passkeys") }
+
+    /// 1 to 80 characters. 404 for an unknown id.
+    public func renamePasskey(id: UUID, name: String) async throws -> Passkey {
+        struct Body: Encodable { let name: String }
+        return try await send(.patch, "/me/passkeys/\(id.uuidString.lowercased())", body: Body(name: name))
+    }
+
+    /// 204. The last passkey can only be revoked while a recovery method is active (409).
+    public func revokePasskey(id: UUID) async throws { try await sendVoid(.delete, "/me/passkeys/\(id.uuidString.lowercased())") }
+
+    public func recoveryStatus() async throws -> RecoveryStatus { try await get("/me/recovery") }
+
+    /// 201 with the plain codes (only here); replaces an older set.
+    public func generateRecoveryCodes() async throws -> [String] {
+        struct Answer: Decodable { let codes: [String] }
+        let answer: Answer = try await send(.post, "/me/recovery/recovery-codes", body: Empty())
+        return answer.codes
+    }
+
+    public func disableRecoveryCodes() async throws { try await sendVoid(.delete, "/me/recovery/recovery-codes") }
+
+    /// 12 to 256 characters; only for recovery, never for normal sign-in.
+    public func setFallbackPassword(_ password: String) async throws {
+        struct Body: Encodable { let password: String }
+        try await sendVoid(.put, "/me/recovery/fallback-password", body: Body(password: password))
+    }
+
+    public func removeFallbackPassword() async throws { try await sendVoid(.delete, "/me/recovery/fallback-password") }
+
+    /// Contract 0.36.0: no body, the account e-mail is the recovery address. 204 = active at once, 202 = a code went to the account e-mail.
+    /// 409 `account_email_missing`, 501 without mail; a fresh session is needed.
+    public func enableEmailRecovery() async throws -> EmailRecoveryStart {
+        let result = try await performWithStatus(.put, "/me/recovery/email")
+        return result.status == 202 ? .codeSent : .active
+    }
+
+    public func disableEmailRecovery() async throws { try await sendVoid(.delete, "/me/recovery/email") }
+
+    /// 204; 400 `invalid_code`. Also confirms the account e-mail.
+    public func verifyRecoveryEmail(code: String) async throws {
+        struct Body: Encodable { let code: String }
+        try await sendVoid(.post, "/me/recovery/email/verify", body: Body(code: code))
+    }
+
+    public func listIdentities() async throws -> [ExternalIdentity] { try await get("/me/identities") }
+
+    /// Fresh session needed (403 `reauth_required`); 409 `last_login_method` when nothing else would be left to sign in with.
+    public func unlinkIdentity(id: UUID) async throws { try await sendVoid(.delete, "/me/identities/\(id.uuidString.lowercased())") }
+
+    /// 204: every session except the current one ends.
+    public func revokeOtherSessions() async throws { try await sendVoid(.delete, "/me/sessions") }
 
     // MARK: - Profile (AUD3-A, contract v0.13.0)
 

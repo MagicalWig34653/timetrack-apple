@@ -152,6 +152,19 @@ public final class AppModel {
         }
     }
 
+    /// AUD3-A: adds a passkey from the settings (the session stays as it is). Returns the failure, nil on success.
+    public func registerAdditionalPasskey(name: String?) async -> TimetrackError? {
+        guard let client = context?.client else { return .api(status: 401, code: "unauthorized", message: "not signed in") }
+        do {
+            try await auth.registerAdditionalPasskey(client: client, name: name)
+            return nil
+        } catch let error as TimetrackError {
+            return error
+        } catch {
+            return .cancelled
+        }
+    }
+
     public func addPasskey(name: String?) async {
         guard let context else { return }
         await run { auth in try await auth.addPasskey(context: context, name: name) }

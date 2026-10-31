@@ -17,8 +17,8 @@ struct SettingsView: View {
         TabView {
             GeneralSettingsView()
                 .tabItem { Label("settings.general", systemImage: "gearshape") }
-            ProfilePage()
-                .tabItem { Label("Profil", systemImage: "person.crop.circle") }
+            NavigationStack { AccountSecurityPage() }
+                .tabItem { Label("Konto", systemImage: "person.badge.shield.checkmark") }
             AppearanceSettingsView()
                 .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
             WorkSettingsView()

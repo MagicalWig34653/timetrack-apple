@@ -188,6 +188,14 @@ public actor AuthService {
         return AuthContext(client: context.client, session: session)
     }
 
+    /// AUD3-A: registers one more passkey for the signed-in account without touching the session (the settings use this; `addPasskey`
+    /// is for the recovery upgrade). Needs a fresh session (403 `reauth_required`).
+    public func registerAdditionalPasskey(client: APIClient, name: String?) async throws {
+        let options = try await client.addPasskeyOptions()
+        let credential = try await passkeys.register(options: options)
+        try await client.addPasskeyVerify(challengeId: options.challengeId, credential: credential, name: name)
+    }
+
     /// Development only: adopt a `tt_session` cookie value copied from a browser session on the same server.
     /// Recovery sessions cannot use time tracking, and registration/login need a passkey, so this is the only way to
     /// exercise the app against a test server before Associated Domains exist. Never offered in release UI.

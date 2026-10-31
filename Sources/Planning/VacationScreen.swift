@@ -43,6 +43,7 @@ private struct VacationContent: View {
                     VacationPlannerLink() // N1a: vacation suggestions (iOS/iPadOS)
                 }
                 #endif
+                requestCard // AUD3-B: vacation request from the year overview
                 if wide {
                     HStack(alignment: .top, spacing: TT.Space.xl) { balance.frame(maxWidth: 440); absences }
                 } else {
@@ -97,6 +98,38 @@ private struct VacationContent: View {
             VacationAccountCard(balance: balance, absences: store.absences, settings: store.settings) // U3
         } else if store.isLoading {
             SkeletonList(rows: 3)
+        }
+    }
+
+    /// AUD3-B (PWA parity): the year overview offers the request PDF directly; the template itself is set up in the web app.
+    @ViewBuilder private var requestCard: some View {
+        let eligible = VacationRequestEligibility.eligible(in: store.absences)
+        VStack(alignment: .leading, spacing: TT.Space.xs) {
+            ListCard {
+                Menu {
+                    ForEach(eligible) { absence in
+                        Button { requestFor = absence } label: {
+                            Text(verbatim: "\(PlanFormat.range(absence.startDate, absence.endDate, calendar: store.calendar)) · \(absence.status.plainName)")
+                        }
+                    }
+                } label: {
+                    HStack(spacing: TT.Space.m) {
+                        KindGlyph(symbol: "doc.text", tint: TT.kindVacation)
+                        Text("Urlaubsantrag erstellen").font(TTFont.body).foregroundStyle(TT.textPrimary)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.up.chevron.down").font(.footnote.weight(.semibold)).foregroundStyle(TT.textTertiary).accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m).contentShape(.rect)
+                }
+                .menuStyle(.button).buttonStyle(.plain)
+                .disabled(eligible.isEmpty)
+                .accessibilityHint(Text("Wähle den Urlaub, für den der Antrag erstellt werden soll."))
+                .accessibilityIdentifier("vacation.request.menu")
+            }
+            Text(eligible.isEmpty ? "Für dieses Jahr gibt es keinen Urlaub, für den ein Antrag möglich ist."
+                                  : "Füllt deine Vorlage auf diesem Gerät aus. Die Vorlage richtest du in der Web-App ein (Einstellungen, Vorlage für den Urlaubsantrag).")
+                .font(TTFont.meta).foregroundStyle(TT.textSecondary).fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, TT.Space.s)
         }
     }
 
@@ -156,7 +189,7 @@ private struct VacationContent: View {
     @ViewBuilder private func rowActions(_ absence: Absence) -> some View {
         Button { attachmentsOf = absence } label: { Label(VT.s("attachments.title"), systemImage: "paperclip") }
             .accessibilityIdentifier("absence.action.attachments")
-        if absence.kind == .vacation {
+        if VacationRequestEligibility.isEligible(absence) {
             Button { requestFor = absence } label: { Label(VT.s("request.action"), systemImage: "doc.text") }
                 .accessibilityIdentifier("absence.action.request")
         }

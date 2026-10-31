@@ -222,3 +222,16 @@ public extension FormMapping {
 
 /// File name for the generated request: `Urlaubsantrag_2026-07-06_2026-07-17.pdf`.
 public func vacationRequestFileName(from: LocalDay, to: LocalDay) -> String { "Urlaubsantrag_\(from)_\(to).pdf" }
+
+
+/// AUD3-B: which absences offer "Urlaubsantrag erstellen" (same rule as the PWA: vacation that is neither cancelled nor rejected).
+public enum VacationRequestEligibility {
+    public static func isEligible(_ absence: Absence) -> Bool {
+        absence.kind == .vacation && absence.status != .cancelled && absence.status != .rejected
+    }
+
+    /// Eligible absences, soonest first (start date, then end date).
+    public static func eligible(in absences: [Absence]) -> [Absence] {
+        absences.filter(isEligible).sorted { ($0.startDate, $0.endDate) < ($1.startDate, $1.endDate) }
+    }
+}

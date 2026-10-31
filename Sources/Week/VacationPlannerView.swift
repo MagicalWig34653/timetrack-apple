@@ -51,6 +51,7 @@ private struct VacationPlannerContent: View {
     @State private var notice: String?
     @State private var noticeIsWarning = false
     @State private var filtersOpen = false
+    @State private var requestFor: Absence? // AUD3-B: request PDF for an absence this screen just created
 
     private var wide: Bool { sizeClass == .regular && !typeSize.isAccessibilitySize }
 
@@ -64,6 +65,7 @@ private struct VacationPlannerContent: View {
                         Text(verbatim: notice).font(TTFont.body).foregroundStyle(TT.textPrimary)
                     }
                     .accessibilityIdentifier("vp.notice")
+                    requestActions
                 }
                 if let error = store.error { WeekErrorBanner(error: error) { Task { await store.load() } } }
                 if store.isUnavailable { HintBanner("wk.vp.unavailable") }
@@ -94,6 +96,23 @@ private struct VacationPlannerContent: View {
                 default: break
                 }
             }
+        }
+    }
+
+    /// AUD3-B (as in the PWA planner): one "Urlaubsantrag erstellen" button per absence created by "Übernehmen".
+    @ViewBuilder private var requestActions: some View {
+        let created = VacationRequestEligibility.eligible(in: store.createdAbsences)
+        if let planning = model.planning, !created.isEmpty {
+            VStack(alignment: .leading, spacing: TT.Space.s) {
+                ForEach(created) { absence in
+                    Button { requestFor = absence } label: {
+                        Label(created.count == 1 ? "Urlaubsantrag erstellen" : "Urlaubsantrag erstellen: \(PlanFormat.range(absence.startDate, absence.endDate, calendar: store.calendar))", systemImage: "doc.text")
+                    }
+                    .buttonStyle(.ttSecondary)
+                    .accessibilityIdentifier("vp.request")
+                }
+            }
+            .sheet(item: $requestFor) { VacationRequestSheet(planning: planning, absence: $0) }
         }
     }
 

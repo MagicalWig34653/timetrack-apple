@@ -93,6 +93,7 @@
 		3DE372E1109C318EE4BEEA41 /* MonthPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020E290DA733637042202DCC /* MonthPager.swift */; };
 		3EBCDEC78EAB39A445EB94F3 /* AutomationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D753667477D8FD54ABCCDBF6 /* AutomationSettingsView.swift */; };
 		3F627F9EDB2539DCEE70EF98 /* LearningFieldsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA365EBA653DE3CA5C24A14 /* LearningFieldsView.swift */; };
+		40204DC81A7E215D2CA93F92 /* TriggerLinksPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1557B88A4F4706DBD4328362 /* TriggerLinksPage.swift */; };
 		4114985EE705769FC54341D8 /* H3ShotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8725765AFF6EDE5CAF09B9E /* H3ShotTests.swift */; };
 		411AA4D445EDACEE61E2658D /* WeekSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BB00EFDD0035C695B5FBA4 /* WeekSupport.swift */; };
 		41D20C5E41D98D6D742977C7 /* Complication.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ECAFD2E133A86EC39C2BB5E6 /* Complication.xcstrings */; };
@@ -316,6 +317,7 @@
 		DA08AB1F30635F5944F657B7 /* TimetrackCheck.icon in Resources */ = {isa = PBXBuildFile; fileRef = 094ED82C8094FCBF9DE1C0FE /* TimetrackCheck.icon */; };
 		DA8AB80A43F878124D24FFA5 /* ReportsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9095E9D69FAAC47C44398BF /* ReportsTests.swift */; };
 		DAD4ADDB89B359CFC8D4DC82 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 2A3825443FEE6077D9C30FB9 /* TimetrackDesign */; };
+		DD325D509F44D261FBAD0938 /* TriggerLinksPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1557B88A4F4706DBD4328362 /* TriggerLinksPage.swift */; };
 		DFED65697CF812F2EC352519 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D3F7BE9453F3BC452D436D /* MainView.swift */; };
 		E12379E828BBBDA414C6EB05 /* WorkModelVersionSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C71D0796C42BD5A1383C1D2 /* WorkModelVersionSheets.swift */; };
 		E242856AAD84C429F11945C8 /* ReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B915F12661E0299E5ED250F /* ReportsView.swift */; };
@@ -465,6 +467,7 @@
 		10DEE4BE7051A858A40C724C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		10F94BC7DC26E230FC2EF77F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1390452B5A4CB291D3242027 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1557B88A4F4706DBD4328362 /* TriggerLinksPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLinksPage.swift; sourceTree = "<group>"; };
 		1697552351FA32321E7252BB /* U3Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = U3Support.swift; sourceTree = "<group>"; };
 		16A11A846346102B37268831 /* VacationTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationTools.swift; sourceTree = "<group>"; };
 		17381ACB307D0628A0B2706B /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -1008,6 +1011,7 @@
 				63C0BF7958ADC0FE6705FC6C /* PushSettingsPage.swift */,
 				B154C3255C3D1530359998F8 /* PushSupport.swift */,
 				C63D37A417C54D0AF163D20E /* TimeAccountScreen.swift */,
+				1557B88A4F4706DBD4328362 /* TriggerLinksPage.swift */,
 				7326FE57D070687C02A5F334 /* WM2.xcstrings */,
 				9A55CC9B36824AAC0B02DE27 /* WorkModelFormFields.swift */,
 				7C71D0796C42BD5A1383C1D2 /* WorkModelVersionSheets.swift */,
@@ -1639,6 +1643,7 @@
 				CF1E200A0644E500E5B5F49C /* TimetrackMacApp.swift in Sources */,
 				A0D3F223B2AED431A0F830D8 /* TimetrackProvider.swift in Sources */,
 				80269B3C174A73B5EA721B7C /* TodayView.swift in Sources */,
+				40204DC81A7E215D2CA93F92 /* TriggerLinksPage.swift in Sources */,
 				ED3F752BAFD034824DF8B6C2 /* U3Support.swift in Sources */,
 				B1C466C3A86245EB36120976 /* UX3Support.swift in Sources */,
 				6E4DEB1DC4153F87958331D3 /* VacationAccountCard.swift in Sources */,
@@ -1782,6 +1787,7 @@
 				4EC6345AFEE693CB207F979F /* TimetrackIOSApp.swift in Sources */,
 				8656DBB1DB476691EBE8FD5F /* TimetrackProvider.swift in Sources */,
 				4F94CA4FF145D972892E7F74 /* TodayView.swift in Sources */,
+				DD325D509F44D261FBAD0938 /* TriggerLinksPage.swift in Sources */,
 				9A66AE10F80C4D7E20A53F99 /* U3Support.swift in Sources */,
 				635BEF80F7D2BF287A919091 /* UX3Support.swift in Sources */,
 				09A80104C51327AF00EAED85 /* VacationAccountCard.swift in Sources */,

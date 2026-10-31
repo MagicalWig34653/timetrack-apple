@@ -27,6 +27,8 @@ struct SettingsView: View {
                 .tabItem { Label("Automatik", systemImage: "location.circle") } }
             if tabOn("t") { ActivitySettingsView()
                 .tabItem { Label("Aktivität", systemImage: "square.stack.3d.up") } }
+            MacTriggerLinksTab()
+                .tabItem { Label("Auslöse-Links", systemImage: "link.badge.plus") }
             CalendarSettingsView()
                 .tabItem { Label("Kalender", systemImage: "calendar") }
             CalendarFeedsPage()
@@ -37,6 +39,19 @@ struct SettingsView: View {
                 .tabItem { Label("settings.about", systemImage: "info.circle") }
         }
         .frame(width: 640, height: 600)
+    }
+}
+
+/// AUD3-A: trigger links need the automation module (like the web app's settings).
+private struct MacTriggerLinksTab: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        if model.isEnabled(.automation) {
+            TriggerLinksPage()
+        } else {
+            ContentUnavailableView("Modul Automatik ist aus", systemImage: "link.badge.plus", description: Text("Auslöse-Links brauchen das Modul Automatik auf dem Server."))
+        }
     }
 }
 

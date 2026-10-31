@@ -530,6 +530,17 @@
         }
       }
     },
+    "error.too_many_trigger_links": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es sind schon 20 Auslöse-Links aktiv. Widerrufe einen, bevor du einen neuen anlegst."
+          }
+        }
+      }
+    },
     "error.unauthorized": {
       "localizations": {
         "de": {

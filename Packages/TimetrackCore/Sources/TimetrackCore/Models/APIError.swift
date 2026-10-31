@@ -58,6 +58,8 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case pushFailed = "push_failed"
     /// N2 (contract 0.31.0): more than 10 active calendar feeds (409).
     case tooManyCalendarFeeds = "too_many_calendar_feeds"
+    /// AUD3-A (contract 0.26.0): more than 20 active trigger links (409).
+    case tooManyTriggerLinks = "too_many_trigger_links"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.

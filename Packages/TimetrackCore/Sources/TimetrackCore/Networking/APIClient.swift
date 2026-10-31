@@ -219,6 +219,20 @@ public actor APIClient: PreferencesService {
         try await sendVoid(.delete, "/me/calendar-feeds/\(id.uuidString.lowercased())")
     }
 
+    // MARK: - Trigger links (AUD3-A, contract v0.26.0, ADR-0027)
+
+    public func listTriggerLinks() async throws -> [TriggerLink] { try await get("/me/trigger-links") }
+
+    /// 201 with `token`/`path` (only here). 409 `too_many_trigger_links` above 20 active links.
+    public func createTriggerLink(_ input: TriggerLinkInput) async throws -> TriggerLink {
+        try await send(.post, "/me/trigger-links", body: input)
+    }
+
+    /// 204, idempotent; 404 for an unknown id.
+    public func revokeTriggerLink(id: UUID) async throws {
+        try await sendVoid(.delete, "/me/trigger-links/\(id.uuidString.lowercased())")
+    }
+
     // MARK: - Work model correction (contract v0.16.0, ADR-0004 addendum) and system info (v0.19.0, ADR-0023)
 
     /// Replaces all editable fields of one version. `ifMatchVersion` is the model's `version` counter (412 `stale_version` when outdated).

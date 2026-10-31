@@ -87,6 +87,7 @@ struct SettingsView: View {
             if model.isEnabled(.automation) {
                 SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
                 SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
+                SettingsLinkRow(title: "Auslöse-Links", symbol: "link.badge.plus", id: "settings.triggerlinks") { TriggerLinksPage() } // AUD3-A
             }
         }
     }

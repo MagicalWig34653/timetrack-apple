@@ -1,5 +1,7 @@
 # Stand der Apple-Apps – 17.10.2026
 
+**Stand 01.11.2026:** `main` 0da7d5e, TestFlight Build 59; SET-A (Einstellungen wie PWA) gemergt, nicht hochgeladen (Build 60 offen, Mac-Navigation ungesehen). Übersicht und offene Punkte: `docs/handoffs/SESSION-2026-11-01.md` im Backend-Repo. Uploads mit Xcode 27.1 aus `~/Downloads` (`DEVELOPER_DIR`), 27.2 ist nicht zugelassen. Keine einseitigen Rahmen/Akzentbalken.
+
 Projektstatus: **Alpha**. Das Repository ist seit 17.10.2026 öffentlich (AGPL-3.0-only). Kanonisches Projektgedächtnis (Konzept, ADRs, Arbeitsplan, API-Verträge) liegt im Backend-Repo (`<workspace>/timetrack-backend`, `docs/STATUS.md`, `docs/ARBEITSPLAN.md`, ADR-0015 für die nativen Clients). Dieses Dokument beschreibt den tatsächlichen Stand der Apps; Details je Paket in `docs/handoffs/`.
 
 ## Pakete und Stand (alle integriert in `main`)

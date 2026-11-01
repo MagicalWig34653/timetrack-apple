@@ -104,6 +104,11 @@ final class MacNotifications: NSObject, UNUserNotificationCenterDelegate, Sendab
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let info = response.notification.request.content.userInfo
+        if let vacationID = info[VacationReminderCenter.absenceKey] as? String { // SET-B: a vacation reminder tap opens the Urlaub screen
+            let start = (info[VacationReminderCenter.startKey] as? String) ?? ""
+            await MainActor.run { VacationReminderCenter.shared.handleTap(absenceID: vacationID, startDate: start) }
+            return
+        }
         switch response.actionIdentifier {
         case MacNotificationID.stopAction:
             guard let seconds = info[MacNotificationID.endKey] as? Double, let text = info[MacNotificationID.eventKey] as? String,

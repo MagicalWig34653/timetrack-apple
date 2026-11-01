@@ -30,6 +30,7 @@ struct TimetrackMacApp: App {
                 .environment(ui)
                 .environment(\.deviceCalendar, deviceCalendar)
                 .widgetSync(model) // A7: widget snapshot
+                .vacationReminderSync(model) // SET-B: local reminders to submit planned vacation (as on iOS)
                 .deviceCalendarSync(model, deviceCalendar) // N2: events written into the calendars follow the server
                 .frame(minWidth: 900, minHeight: 560)
                 .ttAppearance()

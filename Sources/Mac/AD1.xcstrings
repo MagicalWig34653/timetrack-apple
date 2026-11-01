@@ -134,6 +134,138 @@
         }
       }
     },
+    "set_b.export.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exportiere deine Arbeitszeiten für einen Zeitraum als Tabelle oder PDF, zum Beispiel als Nachweis. Der Export läuft in der Web-App und öffnet im Browser."
+          }
+        }
+      }
+    },
+    "set_b.export.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet die Web-App im Browser"
+          }
+        }
+      }
+    },
+    "set_b.export.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export in der Web-App öffnen"
+          }
+        }
+      }
+    },
+    "set_b.focus.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dort startet und stoppt ein iOS-Fokus (zum Beispiel „Arbeit“) den Timer automatisch oder fragt vorher nach. Die Einrichtung geschieht in den iOS-Einstellungen unter Fokus und in der Timetrack-App auf dem iPhone. Auf dem Mac gibt es keinen Fokus-Filter."
+          }
+        }
+      }
+    },
+    "set_b.focus.mac_body": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Mac-Automatik übernimmt Ähnliches: Unter „Orte“ legst du fest, wann ein Timer beim Ankommen oder Verlassen eines Orts gestartet oder gestoppt wird, und unter „Menüleiste“ steuerst du den Timer ohne Fenster."
+          }
+        }
+      }
+    },
+    "set_b.focus.mac_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf dem Mac"
+          }
+        }
+      }
+    },
+    "set_b.focus.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fokus-Filter gibt es auf iPhone und iPad"
+          }
+        }
+      }
+    },
+    "set_b.vacation.current": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuell"
+          }
+        }
+      }
+    },
+    "set_b.vacation.edit": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubsanspruch bearbeiten …"
+          }
+        }
+      }
+    },
+    "set_b.vacation.entitlement": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubsanspruch pro Jahr"
+          }
+        }
+      }
+    },
+    "set_b.vacation.intro": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaubstage, Region, Übertrag und Saldo-Einträge. Die Werte gelten für dein Konto auf allen Geräten."
+          }
+        }
+      }
+    },
+    "set_b.vacation.region": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Region"
+          }
+        }
+      }
+    },
     "settings.feedback": {
       "extractionState": "manual",
       "localizations": {

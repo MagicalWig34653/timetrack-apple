@@ -39,13 +39,13 @@ final class VacationReminderCenter {
         }
     }
 
-    var isAuthorized: Bool { [.authorized, .provisional, .ephemeral].contains(authorization) }
+    var isAuthorized: Bool { NotificationPermission.isGranted(authorization) } // no App Clips on the Mac (`.ephemeral` is iOS only)
 
     func attach(_ model: AppModel) { self.model = model }
 
     func refreshAuthorization() async {
         authorization = await center.notificationSettings().authorizationStatus
-        if settings.enabled, !isAuthorized { // permission was withdrawn in iOS Settings: the switch must not claim reminders that cannot fire
+        if settings.enabled, !isAuthorized { // permission was withdrawn in the system settings: the switch must not claim reminders that cannot fire
             update { $0.enabled = false }
         }
         await refreshCount()
@@ -161,7 +161,10 @@ final class VacationReminderCenter {
     func handleTap(absenceID: String, startDate: String) {
         guard let id = UUID(uuidString: absenceID) else { return }
         pendingTap = PendingTap(absenceID: id, startDate: startDate)
+        #if os(iOS)
         UIState.shared.selection = .vacation
+        #endif
+        // macOS: the main window watches `pendingTap` and selects the Urlaub sidebar item (SET-B).
     }
 }
 

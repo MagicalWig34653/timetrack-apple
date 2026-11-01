@@ -51,6 +51,24 @@ struct SettingsStructureTests {
         #expect(mac.contains("Menüleiste") && !phone.contains("Menüleiste"))
     }
 
+    @Test("SET-B: the Mac shows the same Arbeit/Hinweise/Daten entries as iOS; only Watch and Mac-only pages differ")
+    func macParity() {
+        let phone = Set(groups(.iOS).flatMap(\.entries).map(\.id))
+        let mac = Set(groups(.macOS).flatMap(\.entries).map(\.id))
+        for id in [SettingsEntryID.vacationEntitlement, .vacationReminders, .overworkHints, .focusFilter, .export, .cancelled] {
+            #expect(phone.contains(id) && mac.contains(id), "\(id) must exist on both platforms")
+        }
+        #expect(phone.subtracting(mac) == [.appleWatch])
+        #expect(mac.subtracting(phone) == [.menuBar, .activity])
+    }
+
+    @Test("SET-B: the Mac hides module-bound entries like iOS")
+    func macModuleVisibility() {
+        let titles = groups(.macOS, off: [.planning, .automation, .transfer]).flatMap(\.entries).map(\.title)
+        for hidden in ["Urlaubsanspruch", "Urlaubserinnerungen", "Fokus-Filter", "Export"] { #expect(!titles.contains(hidden)) }
+        #expect(titles.contains("Überstunden-Hinweise") && titles.contains("Stornierte Einträge"))
+    }
+
     @Test("search matches title and keywords, all words required")
     func search() {
         let found = SettingsStructure.groups(platform: .iOS, isEnabled: { _ in true }, query: "ics apple").flatMap(\.entries).map(\.title)

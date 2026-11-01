@@ -70,9 +70,7 @@ private struct VacationContent: View {
             }
         }
         .absenceEditor($request, actions: AbsenceEditorActions(planning: store))
-        #if os(iOS)
-        .vacationReminderOpen(store: store, request: $request) // R3: tap on a reminder opens that absence
-        #endif
+        .vacationReminderOpen(store: store, request: $request) // R3: tap on a reminder opens that absence (SET-B: also on the Mac)
         #if os(macOS)
         .sheet(isPresented: $showSettings) { VacationSettingsSheet(store: store) }
         #endif

@@ -1,7 +1,6 @@
 import SwiftUI
 import TimetrackCore
 import TimetrackDesign
-import UIKit
 import UserNotifications
 
 /// Settings > "Urlaubserinnerungen": local reminders to submit planned vacation, on this device only.
@@ -14,7 +13,7 @@ struct VacationReminderSettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 intro
-                FormSection(footer: "Beim Einschalten fragt iOS einmal nach der Erlaubnis für Mitteilungen.") {
+                FormSection(footer: LocalizedStringKey(NotificationSettingsText.permissionFooter("Beim Einschalten"))) {
                     Toggle(isOn: Binding(get: { center.settings.enabled }, set: { value in Task { await center.setEnabled(value) } })) {
                         Label("Erinnerungen", systemImage: "bell.badge").foregroundStyle(TT.textPrimary)
                     }
@@ -32,8 +31,7 @@ struct VacationReminderSettingsView: View {
             .frame(maxWidth: 680).frame(maxWidth: .infinity)
         }
         .ttScreenBackground()
-        .navigationTitle("Urlaubserinnerungen")
-        .navigationBarTitleDisplayMode(.inline)
+        .notificationPageTitle("Urlaubserinnerungen")
         .task { await center.refreshAuthorization() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await center.refreshAuthorization() } } } // permission may have changed in iOS Settings
     }
@@ -55,11 +53,11 @@ struct VacationReminderSettingsView: View {
         Card {
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 Label("Mitteilungen sind ausgeschaltet", systemImage: "bell.slash").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                Text("Du hast Mitteilungen für Timetrack abgelehnt. Erlaube sie in den iOS-Einstellungen, damit Erinnerungen ankommen können.")
+                Text(verbatim: NotificationSettingsText.deniedText("Erinnerungen"))
                     .font(TTFont.body).foregroundStyle(TT.textSecondary).accessibilityIdentifier("reminders.denied")
                 Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-                } label: { Label("iOS-Einstellungen öffnen", systemImage: "gearshape") }
+                    if let url = NotificationSettingsText.settingsURL { openURL(url) }
+                } label: { Label(NotificationSettingsText.openSettingsTitle, systemImage: "gearshape") }
                     .buttonStyle(.ttSecondary).accessibilityIdentifier("reminders.open_settings")
             }
         }

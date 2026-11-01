@@ -82,6 +82,8 @@ struct MainView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in Task { await model.today?.load() } }
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in Task { await model.today?.load() } }
         .onChange(of: model.isEnabled(.planning)) { if !model.isEnabled(.planning), ui.selection.isPlanning { ui.selection = .today } }
+        // SET-B: a tap on a vacation reminder opens the Urlaub screen (which then opens that absence).
+        .onChange(of: VacationReminderCenter.shared.pendingTap) { if VacationReminderCenter.shared.pendingTap != nil { ui.selection = .vacation } }
     }
 
     private func row(_ item: SidebarItem) -> some View {

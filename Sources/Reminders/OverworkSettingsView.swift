@@ -2,7 +2,6 @@ import Observation
 import SwiftUI
 import TimetrackCore
 import TimetrackDesign
-import UIKit
 import UserNotifications
 
 /// OT1: settings of the overwork notifications. The switches live in the App Group (the intents that pause or resume the timer plan the
@@ -61,7 +60,7 @@ struct OverworkSettingsView: View {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 intro
                 if center.authorization == .denied { deniedCard }
-                FormSection("Hinweise", footer: "Beim ersten Einschalten fragt iOS einmal nach der Erlaubnis für Mitteilungen. Die Hinweise gelten nur auf diesem Gerät.") {
+                FormSection("Hinweise", footer: LocalizedStringKey(NotificationSettingsText.permissionFooter("Beim ersten Einschalten") + " Die Hinweise gelten nur auf diesem Gerät.")) {
                     toggle("Geplantes Ende erreicht", "clock.badge.checkmark", \.plannedEnd, id: "overwork.planned_end")
                     toggle("Tagesgrenzen 8 und 10 Stunden", "gauge.with.dots.needle.67percent", \.dailyLimits, id: "overwork.limits")
                     toggle("Pause fehlt", "cup.and.saucer", \.missingBreak, id: "overwork.break")
@@ -74,8 +73,7 @@ struct OverworkSettingsView: View {
             .frame(maxWidth: 680).frame(maxWidth: .infinity)
         }
         .ttScreenBackground()
-        .navigationTitle("Überstunden-Hinweise")
-        .navigationBarTitleDisplayMode(.inline)
+        .notificationPageTitle("Überstunden-Hinweise")
         .task { await center.refresh() }
         .onChange(of: scenePhase) { if scenePhase == .active { Task { await center.refresh() } } }
     }
@@ -105,11 +103,11 @@ struct OverworkSettingsView: View {
         Card {
             VStack(alignment: .leading, spacing: TT.Space.m) {
                 Label("Mitteilungen sind ausgeschaltet", systemImage: "bell.slash").font(TTFont.cardTitle).foregroundStyle(TT.textPrimary)
-                Text("Du hast Mitteilungen für Timetrack abgelehnt. Erlaube sie in den iOS-Einstellungen, damit Hinweise ankommen können.")
+                Text(verbatim: NotificationSettingsText.deniedText("Hinweise"))
                     .font(TTFont.body).foregroundStyle(TT.textSecondary).accessibilityIdentifier("overwork.denied")
                 Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-                } label: { Label("iOS-Einstellungen öffnen", systemImage: "gearshape") }
+                    if let url = NotificationSettingsText.settingsURL { openURL(url) }
+                } label: { Label(NotificationSettingsText.openSettingsTitle, systemImage: "gearshape") }
                     .buttonStyle(.ttSecondary).accessibilityIdentifier("overwork.open_settings")
             }
         }

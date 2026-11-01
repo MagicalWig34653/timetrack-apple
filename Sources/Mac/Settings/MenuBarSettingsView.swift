@@ -2,7 +2,7 @@ import SwiftUI
 import TimetrackCore
 import TimetrackDesign
 
-/// M2: Settings > Menüleiste. Menu bar item, Dock mode, login item, global hotkey and running-timer reminders.
+/// M2: Settings > Menüleiste. Menu bar item, Dock mode, login item, global hotkey. The running-timer hints moved to "Überstunden-Hinweise" (SET-B).
 struct MenuBarSettingsView: View {
     @AppStorage(MacPrefs.menuBarInserted) private var inserted = true
     @AppStorage(MacPrefs.menuBarShowsTimer) private var showsTimer = true
@@ -10,8 +10,6 @@ struct MenuBarSettingsView: View {
     @AppStorage(MacPrefs.hotkeyEnabled) private var hotkeyOn = false
     @AppStorage(MacPrefs.hotkeyPreset) private var presetRaw = HotkeyPreset.controlOptionT.rawValue
     @State private var companion = MacCompanion.shared
-    @State private var overwork = OverworkSettingsStore().read()
-    @State private var notificationsAllowed = true
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -63,14 +61,8 @@ struct MenuBarSettingsView: View {
             }
 
             Section {
-                Toggle("Geplantes Ende erreicht", isOn: binding(\.plannedEnd))
-                Toggle("Vor und bei 8 und 10 Stunden", isOn: binding(\.dailyLimits))
-                Toggle("Pause fehlt nach 6 und 9 Stunden", isOn: binding(\.missingBreak))
-                if overwork.isAnyEnabled && !notificationsAllowed {
-                    Label("Mitteilungen sind für Timetrack ausgeschaltet.", systemImage: "bell.slash").foregroundStyle(TT.warning)
-                }
-            } header: { Text("Hinweise bei laufendem Timer") } footer: {
-                Text("Dieselben Hinweise wie auf dem iPhone, nur für diesen Mac. Sie werden im Voraus geplant, solange ein Arbeits-Timer läuft. Pausen werden nach tatsächlichen Zeiten beurteilt, nichts wird erfunden.")
+                Label("Die Hinweise bei laufendem Timer (geplantes Ende, Tagesgrenzen, fehlende Pause) stehen jetzt unter „Überstunden-Hinweise“.", systemImage: "info.circle")
+                    .font(TTFont.meta).foregroundStyle(TT.textSecondary)
             }
         }
         .formStyle(.grouped)
@@ -78,19 +70,7 @@ struct MenuBarSettingsView: View {
         .onChange(of: scenePhase) { Task { await refresh() } }
     }
 
-    private func binding(_ key: WritableKeyPath<OverworkSettings, Bool>) -> Binding<Bool> {
-        Binding(get: { overwork[keyPath: key] }, set: { value in
-            overwork[keyPath: key] = value
-            OverworkSettingsStore().write(overwork)
-            Task {
-                if value { notificationsAllowed = await MacNotifications.requestIfNeeded() }
-                await OverworkScheduler.syncFromStoredSnapshot()
-            }
-        })
-    }
-
     private func refresh() async {
         companion.loginItem.refresh()
-        notificationsAllowed = await MacNotifications.isAllowed()
     }
 }

@@ -16,7 +16,17 @@ struct SettingsView: View {
     }
 
     private var groups: [SettingsGroup] {
-        SettingsStructure.groups(platform: .macOS, isEnabled: { model.isEnabled($0) }, query: query)
+        SettingsStructure.groups(platform: .macOS, isEnabled: { model.isEnabled($0) }, query: query).compactMap { group in
+            // Entries that cannot work right now (same rules as iOS).
+            let entries = group.entries.filter { entry in
+                switch entry.id {
+                case .export: model.serverURL != nil
+                case .vacationEntitlement: model.planning != nil
+                default: true
+                }
+            }
+            return entries.isEmpty ? nil : SettingsGroup(id: group.id, entries: entries)
+        }
     }
 
     var body: some View {
@@ -89,7 +99,13 @@ struct SettingsView: View {
         case .menuBar: MenuBarSettingsView()
         case .activity: ActivitySettingsView()
         case .about: AboutSettingsView()
-        case .vacationEntitlement, .vacationReminders, .overworkHints, .focusFilter, .export, .cancelled, .appleWatch: EmptyView()
+        case .vacationEntitlement: VacationEntitlementPage() // SET-B
+        case .vacationReminders: VacationReminderSettingsView() // R3, shared with iOS
+        case .overworkHints: OverworkSettingsView() // OT1, shared with iOS (moved here from "Menüleiste")
+        case .focusFilter: FocusFilterMacPage()
+        case .export: ExportPage()
+        case .cancelled: CancelledScreen() // SG1
+        case .appleWatch: EmptyView()
         }
     }
 }

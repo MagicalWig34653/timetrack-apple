@@ -55,22 +55,6 @@ struct AboutView: View {
     }
 }
 
-/// Vacation entitlement, region, carry-over and balance entries: the sheet that used to hang off the "Urlaub" tab.
-struct VacationEntitlementRow: View {
-    @Environment(AppModel.self) private var model
-    @State private var showing = false
-
-    var body: some View {
-        if let store = model.planning {
-            SettingsActionRow(title: "Urlaubsanspruch", symbol: "beach.umbrella", id: "settings.vacation") {
-                // Load before presenting: saving the sheet writes all fields, so it must start from the server values.
-                Task { await store.load(); await store.loadSettings(); showing = true }
-            }
-            .sheet(isPresented: $showing) { VacationSettingsSheet(store: store) }
-        }
-    }
-}
-
 extension View {
     /// Shared width and padding of the settings pages.
     func settingsPageLayout() -> some View {

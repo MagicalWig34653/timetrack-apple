@@ -68,6 +68,7 @@
 		2BE1B6C97FEA9377FC870DCB /* TimetrackClockDark.icon in Resources */ = {isa = PBXBuildFile; fileRef = 7258FFA9682C41F91725088D /* TimetrackClockDark.icon */; };
 		2C39DB43DDDA0B442A248B6D /* TimetrackWidgetMac.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */; };
 		2C80A500E5BA9061C881FC67 /* OverworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */; };
+		2D66B67A7F45712FB6D478B9 /* SettingsLanding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3298E7E869B25F85E0A1D1 /* SettingsLanding.swift */; };
 		2E16F1E67DF6B39F85C6BC5B /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
 		2EE430D74FEF512CA95B8127 /* ProfilePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86BA31543CA39F3739D2043 /* ProfilePage.swift */; };
 		2F85187B902C40C214900927 /* TimetrackWidgetMac.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6AFED35FEDDDCA6FF903C27A /* TimetrackWidgetMac.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -145,6 +146,7 @@
 		5DE764EA458CE708C4469382 /* LoginItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C01AD40B2A16174484DC8424 /* LoginItem.swift */; };
 		5F7D515F275726A8B1C02DD0 /* ComplicationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FD72ECC0D1BDFB75745274 /* ComplicationView.swift */; };
 		5FA31A4A50BDB1856AC43881 /* EventKitProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB2A52DD3CB4C5FA9AE43EF /* EventKitProvider.swift */; };
+		5FB6074BF21AA98776C12BC0 /* SettingsLanding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3298E7E869B25F85E0A1D1 /* SettingsLanding.swift */; };
 		5FEC63C59C25AF3851624529 /* PlanBlockSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC3C7E6C1DCA8D763543CCA4 /* PlanBlockSheet.swift */; };
 		60AA60195A4474B88FA436E1 /* PlanningArea.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 3C7FD87BEC4B8994CC682F49 /* PlanningArea.xcstrings */; };
 		62ECF8E5E9E76B6071EE6383 /* MacCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FFC9C9F2C662A9C387E19D3 /* MacCommands.swift */; };
@@ -492,6 +494,7 @@
 		20F6CD08AEBBEA531E9C333B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarIntegrationTests.swift; sourceTree = "<group>"; };
 		22C089E2303199136FDFB343 /* TimetrackSunset.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackSunset.icon; sourceTree = "<group>"; };
+		2A3298E7E869B25F85E0A1D1 /* SettingsLanding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsLanding.swift; sourceTree = "<group>"; };
 		2AD8FE9572A2092993DF814B /* StatisticsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsScreen.swift; sourceTree = "<group>"; };
 		2AE88A9D1CCB59D06F72B074 /* ReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSheet.swift; sourceTree = "<group>"; };
 		2CBD6A82D7FCEEADF71ACDDC /* SettingsShotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsShotTests.swift; sourceTree = "<group>"; };
@@ -1023,6 +1026,7 @@
 				B86BA31543CA39F3739D2043 /* ProfilePage.swift */,
 				63C0BF7958ADC0FE6705FC6C /* PushSettingsPage.swift */,
 				B154C3255C3D1530359998F8 /* PushSupport.swift */,
+				2A3298E7E869B25F85E0A1D1 /* SettingsLanding.swift */,
 				41126C4480C06840C8F90197 /* SettingsRows.swift */,
 				C63D37A417C54D0AF163D20E /* TimeAccountScreen.swift */,
 				1557B88A4F4706DBD4328362 /* TriggerLinksPage.swift */,
@@ -1643,6 +1647,7 @@
 				05E50D26F9F57CBB40367636 /* ReviewChip.swift in Sources */,
 				7F324B78744B8F7B854BBE6B /* ReviewReasonText.swift in Sources */,
 				A4895B951818FA56A9B32BAD /* RootView.swift in Sources */,
+				2D66B67A7F45712FB6D478B9 /* SettingsLanding.swift in Sources */,
 				B84DC32BAC6B7A08ABA65F4C /* SettingsRows.swift in Sources */,
 				ED52BD1346D78AD51B2333D7 /* SettingsView.swift in Sources */,
 				53B1B696B0BF1E225713B4A7 /* SharingViews.swift in Sources */,
@@ -1788,6 +1793,7 @@
 				C804B38ABE2DC59966E2B014 /* ReviewReasonText.swift in Sources */,
 				56938F56A4C336F50CE0A203 /* ReviewSheet.swift in Sources */,
 				EA2C0B9A74F7A4A74FFABF97 /* RootView.swift in Sources */,
+				5FB6074BF21AA98776C12BC0 /* SettingsLanding.swift in Sources */,
 				FE944C1071A8C2DACBA2581B /* SettingsRows.swift in Sources */,
 				239165EC0EBAB514D6320BBD /* SettingsSubpages.swift in Sources */,
 				734927ED72C96E14E7E76889 /* SettingsView.swift in Sources */,
@@ -1973,7 +1979,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 58;
+				CURRENT_PROJECT_VERSION = 59;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -2259,7 +2265,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 58;
+				CURRENT_PROJECT_VERSION = 59;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = J2DU2P47XW;
 				ENABLE_NS_ASSERTIONS = NO;

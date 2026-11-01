@@ -163,3 +163,16 @@ struct LearningFieldSheet: View {
         if await store.saveLearningField(name: name, number: number, editing: field) { dismiss() }
     }
 }
+
+/// SET-A: entry point from the settings (the list is also reachable from the Berichtsheft toolbar). Shares the Berichtsheft store.
+struct LearningFieldsScreen: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        Group {
+            if let client = model.apiClient {
+                LearningFieldsView(store: ReportsStoreCache.shared.store(client, calendar: model.dayCalendar))
+            }
+        }
+    }
+}

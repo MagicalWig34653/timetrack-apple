@@ -3,56 +3,93 @@ import TimetrackCore
 import TimetrackDesign
 import TimetrackStores
 
-/// Settings window (⌘,): native toolbar tabs General, Appearance, Work and About; grouped forms instead of card pages.
+/// Settings window (⌘,). SET-A: sidebar with the same groups, names and descriptions as the web app (SettingsStructure in the core
+/// package); the detail column shows the overview (all groups with descriptions) or the selected page.
 struct SettingsView: View {
-    /// Debug bisect aid: `TT_DEV_TABS=m` shows only the named new tabs (m, a, t). Always on in release builds.
-    private func tabOn(_ letter: String) -> Bool {
-        #if DEBUG
-        if let only = ProcessInfo.processInfo.environment["TT_DEV_TABS"] { return only.contains(letter) }
-        #endif
-        return true
-    }
-
-    var body: some View {
-        TabView {
-            GeneralSettingsView()
-                .tabItem { Label("settings.general", systemImage: "gearshape") }
-            NavigationStack { AccountSecurityPage() }
-                .tabItem { Label("Konto", systemImage: "person.badge.shield.checkmark") }
-            AppearanceSettingsView()
-                .tabItem { Label("settings.appearance", systemImage: "paintpalette") }
-            WorkSettingsView()
-                .tabItem { Label(AD.s("settings.work"), systemImage: "briefcase") }
-            if tabOn("m") { MenuBarSettingsView()
-                .tabItem { Label("Menüleiste", systemImage: "menubar.rectangle") } }
-            if tabOn("a") { MacAutomationSettingsView()
-                .tabItem { Label("Automatik", systemImage: "location.circle") } }
-            if tabOn("t") { ActivitySettingsView()
-                .tabItem { Label("Aktivität", systemImage: "square.stack.3d.up") } }
-            MacTriggerLinksTab()
-                .tabItem { Label("Auslöse-Links", systemImage: "link.badge.plus") }
-            CalendarSettingsView()
-                .tabItem { Label("Kalender", systemImage: "calendar") }
-            CalendarFeedsPage()
-                .tabItem { Label("Kalenderabos", systemImage: "calendar.badge.plus") }
-            PushSettingsPage()
-                .tabItem { Label("Push", systemImage: "bell.badge.waveform") }
-            AboutSettingsView()
-                .tabItem { Label("settings.about", systemImage: "info.circle") }
-        }
-        .frame(width: 640, height: 600)
-    }
-}
-
-/// AUD3-A: trigger links need the automation module (like the web app's settings).
-private struct MacTriggerLinksTab: View {
     @Environment(AppModel.self) private var model
+    @State private var selection: Selection? = .overview
+    @State private var query = ""
+
+    enum Selection: Hashable {
+        case overview
+        case entry(SettingsEntryID)
+    }
+
+    private var groups: [SettingsGroup] {
+        SettingsStructure.groups(platform: .macOS, isEnabled: { model.isEnabled($0) }, query: query)
+    }
 
     var body: some View {
-        if model.isEnabled(.automation) {
-            TriggerLinksPage()
-        } else {
-            ContentUnavailableView("Modul Automatik ist aus", systemImage: "link.badge.plus", description: Text("Auslöse-Links brauchen das Modul Automatik auf dem Server."))
+        NavigationSplitView {
+            List(selection: $selection) {
+                Label("Übersicht", systemImage: "list.bullet").tag(Selection.overview)
+                ForEach(groups) { group in
+                    Section(group.title) {
+                        ForEach(group.entries) { entry in
+                            Label(entry.title, systemImage: entry.symbol).tag(Selection.entry(entry.id))
+                        }
+                    }
+                }
+            }
+            .searchable(text: $query, placement: .sidebar, prompt: "Einstellung suchen …")
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
+        } detail: {
+            switch selection ?? .overview {
+            case .overview: overview
+            case .entry(let id): NavigationStack { destination(id) }.id(id)
+            }
+        }
+        .frame(width: 860, height: 620)
+    }
+
+    private var overview: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: TT.Space.xl) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Einstellungen").font(.title2.weight(.bold)).foregroundStyle(TT.textPrimary)
+                    Text("Alle Einstellungen nach Themen geordnet. Nutze die Suche, um direkt zu einer Seite zu springen.")
+                        .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                }
+                SettingsGroupsView(groups: groups) { entry in
+                    Button { selection = .entry(entry.id) } label: { SettingsEntryLabel(entry: entry) }
+                        .buttonStyle(.plain).accessibilityIdentifier(entry.id.accessibilityID)
+                }
+                HStack {
+                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
+                        .disabled(model.phase == .signedOut)
+                    Spacer()
+                    Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
+                }
+            }
+            .padding(TT.Space.xl)
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity)
+        }
+        .ttScreenBackground()
+    }
+
+    @ViewBuilder private func destination(_ id: SettingsEntryID) -> some View {
+        switch id {
+        case .profile: ProfilePage()
+        case .passkeys: PasskeysPage()
+        case .identities: IdentitiesPage()
+        case .recovery: RecoveryPage()
+        case .sessions: SessionsPage()
+        case .workModel: WorkModelsScreen()
+        case .accountTime: TimeAccountScreen() // WM2
+        case .learningFields: LearningFieldsScreen()
+        case .sharing: SharingScreen()
+        case .places: MacAutomationSettingsView()
+        case .triggerLinks: TriggerLinksPage() // AUD3-A
+        case .notifications: PushSettingsPage()
+        case .calendarFeeds: CalendarFeedsPage()
+        case .deviceCalendar: CalendarSettingsView()
+        case .appearance: AppearanceSettingsView()
+        case .modules: ModulesSettingsView()
+        case .menuBar: MenuBarSettingsView()
+        case .activity: ActivitySettingsView()
+        case .about: AboutSettingsView()
+        case .vacationEntitlement, .vacationReminders, .overworkHints, .focusFilter, .export, .cancelled, .appleWatch: EmptyView()
         }
     }
 }
@@ -69,6 +106,7 @@ private struct AppearanceSettingsView: View {
                         .font(TTFont.meta).foregroundStyle(TT.textSecondary)
                         .padding(TT.Space.l).frame(maxWidth: .infinity, alignment: .leading)
                 }
+                FormSection(LocalizedStringKey(AD.s("settings.feedback"))) { HapticsToggle().padding(TT.Space.l) } // moved here from the old "Arbeit" tab
             }
             .padding(TT.Space.xl)
         }
@@ -76,17 +114,11 @@ private struct AppearanceSettingsView: View {
     }
 }
 
-private struct GeneralSettingsView: View {
+private struct ModulesSettingsView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         Form {
-            if let account = model.account {
-                Section("settings.account") {
-                    LabeledContent(AD.s("settings.name")) { Text(verbatim: account.displayName) }
-                    LabeledContent(AD.s("settings.handle")) { Text(verbatim: "@\(account.handle)") }
-                }
-            }
             Section("settings.server") {
                 LabeledContent("settings.server_url") { Text(model.serverURL?.absoluteString ?? "–").textSelection(.enabled).lineLimit(1).truncationMode(.middle) }
                 if let workModel = model.workModel {
@@ -100,14 +132,6 @@ private struct GeneralSettingsView: View {
                     }
                 }
             } header: { Text("settings.modules") } footer: { Text("settings.modules.hint") }
-            Section {
-                HStack {
-                    Button { Task { await model.signOut() } } label: { Label("account.sign_out", systemImage: "rectangle.portrait.and.arrow.right") }
-                        .disabled(model.phase == .signedOut)
-                    Spacer()
-                    Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
-                }
-            }
         }
         .formStyle(.grouped)
     }
@@ -120,32 +144,6 @@ private struct GeneralSettingsView: View {
         case .automation: "module.automation"
         case .mcp: "module.mcp"
         default: "module.unknown"
-        }
-    }
-}
-
-private struct WorkSettingsView: View {
-    @State private var showWorkModels = false
-    @State private var showTimeAccount = false
-
-    var body: some View {
-        Form {
-            Section {
-                Button { showWorkModels = true } label: { Label("workmodel.title", systemImage: "calendar.badge.clock") }
-                    .accessibilityIdentifier("settings.workmodel")
-                Button { showTimeAccount = true } label: { Label(wmKey("wm.account.title"), systemImage: "plusminus.circle") } // WM2
-                    .accessibilityIdentifier("settings.timeaccount")
-            } footer: { Text(AD.s("settings.work.workmodel_hint")) }
-            Section(AD.s("settings.feedback")) { HapticsToggle() }
-        }
-        .formStyle(.grouped)
-        .sheet(isPresented: $showWorkModels) {
-            NavigationStack { WorkModelsScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showWorkModels = false } } } }
-                .frame(minWidth: 560, minHeight: 640)
-        }
-        .sheet(isPresented: $showTimeAccount) {
-            NavigationStack { TimeAccountScreen().toolbar { ToolbarItem(placement: .confirmationAction) { Button("common.done") { showTimeAccount = false } } } }
-                .frame(minWidth: 560, minHeight: 640)
         }
     }
 }

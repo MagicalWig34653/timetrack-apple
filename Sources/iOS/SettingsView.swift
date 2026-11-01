@@ -11,61 +11,113 @@ extension EnvironmentValues {
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.watchSender) private var watchSender
-    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var confirmingServerChange = false
     @State private var watchStatus: WatchHandoffResult?
+    @State private var showingVacation = false
+    @State private var query = ""
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: TT.Space.xl) {
                 AccountCard()
-                accountGroup
-                appearanceGroup
-                workGroup
-                remindersGroup
-                automationGroup
-                devicesGroup
-                technicalGroup
+                // SET-A: same groups, names and descriptions as the web app (SettingsStructure in the core package).
+                SettingsGroupsView(groups: groups) { entry in row(entry) }
+                watchStatusLine
                 sessionActions
             }
             .settingsPageLayout()
         }
         .ttScreenBackground()
         .navigationTitle("sidebar.settings")
+        .searchable(text: $query, prompt: "Einstellung suchen …")
         .confirmationDialog("settings.change_server.confirm", isPresented: $confirmingServerChange, titleVisibility: .visible) {
             Button("settings.change_server", role: .destructive) { Task { await model.forgetServer() } }
         }
         .ttHaptic(.confirmDestructive, whenBecomesTrue: confirmingServerChange)
-    }
-
-    // MARK: - Groups (S2). Each group is a small computed property so later rows (for example vacation reminders) slot in as one line.
-
-    /// AUD3-A: profile, passkeys, recovery, linked sign-ins and sessions behind one row.
-    private var accountGroup: some View {
-        FormSection {
-            SettingsLinkRow(title: "Konto und Sicherheit", symbol: "person.badge.shield.checkmark", id: "settings.account_security") { AccountSecurityPage() }
+        .sheet(isPresented: $showingVacation) {
+            if let store = model.planning { VacationSettingsSheet(store: store) }
         }
     }
 
-    /// Look of the app: accent, scheme, glow, app icon, haptics (the haptic level lives on that page).
-    private var appearanceGroup: some View {
-        FormSection {
-            SettingsLinkRow(title: "settings.appearance", symbol: "paintpalette", id: "settings.appearance") { AppearanceView() }
-        }
-    }
+    // MARK: - Structure
 
-    /// Work and planning: work model versions, vacation entitlement. (UX3: reminders and automation moved to "Mehr".)
-    private var workGroup: some View {
-        FormSection("Arbeit") {
-            SettingsLinkRow(title: "workmodel.title", symbol: "calendar.badge.clock", id: "settings.workmodel") { WorkModelsScreen() }
-            SettingsLinkRow(title: wmKey("wm.account.title"), symbol: "plusminus.circle", id: "settings.timeaccount") { TimeAccountScreen() } // WM2
-            if model.isEnabled(.planning) {
-                VacationEntitlementRow()
+    /// Visible groups: module state and platform from the core structure, minus entries that cannot work right now.
+    private var groups: [SettingsGroup] {
+        SettingsStructure.groups(platform: .iOS, isEnabled: { model.isEnabled($0) }, query: query).compactMap { group in
+            let entries = group.entries.filter { entry in
+                switch entry.id {
+                case .appleWatch: watchSender != nil
+                case .export: model.serverURL != nil
+                case .vacationEntitlement: model.planning != nil
+                default: true
+                }
             }
+            return entries.isEmpty ? nil : SettingsGroup(id: group.id, entries: entries)
         }
     }
 
-    /// Short state next to the push row (the page explains the rest).
+    @ViewBuilder private func row(_ entry: SettingsEntry) -> some View {
+        switch entry.id {
+        case .vacationEntitlement:
+            Button {
+                // Load before presenting: saving the sheet writes all fields, so it must start from the server values.
+                Task {
+                    guard let store = model.planning else { return }
+                    await store.load(); await store.loadSettings(); showingVacation = true
+                }
+            } label: { SettingsEntryLabel(entry: entry) }
+                .buttonStyle(.plain).accessibilityIdentifier(entry.id.accessibilityID)
+        case .appleWatch:
+            Button { if let watchSender { Task { watchStatus = await watchSender.sendNow() } } } label: { SettingsEntryLabel(entry: entry, chevron: "arrow.up.circle") }
+                .buttonStyle(.plain).accessibilityIdentifier(entry.id.accessibilityID)
+        case .export:
+            if let url = model.serverURL?.appending(path: "export") { // the PWA route of the page
+                Link(destination: url) { SettingsEntryLabel(entry: entry, chevron: "arrow.up.right") }
+                    .buttonStyle(.plain).accessibilityIdentifier(entry.id.accessibilityID)
+                    .accessibilityHint(Text("Öffnet die Web-App im Browser"))
+            }
+        default:
+            NavigationLink { destination(entry.id) } label: { SettingsEntryLabel(entry: entry, value: value(entry.id)) }
+                .buttonStyle(.plain).accessibilityIdentifier(entry.id.accessibilityID)
+        }
+    }
+
+    @ViewBuilder private func destination(_ id: SettingsEntryID) -> some View {
+        switch id {
+        case .profile: ProfilePage()
+        case .passkeys: PasskeysPage()
+        case .identities: IdentitiesPage()
+        case .recovery: RecoveryPage()
+        case .sessions: SessionsPage()
+        case .workModel: WorkModelsScreen()
+        case .accountTime: TimeAccountScreen() // WM2
+        case .learningFields: LearningFieldsScreen()
+        case .sharing: SharingScreen()
+        case .places: AutomationSettingsView()
+        case .triggerLinks: TriggerLinksPage() // AUD3-A
+        case .focusFilter: FocusFilterView()
+        case .notifications: PushSettingsPage() // P14c
+        case .vacationReminders: VacationReminderSettingsView() // R3
+        case .overworkHints: OverworkSettingsView() // OT1
+        case .calendarFeeds: CalendarFeedsPage()
+        case .deviceCalendar: CalendarSettingsView()
+        case .cancelled: CancelledScreen()
+        case .appearance: AppearanceView()
+        case .modules: ServerModulesView()
+        case .about: AboutView()
+        case .vacationEntitlement, .export, .appleWatch, .menuBar, .activity: EmptyView()
+        }
+    }
+
+    /// Short state next to a row (the page explains the rest).
+    private func value(_ id: SettingsEntryID) -> String? {
+        switch id {
+        case .notifications: pushValue
+        case .about: AppBuildInfo(platform: "iOS").display
+        default: nil
+        }
+    }
+
     private var pushValue: String? {
         guard let push = model.push else { return nil }
         switch push.state {
@@ -76,53 +128,13 @@ struct SettingsView: View {
         }
     }
 
-    /// U3: reminders (moved here from "Mehr"; the single place for them).
-    private var remindersGroup: some View {
-        FormSection("Erinnerungen") {
-            if model.isEnabled(.planning) {
-                SettingsLinkRow(title: "Urlaubserinnerungen", symbol: "bell.badge", id: "settings.reminders") { VacationReminderSettingsView() } // R3
+    @ViewBuilder private var watchStatusLine: some View {
+        if let watchStatus {
+            HStack {
+                StatusChip(Self.statusKey(watchStatus), tone: watchStatus == .sent ? .success : .neutral, symbol: Self.statusSymbol(watchStatus))
+                Spacer()
             }
-            SettingsLinkRow(title: "Überstunden-Hinweise", symbol: "clock.badge.exclamationmark", id: "settings.overwork") { OverworkSettingsView() } // OT1
-            SettingsLinkRow(title: "Push-Benachrichtigungen", symbol: "bell.badge.waveform", value: pushValue, id: "settings.push") { PushSettingsPage() } // P14c
-        }
-    }
-
-    /// U3: device calendars, location automation switches and the Focus filter (moved here from "Mehr").
-    private var automationGroup: some View {
-        FormSection("Automatik und Kalender", footer: model.isEnabled(.automation) ? "settings.focus.hint" : nil) {
-            SettingsLinkRow(title: "Kalender", symbol: "calendar", id: "settings.calendar") { CalendarSettingsView() }
-            SettingsLinkRow(title: "Kalenderabos", symbol: "calendar.badge.plus", id: "settings.feeds") { CalendarFeedsPage() }
-            if model.isEnabled(.automation) {
-                SettingsLinkRow(title: "Standortautomatik", symbol: "location.circle", id: "settings.automation") { AutomationSettingsView() }
-                SettingsLinkRow(title: "settings.focus", symbol: "moon.circle", id: "settings.focus") { FocusFilterView() }
-                SettingsLinkRow(title: "Auslöse-Links", symbol: "link.badge.plus", id: "settings.triggerlinks") { TriggerLinksPage() } // AUD3-A
-            }
-        }
-    }
-
-    @ViewBuilder private var devicesGroup: some View {
-        if let watchSender {
-            FormSection("settings.watch", footer: "settings.watch.hint") {
-                SettingsActionRow(title: "settings.watch.send", symbol: "applewatch", trailingSymbol: "arrow.up.circle", id: "settings.watch.send") {
-                    Task { watchStatus = await watchSender.sendNow() }
-                }
-                if let watchStatus {
-                    HStack {
-                        StatusChip(Self.statusKey(watchStatus), tone: watchStatus == .sent ? .success : .neutral, symbol: Self.statusSymbol(watchStatus))
-                        Spacer()
-                    }
-                    .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
-                    .accessibilityIdentifier("settings.watch.status")
-                }
-            }
-        }
-    }
-
-    /// Technical facts live at the bottom, one level down.
-    private var technicalGroup: some View {
-        FormSection("Info") {
-            SettingsLinkRow(title: "Server und Module", symbol: "server.rack", id: "settings.server") { ServerModulesView() }
-            SettingsLinkRow(title: "settings.about", symbol: "info.circle", value: AppBuildInfo(platform: "iOS").display, id: "settings.about") { AboutView() }
+            .accessibilityIdentifier("settings.watch.status")
         }
     }
 

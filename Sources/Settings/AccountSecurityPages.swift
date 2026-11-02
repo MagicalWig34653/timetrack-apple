@@ -253,7 +253,7 @@ struct RecoveryPage: View {
     @ViewBuilder private func passwordSection(_ store: RecoveryStore) -> some View {
         let active = store.status?.fallbackPassword.active ?? false
         let problem = password.isEmpty ? nil : RecoveryValidation.passwordProblem(password, repeated: passwordRepeat)
-        FormSection("Rückfallpasswort", footer: "Ein Passwort ausschließlich für die Wiederherstellung. Es dient nie zur normalen Anmeldung. Mindestens 12 Zeichen.") {
+        FormSection("Rückfallpasswort", footer: "Ein Passwort ausschließlich für die Wiederherstellung. Es dient nie zur normalen Anmeldung. Mindestens 16 Zeichen: am besten eine lange Passphrase aus mehreren zufälligen Wörtern.") {
             HStack { Text("Status").font(TTFont.body); Spacer(); chip(active) }
                 .padding(.horizontal, TT.Space.l).padding(.vertical, TT.Space.m)
             SecureField(active ? "Neues Rückfallpasswort" : "Rückfallpasswort", text: $password)
@@ -359,7 +359,7 @@ struct RecoveryPage: View {
 
     static func problemText(_ problem: RecoveryValidation.PasswordProblem) -> String {
         switch problem {
-        case .tooShort: "Das Passwort muss mindestens 12 Zeichen lang sein."
+        case .tooShort: "Das Passwort muss mindestens 16 Zeichen lang sein. Eine lange Passphrase aus mehreren Wörtern ist am besten."
         case .tooLong: "Das Passwort darf höchstens 256 Zeichen lang sein."
         case .mismatch: "Die Passwörter stimmen nicht überein."
         }

@@ -106,6 +106,16 @@
         }
       }
     },
+    "error.export_rate_limited": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du hast den Export in der letzten Stunde schon dreimal angefordert."
+          }
+        }
+      }
+    },
     "error.file_too_large": {
       "extractionState": "manual",
       "localizations": {
@@ -492,6 +502,16 @@
         }
       }
     },
+    "error.retry_after": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bitte versuche es in %@ erneut."
+          }
+        }
+      }
+    },
     "error.segment_not_cancelled": {
       "extractionState": "manual",
       "localizations": {
@@ -530,6 +550,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Der Eintrag wurde zwischenzeitlich geändert. Bitte neu laden."
+          }
+        }
+      }
+    },
+    "error.storage_quota_exceeded": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Speicherplatz für Dateien ist voll. Lösche nicht mehr benötigte Anhänge und versuche es erneut."
           }
         }
       }
@@ -602,6 +632,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dieser Dateityp wird nicht unterstützt."
+          }
+        }
+      }
+    },
+    "error.wait.hours": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "etwa %d Stunden"
+          }
+        }
+      }
+    },
+    "error.wait.minutes": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "etwa %d Minuten"
+          }
+        }
+      }
+    },
+    "error.wait.seconds": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d Sekunden"
+          }
+        }
+      }
+    },
+    "error.weak_password": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieses Rückfallpasswort ist zu schwach. Nimm eine lange Passphrase mit mindestens 16 Zeichen, zum Beispiel mehrere zufällige Wörter hintereinander, ohne Wiederholungen und ohne deinen Namen."
           }
         }
       }

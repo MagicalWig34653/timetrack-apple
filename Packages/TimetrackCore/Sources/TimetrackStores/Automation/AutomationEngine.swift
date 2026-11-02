@@ -205,8 +205,17 @@ public actor AutomationEngine {
         (state.runtime.values.filter { $0.phase == .pending }.compactMap(\.dueAt) + state.pendingLeaves.values.map(\.dueAt)).min()
     }
 
+    /// SEC-A: after the server rejected the device token (revoked, e.g. by an account recovery) the queue waits this long before it
+    /// asks again, so a dead token is not tried on every event. A new token clears the wait (`tokenReplaced`).
+    public static let rejectedTokenCooldown: TimeInterval = 30 * 60
+    private var tokenRejectedAt: Date?
+
+    /// A fresh device token was stored: the next flush may send again at once.
+    public func tokenReplaced() { tokenRejectedAt = nil }
+
     public func flush() async {
         guard await queue.count > 0 else { return }
+        if let rejected = tokenRejectedAt, now().timeIntervalSince(rejected) < Self.rejectedTokenCooldown { return }
         guard let sender = senderFactory() else { return } // no device token yet: events wait in the queue
         let summary = await queue.drain(using: sender)
         for report in summary.reports {
@@ -219,7 +228,9 @@ public actor AutomationEngine {
             appendLog(placeName: report.queued.placeName, trigger: .sync, decision: decision, confidence: nil, detail: "\(report.queued.event.type.rawValue): \(detail)")
         }
         switch summary.stop {
-        case .unauthorized: appendLog(placeName: "", trigger: .sync, decision: .unauthorized, confidence: nil, detail: nil)
+        case .unauthorized:
+            tokenRejectedAt = now()
+            appendLog(placeName: "", trigger: .sync, decision: .unauthorized, confidence: nil, detail: nil)
         case .retryLater: if await queue.count > 0 { appendLog(placeName: "", trigger: .sync, decision: .sendFailed, confidence: nil, detail: nil, coalesce: true) }
         case .finished: break
         }

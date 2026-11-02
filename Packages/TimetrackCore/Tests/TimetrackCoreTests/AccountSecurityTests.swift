@@ -53,7 +53,7 @@ private func recoveryJSON(codes: Bool = false, remaining: Int? = nil, password: 
     }
 
     @Test func passwordRules() {
-        let long = String(repeating: "a", count: 12)
+        let long = String(repeating: "a", count: 16)
         #expect(RecoveryValidation.passwordProblem("short", repeated: "short") == .tooShort)
         #expect(RecoveryValidation.passwordProblem(long, repeated: long + "x") == .mismatch)
         #expect(RecoveryValidation.passwordProblem(long, repeated: long) == nil)
@@ -160,13 +160,13 @@ private func recoveryJSON(codes: Bool = false, remaining: Int? = nil, password: 
         transport.enqueue("GET /api/v1/me/recovery", body: recoveryJSON(password: true))
         let store = store(transport)
         #expect(await store.setPassword("short", repeated: "short") == false)
-        #expect(await store.setPassword("long enough pw!", repeated: "other") == false)
+        #expect(await store.setPassword("a long passphrase!!", repeated: "other") == false)
         #expect(transport.requests.isEmpty)
-        #expect(await store.setPassword("long enough pw!", repeated: "long enough pw!"))
+        #expect(await store.setPassword("a long passphrase!!", repeated: "a long passphrase!!"))
         #expect(store.status?.fallbackPassword.active == true && store.notice == .passwordSaved)
         let sent = try #require(transport.requests(matching: "PUT /api/v1/me/recovery/fallback-password").first)
         let body = try #require(try JSONSerialization.jsonObject(with: sent.httpBody ?? Data()) as? [String: Any])
-        #expect(body["password"] as? String == "long enough pw!" && body.count == 1)
+        #expect(body["password"] as? String == "a long passphrase!!" && body.count == 1)
     }
 
     @Test func removingThePassword() async {

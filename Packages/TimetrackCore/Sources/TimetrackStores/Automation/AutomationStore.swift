@@ -320,6 +320,7 @@ public final class AutomationStore {
             hasLocalToken = true
             tokenInfo = created
             error = nil
+            await engine.tokenReplaced()
             await engine.flush() // events queued while the token was missing
             await refreshFromEngine()
         } catch let failure as TimetrackError {

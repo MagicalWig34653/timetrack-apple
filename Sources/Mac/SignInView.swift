@@ -103,6 +103,10 @@ struct SignInView: View {
                             HintBanner("signin.offline", symbol: "wifi.slash")
                             Button("signin.retry") { Task { await model.restore() } }.buttonStyle(.ttSecondary)
                         }
+                        if model.sessionEnded {
+                            HintBanner("signin.session_ended", symbol: "person.crop.circle.badge.exclamationmark")
+                                .accessibilityIdentifier("signin.session_ended")
+                        }
                         if let error = model.lastError {
                             ErrorBanner(message: error.germanDescription, retryTitle: "common.retry") { model.lastError = nil }
                                 .accessibilityIdentifier("signin.error")

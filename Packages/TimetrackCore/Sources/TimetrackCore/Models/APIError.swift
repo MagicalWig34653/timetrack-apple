@@ -66,12 +66,19 @@ public enum APIErrorCode: String, Sendable, CaseIterable {
     case accountEmailMissing = "account_email_missing"
     case recoveryEmailMustBeAccountEmail = "recovery_email_must_be_account_email"
     case lastLoginMethod = "last_login_method"
+    /// SEC-A (contract 0.40.0): the fallback password is too weak (400; at least 16 characters, no common patterns).
+    case weakPassword = "weak_password"
+    /// SEC-C (contract 0.41.0): per-account storage quota reached (413); account export limit of three per hour (429).
+    case storageQuotaExceeded = "storage_quota_exceeded"
+    case exportRateLimited = "export_rate_limited"
 }
 
 /// Everything that can go wrong in a client call. No request or response bodies that could hold secrets are kept in descriptions.
 public enum TimetrackError: Error, Sendable, Equatable {
     /// HTTP error with the contract's error payload (`code` is the raw backend string).
     case api(status: Int, code: String, message: String)
+    /// 429 (SEC-A/SEC-C): lock-out or quota; `retryAfter` is the server's `Retry-After` in seconds when it sent one.
+    case rateLimited(code: String, message: String, retryAfter: Int?)
     /// Transport failure (offline, DNS, TLS, timeout); retrying with the same `clientEventId` is safe.
     case network(URLError.Code)
     /// The server answered with a body that does not match the contract.
@@ -83,11 +90,13 @@ public enum TimetrackError: Error, Sendable, Equatable {
 
     public var status: Int? {
         if case .api(let status, _, _) = self { return status }
+        if case .rateLimited = self { return 429 }
         return nil
     }
 
     public var code: String? {
         if case .api(_, let code, _) = self { return code }
+        if case .rateLimited(let code, _, _) = self { return code }
         return nil
     }
 
@@ -123,8 +132,28 @@ public enum TimetrackError: Error, Sendable, Equatable {
         return result
     }()
 
+    /// Seconds the server asked to wait (`Retry-After` of a 429), nil otherwise.
+    public var retryAfterSeconds: Int? {
+        if case .rateLimited(_, _, let seconds) = self { return seconds }
+        return nil
+    }
+
+    /// "etwa 5 Minuten" and the like; nil for a missing or zero wait.
+    static func waitPhrase(seconds: Int?) -> String? {
+        guard let seconds, seconds > 0 else { return nil }
+        if seconds < 90 { return String(format: text("error.wait.seconds"), seconds) }
+        let minutes = Int((Double(seconds) / 60).rounded(.up))
+        if minutes < 90 { return String(format: text("error.wait.minutes"), minutes) }
+        return String(format: text("error.wait.hours"), Int((Double(minutes) / 60).rounded(.up)))
+    }
+
     public var germanDescription: String {
         switch self {
+        case .rateLimited(let code, _, let retryAfter):
+            let key = APIErrorCode(rawValue: code) == .exportRateLimited ? "error.export_rate_limited" : "error.too_many_requests"
+            let base = Self.text(key)
+            guard let wait = Self.waitPhrase(seconds: retryAfter) else { return base }
+            return base + " " + String(format: Self.text("error.retry_after"), wait)
         case .api(_, let code, _):
             if let known = APIErrorCode(rawValue: code) {
                 return Self.text("error.\(known.rawValue)")

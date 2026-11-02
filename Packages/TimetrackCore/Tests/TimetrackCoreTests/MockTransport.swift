@@ -7,6 +7,7 @@ final class MockTransport: HTTPTransport, SessionCookieJar, @unchecked Sendable 
         var status: Int = 200
         var body: String = ""
         var error: URLError.Code?
+        var headers: [String: String]?
     }
 
     private let lock = NSLock()
@@ -15,8 +16,8 @@ final class MockTransport: HTTPTransport, SessionCookieJar, @unchecked Sendable 
     private var cookie: String?
     var delay: Duration?
 
-    func enqueue(_ key: String, status: Int = 200, body: String = "", error: URLError.Code? = nil) {
-        lock.withLock { replies[key, default: []].append(Reply(status: status, body: body, error: error)) }
+    func enqueue(_ key: String, status: Int = 200, body: String = "", error: URLError.Code? = nil, headers: [String: String]? = nil) {
+        lock.withLock { replies[key, default: []].append(Reply(status: status, body: body, error: error, headers: headers)) }
     }
 
     /// Replaces any queued or repeating answers of `key` (used when a test changes the server's answer midway).
@@ -78,11 +79,11 @@ final class MockTransport: HTTPTransport, SessionCookieJar, @unchecked Sendable 
         await gate?.wait()
         guard let reply else { return (Data(#"{"error":{"code":"not_found","message":"unmocked"}}"#.utf8), response(request, 404)) }
         if let error = reply.error { throw URLError(error) }
-        return (Data(reply.body.utf8), response(request, reply.status))
+        return (Data(reply.body.utf8), response(request, reply.status, reply.headers))
     }
 
-    private func response(_ request: URLRequest, _ status: Int) -> HTTPURLResponse {
-        HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: "HTTP/1.1", headerFields: nil)!
+    private func response(_ request: URLRequest, _ status: Int, _ headers: [String: String]? = nil) -> HTTPURLResponse {
+        HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: "HTTP/1.1", headerFields: headers)!
     }
 
     // SessionCookieJar

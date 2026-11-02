@@ -40,6 +40,9 @@ public final class AppModel {
     /// Session state of clients that start from stored credentials (`restoreFast`); kept in step on all paths.
     public private(set) var lifecycle = SessionLifecycle()
     public var lastError: TimetrackError?
+    /// SEC-A: the server ended the session while the app was in use (recovery or passkey revocation on another device, idle timeout).
+    /// The sign-in screen explains it; cleared by the next sign-in or an explicit sign-out.
+    public private(set) var sessionEnded = false
     /// Backend version data for "Über Timetrack" (`GET /system/info`); loaded on demand by `refreshSystemInfo()`.
     public private(set) var systemInfo: SystemInfoState = .idle
 
@@ -184,12 +187,14 @@ public final class AppModel {
     }
 
     public func signOut() async {
+        sessionEnded = false
         await push?.unregister() // P14: the session is still valid here, so the server forgets this device before the cookie goes
         await auth.signOut()
         reset(to: .signedOut)
     }
 
     public func forgetServer() async {
+        sessionEnded = false
         await push?.unregister()
         await auth.forgetServer()
         serverURL = nil
@@ -251,6 +256,7 @@ public final class AppModel {
             lifecycle.apply(.validated)
             await finishFastRestore(context)
         case .signedOut:
+            sessionEnded = true
             lifecycle.apply(.serverRejected)
             reset(to: .signedOut)
         case .offline:
@@ -269,6 +275,7 @@ public final class AppModel {
             return
         }
         await context.client.setModuleDisabledHandler { [weak self] in Task { @MainActor in await self?.refreshModules() } }
+        await installSessionGuard(context.client)
         // X4: bind the fast-launch queue to this account; foreign entries are purged, the optimistic store learns its account.
         if let queue = fastLaunch?.queue {
             await queue.bind(accountId: context.session.account.id)
@@ -294,6 +301,25 @@ public final class AppModel {
         if !modules.isEnabled(.planning) { planning = nil; calendar = nil }
     }
 
+    /// SEC-A: any 401 outside `/auth/` makes the app check the session once. When the server confirms it is gone, the app signs out
+    /// cleanly (stored cookie deleted, stores released), so nothing keeps polling with a dead session. Other 401 causes change nothing.
+    private func installSessionGuard(_ client: APIClient) async {
+        await client.setUnauthorizedHandler { [weak self] in Task { @MainActor in await self?.sessionRejectedByServer() } }
+    }
+
+    private var sessionCheckInFlight = false
+
+    public func sessionRejectedByServer() async {
+        guard phase == .signedIn || phase == .recoveryRestricted, !sessionCheckInFlight, !validating else { return }
+        sessionCheckInFlight = true
+        defer { sessionCheckInFlight = false }
+        guard case .signedOut = await auth.validate() else { return }
+        guard phase == .signedIn || phase == .recoveryRestricted else { return }
+        sessionEnded = true
+        lifecycle.apply(.serverRejected)
+        reset(to: .signedOut)
+    }
+
     private func adopt(_ context: AuthContext) async {
         self.context = context
         account = context.session.account
@@ -308,6 +334,8 @@ public final class AppModel {
         await context.client.setModuleDisabledHandler { [weak self] in
             Task { @MainActor in await self?.refreshModules() }
         }
+        await installSessionGuard(context.client)
+        sessionEnded = false
         async let statuses = try? context.client.listModules()
         async let models = try? context.client.listWorkModels()
         modules = ModuleSwitches(await statuses ?? [])

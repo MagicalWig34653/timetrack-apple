@@ -11,6 +11,7 @@ public actor APIClient: PreferencesService {
     private let encoder = JSONCoding.makeEncoder()
     private var csrfToken: String?
     private var moduleDisabledHandler: (@Sendable () -> Void)?
+    private var unauthorizedHandler: (@Sendable () -> Void)?
     /// Waits before a retry of a read that hit 503 `database_unavailable` (replaceable so tests do not sleep).
     private var retrySleeper: @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
 
@@ -27,6 +28,10 @@ public actor APIClient: PreferencesService {
 
     /// Callback when any call answers 404 `module_disabled` (stores refresh their module switches).
     public func setModuleDisabledHandler(_ handler: (@Sendable () -> Void)?) { moduleDisabledHandler = handler }
+
+    /// SEC-A: callback when a call outside `/auth/` answers 401, i.e. the session ended elsewhere (recovery, passkey revoked, idle timeout).
+    /// The owner checks the session once and signs out cleanly instead of letting every screen keep failing.
+    public func setUnauthorizedHandler(_ handler: (@Sendable () -> Void)?) { unauthorizedHandler = handler }
 
     public func setRetrySleeper(_ sleeper: @escaping @Sendable (Duration) async throws -> Void) { retrySleeper = sleeper }
 
@@ -79,7 +84,8 @@ public actor APIClient: PreferencesService {
                 throw TimetrackError.network(error.code)
             }
             if (200..<300).contains(response.statusCode) { return (data, response.statusCode) }
-            let failure = parseError(status: response.statusCode, data: data)
+            let failure = parseError(status: response.statusCode, data: data, retryAfter: response.value(forHTTPHeaderField: "Retry-After"))
+            if response.statusCode == 401, !path.hasPrefix("/auth/") { unauthorizedHandler?() }
             // A rejected CSRF token means the request was not processed: refresh the token once and replay.
             if failure.code == APIErrorCode.csrfInvalid.rawValue, method != .get, !refreshedCSRF, path != "/auth/session" {
                 refreshedCSRF = true
@@ -104,13 +110,20 @@ public actor APIClient: PreferencesService {
         return min(.seconds(seconds), maxRetryAfter)
     }
 
-    private func parseError(status: Int, data: Data) -> TimetrackError {
+    /// `Retry-After` of a 429 in whole seconds; nil when missing or not a number (the HTTP-date form is not used by the backend).
+    static func retryAfterSeconds(_ header: String?) -> Int? {
+        guard let header, let seconds = Int(header.trimmingCharacters(in: .whitespaces)), seconds > 0 else { return nil }
+        return min(seconds, 86_400)
+    }
+
+    private func parseError(status: Int, data: Data, retryAfter: String? = nil) -> TimetrackError {
         var code = "http_\(status)"
         var message = HTTPURLResponse.localizedString(forStatusCode: status)
         if let envelope = try? decoder.decode(ErrorEnvelope.self, from: data), let body = envelope.error {
             if let value = body.code, !value.isEmpty { code = value }
             if let value = body.message, !value.isEmpty { message = value }
         }
+        if status == 429 { return .rateLimited(code: code == "http_429" ? APIErrorCode.tooManyRequests.rawValue : code, message: message, retryAfter: Self.retryAfterSeconds(retryAfter)) }
         return .api(status: status, code: code, message: message)
     }
 

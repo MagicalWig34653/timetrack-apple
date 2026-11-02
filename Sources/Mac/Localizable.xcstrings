@@ -3093,6 +3093,17 @@
         }
       }
     },
+    "signin.session_ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Sitzung wurde beendet, zum Beispiel nach einer Wiederherstellung oder dem Widerruf eines Passkeys auf einem anderen Gerät. Bitte melde dich erneut an."
+          }
+        }
+      }
+    },
     "signin.tagline": {
       "extractionState": "manual",
       "localizations": {

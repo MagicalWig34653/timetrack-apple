@@ -94,7 +94,7 @@ public enum EmailRecoveryState: Sendable, Equatable {
 public enum EmailRecoveryStart: Sendable, Equatable { case active, codeSent }
 
 public enum RecoveryValidation {
-    public static let passwordMinimum = 12
+    public static let passwordMinimum = 16
     public static let passwordMaximum = 256
 
     public enum PasswordProblem: Sendable, Equatable { case tooShort, tooLong, mismatch }

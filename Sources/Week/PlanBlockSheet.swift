@@ -100,14 +100,14 @@ struct PlanBlockSheet: View {
     }
 }
 
-/// U2: copies the plan of one day onto other days of the week (blocked days are not offered).
+/// U2: copies the plan of one day onto other days of the week (off days are offered like any other).
 struct CopyDaySheet: View {
     let store: WeekPlanStore
     let source: Int
     @Environment(\.dismiss) private var dismiss
     @State private var targets: Set<Int> = []
 
-    private var candidates: [Int] { (0..<7).filter { $0 != source && !(store.days[safe: $0]?.isBlocked ?? true) } }
+    private var candidates: [Int] { (0..<7).filter { $0 != source && store.days.indices.contains($0) } }
 
     var body: some View {
         NavigationStack {

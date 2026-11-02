@@ -41,7 +41,7 @@ struct VacationBookingTests {
     @Test func weekDayHintAndActualTime() throws {
         let booked = try weekDay(mark: "vacation", work: 7200, count: 1)
         #expect(VacationBooking.showsHint(booked))
-        #expect(booked.planActualDifferenceSeconds == nil) // blocked day: booking is actual time, not a plan deviation
+        #expect(booked.planActualDifferenceSeconds == nil) // no plan on that day, so no deviation
         #expect(VacationBooking.actualSeconds(booked) == 7200)
         #expect(booked.hoursSeconds == 7200) // the actual time is not hidden by the vacation mark
         #expect(!VacationBooking.showsHint(try weekDay(mark: "vacation", work: 0, count: 0)))

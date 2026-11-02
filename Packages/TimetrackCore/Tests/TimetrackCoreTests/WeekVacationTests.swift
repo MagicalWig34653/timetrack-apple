@@ -80,9 +80,9 @@ private enum WeekFixtures {
     @Test func planWeekDecodesAndBlocks() throws {
         let week = try decode(PlanWeek.self, WeekFixtures.planWeek)
         #expect(week.days[0].plan?.plannedStart == "08:00" && week.days[0].plan?.plannedSeconds == 28800)
-        #expect(week.days[1].blockedBy == .holiday && week.days[1].isBlocked && week.days[1].plan?.mode == .home)
-        #expect(week.days[3].blockedBy == .unknown && week.days[3].isBlocked)
-        #expect(week.days[2].isBlocked == false)
+        #expect(week.days[1].blockedBy == .holiday && week.days[1].isOffDay && week.days[1].plan?.mode == .home)
+        #expect(week.days[3].blockedBy == .unknown && week.days[3].isOffDay)
+        #expect(week.days[2].isOffDay == false)
         #expect(week.totals.differenceSeconds == -82080)
     }
 
@@ -160,10 +160,53 @@ private enum WeekFixtures {
         #expect(same[4].mode == .office && same[4].start == "08:00" && same[5].mode == nil)
 
         let cleared = WeekPlan.clearWeek(days: days, current: drafts)
-        #expect(cleared[0].mode == nil && cleared[1].mode == .home)
+        #expect(cleared[0].mode == nil && cleared[1].mode == nil) // ADR-0035: an off day is cleared like any other
 
         let totals = WeekPlan.totals(days: days, drafts: standard)
         #expect(totals.plannedSeconds == 4 * 27900 && totals.targetSeconds == 110880)
+    }
+}
+
+@Suite struct PlanOffDayTests {
+    private func decodeWeek(_ blockedBy: String, planned: Int, plan: String) throws -> PlanWeek {
+        let json = #"{"week":"2026-W44","from":"2026-10-26","to":"2026-11-01","days":[{"date":"2026-10-26","weekday":1,"targetSeconds":0,"plannedSeconds":\#(planned),"blockedBy":\#(blockedBy),"plan":\#(plan)}],"totals":{"targetSeconds":0,"plannedSeconds":\#(planned),"differenceSeconds":\#(planned)}}"#
+        return try JSONCoding.makeDecoder().decode(PlanWeek.self, from: Data(json.utf8))
+    }
+
+    private let plan = #"{"date":"2026-10-26","mode":"office","note":null,"plannedStart":"09:00","plannedEnd":"13:00","plannedBreakMinutes":0,"plannedSeconds":14400}"#
+
+    @Test func serverPlannedSecondsOnOffDaysAreTakenAsSent() throws {
+        for marker in ["vacation", "sick", "excused", "holiday"] {
+            let week = try decodeWeek("\"\(marker)\"", planned: 14400, plan: plan)
+            #expect(week.days[0].plannedSeconds == 14400 && week.days[0].isOffDay && week.days[0].targetSeconds == 0)
+            #expect(week.totals.plannedSeconds == 14400)
+        }
+    }
+
+    @Test func totalsCountPlannedTimeOnOffDays() throws {
+        let week = try decodeWeek(#""vacation""#, planned: 14400, plan: plan)
+        let drafts = week.days.map(WeekPlan.draft(from:))
+        let totals = WeekPlan.totals(days: week.days, drafts: drafts)
+        #expect(totals.plannedSeconds == 14400 && totals.targetSeconds == 0 && totals.differenceSeconds == 14400)
+    }
+
+    @Test func hintOnlyForPlannedVacation() throws {
+        let vacation = try decodeWeek(#""vacation""#, planned: 14400, plan: plan).days[0]
+        let draft = WeekPlan.draft(from: vacation)
+        #expect(WeekPlan.showsOffDayHint(day: vacation, draft: draft))
+        #expect(!WeekPlan.showsOffDayHint(day: vacation, draft: DayDraft(date: vacation.date)))
+        let sick = try decodeWeek(#""sick""#, planned: 14400, plan: plan).days[0]
+        #expect(!WeekPlan.showsOffDayHint(day: sick, draft: WeekPlan.draft(from: sick)))
+    }
+
+    @Test func bulkActionsKeepOffDaysButClearWeekClearsThem() throws {
+        let day = try decodeWeek(#""vacation""#, planned: 14400, plan: plan).days
+        let drafts = day.map(WeekPlan.draft(from:))
+        let suggestion = WeekPlan.fallbackWindow(targetSeconds: 27720)
+        #expect(WeekPlan.standardWeek(days: day, current: drafts, suggestion: suggestion) == drafts)
+        #expect(WeekPlan.sameForWorkdays(days: day, current: drafts) == drafts)
+        #expect(WeekPlan.clearWeek(days: day, current: drafts)[0].mode == nil)
+        #expect(WeekPlan.problem(DayDraft(date: "d", mode: .office, start: "10:00", end: "09:00")) == .endBeforeStart) // validation still applies
     }
 }
 
@@ -261,7 +304,7 @@ extension PlanWeek {
         #expect(await store.save())
         #expect(!store.isDirty && outcomes == [.saved])
         let body = transport.requests(matching: "PUT /api/v1/plan/weeks/2026-W44").first?.httpBody.flatMap { try? JSONSerialization.jsonObject(with: $0) as? [String: Any] }
-        // blocked day 27th keeps its stored plan in the request (replace would delete it otherwise)
+        // off day 27th keeps its stored plan in the request (replace would delete it otherwise)
         #expect((body?["days"] as? [[String: Any]])?.contains { $0["date"] as? String == "2026-10-27" } == true)
         store.setMode(2, .office)
         store.discard()

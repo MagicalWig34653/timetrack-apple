@@ -17,6 +17,6 @@ public enum VacationBooking {
         showsHint(mark: day.mark == .vacation ? .vacation : nil, workSeconds: day.workSeconds, segmentCount: day.segmentsCount)
     }
 
-    /// Plan/actual: on blocked days the server sends no `planActualDifferenceSeconds`; the booking is shown as actual time, not as a deviation.
+    /// Actual time of a day (work plus credit); since contract 0.42.0 `planActualDifferenceSeconds` is also set on off days that have a plan.
     public static func actualSeconds(_ day: TimeWeekDay) -> Int { day.workSeconds + day.creditSeconds }
 }

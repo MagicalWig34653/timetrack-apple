@@ -67,6 +67,13 @@ struct PlanGridPlanner: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    /// Header rows: weekday, optional marker or half-day chip, mode menu, planned hours. Scales with Dynamic Type so large text is not clipped.
+    @ScaledMetric(relativeTo: .caption2) private var baseHeaderHeight: CGFloat = 70
+    @ScaledMetric(relativeTo: .caption2) private var markerHeaderHeight: CGFloat = 88
+    private var headerHeight: CGFloat {
+        store.holidayNotes.values.contains { $0.isHalfDay } || store.days.contains { $0.isOffDay } ? markerHeaderHeight : baseHeaderHeight
+    }
+
     @State private var windowStart = 0
     @State private var brush: PlanBlockKind = .work
     @State private var selected: BlockRef?
@@ -202,21 +209,27 @@ struct PlanGridPlanner: View {
                 ForEach(Array(visible), id: \.self) { i in dayHeader(i).frame(width: colW) }
             }
         }
-        .frame(height: store.holidayNotes.values.contains { $0.isHalfDay } ? 88 : 70)
+        .frame(height: headerHeight)
         .padding(.top, 2)
     }
 
     private func dayHeader(_ i: Int) -> some View {
         let day = store.days[safe: i]
         let draft = store.drafts[safe: i]
-        let planned = day.flatMap { $0.isBlocked ? 0 : draft.flatMap { WeekPlan.plannedSeconds($0) } } ?? 0
+        let planned = draft.flatMap { WeekPlan.plannedSeconds($0) } ?? 0
         return VStack(spacing: 2) {
             Text(verbatim: day.map { dayTitle($0.date, calendar: store.calendar) } ?? "").font(TTFont.meta.weight(.semibold)).foregroundStyle(TT.textPrimary).lineLimit(1).minimumScaleFactor(0.7)
-            if let day, !day.isBlocked, let note = store.holidayNotes[day.date], note.isHalfDay {
+            if let day, !day.isOffDay, let note = store.holidayNotes[day.date], note.isHalfDay {
                 // AUD3-B (ADR-0029): half company day: still plannable, target halved; never colour alone (½ and dashed outline).
                 HolidayNoteChip(note: note)
             }
-            if let day, !day.isBlocked {
+            if let day, let marker = day.blockedBy {
+                // Contract 0.42.0: marker as plain information; the mode menu and the grid below stay usable.
+                Text(verbatim: marker == .holiday ? (store.holidayNotes[day.date]?.name ?? marker.label) : marker.shortLabel)
+                    .font(.system(.caption2, weight: .medium)).foregroundStyle(TT.textSecondary).lineLimit(1).minimumScaleFactor(0.7)
+                    .accessibilityIdentifier("plan.offday.\(day.date)")
+            }
+            if let day {
                 Menu {
                     Button { store.setMode(i, nil) } label: { Text(verbatim: "Kein Plan") }
                     ForEach(PlanMode.selectable, id: \.self) { mode in Button { store.setMode(i, mode) } label: { Label(mode.plainName, systemImage: mode.symbol) } }
@@ -233,8 +246,6 @@ struct PlanGridPlanner: View {
                 }
                 .accessibilityLabel(Text(verbatim: "Tagesart \(dayTitle(day.date, calendar: store.calendar))"))
                 .accessibilityIdentifier("plan.mode.\(day.date)")
-            } else if let day, let blocked = day.blockedBy {
-                Text(verbatim: blocked == .holiday ? (store.holidayNotes[day.date]?.name ?? blocked.label) : blocked.label).font(.system(.caption2)).foregroundStyle(TT.textSecondary).lineLimit(2).minimumScaleFactor(0.7).frame(minHeight: 30)
             }
             Text(verbatim: planned > 0 ? DurationFormat.hoursMinutes(planned) : "").font(.system(.caption2)).monospacedDigit().foregroundStyle(TT.textSecondary)
         }
@@ -302,27 +313,27 @@ struct PlanGridPlanner: View {
 
     private func dayColumn(_ i: Int, colW: CGFloat, startHour: Int, height: CGFloat) -> some View {
         let draft = store.drafts[safe: i]
-        let blocked = store.days[safe: i]?.isBlocked ?? true
+        let offDay = store.days[safe: i]?.isOffDay ?? false
         let hh = Double(hourHeight)
         return ZStack(alignment: .topLeading) {
-            Rectangle().fill(blocked ? TT.separator.opacity(0.35) : Color.clear)
-                .overlay { if blocked { PlanPatternOverlay(pattern: .stripes).opacity(0.25) } }
+            // Off days get a quiet tint (no stripes: nothing is blocked since contract 0.42.0).
+            Rectangle().fill(offDay ? TT.separator.opacity(0.18) : Color.clear)
                 .overlay(alignment: .leading) { Rectangle().fill(TT.separator.opacity(0.5)).frame(width: 0.5) }
                 .contentShape(.rect)
-                .gesture(paintGesture(i, startHour: startHour), isEnabled: !blocked)
-                .onTapGesture { location in if !blocked { tapEmpty(i, y: location.y, startHour: startHour) } }
+                .gesture(paintGesture(i, startHour: startHour))
+                .onTapGesture { location in tapEmpty(i, y: location.y, startHour: startHour) }
                 .onContinuousHover { phase in
                     switch phase {
-                    case .active(let point): if !blocked { hover = (i, PlanGrid.minutes(atY: point.y, startHour: startHour, hourHeight: hh)) }
+                    case .active(let point): hover = (i, PlanGrid.minutes(atY: point.y, startHour: startHour, hourHeight: hh))
                     case .ended: hover = nil
                     }
                 }
                 .accessibilityElement()
                 .accessibilityLabel(Text(verbatim: columnLabel(i)))
-                .accessibilityAction(named: Text(verbatim: "Block hinzufügen")) { if !blocked { addDefaultBlock(i) } }
-                .accessibilityAction(named: Text(verbatim: "Tag kopieren")) { if !blocked { copySource = i } }
+                .accessibilityAction(named: Text(verbatim: "Block hinzufügen")) { addDefaultBlock(i) }
+                .accessibilityAction(named: Text(verbatim: "Tag kopieren")) { copySource = i }
                 .accessibilityIdentifier("plan.col.\(draft?.date ?? "\(i)")")
-            if let draft, !blocked {
+            if let draft {
                 ForEach(Array(draft.blocks.enumerated()), id: \.offset) { index, block in
                     if let range = PlanGridEdit.ranges(draft.blocks).first(where: { $0.index == index })?.range {
                         blockView(BlockRef(day: i, index: index), block: block, range: range, colW: colW, startHour: startHour)
@@ -354,10 +365,10 @@ struct PlanGridPlanner: View {
     private func columnLabel(_ i: Int) -> String {
         guard let day = store.days[safe: i], let draft = store.drafts[safe: i] else { return "" }
         let title = MonthCellLabel.longDay(day.date)
-        if let blocked = day.blockedBy { return "\(title), \(blocked == .holiday ? (store.holidayNotes[day.date]?.name ?? blocked.label) : blocked.label), gesperrt" }
+        let marker = day.blockedBy.map { ", \($0 == .holiday ? (store.holidayNotes[day.date]?.name ?? $0.label) : $0.label)" } ?? ""
         let halfHint = store.holidayNotes[day.date].flatMap { $0.isHalfDay ? ", \($0.hint)" : nil } ?? ""
         let planned = WeekPlan.plannedSeconds(draft).map { "geplant \(DurationFormat.hoursMinutes($0))" } ?? "kein Plan"
-        return "\(title)\(halfHint), \(draft.mode?.plainName ?? "frei"), \(planned), \(draft.blocks.count) Blöcke"
+        return "\(title)\(marker)\(halfHint), \(draft.mode?.plainName ?? "frei"), \(planned), \(draft.blocks.count) Blöcke"
     }
 
     // MARK: Block

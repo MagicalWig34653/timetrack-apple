@@ -39,7 +39,7 @@ public struct PlanHorizonRow: Sendable, Hashable, Identifiable {
 public enum PlanHorizon {
     /// The row for a loaded plan week. A day counts as planned when it has a plan entry; mode "off" counts too (deliberately free).
     public static func row(for week: PlanWeek) -> PlanHorizonRow {
-        let plannable = week.days.filter { $0.targetSeconds > 0 && !$0.isBlocked }
+        let plannable = week.days.filter { $0.targetSeconds > 0 && !$0.isOffDay }
         return PlanHorizonRow(
             isoWeek: week.week,
             monday: week.from,
@@ -49,7 +49,7 @@ public enum PlanHorizon {
             targetSeconds: week.totals.targetSeconds,
             plannableDays: plannable.count,
             plannedDays: plannable.filter { $0.plan != nil }.count,
-            blockedDays: week.days.filter(\.isBlocked).count
+            blockedDays: week.days.filter(\.isOffDay).count
         )
     }
 

@@ -11,7 +11,8 @@ public enum WeekMark: String, Codable, Sendable, Hashable, CaseIterable {
     }
 }
 
-/// Why a plan day does not count (`PlanWeekDay.blockedBy`). Any value, known or not, means blocked.
+/// Which day marker a plan day carries (`PlanWeekDay.blockedBy`, the wire name is historical). Since contract 0.42.0 (ADR-0035 proposal)
+/// it blocks nothing: plan blocks stay possible and count as planned extra time while the target stays 0. Any value, known or not, means "off day".
 public enum PlanBlockedBy: String, Codable, Sendable, Hashable {
     case holiday, vacation, sick, excused, unknown
 
@@ -48,7 +49,7 @@ public struct TimeWeekDay: Codable, Sendable, Hashable, Identifiable {
     public let plannedSeconds: Int?
     public let planMode: PlanMode?
     /// Contract 0.35.0 (absent for older servers): the day's plan blocks (nil without plan), non-binding plan hints and
-    /// `work + credit - effective planned duration` (nil on future and blocked days or without a planned duration).
+    /// `work + credit - effective planned duration` (nil on future days or without a planned duration; set on off days from contract 0.42.0).
     public let planBlocks: [PlanTimeBlock]?
     public let planHints: [PlanHint]?
     public let planActualDifferenceSeconds: Int?
@@ -137,13 +138,14 @@ public struct PlanWeekDay: Codable, Sendable, Hashable, Identifiable {
     public let date: LocalDay
     public let weekday: Int
     public let targetSeconds: Int
-    /// Effective planned seconds: 0 on a blocked day, nil without plan or without times.
+    /// Planned seconds of the plan (contract 0.42.0: also on vacation, sick, excused and holiday days), nil without plan or without times.
     public let plannedSeconds: Int?
     public let blockedBy: PlanBlockedBy?
     public let plan: PlanDay?
     public var id: LocalDay { date }
 
-    public var isBlocked: Bool { blockedBy != nil }
+    /// The day carries a vacation, sick, excused or holiday marker. Display only; planning is never blocked (contract 0.42.0).
+    public var isOffDay: Bool { blockedBy != nil }
 }
 
 public struct PlanWeekTotals: Codable, Sendable, Hashable {

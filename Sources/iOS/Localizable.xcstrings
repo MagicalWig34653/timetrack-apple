@@ -4924,18 +4924,51 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Feiertag, hier ist kein Plan nötig."
+            "value": "Feiertag."
           }
         }
       }
     },
-    "wk.blocked.kept": {
+    "wk.blocked.short.excused": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ein gespeicherter Plan bleibt erhalten, zählt aber nicht."
+            "value": "Frei"
+          }
+        }
+      }
+    },
+    "wk.blocked.short.holiday": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feiertag"
+          }
+        }
+      }
+    },
+    "wk.blocked.short.sick": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krank"
+          }
+        }
+      }
+    },
+    "wk.blocked.short.vacation": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urlaub"
           }
         }
       }
@@ -5486,6 +5519,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diese Woche"
+          }
+        }
+      }
+    },
+    "wk.offday.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan an einem Urlaubstag zählt als geplante Mehrzeit."
           }
         }
       }

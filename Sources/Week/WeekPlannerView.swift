@@ -200,7 +200,7 @@ private struct PlanDayRow: View {
     let onChange: (DayDraft) -> Void
     @Environment(\.dynamicTypeSize) private var typeSize
 
-    private var planned: Int? { day.isBlocked ? 0 : WeekPlan.plannedSeconds(draft) }
+    private var planned: Int? { WeekPlan.plannedSeconds(draft) }
     private var timed: Bool { draft.mode != nil && draft.mode != .off }
 
     var body: some View {
@@ -211,11 +211,14 @@ private struct PlanDayRow: View {
                     Spacer(minLength: TT.Space.s)
                     if day.targetSeconds > 0 { W.t("plan.day_target", DurationFormat.hoursMinutes(day.targetSeconds)).font(TTFont.meta).foregroundStyle(TT.textSecondary) }
                 }
-                if let blocked = day.blockedBy {
+                if let marker = day.blockedBy {
+                    // Contract 0.42.0: the marker is information only; plan blocks stay possible on off days.
                     HStack(alignment: .top, spacing: TT.Space.xs) {
-                        Image(systemName: "lock.fill").imageScale(.small).foregroundStyle(TT.textSecondary).accessibilityHidden(true)
-                        Text(verbatim: blocked.label + (day.plan != nil ? " " + W.s("blocked.kept") : "")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                        Image(systemName: "info.circle").imageScale(.small).foregroundStyle(TT.textSecondary).accessibilityHidden(true)
+                        Text(verbatim: marker.label + (WeekPlan.showsOffDayHint(day: day, draft: draft) ? " " + W.s("offday.hint") : "")).font(TTFont.meta).foregroundStyle(TT.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .accessibilityIdentifier("plan.offday.\(day.date)")
                 }
                 modePicker
                 if timed {
@@ -230,7 +233,7 @@ private struct PlanDayRow: View {
                         .ttField().accessibilityIdentifier("plan.note.\(day.date)")
                 }
                 if let problem, !multi { Label { problemText(problem) } icon: { Image(systemName: "exclamationmark.triangle.fill") }.font(TTFont.meta).foregroundStyle(TT.danger) }
-                if timed, let planned, !day.isBlocked {
+                if timed, let planned {
                     W.t("plan.planned_hours", DurationFormat.hoursMinutes(planned)).font(TTFont.numeral).foregroundStyle(TT.textPrimary)
                 }
             }

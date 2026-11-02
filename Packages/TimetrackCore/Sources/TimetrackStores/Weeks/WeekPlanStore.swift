@@ -71,7 +71,7 @@ public final class WeekPlanStore {
     public var isPast: Bool { sunday < today }
 
     public func problem(at index: Int) -> DraftProblem? {
-        guard drafts.indices.contains(index), days.indices.contains(index), !days[index].isBlocked else { return nil }
+        guard drafts.indices.contains(index), days.indices.contains(index) else { return nil }
         return WeekPlan.problem(drafts[index])
     }
 
@@ -239,7 +239,7 @@ public final class WeekPlanStore {
         drafts = next
     }
 
-    private func editable(_ index: Int) -> Bool { drafts.indices.contains(index) && days.indices.contains(index) && !days[index].isBlocked }
+    private func editable(_ index: Int) -> Bool { drafts.indices.contains(index) && days.indices.contains(index) }
 
     /// Paints a block into day `index` (the new block wins over what it covers). Returns the index of the new block, nil when refused.
     @discardableResult
@@ -292,7 +292,7 @@ public final class WeekPlanStore {
         drafts[index].blocks[block].note = (trimmed?.isEmpty ?? true) ? nil : trimmed
     }
 
-    /// Copies the plan of day `source` onto the given other days (blocked days are skipped); returns the days that took it.
+    /// Copies the plan of day `source` onto the given other days (off days take it too); returns the days that took it.
     @discardableResult
     public func copyDay(_ source: Int, to targets: [Int]) -> [Int] {
         guard drafts.indices.contains(source) else { return [] }

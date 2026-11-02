@@ -210,7 +210,7 @@ struct PlanBlocksStoreTests {
         await store.load()
         #expect(store.supportsBlocks && !store.isDirty)
         #expect(store.drafts[2].blocks.count == 2 && store.drafts[2].start.isEmpty)
-        #expect(store.totals.plannedSeconds == 28800) // 08-12 + 13-17; blocked day counts 0
+        #expect(store.totals.plannedSeconds == 28800 + 3600) // 08-12 + 13-17, plus the holiday's 09-10 as planned extra time (contract 0.42.0)
         store.splitBlock(2, at: 1)
         #expect(store.isDirty && store.drafts[2].blocks.count == 3)
         store.mergeBlock(2, at: 1)
@@ -230,7 +230,20 @@ struct PlanBlocksStoreTests {
         #expect(!store.isDirty)
     }
 
-    @Test func gridEditsAreUndoableAndSkipBlockedDays() async {
+    @Test func vacationDayIsEditableAndCopyable() async {
+        let transport = MockTransport()
+        let store = store(transport, apiVersion: "0.42.0")
+        transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: BlockFixtures.planWeek().replacingOccurrences(of: #""blockedBy":"holiday""#, with: #""blockedBy":"vacation""#))
+        await store.load()
+        #expect(store.days[1].blockedBy == .vacation && store.days[1].isOffDay)
+        #expect(store.problem(at: 1) == nil)
+        #expect(store.paintBlock(1, range: MinuteRange(start: 14 * 60, end: 15 * 60), kind: .work) != nil)
+        #expect(store.totals.plannedSeconds == 28800 + 7200 && store.isDirty)
+        #expect(WeekPlan.showsOffDayHint(day: store.days[1], draft: store.drafts[1]))
+        #expect(store.copyDay(1, to: [1, 3]) == [3])
+    }
+
+    @Test func gridEditsAreUndoableAndWorkOnOffDays() async {
         let transport = MockTransport()
         let store = store(transport, apiVersion: "0.35.0")
         transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: BlockFixtures.planWeek())
@@ -252,11 +265,11 @@ struct PlanBlocksStoreTests {
         store.eraseBlock(2, at: 0)
         #expect(!store.canRedo && store.drafts[2].blocks.count == 1)
         store.undo()
-        // copy: the blocked day (Tuesday, index 1) does not take the plan
+        // copy: the holiday (Tuesday, index 1) takes the plan like any other day (contract 0.42.0)
         let taken = store.copyDay(2, to: [1, 3, 4, 2])
-        #expect(taken == [3, 4])
+        #expect(taken == [1, 3, 4])
         #expect(store.drafts[3].blocks == store.drafts[2].blocks && store.drafts[3].date != store.drafts[2].date)
-        #expect(store.paintBlock(1, range: MinuteRange(start: 540, end: 600), kind: .work) == nil, "blocked day")
+        #expect(store.paintBlock(1, range: MinuteRange(start: 15 * 60, end: 16 * 60), kind: .work) != nil, "off days can be painted")
         // moving a block to another day removes it from the source
         let count = store.drafts[2].blocks.count
         #expect(store.moveBlock(from: 2, at: 0, toDay: 5, range: MinuteRange(start: 9 * 60, end: 11 * 60)) == 0)

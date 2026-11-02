@@ -51,6 +51,8 @@ extension WeekMark {
 
 extension PlanBlockedBy {
     var label: String { W.s("blocked.\(self == .unknown ? "excused" : rawValue)") }
+    /// One word for the narrow planner column header.
+    var shortLabel: String { W.s("blocked.short.\(self == .unknown ? "excused" : rawValue)") }
 }
 
 /// Weekday plus date, e.g. "Mo., 26. Okt.".

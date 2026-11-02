@@ -185,7 +185,7 @@ public enum WeekPlan {
         return input
     }
 
-    /// The PUT body: every planned row, including the stored plan of blocked days (`replace` would delete it otherwise).
+    /// The PUT body: every planned row, including the plan of off days (`replace` would delete it otherwise).
     public static func request(_ drafts: [DayDraft], multi: Bool = false) -> PlanWeekInput {
         PlanWeekInput(replace: true, days: drafts.compactMap { entry(from: $0, multi: multi) })
     }
@@ -329,12 +329,12 @@ public enum WeekPlan {
         return result
     }
 
-    private static func isWorkday(_ day: PlanWeekDay) -> Bool { day.targetSeconds > 0 && !day.isBlocked }
+    private static func isWorkday(_ day: PlanWeekDay) -> Bool { day.targetSeconds > 0 && !day.isOffDay }
 
-    /// "Standardwoche": office on every workday of the work model with the suggested window, everything else cleared; blocked days keep their draft.
+    /// "Standardwoche": office on every workday of the work model with the suggested window, everything else cleared; off days (vacation, sick, excused, holiday) keep their draft, so a bulk action never creates extra time there.
     public static func standardWeek(days: [PlanWeekDay], current: [DayDraft], suggestion: WindowSuggestion, multi: Bool = false) -> [DayDraft] {
         zip(days, current).map { day, draft in
-            if day.isBlocked { return draft }
+            if day.isOffDay { return draft }
             if !isWorkday(day) { return DayDraft(date: draft.date) }
             let window = window(for: suggestion, targetSeconds: day.targetSeconds)
             if multi { return DayDraft(date: draft.date, mode: .office, blocks: blocks(for: window, kind: .office)) }
@@ -342,10 +342,10 @@ public enum WeekPlan {
         }
     }
 
-    /// Copies the plan of another week day by day (Monday to Monday); blocked days keep their draft.
+    /// Copies the plan of another week day by day (Monday to Monday); off days keep their draft (single-day copy and painting do work there).
     public static func copyWeek(source: PlanWeek, days: [PlanWeekDay], current: [DayDraft], multi: Bool = false) -> [DayDraft] {
         current.enumerated().map { index, draft in
-            guard index < days.count, !days[index].isBlocked else { return draft }
+            guard index < days.count, !days[index].isOffDay else { return draft }
             guard index < source.days.count else { return DayDraft(date: draft.date) }
             var copy = self.draft(from: source.days[index], multi: multi)
             copy.date = draft.date
@@ -355,9 +355,9 @@ public enum WeekPlan {
 
     /// The first planned day is applied to all other workdays (mode, times, break, place); notes stay as they are.
     public static func sameForWorkdays(days: [PlanWeekDay], current: [DayDraft]) -> [DayDraft] {
-        guard let model = zip(days, current).first(where: { $0.1.mode != nil && !$0.0.isBlocked })?.1 else { return current }
+        guard let model = zip(days, current).first(where: { $0.1.mode != nil && !$0.0.isOffDay })?.1 else { return current }
         return zip(days, current).map { day, draft in
-            guard !day.isBlocked, isWorkday(day) else { return draft }
+            guard !day.isOffDay, isWorkday(day) else { return draft }
             var copy = draft
             copy.mode = model.mode
             copy.start = model.start
@@ -369,17 +369,22 @@ public enum WeekPlan {
         }
     }
 
-    public static func clearWeek(days: [PlanWeekDay], current: [DayDraft]) -> [DayDraft] {
-        zip(days, current).map { day, draft in day.isBlocked ? draft : DayDraft(date: draft.date) }
+    /// ADR-0035 (proposal): a plan on a vacation day counts as planned extra time. Shown as a quiet note, never as a block.
+    public static func showsOffDayHint(day: PlanWeekDay, draft: DayDraft) -> Bool {
+        day.blockedBy == .vacation && (plannedSeconds(draft) ?? 0) > 0
     }
 
-    /// Live totals: blocked days count 0 planned; the target comes from the server.
+    public static func clearWeek(days: [PlanWeekDay], current: [DayDraft]) -> [DayDraft] {
+        zip(days, current).map { _, draft in DayDraft(date: draft.date) }
+    }
+
+    /// Live totals: the planned time of every day counts, off days included (contract 0.42.0: planned extra time); the target comes from the server.
     public static func totals(days: [PlanWeekDay], drafts: [DayDraft]) -> PlanWeekTotals {
         var planned = 0
         var target = 0
         for (day, draft) in zip(days, drafts) {
             target += day.targetSeconds
-            if !day.isBlocked { planned += plannedSeconds(draft) ?? 0 }
+            planned += plannedSeconds(draft) ?? 0
         }
         return PlanWeekTotals(targetSeconds: target, plannedSeconds: planned, differenceSeconds: planned - target)
     }

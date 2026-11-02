@@ -5,3 +5,6 @@ xcuserdata/
 *.xcuserstate
 .env
 __pycache__/
+
+# Todolino: Server-URL ist privat
+.todolino.json

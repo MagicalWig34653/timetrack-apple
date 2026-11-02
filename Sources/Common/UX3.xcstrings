@@ -804,6 +804,17 @@
           }
         }
       }
+    },
+    "vb1.note": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buchung an Urlaubstag: Die gebuchte Zeit zählt als Überstunde."
+          }
+        }
+      }
     }
   }
 }

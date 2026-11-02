@@ -128,6 +128,7 @@ private struct TimeContent: View {
                         editor = EditorRequest(segment: nil, day: day.date)
                     }
                 } footer: {
+                    if VacationBooking.showsHint(day) { VacationBookingNote() }
                     if day.hasLegalNotes {
                         LegalDayNotes(day: day) { await store.setSchoolLessons($0, on: day.date) }
                     }

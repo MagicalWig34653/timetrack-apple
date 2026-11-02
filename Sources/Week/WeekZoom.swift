@@ -128,6 +128,9 @@ struct WeekDayList: View {
                     } header: {
                         DayHeader(day: day, calendar: store.calendar, isToday: day.date == store.calendar.day(for: .now), isFuture: day.date > store.calendar.day(for: .now), isSelected: day.date == selected, isEmpty: compactEmpty,
                                   plan: week?.week?.days.first { $0.date == day.date }, canAct: canAct && isCurrent, actions: actions, open: { openDay(day.date) })
+                    } footer: {
+                        // VB1: bookings on a vacation day are allowed; an optional note instead of a block.
+                        if VacationBooking.showsHint(day) { VacationBookingNote().textCase(nil) }
                     }
                     .id(day.date)
                 }

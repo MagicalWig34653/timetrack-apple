@@ -57,6 +57,7 @@ struct DayDetail<Entries: View>: View {
                 if let mark = detail.mark, mark != .unmarked, mark != .unknown { StatusChip(markKeyPlan(mark), tone: .neutral) }
             }
             .accessibilityElement(children: .combine)
+            if VacationBooking.showsHint(detail) { VacationBookingNote() }
         }
     }
 

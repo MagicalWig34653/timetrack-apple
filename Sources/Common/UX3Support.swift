@@ -213,3 +213,15 @@ extension View {
         safeAreaInset(edge: .top, spacing: 0) { SyncStatusLine() }
     }
 }
+
+// MARK: - Booking on a vacation day (VB1, ADR-0034 proposal)
+
+/// Optional note under a day section: a booking on a vacation day is allowed and counts as overtime (the day stays vacation).
+/// Plain secondary text with an icon, no frame or accent bar.
+struct VacationBookingNote: View {
+    var body: some View {
+        Label { ux3("vb1.note") } icon: { Image(systemName: "beach.umbrella") }
+            .font(TTFont.meta).foregroundStyle(TT.textSecondary)
+            .accessibilityIdentifier("vacation.booking.note")
+    }
+}

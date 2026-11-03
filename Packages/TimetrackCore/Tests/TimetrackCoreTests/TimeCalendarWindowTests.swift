@@ -225,6 +225,60 @@ import Testing
         #expect(snapshot.cells.first { $0.day == "2026-10-22" }?.pills.isEmpty == true)
     }
 
+    @Test(arguments: [DayMarkKind.vacation, .sick, .excused])
+    func dayMarkWithoutAbsenceShowsFilledPill(mark: DayMarkKind) {
+        let day: LocalDay = "2026-10-20"
+        let kind = AbsenceKind(rawValue: mark.rawValue)!
+        let snapshot = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: [], absences: [],
+                                           planDays: [:], evaluations: [day: DayEvaluation(date: day, mark: mark)])
+        let cell = snapshot.cells.first { $0.day == day }!
+        #expect(cell.pills == [MonthPill(kind: .absence(kind), tentative: false, text: nil)])
+        #expect(cell.markers == [.absence(kind)])
+        #expect(cell.info.absences.isEmpty)
+    }
+
+    @Test(arguments: [DayMarkKind.vacation, .sick, .excused])
+    func matchingAbsenceSuppressesDayMarkPill(mark: DayMarkKind) {
+        let day: LocalDay = "2026-10-20"
+        let kind = AbsenceKind(rawValue: mark.rawValue)!
+        let snapshot = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: [],
+                                           absences: [absence(kind, "planned", day)], planDays: [:],
+                                           evaluations: [day: DayEvaluation(date: day, mark: mark)])
+        let cell = snapshot.cells.first { $0.day == day }!
+        #expect(cell.pills == [MonthPill(kind: .absence(kind), tentative: true, text: nil)])
+        #expect(cell.markers == [.absence(kind)])
+    }
+
+    @Test(arguments: [DayMarkKind?.none, .unmarked, .holiday, .schoolCredit, .unknown])
+    func otherDayMarksDoNotChangePillsOrMarkers(mark: DayMarkKind?) {
+        let day: LocalDay = "2026-10-20"
+        let holiday = CalendarDay(startDate: day, endDate: day, name: "Feiertag X", kind: .holiday, source: .builtin)
+        let plan = PlanDay(date: day, mode: .office, placeId: nil, note: nil)
+        for holidays in [[], [holiday]] {
+            let baseline = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: holidays,
+                                               absences: [], planDays: [day: plan])
+            let marked = MonthSnapshot.build(key: baseline.key, holidays: holidays, absences: [], planDays: [day: plan],
+                                             evaluations: [day: DayEvaluation(date: day, mark: mark)])
+            #expect(marked.cells.map(\.pills) == baseline.cells.map(\.pills))
+            #expect(marked.cells.map(\.markers) == baseline.cells.map(\.markers))
+        }
+    }
+
+    @Test func dayMarkKeepsOtherAbsencesAndPriorityWithinCapacity() {
+        let day: LocalDay = "2026-10-20"
+        let holiday = CalendarDay(startDate: day, endDate: day, name: "Feiertag X", kind: .holiday, source: .builtin)
+        let plan = PlanDay(date: day, mode: .office, placeId: nil, note: nil)
+        let snapshot = MonthSnapshot.build(key: MonthKey(year: 2026, month: 10), holidays: [holiday],
+                                           absences: [absence(.vacation, "approved", day)], planDays: [day: plan],
+                                           evaluations: [day: DayEvaluation(date: day, mark: .excused)])
+        let cell = snapshot.cells.first { $0.day == day }!
+        #expect(cell.pills.map(\.kind) == [.absence(.vacation), .absence(.excused), .holiday, .plan(.office)])
+        #expect(cell.markers == [.absence(.vacation), .absence(.excused), .holiday])
+        let visible = MonthPill.visible(cell.pills, capacity: 2)
+        #expect(visible.shown.map(\.kind) == [.absence(.vacation)])
+        #expect(visible.hidden == 3)
+    }
+
     @Test func overflowTurnsTheLastSlotIntoACount() {
         let pills = (0..<4).map { _ in MonthPill(kind: .holiday, tentative: false, text: nil) }
         let two = MonthPill.visible(pills, capacity: 2)

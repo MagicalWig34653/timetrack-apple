@@ -72,9 +72,12 @@ public struct MonthPill: Hashable, Sendable {
     public let text: String?
 
     /// Pills in priority order: absences first (vacation, sick, ...), then the holiday, then the plan mode (off and unknown are no pill).
-    public static func pills(for info: CalendarDayInfo) -> [MonthPill] {
+    public static func pills(for info: CalendarDayInfo, mark: DayMarkKind? = nil) -> [MonthPill] {
         var result: [MonthPill] = info.absences.map {
             MonthPill(kind: .absence($0.kind), tentative: $0.status == .planned || $0.status == .requested, text: nil)
+        }
+        if let kind = additionalAbsenceKind(for: info, mark: mark) {
+            result.append(MonthPill(kind: .absence(kind), tentative: false, text: nil))
         }
         if info.isHoliday || info.hasHalfDay, let name = (info.holidays.first { !$0.isHalfDay } ?? info.holidays.first)?.displayName {
             result.append(MonthPill(kind: .holiday, tentative: false, text: name))
@@ -83,6 +86,18 @@ public struct MonthPill: Hashable, Sendable {
             result.append(MonthPill(kind: .plan(plan.mode), tentative: false, text: nil))
         }
         return result
+    }
+
+    /// Day marks use absence styling without creating an absence record or duplicating one already shown.
+    fileprivate static func additionalAbsenceKind(for info: CalendarDayInfo, mark: DayMarkKind?) -> AbsenceKind? {
+        let kind: AbsenceKind
+        switch mark {
+        case .vacation: kind = .vacation
+        case .sick: kind = .sick
+        case .excused: kind = .excused
+        default: return nil
+        }
+        return info.absences.contains { $0.kind == kind } ? nil : kind
     }
 
     /// What fits into a cell with `capacity` pill slots: when more exist, the last slot becomes "+n" (`hidden` counts what is not shown).
@@ -150,13 +165,16 @@ public struct MonthSnapshot: Hashable, Sendable, Identifiable {
             }
             info.absences = relevantAbsences.filter { $0.startDate <= day && day <= $0.endDate }
             info.plan = planDays[day]
-            var markers: [MonthMarker] = info.absences.prefix(2).map { .absence($0.kind) }
+            let mark = evaluations[day]?.mark
+            var absenceKinds = info.absences.map(\.kind)
+            if let kind = MonthPill.additionalAbsenceKind(for: info, mark: mark) { absenceKinds.append(kind) }
+            var markers: [MonthMarker] = absenceKinds.prefix(2).map { .absence($0) }
             if info.isHoliday || info.hasHalfDay { markers.append(.holiday) }
             if let plan = info.plan { markers.append(.plan(plan.mode)) }
             let parts = LocalDays.parse(day)
             return MonthCell(day: day, dayNumber: parts?.day ?? 0, inMonth: parts?.year == key.year && parts?.month == key.month,
                              isWeekend: (LocalDays.isoWeekday(day) ?? 1) >= 6, isHoliday: info.isHoliday, markers: Array(markers.prefix(3)),
-                             pills: MonthPill.pills(for: info), workedSeconds: evaluations[day].map { $0.evaluatedWorkSeconds + $0.creditSeconds } ?? 0, info: info)
+                             pills: MonthPill.pills(for: info, mark: mark), workedSeconds: evaluations[day].map { $0.evaluatedWorkSeconds + $0.creditSeconds } ?? 0, info: info)
         }
         let weeks = stride(from: 0, to: days.count, by: 7).map { LocalDays.isoWeek(of: days[$0]) ?? 0 }
         return MonthSnapshot(key: key, cells: cells, weekNumbers: weeks)

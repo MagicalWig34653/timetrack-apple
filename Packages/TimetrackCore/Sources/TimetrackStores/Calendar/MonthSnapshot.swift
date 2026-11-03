@@ -110,6 +110,15 @@ public struct MonthCell: Hashable, Sendable, Identifiable {
     public var id: LocalDay { day }
 }
 
+/// A week as rendered in one month section of the continuous list.
+public struct MonthWeekSnapshot: Hashable, Sendable, Identifiable {
+    public let month: MonthKey
+    public let week: Int
+    public let cells: [MonthCell]
+    /// Boundary weeks appear in both adjacent sections. Lazy containers need a section-specific identity.
+    public var id: String { "\(month.index):\(cells[0].day)" }
+}
+
 /// Immutable, `Sendable` render model of one month page. Built when data changes; paging only reads it.
 public struct MonthSnapshot: Hashable, Sendable, Identifiable {
     public let key: MonthKey
@@ -121,9 +130,9 @@ public struct MonthSnapshot: Hashable, Sendable, Identifiable {
     public var rows: [[MonthCell]] { stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0..<min($0 + 7, cells.count)]) } }
 
     /// U2: the weeks that contain at least one day of the month (4 to 6 rows with their ISO week numbers), for the vertical list.
-    public var monthRows: [(week: Int, cells: [MonthCell])] {
+    public var monthRows: [MonthWeekSnapshot] {
         rows.enumerated().compactMap { index, row in
-            row.contains { $0.inMonth } ? (weekNumbers.indices.contains(index) ? weekNumbers[index] : 0, row) : nil
+            row.contains { $0.inMonth } ? MonthWeekSnapshot(month: key, week: weekNumbers.indices.contains(index) ? weekNumbers[index] : 0, cells: row) : nil
         }
     }
 

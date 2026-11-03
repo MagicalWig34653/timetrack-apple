@@ -29,7 +29,7 @@ struct MonthList: View {
                 ForEach(layout.keys) { key in
                     let snapshot = store.snapshot(for: key)
                     Section {
-                        ForEach(snapshot.monthRows, id: \.cells[0].day) { row in
+                        ForEach(snapshot.monthRows) { row in
                             MonthWeekRow(week: row.week, cells: row.cells, today: store.today, selected: store.isRangeMode ? nil : selected,
                                          range: rangeBounds, rowHeight: layout.rowHeight, capacity: capacity, onTap: onTap, onLongPress: onLongPress)
                                 .equatable()

@@ -230,16 +230,17 @@ struct PlanBlocksStoreTests {
         #expect(!store.isDirty)
     }
 
-    @Test func vacationDayIsEditableAndCopyable() async {
+    @Test(arguments: ["vacation", "sick", "excused", "holiday"])
+    func offDayIsEditableAndCopyable(marker: String) async {
         let transport = MockTransport()
         let store = store(transport, apiVersion: "0.42.0")
-        transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: BlockFixtures.planWeek().replacingOccurrences(of: #""blockedBy":"holiday""#, with: #""blockedBy":"vacation""#))
+        transport.enqueue("GET /api/v1/plan/weeks/2026-W44", body: BlockFixtures.planWeek().replacingOccurrences(of: #""blockedBy":"holiday""#, with: "\"blockedBy\":\"\(marker)\""))
         await store.load()
-        #expect(store.days[1].blockedBy == .vacation && store.days[1].isOffDay)
+        #expect(store.days[1].blockedBy?.rawValue == marker && store.days[1].isOffDay)
         #expect(store.problem(at: 1) == nil)
         #expect(store.paintBlock(1, range: MinuteRange(start: 14 * 60, end: 15 * 60), kind: .work) != nil)
         #expect(store.totals.plannedSeconds == 28800 + 7200 && store.isDirty)
-        #expect(WeekPlan.showsOffDayHint(day: store.days[1], draft: store.drafts[1]))
+        #expect(WeekPlan.showsOffDayHint(day: store.days[1], draft: store.drafts[1]) == (marker == "vacation"))
         #expect(store.copyDay(1, to: [1, 3]) == [3])
     }
 

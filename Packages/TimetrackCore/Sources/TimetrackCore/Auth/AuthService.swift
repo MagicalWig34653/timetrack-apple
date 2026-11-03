@@ -14,7 +14,7 @@ public enum RestoreResult: Sendable {
     case offline(serverURL: URL)
 }
 
-/// Sign-in flows. REST accepts only the cookie session, so every flow ends with a `tt_session` cookie (kept in the
+/// Sign-in flows. REST accepts only the cookie session, so every flow ends with a session cookie (kept in the
 /// Keychain-backed secret store) and a CSRF token held by the `APIClient`.
 public actor AuthService {
     private let secrets: SecretStore
@@ -196,7 +196,7 @@ public actor AuthService {
         try await client.addPasskeyVerify(challengeId: options.challengeId, credential: credential, name: name)
     }
 
-    /// Development only: adopt a `tt_session` cookie value copied from a browser session on the same server.
+    /// Development only: adopt a session cookie value copied from a browser session on the same server.
     /// Recovery sessions cannot use time tracking, and registration/login need a passkey, so this is the only way to
     /// exercise the app against a test server before Associated Domains exist. Never offered in release UI.
     public func signInWithSessionCookie(server: URL, cookieValue: String) async throws -> AuthContext {

@@ -128,7 +128,7 @@ public final class AppModel {
         await run { auth in try await auth.signInWithPasskey(server: try AuthService.normalizeServerURL(serverInput)) }
     }
 
-    /// Development-only sign-in with a copied `tt_session` cookie value.
+    /// Development-only sign-in with a copied session cookie value.
     public func signInWithSessionCookie(serverInput: String, cookie: String) async {
         await run { auth in try await auth.signInWithSessionCookie(server: try AuthService.normalizeServerURL(serverInput), cookieValue: cookie) }
     }

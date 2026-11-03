@@ -2868,7 +2868,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sitzungs-Cookie tt_session"
+            "value": "Sitzungs-Cookie"
           }
         }
       }
@@ -2890,7 +2890,7 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nur für Entwicklung: Wert des Cookies tt_session aus einer Browser-Sitzung auf demselben Server einfügen."
+            "value": "Nur für Entwicklung: Wert des Sitzungs-Cookies (__Host-tt_session bei HTTPS, tt_session bei HTTP) aus einer Browser-Sitzung auf demselben Server einfügen."
           }
         }
       }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// REST client for `/api/v1` (contract v0.10.3): cookie session `tt_session` plus `X-CSRF-Token` on every non-GET request.
+/// REST client for `/api/v1` (contract v0.10.3): cookie session plus `X-CSRF-Token` on every non-GET request.
 /// Personal bearer tokens are not accepted by REST (only `/mcp`), so native clients always use the cookie session.
 public actor APIClient: PreferencesService {
     public static let basePath = "/api/v1"

@@ -31,6 +31,16 @@ private func pending(visitReported: Bool = false, leftAt: Date = t0) -> PendingL
 @Suite struct LeaveStopFilterTests {
     let filter = LeaveStopFilter(config: AutomationConfig())
 
+    /// Review finding 8: an answered "Timer stoppen?" only stops the segment that ran when it was asked (a timer of another account
+    /// signed in meanwhile, or a new one, is never stopped); without a remembered segment the older checks decide.
+    @Test func answerIsBoundToTheSegmentThatRanWhenAsked() {
+        let asked = UUID(), other = UUID()
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: asked) == nil)
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: other) == .leaveTimerRestarted)
+        #expect(LeaveStopFilter.segmentDecision(expected: nil, running: other) == nil)
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: nil) == nil)
+    }
+
     @Test func schedulesAfterLongStayWithoutArrival() {
         let result = filter.schedule(place: office(), leftAt: t0, exit: exitResult(.noArrival), eventId: leaveID)
         #expect(result.decision == .leaveScheduled)

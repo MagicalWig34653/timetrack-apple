@@ -230,6 +230,13 @@ public final class AppModel {
         }
         lifecycle.apply(.credentialsFound)
         serverURL = client.baseURL
+        if let stale = today, stale.client !== client {
+            // Review finding 4: a session for another server (watch handover) gets a new client; the old store would keep
+            // reading and acting on the previous server. Detach it and build a fresh one.
+            stale.onChange = nil
+            stale.onOutcome = nil
+            today = nil
+        }
         if today == nil {
             let snapshot = launch.snapshot()
             let zone = snapshot.flatMap { TimeZone(identifier: $0.timeZone) } ?? TimeZone(identifier: "Europe/Berlin") ?? .current

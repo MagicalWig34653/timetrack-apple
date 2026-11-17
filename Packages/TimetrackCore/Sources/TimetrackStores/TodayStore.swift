@@ -54,7 +54,8 @@ public final class TodayStore {
     /// the latest load may change the state, an older response never overwrites a newer one.
     private var loadGeneration = 0
 
-    private let client: APIClient
+    /// Internal (not private): AppModel replaces the store when the session moves to another client (review finding 4).
+    let client: APIClient
     private let calendar: DayCalendar
     private let queue: TimerActionQueue?
     /// X4: the account this store belongs to; queued actions are only delivered for it. `nil` until known (watch fast launch).

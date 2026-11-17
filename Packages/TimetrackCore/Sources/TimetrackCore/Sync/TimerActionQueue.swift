@@ -43,6 +43,10 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
     public var serverFailures: Int?
     /// AUD3: no delivery attempt before this time (backoff after a 5xx/429); later entries wait behind it to keep the order.
     public var retryNotBefore: Date?
+    /// Review finding 2 (stop only): the segment that ran when the stop was pressed. If another segment runs on delivery (it was
+    /// stopped and a new one started elsewhere meanwhile), the stop is obsolete and dropped instead of ending the new timer.
+    /// `nil` = unknown (entries from before, or a stop queued behind a not yet delivered start).
+    public var expectedSegmentId: UUID?
 
     public struct Attention: Codable, Sendable, Equatable {
         public let status: Int
@@ -50,8 +54,9 @@ public struct QueuedTimerAction: Codable, Sendable, Equatable, Identifiable {
         public init(status: Int, code: String?) { self.status = status; self.code = code }
     }
 
-    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil, attention: Attention? = nil, accountId: UUID? = nil) {
+    public init(id: UUID = UUID(), command: Command, queuedAt: Date = .now, placeId: UUID? = nil, correctionReason: String? = nil, attention: Attention? = nil, accountId: UUID? = nil, expectedSegmentId: UUID? = nil) {
         self.id = id
+        self.expectedSegmentId = expectedSegmentId
         self.command = command
         self.queuedAt = queuedAt
         self.placeId = placeId
@@ -203,8 +208,11 @@ public actor TimerActionQueue {
             // Backoff after a server failure: the order must hold, so everything behind this entry waits too.
             if let notBefore = action.retryNotBefore, notBefore > now { result.offline = true; break }
             do {
-                if try await deliver(action, client: client, now: now) == .correctionRefused { result.correctionFailed += 1 }
-                result.delivered += 1
+                switch try await deliver(action, client: client, now: now) {
+                case .done: result.delivered += 1
+                case .correctionRefused: result.correctionFailed += 1; result.delivered += 1
+                case .obsolete: result.dropped += 1
+                }
             } catch let error as TimetrackError where error.isNetworkError || error == .cancelled {
                 result.offline = error.isNetworkError
                 break
@@ -259,7 +267,7 @@ public actor TimerActionQueue {
         error.code == APIErrorCode.timerAlreadyRunning.rawValue || error.code == APIErrorCode.noRunningTimer.rawValue
     }
 
-    private enum Delivery { case done, correctionRefused }
+    private enum Delivery { case done, correctionRefused, obsolete }
 
     /// Books the action. The backdating correction (move the booking back to the press time) is part of the delivery: a network or
     /// server failure of the correction throws, so the entry stays and is retried (the action itself is idempotent over its id and
@@ -275,6 +283,8 @@ public actor TimerActionQueue {
         case .resume(let target):
             _ = try await Self.resume(target, client: client, clientEventId: action.id)
         case .stop:
+            // Not atomic (the server has no "stop only segment X" yet), but it closes the window from minutes/hours to one round trip.
+            if let expected = action.expectedSegmentId, let running = try await client.currentTimer(), running.id != expected { return .obsolete }
             let segment = try await client.stopTimer(clientEventId: action.id)
             if late, let end = segment.endedAt, end > action.queuedAt.addingTimeInterval(Self.backdateThreshold / 2) {
                 return try await backdate(client: client, segment: segment, SegmentCorrection(endedAt: action.queuedAt, reason: action.correctionReason ?? "Offline gestoppt"))

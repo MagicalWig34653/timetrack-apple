@@ -88,6 +88,12 @@ public final class AppModel {
     /// The signed-in API client (nil while signed out); used by feature stores that live outside the model (L2: location automation).
     public var apiClient: APIClient? { context?.client }
 
+    /// Review finding 5: owner token of the events this account writes into device calendars (server + account, hashed).
+    public var calendarOwner: String? {
+        guard let client = context?.client, let id = account?.id else { return nil }
+        return EntryMarker.owner(server: client.baseURL, accountId: id)
+    }
+
     // MARK: - Lifecycle
 
     /// HG1: entry point of the root view's `.task`. That task starts again whenever the scene's root view is created anew (scene
@@ -143,10 +149,11 @@ public final class AppModel {
     /// 403 `reauth_required`). Replaces the session in place; returns the failure, nil on success (a cancelled prompt is reported too).
     public func reauthenticate() async -> TimetrackError? {
         guard let url = serverURL else { return .invalidServerURL }
+        guard let accountId = account?.id else { return .api(status: 401, code: "unauthorized", message: "not signed in") }
         isBusy = true
         defer { isBusy = false }
         do {
-            await adopt(try await auth.signInWithPasskey(server: url))
+            await adopt(try await auth.reauthenticate(server: url, accountId: accountId))
             return nil
         } catch let error as TimetrackError {
             return error
@@ -229,6 +236,13 @@ public final class AppModel {
         }
         lifecycle.apply(.credentialsFound)
         serverURL = client.baseURL
+        if let stale = today, stale.client !== client {
+            // Review finding 4: a session for another server (watch handover) gets a new client; the old store would keep
+            // reading and acting on the previous server. Detach it and build a fresh one.
+            stale.onChange = nil
+            stale.onOutcome = nil
+            today = nil
+        }
         if today == nil {
             let snapshot = launch.snapshot()
             let zone = snapshot.flatMap { TimeZone(identifier: $0.timeZone) } ?? TimeZone(identifier: "Europe/Berlin") ?? .current

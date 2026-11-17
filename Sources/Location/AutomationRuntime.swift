@@ -166,6 +166,7 @@ final class AutomationRuntime {
 
     /// The account is gone (sign-out): stop watching, forget cached places and queued events, delete the local token.
     func signedOut() async {
+        await LeaveStopNotification.removeAll() // review finding 8: no stop question of the previous account stays answerable
         await engine.clearAll()
         secrets.delete(AutomationSecretKey.deviceToken)
         secrets.delete(AutomationSecretKey.deviceTokenId)

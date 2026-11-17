@@ -164,7 +164,7 @@ enum MacNotificationID {
     static let stopCategory = "de.linolaske.timetrack.mac.stop.category"
     static let startCategory = "de.linolaske.timetrack.mac.start.category"
     static let stopAction = "mac.stop", keepAction = "mac.keep", startAction = "mac.start"
-    static let endKey = "endAt", eventKey = "eventId", sourceKey = "source", placeKey = "place"
+    static let endKey = "endAt", eventKey = "eventId", sourceKey = "source", placeKey = "place", segmentKey = "segmentId"
     static let reminderPrefix = "de.linolaske.timetrack.mac."
 }
 

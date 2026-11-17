@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 
 // MARK: - Writing to calendars (planned work days, planned vacation and sick days)
@@ -13,17 +14,24 @@ public struct CalendarEntry: Sendable, Equatable {
     /// Minutes since local midnight of `firstDay` for a timed event (a plan block); both nil = all-day.
     public let startMinute: Int?
     public let endMinute: Int?
+    /// Review finding 5: the account that owns the event (`EntryMarker.owner(server:accountId:)`), part of the marker; nil = unowned.
+    public let owner: String?
 
-    public init(key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil) {
+    public init(key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil, owner: String? = nil) {
         self.key = key
         self.firstDay = firstDay
         self.lastDay = lastDay
         self.title = title
         self.startMinute = startMinute
         self.endMinute = endMinute
+        self.owner = owner
     }
 
     public var isTimed: Bool { startMinute != nil && endMinute != nil }
+
+    public func owned(by owner: String?) -> CalendarEntry {
+        CalendarEntry(key: key, firstDay: firstDay, lastDay: lastDay, title: title, startMinute: startMinute, endMinute: endMinute, owner: owner)
+    }
 }
 
 /// An event Timetrack wrote earlier (recognised by its marker URL, see `EntryMarker`).
@@ -36,8 +44,11 @@ public struct WrittenEvent: Sendable, Equatable {
     /// Local start and end minute of a timed event (plan block); nil for all-day events.
     public let startMinute: Int?
     public let endMinute: Int?
+    /// The owner from the marker; nil for events written before owners existed.
+    public let owner: String?
 
-    public init(eventID: String, key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil) {
+    public init(eventID: String, key: String, firstDay: LocalDay, lastDay: LocalDay, title: String, startMinute: Int? = nil, endMinute: Int? = nil, owner: String? = nil) {
+        self.owner = owner
         self.eventID = eventID
         self.key = key
         self.firstDay = firstDay
@@ -49,16 +60,16 @@ public struct WrittenEvent: Sendable, Equatable {
 
     /// Builds the record of a device event, reading its instants in `calendar`'s zone (the zone the events were WRITTEN in, i.e. the
     /// work model's; the device zone would shift minutes and day borders while travelling).
-    public static func reading(eventID: String, key: String, title: String, isAllDay: Bool, start: Date, end: Date, calendar: DayCalendar) -> WrittenEvent {
+    public static func reading(eventID: String, key: String, title: String, isAllDay: Bool, start: Date, end: Date, calendar: DayCalendar, owner: String? = nil) -> WrittenEvent {
         if !isAllDay, key.split(separator: "/").count == 3 {
             // P13: a plan block is a timed event on one day.
             let from = calendar.hourAndMinute(of: start), to = calendar.hourAndMinute(of: end)
             let day = calendar.day(for: start)
             return WrittenEvent(eventID: eventID, key: key, firstDay: day, lastDay: day, title: title,
-                                startMinute: from.hour * 60 + from.minute, endMinute: to.hour * 60 + to.minute)
+                                startMinute: from.hour * 60 + from.minute, endMinute: to.hour * 60 + to.minute, owner: owner)
         }
         let days = DeviceEventFilter.allDayDays(start: start, end: end, calendar: calendar)
-        return WrittenEvent(eventID: eventID, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: title)
+        return WrittenEvent(eventID: eventID, key: key, firstDay: days.lowerBound, lastDay: days.upperBound, title: title, owner: owner)
     }
 }
 
@@ -79,12 +90,36 @@ public enum EntryMarker {
     public static func planBlockKey(_ day: LocalDay, number: Int) -> String { "\(planHost)/\(day)/\(number)" }
     public static func absenceKey(_ id: UUID) -> String { "\(absenceHost)/\(id.uuidString)" }
 
-    public static func url(forKey key: String) -> URL? { URL(string: "\(scheme)://\(key)") }
+    public static func url(forKey key: String, owner: String? = nil) -> URL? { URL(string: token(forKey: key, owner: owner)) }
+
+    private static func token(forKey key: String, owner: String?) -> String {
+        "\(scheme)://\(key)" + (owner.map { "?owner=\($0)" } ?? "")
+    }
+
+    /// Review finding 5: opaque owner of an event (server + account), so events of one account are never changed by another one
+    /// signed in on the same device. A hash: neither the server nor the account id appear in the calendar.
+    public static func owner(server: URL, accountId: UUID) -> String {
+        let digest = SHA256.hash(data: Data("\(server.absoluteString)|\(accountId.uuidString.lowercased())".utf8))
+        return digest.prefix(8).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// The owner from the URL field, or else from the marker token in the notes; nil for unowned (older) or foreign events.
+    public static func owner(from url: URL?, notes: String?) -> String? {
+        func parse(_ url: URL?) -> String? {
+            guard let url, key(from: url) != nil else { return nil }
+            return URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "owner" }?.value
+        }
+        if let url, key(from: url) != nil { return parse(url) }
+        for token in (notes ?? "").split(whereSeparator: \.isWhitespace) where token.hasPrefix("\(scheme)://") {
+            if let found = URL(string: String(token)), key(from: found) != nil { return parse(found) }
+        }
+        return nil
+    }
 
     /// The notes text of an event Timetrack writes: a short German hint plus the marker URL. Some calendar servers drop the URL field,
     /// so the marker is also kept here (N2) and read back from either place. No user data is stored in it.
-    public static func notes(forKey key: String) -> String {
-        "Von Timetrack geschrieben. Änderungen bitte in Timetrack vornehmen.\n\(scheme)://\(key)"
+    public static func notes(forKey key: String, owner: String? = nil) -> String {
+        "Von Timetrack geschrieben. Änderungen bitte in Timetrack vornehmen.\n\(token(forKey: key, owner: owner))"
     }
 
     /// The key from the URL field, or else from a marker token inside the notes; nil for anything not written by Timetrack.

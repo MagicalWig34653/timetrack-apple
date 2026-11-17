@@ -31,6 +31,28 @@ private func pending(visitReported: Bool = false, leftAt: Date = t0) -> PendingL
 @Suite struct LeaveStopFilterTests {
     let filter = LeaveStopFilter(config: AutomationConfig())
 
+    /// Review finding 8: an answered "Timer stoppen?" only stops the segment that ran when it was asked (a timer of another account
+    /// signed in meanwhile, or a new one, is never stopped); without a remembered segment the older checks decide.
+    @Test func answerIsBoundToTheSegmentThatRanWhenAsked() {
+        let asked = UUID(), other = UUID()
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: asked) == nil)
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: other) == .leaveTimerRestarted)
+        #expect(LeaveStopFilter.segmentDecision(expected: nil, running: other) == nil)
+        #expect(LeaveStopFilter.segmentDecision(expected: asked, running: nil) == nil)
+    }
+
+    /// Review finding 8 (Mac "Timer beenden um …?"): the answer stops only the segment the question was about; a timer started after
+    /// the question or another account's timer that started earlier is left running.
+    @Test func stopAnswerOnlyStopsTheSegmentItWasAskedAbout() {
+        let asked = UUID(), other = UUID()
+        let endAt = t0
+        #expect(LeaveStopFilter.answerMayStop(expected: asked, runningId: asked, runningStartedAt: t0.addingTimeInterval(-3600), endAt: endAt))
+        #expect(!LeaveStopFilter.answerMayStop(expected: asked, runningId: other, runningStartedAt: t0.addingTimeInterval(-8 * 3600), endAt: endAt))
+        #expect(!LeaveStopFilter.answerMayStop(expected: nil, runningId: other, runningStartedAt: t0.addingTimeInterval(60), endAt: endAt))
+        #expect(LeaveStopFilter.answerMayStop(expected: nil, runningId: other, runningStartedAt: t0.addingTimeInterval(-60), endAt: endAt))
+        #expect(LeaveStopFilter.answerMayStop(expected: asked, runningId: nil, runningStartedAt: nil, endAt: endAt), "unknown: the queued stop decides")
+    }
+
     @Test func schedulesAfterLongStayWithoutArrival() {
         let result = filter.schedule(place: office(), leftAt: t0, exit: exitResult(.noArrival), eventId: leaveID)
         #expect(result.decision == .leaveScheduled)

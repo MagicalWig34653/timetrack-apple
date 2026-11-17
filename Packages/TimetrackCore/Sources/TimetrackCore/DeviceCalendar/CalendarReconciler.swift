@@ -68,13 +68,15 @@ public enum CalendarReconciler {
     /// - Duplicates of one key are deleted; the one the ledger points to wins.
     /// - A wanted item without an event is created, unless the ledger shows the same content was written before and the event is
     ///   gone: then the user deleted it by hand and it stays gone until the item changes.
+    /// - With `owner`, only events of that owner (or without owner) are considered; `desired` must carry the same owner.
     /// - An event of an item that is no longer wanted (cancelled, rejected, deleted, other kind) is deleted.
     public static func plan(desired: [CalendarEntry], existing: [WrittenEvent], records: [String: CalendarLedgerRecord], from: LocalDay, to: LocalDay,
-                            managing prefixes: [String] = [EntryMarker.planHost, EntryMarker.absenceHost]) -> CalendarReconciliation {
+                            managing prefixes: [String] = [EntryMarker.planHost, EntryMarker.absenceHost], owner: String? = nil) -> CalendarReconciliation {
         func managed(_ key: String) -> Bool { prefixes.contains { key.hasPrefix($0 + "/") } }
         var result = CalendarReconciliation()
         var kept: [String: WrittenEvent] = [:]
-        let inWindow = existing.filter { $0.lastDay >= from && $0.firstDay <= to && managed($0.key) }
+        // Review finding 5: with an owner, events of another owner are left alone; unowned (older) events are adopted and stamped.
+        let inWindow = existing.filter { $0.lastDay >= from && $0.firstDay <= to && managed($0.key) && (owner == nil || $0.owner == nil || $0.owner == owner) }
         for event in inWindow.sorted(by: { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }) {
             if let current = kept[event.key] {
                 // Duplicate: keep the one the ledger knows.
@@ -93,7 +95,7 @@ public enum CalendarReconciler {
             guard let target = wanted[key] else { continue }
             if let current = kept[key] {
                 if current.title != target.title || current.firstDay != target.firstDay || current.lastDay != target.lastDay
-                    || current.startMinute != target.startMinute || current.endMinute != target.endMinute {
+                    || current.startMinute != target.startMinute || current.endMinute != target.endMinute || (owner != nil && current.owner != owner) {
                     result.operations.append(.update(eventID: current.eventID, target))
                 } else if records[key] != CalendarLedgerRecord(eventID: current.eventID, entry: target) {
                     result.adopt[key] = CalendarLedgerRecord(eventID: current.eventID, entry: target)

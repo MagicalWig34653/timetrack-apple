@@ -34,6 +34,29 @@ import Testing
         #expect(!outcomes.contains(.failed))
     }
 
+    /// Review finding 7: "start since …" must only move the start of the segment THIS call created, never a timer started elsewhere.
+    @Test(arguments: [false, true]) func startSinceDoesNotMoveATimerStartedElsewhere(queued: Bool) async {
+        let transport = MockTransport()
+        let today = store(transport: transport, queue: queued ? TimerActionQueue(fileURL: nil) : nil)
+        await today.load(deferAccount: true)
+        transport.set("POST /api/v1/time/timer/start", status: 409, body: conflictBody)
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        await today.start(kind: .work, since: Date.now.addingTimeInterval(-30 * 60))
+        #expect(today.running != nil)
+        #expect(transport.requests(matching: "PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222").isEmpty)
+    }
+
+    @Test func startSinceMovesTheSegmentItCreated() async {
+        let transport = MockTransport()
+        let today = store(transport: transport)
+        await today.load(deferAccount: true)
+        transport.set("POST /api/v1/time/timer/start", body: Fixtures.segmentJSON)
+        transport.set("GET /api/v1/time/timer", body: Fixtures.segmentJSON)
+        transport.set("PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222", body: Fixtures.segmentJSON)
+        await today.start(kind: .work, since: Date.now.addingTimeInterval(-30 * 60))
+        #expect(transport.requests(matching: "PATCH /api/v1/time/segments/22222222-2222-4222-8222-222222222222").count == 1)
+    }
+
     @Test func differentKindOffersSwitchingAndSwitchStopsThenStarts() async {
         let transport = MockTransport()
         let queue = TimerActionQueue(fileURL: nil)

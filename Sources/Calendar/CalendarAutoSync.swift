@@ -18,8 +18,9 @@ final class CalendarAutoSync {
         pending?.cancel()
         pending = Task {
             try? await Task.sleep(for: delay)
-            guard !Task.isCancelled, model.phase == .signedIn, let client = model.apiClient, !deviceCalendar.preferences.writeCalendarIDs.isEmpty else { return }
-            await deviceCalendar.syncAll(source: client, calendar: model.dayCalendar, planTitle: Self.planTitle)
+            guard !Task.isCancelled, model.phase == .signedIn, let client = model.apiClient, let owner = model.calendarOwner,
+                  !deviceCalendar.preferences.writeCalendarIDs.isEmpty else { return }
+            await deviceCalendar.syncAll(source: client, owner: owner, calendar: model.dayCalendar, planTitle: Self.planTitle)
         }
     }
 }

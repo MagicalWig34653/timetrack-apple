@@ -88,6 +88,12 @@ public final class AppModel {
     /// The signed-in API client (nil while signed out); used by feature stores that live outside the model (L2: location automation).
     public var apiClient: APIClient? { context?.client }
 
+    /// Review finding 5: owner token of the events this account writes into device calendars (server + account, hashed).
+    public var calendarOwner: String? {
+        guard let client = context?.client, let id = account?.id else { return nil }
+        return EntryMarker.owner(server: client.baseURL, accountId: id)
+    }
+
     // MARK: - Lifecycle
 
     /// HG1: entry point of the root view's `.task`. That task starts again whenever the scene's root view is created anew (scene

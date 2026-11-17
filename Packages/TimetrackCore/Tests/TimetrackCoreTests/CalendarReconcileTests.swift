@@ -321,4 +321,38 @@ extension CalendarReconcileTests {
         let report = await store.syncNow(source: FakeSource(), calendar: berlin) { $0.rawValue }
         #expect(report == .nothingToWrite)
     }
+
+    // Review finding 5: events are owned by the account (server + account) that wrote them; another account never changes them.
+
+    @Test func anotherAccountLeavesThePreviousAccountsEventsAlone() async {
+        let (store, provider, _) = await makeStore()
+        store.setWritePlanDays(true)
+        let ownerA = EntryMarker.owner(server: URL(string: "https://a.example.org")!, accountId: idA)
+        let ownerB = EntryMarker.owner(server: URL(string: "https://a.example.org")!, accountId: idB)
+        let sourceA = FakeSource()
+        sourceA.absences = [absence(idA, .vacation, .approved, "2026-11-17", "2026-11-19")]
+        sourceA.plan = [PlanDay(date: "2026-11-03", mode: .office)]
+        await store.syncAll(source: sourceA, owner: ownerA, calendar: berlin, now: now) { "Arbeit: \($0.rawValue)" }
+        let writtenByA = summary(provider)
+        #expect(writtenByA.count == 2)
+        // B has neither the absence nor that plan day; B's own plan day on the same date is written next to A's.
+        let sourceB = FakeSource()
+        sourceB.plan = [PlanDay(date: "2026-11-03", mode: .home)]
+        await store.syncAll(source: sourceB, owner: ownerB, calendar: berlin, now: now) { "Arbeit: \($0.rawValue)" }
+        #expect(provider.written.values.filter { $0.entry.owner == ownerA }.count == 2, "A's events are untouched")
+        #expect(provider.written.values.filter { $0.entry.owner == ownerB }.map(\.entry.title) == ["Arbeit: home"])
+        // Back to A: nothing to change for A.
+        let again = await store.syncAll(source: sourceA, owner: ownerA, calendar: berlin, now: now) { "Arbeit: \($0.rawValue)" }
+        #expect(again == .written(created: 0, updated: 0, deleted: 0))
+    }
+
+    @Test func ownerTravelsInTheMarkerWithoutPersonalData() {
+        let owner = EntryMarker.owner(server: URL(string: "https://a.example.org")!, accountId: idA)
+        #expect(!owner.contains("a.example.org") && !owner.lowercased().contains(idA.uuidString.lowercased()))
+        let key = EntryMarker.absenceKey(idA)
+        #expect(EntryMarker.key(from: EntryMarker.url(forKey: key, owner: owner), notes: nil) == key)
+        #expect(EntryMarker.owner(from: EntryMarker.url(forKey: key, owner: owner), notes: nil) == owner)
+        #expect(EntryMarker.owner(from: nil, notes: EntryMarker.notes(forKey: key, owner: owner)) == owner)
+        #expect(EntryMarker.owner(from: EntryMarker.url(forKey: key), notes: EntryMarker.notes(forKey: key)) == nil)
+    }
 }

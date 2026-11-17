@@ -339,7 +339,10 @@ public final class TodayStore {
         let eventId = UUID()
         let client = client
         if let queue {
-            await performQueued(.init(id: eventId, command: .stop, queuedAt: .now), queue: queue, success: .timerStopped) {
+            // Bind the stop to the running segment unless a start waits in the queue (its segment id is not known yet).
+            let startQueued = pending.contains { if case .stop = $0.command { false } else { true } }
+            let action = QueuedTimerAction(id: eventId, command: .stop, queuedAt: .now, expectedSegmentId: startQueued ? nil : running?.id)
+            await performQueued(action, queue: queue, success: .timerStopped) {
                 _ = try await client.stopTimer(clientEventId: eventId)
                 self.running = nil
             }

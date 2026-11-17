@@ -179,6 +179,24 @@ public actor AuthService {
         return AuthContext(client: client, session: session)
     }
 
+    /// AUD3-A / review finding 3: fresh passkey sign-in for `reauth_required`, bound to the signed-in account. A passkey of another
+    /// account is refused: that new session is ended and the previous cookie is put back, so open account-bound pages never
+    /// continue with another identity.
+    public func reauthenticate(server: URL, accountId: UUID) async throws -> AuthContext {
+        let previous = secrets.read(SecretKey.sessionCookie) ?? handedOverCookie ?? cookieJar.sessionCookieValue(for: server)
+        let context = try await signInWithPasskey(server: server)
+        guard context.session.account.id != accountId else { return context }
+        try? await context.client.logout()
+        if let previous {
+            cookieJar.setSessionCookie(previous, for: server)
+            secrets.write(previous, for: SecretKey.sessionCookie)
+            _ = try? await context.client.refreshSession()
+        } else {
+            await clearSession(for: server)
+        }
+        throw TimetrackError.passkey("other_account")
+    }
+
     /// Recovery path (recovery code or fallback password). The result is a restricted session (`recovery == true`):
     /// the backend allows only passkey setup and session revocation until a passkey is added (ADR-0003).
     public func signInWithRecovery(server: URL, method: RecoveryMethod, handle: String, proof: String) async throws -> AuthContext {

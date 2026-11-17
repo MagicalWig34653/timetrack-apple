@@ -143,10 +143,11 @@ public final class AppModel {
     /// 403 `reauth_required`). Replaces the session in place; returns the failure, nil on success (a cancelled prompt is reported too).
     public func reauthenticate() async -> TimetrackError? {
         guard let url = serverURL else { return .invalidServerURL }
+        guard let accountId = account?.id else { return .api(status: 401, code: "unauthorized", message: "not signed in") }
         isBusy = true
         defer { isBusy = false }
         do {
-            await adopt(try await auth.signInWithPasskey(server: url))
+            await adopt(try await auth.reauthenticate(server: url, accountId: accountId))
             return nil
         } catch let error as TimetrackError {
             return error

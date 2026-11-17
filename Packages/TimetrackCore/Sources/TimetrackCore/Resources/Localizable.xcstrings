@@ -353,6 +353,16 @@
         }
       }
     },
+    "error.passkey_other_account": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das war der Passkey eines anderen Kontos. Bitte melde dich mit dem Passkey dieses Kontos an."
+          }
+        }
+      }
+    },
     "error.plan_blocks_invalid": {
       "extractionState": "manual",
       "localizations": {

@@ -136,6 +136,47 @@ struct FakePasskeys: PasskeyAuthenticator {
         #expect(secrets.read(SecretKey.sessionCookie) == "cookie-of-b")
     }
 
+    /// Review finding 3: a fresh sign-in for `reauth_required` must stay on the same account. Choosing another account's passkey
+    /// is refused, that session is ended and the previous cookie is put back.
+    @Test func reauthenticationWithAnotherAccountIsRefusedAndRestoresTheSession() async throws {
+        struct SwitchingPasskeys: PasskeyAuthenticator {
+            let transport: MockTransport
+            func register(options: WebAuthnOptions) async throws -> JSONValue { .null }
+            func authenticate(options: WebAuthnOptions) async throws -> JSONValue {
+                transport.setSessionCookie("cookie-of-b", for: Fixtures.baseURL) // what the server's Set-Cookie would do
+                return .object(["id": .string("cred-b")])
+            }
+        }
+        let secrets = InMemorySecretStore()
+        let transport = MockTransport()
+        let service = AuthService(secrets: secrets, transport: transport, passkeys: SwitchingPasskeys(transport: transport))
+        transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON(csrf: "csrf-a"))
+        let first = try await service.signInWithSessionCookie(server: Fixtures.baseURL, cookieValue: "cookie-of-a")
+        let other = #"{"account":{"id":"99999999-9999-4999-8999-999999999999","handle":"bert","displayName":"Bert","role":"member"},"csrfToken":"csrf-b","recovery":false,"expiresAt":"2026-11-01T08:00:00Z"}"#
+        transport.enqueue("POST /api/v1/auth/login/options", body: #"{"challengeId":"ch","publicKey":{}}"#)
+        transport.enqueue("POST /api/v1/auth/login/verify", body: other)
+        transport.enqueue("DELETE /api/v1/auth/session", status: 204)
+        await #expect(throws: TimetrackError.passkey("other_account")) {
+            try await service.reauthenticate(server: Fixtures.baseURL, accountId: first.session.account.id)
+        }
+        #expect(transport.requests(matching: "DELETE /api/v1/auth/session").count == 1, "the session of the other account is ended")
+        #expect(transport.sessionCookieValue(for: Fixtures.baseURL) == "cookie-of-a")
+        #expect(secrets.read(SecretKey.sessionCookie) == "cookie-of-a")
+        #expect(TimetrackError.passkey("other_account").germanDescription.contains("anderen Kontos"))
+    }
+
+    @Test func reauthenticationWithTheSameAccountReplacesTheSession() async throws {
+        let transport = MockTransport()
+        let service = makeService(transport)
+        transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())
+        let first = try await service.signInWithSessionCookie(server: Fixtures.baseURL, cookieValue: "cookie-of-a")
+        transport.enqueue("POST /api/v1/auth/login/options", body: #"{"challengeId":"ch","publicKey":{}}"#)
+        transport.enqueue("POST /api/v1/auth/login/verify", body: Fixtures.sessionJSON(csrf: "fresh"))
+        let fresh = try await service.reauthenticate(server: Fixtures.baseURL, accountId: first.session.account.id)
+        #expect(fresh.session.account.id == first.session.account.id)
+        #expect(transport.requests(matching: "DELETE /api/v1/auth/session").isEmpty)
+    }
+
     @Test func devCookieSignInAndFailureCleanup() async throws {
         let transport = MockTransport()
         transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())

@@ -167,8 +167,8 @@ public enum TimetrackError: Error, Sendable, Equatable {
             return Self.text("error.invalid_server_url")
         case .cancelled:
             return Self.text("error.cancelled")
-        case .passkey:
-            return Self.text("error.passkey")
+        case .passkey(let reason):
+            return Self.text(reason == "other_account" ? "error.passkey_other_account" : "error.passkey")
         }
     }
 }

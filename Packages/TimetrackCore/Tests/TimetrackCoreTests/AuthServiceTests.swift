@@ -103,6 +103,39 @@ struct FakePasskeys: PasskeyAuthenticator {
         #expect(secrets.read(SecretKey.sessionCookie) == "stored-cookie")
     }
 
+    /// Review finding 1: a failed sign-in on server B must not rebind the stored cookie of server A to B.
+    @Test func failedSignInOnOtherServerKeepsCookieBoundToStoredServer() async throws {
+        let secrets = InMemorySecretStore()
+        secrets.write("http://localhost:18090", for: SecretKey.serverURL)
+        secrets.write("cookie-of-a", for: SecretKey.sessionCookie)
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/auth/session", error: .cannotConnectToHost)
+        transport.enqueue("POST /api/v1/auth/login/options", status: 500, body: #"{"error":{"code":"internal","message":"x"}}"#)
+        let service = makeService(transport, secrets: secrets)
+        guard case .offline = await service.restore() else { Issue.record("expected offline"); return }
+        let other = URL(string: "https://b.example.org")!
+        await #expect(throws: TimetrackError.self) { try await service.signInWithPasskey(server: other) }
+        #expect(secrets.read(SecretKey.serverURL) == "http://localhost:18090")
+        #expect(await service.serverURL == Fixtures.baseURL)
+        _ = await service.restore()
+        _ = await makeService(transport, secrets: secrets).restore()
+        let sessionChecks = transport.requests(matching: "GET /api/v1/auth/session")
+        #expect(sessionChecks.count == 3)
+        #expect(sessionChecks.allSatisfy { $0.url?.host == "localhost" }, "the cookie of A is never sent to B")
+    }
+
+    @Test func successfulSignInOnOtherServerStoresIt() async throws {
+        let secrets = InMemorySecretStore()
+        secrets.write("http://localhost:18090", for: SecretKey.serverURL)
+        secrets.write("cookie-of-a", for: SecretKey.sessionCookie)
+        let transport = MockTransport()
+        transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())
+        let other = URL(string: "https://b.example.org")!
+        _ = try await makeService(transport, secrets: secrets).signInWithSessionCookie(server: other, cookieValue: "cookie-of-b")
+        #expect(secrets.read(SecretKey.serverURL) == "https://b.example.org")
+        #expect(secrets.read(SecretKey.sessionCookie) == "cookie-of-b")
+    }
+
     @Test func devCookieSignInAndFailureCleanup() async throws {
         let transport = MockTransport()
         transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())

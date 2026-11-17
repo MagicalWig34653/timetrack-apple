@@ -61,17 +61,28 @@ public actor AuthService {
         return url
     }
 
+    /// Client for `url`. Does NOT store the server: the stored server and session cookie only change together after a successful
+    /// sign-in (`commitSignIn`), so a failed attempt on another server never rebinds the stored cookie to it.
     private func useServer(_ url: URL) -> APIClient {
         if let client, client.baseURL == url { return client }
         let made = APIClient(baseURL: url, transport: transport)
         client = made
-        serverURL = url
-        secrets.write(url.absoluteString, for: SecretKey.serverURL)
         return made
     }
 
     private func persistCookie(for url: URL) {
         if let value = cookieJar.sessionCookieValue(for: url) { secrets.write(value, for: SecretKey.sessionCookie) }
+    }
+
+    /// Stores server and session cookie as one pair after a successful sign-in.
+    private func commitSignIn(server url: URL) {
+        if serverURL != url {
+            handedOverCookie = nil
+            secrets.delete(SecretKey.sessionCookie)
+        }
+        serverURL = url
+        secrets.write(url.absoluteString, for: SecretKey.serverURL)
+        persistCookie(for: url)
     }
 
     // MARK: - Restore and sign out
@@ -164,7 +175,7 @@ public actor AuthService {
         let options = try await client.loginOptions()
         let credential = try await passkeys.authenticate(options: options)
         let session = try await client.loginVerify(challengeId: options.challengeId, credential: credential)
-        persistCookie(for: server)
+        commitSignIn(server: server)
         return AuthContext(client: client, session: session)
     }
 
@@ -174,7 +185,7 @@ public actor AuthService {
         let client = useServer(server)
         let start = try await client.recoveryStart(method: method, identifier: handle.trimmingCharacters(in: .whitespaces).lowercased())
         let session = try await client.recoveryComplete(recoveryId: start.recoveryId, proof: proof.trimmingCharacters(in: .whitespacesAndNewlines))
-        persistCookie(for: server)
+        commitSignIn(server: server)
         return AuthContext(client: client, session: session)
     }
 
@@ -205,7 +216,7 @@ public actor AuthService {
         cookieJar.setSessionCookie(value, for: server)
         do {
             let session = try await client.refreshSession()
-            persistCookie(for: server)
+            commitSignIn(server: server)
             return AuthContext(client: client, session: session)
         } catch {
             cookieJar.clearSessionCookie(for: server)

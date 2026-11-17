@@ -16,7 +16,9 @@ public final class AppModel {
         case signedIn
     }
 
-    public private(set) var phase: Phase = .restoring
+    public private(set) var phase: Phase = .restoring {
+        didSet { if phase != oldValue { onPhaseChange?(oldValue, phase) } }
+    }
     public private(set) var account: Account?
     public private(set) var serverURL: URL?
     public private(set) var modules = ModuleSwitches()
@@ -69,6 +71,8 @@ public final class AppModel {
     public var fastLaunch: FastLaunch?
     /// Shared queue for timer actions initiated by the app, intents, and automation on iOS.
     public var actionQueue: TimerActionQueue?
+    /// Every phase change, synchronously and in order (a window-less app cannot rely on `onChange` of a view; see `SignOutCleanup`).
+    @ObservationIgnored public var onPhaseChange: (@MainActor (_ old: Phase, _ new: Phase) -> Void)?
     /// Forwarded to the fast-launch today store (`TodayStore.onChange`).
     public var onTodayChanged: (@MainActor () -> Void)?
 

@@ -20,6 +20,7 @@ struct TimetrackMacApp: App {
         model.onOutcome = { TTHaptics.handle($0) } // trackpad feedback for explicit actions only
         MacNotifications.install() // M2: answers to "Timer beenden?" / "Timer starten?"
         PushBridge.shared.attach(model) // P14c
+        MacBootstrap.observeSession(model)
         _model = State(initialValue: model)
     }
 
@@ -141,6 +142,19 @@ enum SidebarItem: String, CaseIterable, Identifiable {
 @MainActor
 enum MacBootstrap {
     private static var running = false
+    /// X4: as on iOS, signing out (also before switching accounts) forgets the automation token, queue and places; the next
+    /// account's places load only after that cleanup. Hooked to the model, not a view: "nur Menüleiste" may have no window.
+    static let signOutCleanup = SignOutCleanup { await MacAutomationRuntime.shared.signedOut() }
+
+    static func observeSession(_ model: AppModel) {
+        model.onPhaseChange = { [weak model] old, new in
+            signOutCleanup.phaseChanged(from: old, to: new)
+            // Signed in later (new sign-in, back online); the launch restore itself is covered by `run`.
+            if new == .signedIn, old != .restoring {
+                Task { await signOutCleanup.wait(); await MacAutomationRuntime.shared.refreshPlaces(using: model?.apiClient) }
+            }
+        }
+    }
 
     static func run(_ model: AppModel) async {
         MacCompanion.shared.attach(model) // activity capture, presence, hotkey, Dock mode

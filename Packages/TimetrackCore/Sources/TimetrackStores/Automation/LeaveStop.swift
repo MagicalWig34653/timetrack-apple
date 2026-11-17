@@ -92,6 +92,14 @@ public struct LeaveStopFilter: Sendable {
         return .leaveTimerRestarted
     }
 
+    /// Whether a "Timer beenden um …?" answer may stop the running timer: not one that started after `endAt`, and not another
+    /// segment than the one asked about (`expected`). Nothing running or unknown: true (the queued stop is moot or bound itself).
+    public static func answerMayStop(expected: UUID?, runningId: UUID?, runningStartedAt: Date?, endAt: Date) -> Bool {
+        guard let runningId else { return true }
+        if let runningStartedAt, runningStartedAt > endAt { return false }
+        return segmentDecision(expected: expected, running: runningId) == nil
+    }
+
     /// Whether a running timer may be stopped for a leave at `leftAt`: it must have started before leaving.
     public static func timerDecision(_ timer: TimerObservation, leftAt: Date) -> AutomationDecision? {
         switch timer {

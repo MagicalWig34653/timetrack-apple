@@ -41,6 +41,18 @@ private func pending(visitReported: Bool = false, leftAt: Date = t0) -> PendingL
         #expect(LeaveStopFilter.segmentDecision(expected: asked, running: nil) == nil)
     }
 
+    /// Review finding 8 (Mac "Timer beenden um …?"): the answer stops only the segment the question was about; a timer started after
+    /// the question or another account's timer that started earlier is left running.
+    @Test func stopAnswerOnlyStopsTheSegmentItWasAskedAbout() {
+        let asked = UUID(), other = UUID()
+        let endAt = t0
+        #expect(LeaveStopFilter.answerMayStop(expected: asked, runningId: asked, runningStartedAt: t0.addingTimeInterval(-3600), endAt: endAt))
+        #expect(!LeaveStopFilter.answerMayStop(expected: asked, runningId: other, runningStartedAt: t0.addingTimeInterval(-8 * 3600), endAt: endAt))
+        #expect(!LeaveStopFilter.answerMayStop(expected: nil, runningId: other, runningStartedAt: t0.addingTimeInterval(60), endAt: endAt))
+        #expect(LeaveStopFilter.answerMayStop(expected: nil, runningId: other, runningStartedAt: t0.addingTimeInterval(-60), endAt: endAt))
+        #expect(LeaveStopFilter.answerMayStop(expected: asked, runningId: nil, runningStartedAt: nil, endAt: endAt), "unknown: the queued stop decides")
+    }
+
     @Test func schedulesAfterLongStayWithoutArrival() {
         let result = filter.schedule(place: office(), leftAt: t0, exit: exitResult(.noArrival), eventId: leaveID)
         #expect(result.decision == .leaveScheduled)

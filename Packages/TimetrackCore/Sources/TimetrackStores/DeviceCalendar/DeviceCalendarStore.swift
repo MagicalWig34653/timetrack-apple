@@ -306,15 +306,18 @@ public final class DeviceCalendarStore {
     /// for `[from, to]` (absences and plan days use the same window). Does nothing without write access or without a read+write
     /// calendar. Only marker events are touched.
     @discardableResult
-    public func sync(planDays: [LocalDay: PlanDay], absences: [Absence], from: LocalDay, to: LocalDay, calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
-        reconcile(planDays: planDays, absences: absences, absenceWindow: (from, to), planWindow: (from, to), calendar: calendar, planTitle: planTitle)
+    public func sync(planDays: [LocalDay: PlanDay], absences: [Absence], from: LocalDay, to: LocalDay, owner: String? = nil, calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
+        reconcile(planDays: planDays, absences: absences, absenceWindow: (from, to), planWindow: (from, to), owner: owner, calendar: calendar, planTitle: planTitle)
     }
 
     /// N2: reads the absences (and, if enabled, the plan days) of the wide windows from the server itself and reconciles every
     /// read+write calendar, independent of which screen or month is open. Nothing is changed when the server could not be read, so a
     /// network error can never delete events. Calls that arrive while a run is in progress cause exactly one more run afterwards.
     @discardableResult
-    public func syncAll(source: CalendarSyncSource, calendar: DayCalendar, now: Date = .now, planTitle: @escaping (PlanMode) -> String) async -> CalendarWriteResult {
+    ///
+    /// `owner` (review finding 5, `EntryMarker.owner(server:accountId:)`): events and ledger belong to that account; events another
+    /// account wrote on this device are never changed or deleted.
+    public func syncAll(source: CalendarSyncSource, owner: String? = nil, calendar: DayCalendar, now: Date = .now, planTitle: @escaping (PlanMode) -> String) async -> CalendarWriteResult {
         if isSyncing {
             syncRequested = true
             return .skipped
@@ -325,7 +328,7 @@ public final class DeviceCalendarStore {
         repeat {
             syncRequested = false
             serverReadFailed = false
-            result = await runFullSync(source: source, calendar: calendar, now: now, planTitle: planTitle)
+            result = await runFullSync(source: source, owner: owner, calendar: calendar, now: now, planTitle: planTitle)
         } while syncRequested
         switch result {
         case .written(let created, let updated, let deleted): lastSyncReport = .synced(created: created, updated: updated, deleted: deleted)
@@ -339,12 +342,12 @@ public final class DeviceCalendarStore {
     /// U3: "Jetzt synchronisieren": runs a full reconciliation immediately and returns its report. A run that is already in progress is
     /// not doubled; its report is returned when the running one finished (the extra run it triggers keeps the data current).
     @discardableResult
-    public func syncNow(source: CalendarSyncSource, calendar: DayCalendar, planTitle: @escaping (PlanMode) -> String) async -> CalendarSyncReport? {
-        await syncAll(source: source, calendar: calendar, planTitle: planTitle)
+    public func syncNow(source: CalendarSyncSource, owner: String? = nil, calendar: DayCalendar, planTitle: @escaping (PlanMode) -> String) async -> CalendarSyncReport? {
+        await syncAll(source: source, owner: owner, calendar: calendar, planTitle: planTitle)
         return lastSyncReport
     }
 
-    private func runFullSync(source: CalendarSyncSource, calendar: DayCalendar, now: Date, planTitle: (PlanMode) -> String) async -> CalendarWriteResult {
+    private func runFullSync(source: CalendarSyncSource, owner: String?, calendar: DayCalendar, now: Date, planTitle: (PlanMode) -> String) async -> CalendarWriteResult {
         access = provider.access
         guard access.canWrite, calendars.contains(where: { preferences.mode(for: $0.id).writes && $0.allowsWrite }) else {
             lastWrite = .skipped
@@ -366,11 +369,11 @@ public final class DeviceCalendarStore {
             lastWrite = .skipped
             return .skipped
         }
-        return reconcile(planDays: planDays, absences: absences, absenceWindow: absenceWindow, planWindow: planWindow, calendar: calendar, planTitle: planTitle)
+        return reconcile(planDays: planDays, absences: absences, absenceWindow: absenceWindow, planWindow: planWindow, owner: owner, calendar: calendar, planTitle: planTitle)
     }
 
     private func reconcile(planDays: [LocalDay: PlanDay], absences: [Absence], absenceWindow: (from: LocalDay, to: LocalDay),
-                           planWindow: (from: LocalDay, to: LocalDay), calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
+                           planWindow: (from: LocalDay, to: LocalDay), owner: String?, calendar: DayCalendar, planTitle: (PlanMode) -> String) -> CalendarWriteResult {
         access = provider.access
         let targets = calendars.filter { preferences.mode(for: $0.id).writes && $0.allowsWrite }
         let queryFrom = min(absenceWindow.from, planWindow.from), queryTo = max(absenceWindow.to, planWindow.to)
@@ -378,14 +381,20 @@ public final class DeviceCalendarStore {
             lastWrite = .skipped
             return .skipped
         }
-        let desiredPlan = preferences.writePlanDays ? CalendarWritePlanner.desiredPlanDays(from: planDays, from: planWindow.from, to: planWindow.to, title: planTitle) : []
-        let desiredAbsences = preferences.writeAbsences ? CalendarWritePlanner.desiredAbsences(absences, from: absenceWindow.from, to: absenceWindow.to) : []
+        let desiredPlan = (preferences.writePlanDays ? CalendarWritePlanner.desiredPlanDays(from: planDays, from: planWindow.from, to: planWindow.to, title: planTitle) : []).map { $0.owned(by: owner) }
+        let desiredAbsences = (preferences.writeAbsences ? CalendarWritePlanner.desiredAbsences(absences, from: absenceWindow.from, to: absenceWindow.to) : []).map { $0.owned(by: owner) }
         var created = 0, updated = 0, deleted = 0
         for target in targets {
             let existing = provider.writtenEvents(calendarID: target.id, from: start, to: end, calendar: calendar)
-            var records = ledger.records(for: target.id)
-            let absencePlan = CalendarReconciler.plan(desired: desiredAbsences, existing: existing, records: records, from: absenceWindow.from, to: absenceWindow.to, managing: [EntryMarker.absenceHost])
-            let planPlan = CalendarReconciler.plan(desired: desiredPlan, existing: existing, records: records, from: planWindow.from, to: planWindow.to, managing: [EntryMarker.planHost])
+            // The ledger is kept per owner too (an older unscoped ledger is taken over by the first owner that syncs).
+            let ledgerID = Self.ledgerID(calendarID: target.id, owner: owner)
+            var records = ledger.records(for: ledgerID)
+            if records.isEmpty, ledgerID != target.id {
+                records = ledger.records(for: target.id)
+                ledger.clear(calendar: target.id)
+            }
+            let absencePlan = CalendarReconciler.plan(desired: desiredAbsences, existing: existing, records: records, from: absenceWindow.from, to: absenceWindow.to, managing: [EntryMarker.absenceHost], owner: owner)
+            let planPlan = CalendarReconciler.plan(desired: desiredPlan, existing: existing, records: records, from: planWindow.from, to: planWindow.to, managing: [EntryMarker.planHost], owner: owner)
             let operations = (absencePlan.operations + planPlan.operations).sorted { CalendarWritePlanner.sortKey($0) < CalendarWritePlanner.sortKey($1) }
             var assigned: [String: String] = [:]
             if !operations.isEmpty {
@@ -415,7 +424,7 @@ public final class DeviceCalendarStore {
                     }
                 }
             }
-            ledger.set(records, for: target.id)
+            ledger.set(records, for: ledgerID)
         }
         ledgerStorage.save(ledger)
         message = nil
@@ -424,8 +433,11 @@ public final class DeviceCalendarStore {
         return result
     }
 
+    static func ledgerID(calendarID: String, owner: String?) -> String { owner.map { "\(calendarID)#\($0)" } ?? calendarID }
+
     private func forgetLedger(of calendarID: String) {
         ledger.clear(calendar: calendarID)
+        for id in ledger.calendars.keys where id.hasPrefix(calendarID + "#") { ledger.clear(calendar: id) }
         ledgerStorage.save(ledger)
     }
 

@@ -257,9 +257,9 @@ private struct CalendarSettingsContent: View {
     }
 
     private func syncNow() {
-        guard let client = model.apiClient else { return }
+        guard let client = model.apiClient, let owner = model.calendarOwner else { return }
         TTHaptics.play(.softTap)
-        Task { await store.syncNow(source: client, calendar: model.dayCalendar, planTitle: CalendarAutoSync.planTitle) }
+        Task { await store.syncNow(source: client, owner: owner, calendar: model.dayCalendar, planTitle: CalendarAutoSync.planTitle) }
     }
 
     private func reportText(_ report: CalendarSyncReport) -> String {

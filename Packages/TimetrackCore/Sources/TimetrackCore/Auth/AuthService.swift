@@ -61,17 +61,28 @@ public actor AuthService {
         return url
     }
 
+    /// Client for `url`. Does NOT store the server: the stored server and session cookie only change together after a successful
+    /// sign-in (`commitSignIn`), so a failed attempt on another server never rebinds the stored cookie to it.
     private func useServer(_ url: URL) -> APIClient {
         if let client, client.baseURL == url { return client }
         let made = APIClient(baseURL: url, transport: transport)
         client = made
-        serverURL = url
-        secrets.write(url.absoluteString, for: SecretKey.serverURL)
         return made
     }
 
     private func persistCookie(for url: URL) {
         if let value = cookieJar.sessionCookieValue(for: url) { secrets.write(value, for: SecretKey.sessionCookie) }
+    }
+
+    /// Stores server and session cookie as one pair after a successful sign-in.
+    private func commitSignIn(server url: URL) {
+        if serverURL != url {
+            handedOverCookie = nil
+            secrets.delete(SecretKey.sessionCookie)
+        }
+        serverURL = url
+        secrets.write(url.absoluteString, for: SecretKey.serverURL)
+        persistCookie(for: url)
     }
 
     // MARK: - Restore and sign out
@@ -164,8 +175,26 @@ public actor AuthService {
         let options = try await client.loginOptions()
         let credential = try await passkeys.authenticate(options: options)
         let session = try await client.loginVerify(challengeId: options.challengeId, credential: credential)
-        persistCookie(for: server)
+        commitSignIn(server: server)
         return AuthContext(client: client, session: session)
+    }
+
+    /// AUD3-A / review finding 3: fresh passkey sign-in for `reauth_required`, bound to the signed-in account. A passkey of another
+    /// account is refused: that new session is ended and the previous cookie is put back, so open account-bound pages never
+    /// continue with another identity.
+    public func reauthenticate(server: URL, accountId: UUID) async throws -> AuthContext {
+        let previous = secrets.read(SecretKey.sessionCookie) ?? handedOverCookie ?? cookieJar.sessionCookieValue(for: server)
+        let context = try await signInWithPasskey(server: server)
+        guard context.session.account.id != accountId else { return context }
+        try? await context.client.logout()
+        if let previous {
+            cookieJar.setSessionCookie(previous, for: server)
+            secrets.write(previous, for: SecretKey.sessionCookie)
+            _ = try? await context.client.refreshSession()
+        } else {
+            await clearSession(for: server)
+        }
+        throw TimetrackError.passkey("other_account")
     }
 
     /// Recovery path (recovery code or fallback password). The result is a restricted session (`recovery == true`):
@@ -174,7 +203,7 @@ public actor AuthService {
         let client = useServer(server)
         let start = try await client.recoveryStart(method: method, identifier: handle.trimmingCharacters(in: .whitespaces).lowercased())
         let session = try await client.recoveryComplete(recoveryId: start.recoveryId, proof: proof.trimmingCharacters(in: .whitespacesAndNewlines))
-        persistCookie(for: server)
+        commitSignIn(server: server)
         return AuthContext(client: client, session: session)
     }
 
@@ -205,7 +234,7 @@ public actor AuthService {
         cookieJar.setSessionCookie(value, for: server)
         do {
             let session = try await client.refreshSession()
-            persistCookie(for: server)
+            commitSignIn(server: server)
             return AuthContext(client: client, session: session)
         } catch {
             cookieJar.clearSessionCookie(for: server)

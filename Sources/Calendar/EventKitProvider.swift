@@ -79,7 +79,8 @@ final class EventKitProvider: DeviceCalendarProvider {
         return store.events(matching: predicate).compactMap { event in
             guard let key = EntryMarker.key(from: event.url, notes: event.notes), let id = event.eventIdentifier else { return nil }
             return WrittenEvent.reading(eventID: id, key: key, title: event.title ?? "", isAllDay: event.isAllDay,
-                                        start: event.startDate, end: event.endDate, calendar: dayCalendar)
+                                        start: event.startDate, end: event.endDate, calendar: dayCalendar,
+                                        owner: EntryMarker.owner(from: event.url, notes: event.notes))
         }
     }
 
@@ -128,10 +129,12 @@ final class EventKitProvider: DeviceCalendarProvider {
         } else {
             event.isAllDay = true
             event.startDate = first.start
-            event.endDate = last.start // all-day events end on their last day
+            // All-day events end on their last day: EventKit normalises this to 23:59:59 of `lastDay` (checked on macOS 27:
+            // end = start of 19 Nov reads back as 19 Nov 23:59:59). The start of the NEXT day would add a whole extra day.
+            event.endDate = last.start
         }
-        event.url = EntryMarker.url(forKey: planned.key)
-        event.notes = EntryMarker.notes(forKey: planned.key) // fallback marker for servers that drop the URL field
+        event.url = EntryMarker.url(forKey: planned.key, owner: planned.owner)
+        event.notes = EntryMarker.notes(forKey: planned.key, owner: planned.owner) // fallback marker for servers that drop the URL field
         event.availability = .free
     }
 

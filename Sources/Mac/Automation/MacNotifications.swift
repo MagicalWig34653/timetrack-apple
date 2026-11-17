@@ -15,8 +15,8 @@ enum MacTimerActions {
         await AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(timeout: 8)).optimisticClient()
     }
 
-    static func stop(eventId: UUID, at: Date, reason: String) async -> LeaveStopResult {
-        await queue.enqueue(QueuedTimerAction(id: eventId, command: .stop, queuedAt: at, correctionReason: reason))
+    static func stop(eventId: UUID, at: Date, reason: String, expectedSegmentId: UUID? = nil) async -> LeaveStopResult {
+        await queue.enqueue(QueuedTimerAction(id: eventId, command: .stop, queuedAt: at, correctionReason: reason, expectedSegmentId: expectedSegmentId))
         guard let client = await client() else { return .queued }
         let result = await queue.drain(client: client)
         defer { Task { @MainActor in NotificationCenter.default.post(name: .ttTimerChangedExternally, object: nil) } }
@@ -76,6 +76,10 @@ final class MacNotifications: NSObject, UNUserNotificationCenterDelegate, Sendab
         var info: [String: Any] = [MacNotificationID.endKey: endAt.timeIntervalSince1970, MacNotificationID.eventKey: eventId.uuidString,
                                    MacNotificationID.sourceKey: source]
         if let place { info[MacNotificationID.placeKey] = place }
+        // Review finding 8: the answer may only stop the segment that runs now (not a later one, not one of another account).
+        if let client = await MacTimerActions.client(), let running = try? await client.currentTimer(), running.endedAt == nil {
+            info[MacNotificationID.segmentKey] = running.id.uuidString
+        }
         content.userInfo = info
         do {
             try await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: MacNotificationID.reminderPrefix + "stop." + eventId.uuidString, content: content, trigger: nil))
@@ -114,10 +118,12 @@ final class MacNotifications: NSObject, UNUserNotificationCenterDelegate, Sendab
             guard let seconds = info[MacNotificationID.endKey] as? Double, let text = info[MacNotificationID.eventKey] as? String,
                   let eventId = UUID(uuidString: text) else { return }
             let endAt = Date(timeIntervalSince1970: seconds)
-            // A timer that was started after the question was asked is not the one the question was about.
-            if let client = await MacTimerActions.client(), let running = try? await client.currentTimer(), running.endedAt == nil, running.startedAt > endAt { return }
+            let expected = (info[MacNotificationID.segmentKey] as? String).flatMap(UUID.init(uuidString:))
+            // A timer started after the question, or another segment (e.g. of an account signed in meanwhile), is not the one asked about.
+            if let client = await MacTimerActions.client(), let running = try? await client.currentTimer(), running.endedAt == nil,
+               !LeaveStopFilter.answerMayStop(expected: expected, runningId: running.id, runningStartedAt: running.startedAt, endAt: endAt) { return }
             let reason = (info[MacNotificationID.sourceKey] as? String) == "leave" ? "Beim Verlassen des Orts gestoppt" : "Auf Nachfrage beim Verlassen des Macs gestoppt"
-            let result = await MacTimerActions.stop(eventId: eventId, at: endAt, reason: reason)
+            let result = await MacTimerActions.stop(eventId: eventId, at: endAt, reason: reason, expectedSegmentId: expected)
             if (info[MacNotificationID.sourceKey] as? String) == "leave", let place = info[MacNotificationID.placeKey] as? String {
                 let clock = LeaveStopFilter.clockText(endAt)
                 let engine = await MainActor.run { MacAutomationRuntime.shared.engine }

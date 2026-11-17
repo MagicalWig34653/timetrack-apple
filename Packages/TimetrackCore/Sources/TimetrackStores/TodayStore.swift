@@ -54,7 +54,8 @@ public final class TodayStore {
     /// the latest load may change the state, an older response never overwrites a newer one.
     private var loadGeneration = 0
 
-    private let client: APIClient
+    /// Internal (not private): AppModel replaces the store when the session moves to another client (review finding 4).
+    let client: APIClient
     private let calendar: DayCalendar
     private let queue: TimerActionQueue?
     /// X4: the account this store belongs to; queued actions are only delivered for it. `nil` until known (watch fast launch).
@@ -263,6 +264,13 @@ public final class TodayStore {
     }
 
     public func start(kind: SegmentKind = .work) async {
+        await startCreating(kind: kind)
+    }
+
+    /// Starts and returns the id of the segment THIS call created; nil when it was queued, refused, or another timer already ran.
+    @discardableResult
+    private func startCreating(kind: SegmentKind) async -> UUID? {
+        var created: UUID?
         conflict = nil
         actionEpoch += 1
         defer { actionEpoch += 1 }
@@ -270,14 +278,18 @@ public final class TodayStore {
         let client = client
         if let queue {
             await performQueued(.init(id: eventId, command: .start(kind), queuedAt: .now), queue: queue, success: .timerStarted) {
-                self.running = try await client.startTimer(clientEventId: eventId, kind: kind)
+                let segment = try await client.startTimer(clientEventId: eventId, kind: kind)
+                self.running = segment
+                created = segment.id
             }
-            return
+            return created
         }
         await perform(success: .timerStarted, requested: kind) {
             let segment = try await retryOnNetworkError { try await client.startTimer(clientEventId: eventId, kind: kind) }
             self.running = segment
+            created = segment.id
         }
+        return created
     }
 
     /// H4: what "Fortführen" did, for an honest message ("Eintrag wieder geöffnet" / "Neuer Eintrag ab jetzt, die Lücke bleibt Pause" / "wird gesendet").
@@ -339,7 +351,10 @@ public final class TodayStore {
         let eventId = UUID()
         let client = client
         if let queue {
-            await performQueued(.init(id: eventId, command: .stop, queuedAt: .now), queue: queue, success: .timerStopped) {
+            // Bind the stop to the running segment unless a start waits in the queue (its segment id is not known yet).
+            let startQueued = pending.contains { if case .stop = $0.command { false } else { true } }
+            let action = QueuedTimerAction(id: eventId, command: .stop, queuedAt: .now, expectedSegmentId: startQueued ? nil : running?.id)
+            await performQueued(action, queue: queue, success: .timerStopped) {
                 _ = try await client.stopTimer(clientEventId: eventId)
                 self.running = nil
             }
@@ -382,8 +397,8 @@ public final class TodayStore {
     /// H3: "start at a custom time" = start now, then move the beginning back (two honest steps with existing endpoints).
     /// If the correction is refused (e.g. an overlap) the timer keeps running from now and the error is shown.
     public func start(kind: SegmentKind, since: Date, now: Date = .now) async {
-        await start(kind: kind)
-        guard running != nil, since < now.addingTimeInterval(-60) else { return }
+        // Review finding 7: only the segment this call created is moved, never a timer that was started elsewhere meanwhile.
+        guard let created = await startCreating(kind: kind), running?.id == created, since < now.addingTimeInterval(-60) else { return }
         await correctRunning(SegmentCorrection(startedAt: since, reason: "Korrektur im laufenden Eintrag"))
     }
 

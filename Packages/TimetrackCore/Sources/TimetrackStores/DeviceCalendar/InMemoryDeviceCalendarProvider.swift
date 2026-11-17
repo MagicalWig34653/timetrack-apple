@@ -65,7 +65,7 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
     public func writtenEvents(calendarID: String, from: Date, to: Date, calendar: DayCalendar) -> [WrittenEvent] {
         written.filter { $0.value.calendarID == calendarID }
             .map { WrittenEvent(eventID: $0.key, key: $0.value.entry.key, firstDay: $0.value.entry.firstDay, lastDay: $0.value.entry.lastDay, title: $0.value.entry.title,
-                                           startMinute: $0.value.entry.startMinute, endMinute: $0.value.entry.endMinute) }
+                                           startMinute: $0.value.entry.startMinute, endMinute: $0.value.entry.endMinute, owner: $0.value.entry.owner) }
             .sorted { ($0.firstDay, $0.eventID) < ($1.firstDay, $1.eventID) }
     }
 
@@ -110,7 +110,7 @@ public final class InMemoryDeviceCalendarProvider: DeviceCalendarProvider {
     public func userMoveEvent(_ id: String, first: LocalDay, last: LocalDay) {
         guard let record = written[id] else { return }
         let entry = CalendarEntry(key: record.entry.key, firstDay: first, lastDay: last, title: record.entry.title,
-                                  startMinute: record.entry.startMinute, endMinute: record.entry.endMinute)
+                                  startMinute: record.entry.startMinute, endMinute: record.entry.endMinute, owner: record.entry.owner)
         written[id] = WrittenRecord(calendarID: record.calendarID, entry: entry)
     }
 }

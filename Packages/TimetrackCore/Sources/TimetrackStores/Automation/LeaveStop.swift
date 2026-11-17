@@ -85,6 +85,21 @@ public struct LeaveStopFilter: Sendable {
         return (leave, .leaveScheduled)
     }
 
+    /// Review finding 8: a stop question remembers the segment that ran when it was asked. Another running segment (a new timer, or
+    /// the timer of another account signed in meanwhile) is never stopped by it. Nil = no objection (unknown on either side).
+    public static func segmentDecision(expected: UUID?, running: UUID?) -> AutomationDecision? {
+        guard let expected, let running, running != expected else { return nil }
+        return .leaveTimerRestarted
+    }
+
+    /// Whether a "Timer beenden um …?" answer may stop the running timer: not one that started after `endAt`, and not another
+    /// segment than the one asked about (`expected`). Nothing running or unknown: true (the queued stop is moot or bound itself).
+    public static func answerMayStop(expected: UUID?, runningId: UUID?, runningStartedAt: Date?, endAt: Date) -> Bool {
+        guard let runningId else { return true }
+        if let runningStartedAt, runningStartedAt > endAt { return false }
+        return segmentDecision(expected: expected, running: runningId) == nil
+    }
+
     /// Whether a running timer may be stopped for a leave at `leftAt`: it must have started before leaving.
     public static func timerDecision(_ timer: TimerObservation, leftAt: Date) -> AutomationDecision? {
         switch timer {

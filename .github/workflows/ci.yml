@@ -26,8 +26,18 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      # Pinned: runner images ship different Homebrew versions, and a newer XcodeGen writes the project differently.
+      # Update version and checksum together with a regenerated project.
       - name: Install XcodeGen
-        run: brew install xcodegen
+        env:
+          XCODEGEN_VERSION: "2.46.0"
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o xcodegen.zip "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+          echo "$XCODEGEN_SHA256  xcodegen.zip" | shasum -a 256 -c -
+          unzip -q xcodegen.zip
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
       - name: Generate the project and fail if the tracked project differs
         run: |
           xcodegen --version

@@ -29,6 +29,11 @@ public final class PlatformPasskeyAuthenticator: NSObject, PasskeyAuthenticator,
         return Self.assertionJSON(credential)
     }
 
+    /// How an error of the system prompt is reported.
+    public nonisolated static func failure(for error: Error) -> TimetrackError {
+        .passkey((error as? ASAuthorizationError).map { "code \($0.code.rawValue)" } ?? "failed")
+    }
+
     // MARK: - Requests (W3C JSON -> AuthenticationServices)
 
     private static func registrationRequest(_ options: WebAuthnOptions) throws -> ASAuthorizationRequest {
@@ -103,7 +108,7 @@ public final class PlatformPasskeyAuthenticator: NSObject, PasskeyAuthenticator,
     }
 
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        continuation?.resume(throwing: TimetrackError.passkey((error as? ASAuthorizationError).map { "code \($0.code.rawValue)" } ?? "failed"))
+        continuation?.resume(throwing: Self.failure(for: error))
         continuation = nil
     }
 

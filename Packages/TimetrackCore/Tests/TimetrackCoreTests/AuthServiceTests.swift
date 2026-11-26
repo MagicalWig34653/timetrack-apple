@@ -1,3 +1,6 @@
+#if canImport(AuthenticationServices)
+import AuthenticationServices
+#endif
 import Foundation
 import Testing
 @testable import TimetrackCore
@@ -176,6 +179,28 @@ struct FakePasskeys: PasskeyAuthenticator {
         #expect(fresh.session.account.id == first.session.account.id)
         #expect(transport.requests(matching: "DELETE /api/v1/auth/session").isEmpty)
     }
+
+    #if canImport(AuthenticationServices) && (os(macOS) || os(iOS))
+    /// B33A8F6A: cancelling the system prompt must not leave an error on screen (`FreshLoginNotice` hides `.cancelled` only).
+    @Test func cancellingTheSystemPromptDuringReauthenticationIsReportedAsCancelled() async throws {
+        struct CancellingPasskeys: PasskeyAuthenticator {
+            func register(options: WebAuthnOptions) async throws -> JSONValue { .null }
+            func authenticate(options: WebAuthnOptions) async throws -> JSONValue {
+                throw PlatformPasskeyAuthenticator.failure(for: ASAuthorizationError(.canceled))
+            }
+        }
+        let secrets = InMemorySecretStore()
+        let transport = MockTransport()
+        let service = AuthService(secrets: secrets, transport: transport, passkeys: CancellingPasskeys())
+        transport.enqueue("GET /api/v1/auth/session", body: Fixtures.sessionJSON())
+        let first = try await service.signInWithSessionCookie(server: Fixtures.baseURL, cookieValue: "cookie-of-a")
+        transport.enqueue("POST /api/v1/auth/login/options", body: #"{"challengeId":"ch","publicKey":{}}"#)
+        await #expect(throws: TimetrackError.cancelled) {
+            try await service.reauthenticate(server: Fixtures.baseURL, accountId: first.session.account.id)
+        }
+        #expect(secrets.read(SecretKey.sessionCookie) == "cookie-of-a")
+    }
+    #endif
 
     @Test func devCookieSignInAndFailureCleanup() async throws {
         let transport = MockTransport()

@@ -19,7 +19,11 @@ struct TimetrackIOSApp: App {
 
     init() {
         let passkeys = PlatformPasskeyAuthenticator { Self.keyWindow() }
+        #if DEBUG
+        let auth = ReauthSimulation.authService(passkeys: passkeys) // TT_DEV_REAUTH for ReauthNoticeTests
+        #else
         let auth = AuthService(secrets: KeychainSecretStore(), transport: URLSessionTransport(), passkeys: passkeys)
+        #endif
         let model = AppModel(auth: auth)
         model.actionQueue = TimerControlRunner.queue
         FocusNotifications.install() // F2: action buttons of the Focus filter's questions

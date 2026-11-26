@@ -277,6 +277,7 @@
 		B1B5DE9EBB1CA581CBFC6AB3 /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A34AFE293FAA799DA0278F /* ActivityView.swift */; };
 		B1C466C3A86245EB36120976 /* UX3Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D7F38D8D61DEC777E6B0A8 /* UX3Support.swift */; };
 		B20B99F29F5067426CBFBB25 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB3DFF54A49CFF428D635AD /* WidgetBridge.swift */; };
+		B2FEDC6AAC16233ECF8D6BD6 /* ReauthSimulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF08348C255CB3DE2113E041 /* ReauthSimulation.swift */; };
 		B469FA4F96199AC22D41F102 /* NewPlaceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A31FA3C9AA134A414F010ED /* NewPlaceSheet.swift */; };
 		B74C1FB15C6288F16B499E1D /* StatisticsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD8FE9572A2092993DF814B /* StatisticsScreen.swift */; };
 		B82DB5EDA8396818C6F6D31B /* LiveActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */; };
@@ -306,6 +307,7 @@
 		C58D2277C63056DEB3EB553F /* ReportCopySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BA66F292A56DEB5E6CF5A1 /* ReportCopySheet.swift */; };
 		C5F53D83EC8C94AFA44D91D2 /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = 8B1C4EF1FB7F7021FD68BECF /* TimetrackStores */; };
 		C5FE21F448AF752E9992B34B /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = D5ABC4A98D257C9ACD688EBF /* TimetrackStores */; };
+		C68238F0E8CAA068D79D8F08 /* ReauthNoticeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E69A3BDC89175B8327C89C7 /* ReauthNoticeTests.swift */; };
 		C804B38ABE2DC59966E2B014 /* ReviewReasonText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8ADAB65FACECE01A6615AA0 /* ReviewReasonText.swift */; };
 		C8FEFF1B4DBF584BD89FDEAB /* TimetrackStores in Frameworks */ = {isa = PBXBuildFile; productRef = E006E6843F9452A0AB2BEDD0 /* TimetrackStores */; };
 		CC9A135EB8E39FBB2C141369 /* LeaveStopActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0130CA5EF5402B99A1417ECF /* LeaveStopActions.swift */; };
@@ -597,6 +599,7 @@
 		8597EA72F400AE8400C3242E /* QuickAbsenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAbsenceRow.swift; sourceTree = "<group>"; };
 		8C763282810FAFC5076E633B /* VacationRequestSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationRequestSheet.swift; sourceTree = "<group>"; };
 		8E422A87184929AD155B5655 /* TimetrackStopwatch.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackStopwatch.icon; sourceTree = "<group>"; };
+		8E69A3BDC89175B8327C89C7 /* ReauthNoticeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReauthNoticeTests.swift; sourceTree = "<group>"; };
 		8EA04FE3AF0A631BE08DC9E1 /* LiveActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityViews.swift; sourceTree = "<group>"; };
 		8EB885EFB0928A0E36310FA4 /* VacationReminderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VacationReminderCenter.swift; sourceTree = "<group>"; };
 		903169299B6759FC886D6148 /* TimetrackDesign */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TimetrackDesign; path = Packages/TimetrackDesign; sourceTree = SOURCE_ROOT; };
@@ -711,6 +714,7 @@
 		FA5AAE907118B638C7B34FA5 /* AutomationRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomationRuntime.swift; sourceTree = "<group>"; };
 		FAC6D0420BF1C7598C65F025 /* TimetrackTimer.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackTimer.icon; sourceTree = "<group>"; };
 		FEBDB5FFA498857C613DC9CB /* NowSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowSheet.swift; sourceTree = "<group>"; };
+		FF08348C255CB3DE2113E041 /* ReauthSimulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReauthSimulation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -895,6 +899,7 @@
 				37D1A047747CC9579EA2CCE6 /* PlanningFlowTests.swift */,
 				AA80849DF4DEE427108120A8 /* ProfileAdjustmentsTests.swift */,
 				ED6EF7C8EE20718A611350BB /* PushFeedsTests.swift */,
+				8E69A3BDC89175B8327C89C7 /* ReauthNoticeTests.swift */,
 				A9095E9D69FAAC47C44398BF /* ReportsTests.swift */,
 				E5C0DF877B5FFBAFCC03E1F2 /* ReviewTests.swift */,
 				F1D004903E693BE7FCB8A86C /* RunningTimerSurvivesNavigationTests.swift */,
@@ -1250,6 +1255,7 @@
 				4095C5DF2594C470A3C65131 /* MoreView.swift */,
 				3736596C876A3E5D1E8C3F0B /* NowBar.swift */,
 				FEBDB5FFA498857C613DC9CB /* NowSheet.swift */,
+				FF08348C255CB3DE2113E041 /* ReauthSimulation.swift */,
 				2AE88A9D1CCB59D06F72B074 /* ReviewSheet.swift */,
 				10DEE4BE7051A858A40C724C /* RootView.swift */,
 				D664773736598F0B0415370D /* SettingsSubpages.swift */,
@@ -1807,6 +1813,7 @@
 				A950D632BA78A6421504D780 /* PushSettingsPage.swift in Sources */,
 				84A92D323190F9DF91BA8586 /* PushSupport.swift in Sources */,
 				441DC2D5FBD277B97AF63CEA /* QuickAbsenceRow.swift in Sources */,
+				B2FEDC6AAC16233ECF8D6BD6 /* ReauthSimulation.swift in Sources */,
 				C58D2277C63056DEB3EB553F /* ReportCopySheet.swift in Sources */,
 				75B74662F7960CDB59209068 /* ReportEntrySheet.swift in Sources */,
 				A8C446B6E58CAA079CE6E5C5 /* ReportSourcesView.swift in Sources */,
@@ -1890,6 +1897,7 @@
 				42BF6AD7EC6E036769EC7EA7 /* PlanningFlowTests.swift in Sources */,
 				36A928C59201B438B8B1365B /* ProfileAdjustmentsTests.swift in Sources */,
 				A682131CE8002DBE149F4469 /* PushFeedsTests.swift in Sources */,
+				C68238F0E8CAA068D79D8F08 /* ReauthNoticeTests.swift in Sources */,
 				DA8AB80A43F878124D24FFA5 /* ReportsTests.swift in Sources */,
 				2727A4A2AE2C176CDE9C17ED /* ReviewTests.swift in Sources */,
 				EC8C74B50730A5CA4661E84F /* RunningTimerSurvivesNavigationTests.swift in Sources */,

@@ -29,9 +29,11 @@ public final class PlatformPasskeyAuthenticator: NSObject, PasskeyAuthenticator,
         return Self.assertionJSON(credential)
     }
 
-    /// How an error of the system prompt is reported.
+    /// How an error of the system prompt is reported. A closed prompt keeps its own reason, so flows that must stay silent on
+    /// cancel can tell it apart (iOS reports "no passkey available" the same way, so sign-in keeps its passkey message).
     public nonisolated static func failure(for error: Error) -> TimetrackError {
-        .passkey((error as? ASAuthorizationError).map { "code \($0.code.rawValue)" } ?? "failed")
+        guard let error = error as? ASAuthorizationError else { return .passkey("failed") }
+        return .passkey(error.code == .canceled ? TimetrackError.cancelledPrompt : "code \(error.code.rawValue)")
     }
 
     // MARK: - Requests (W3C JSON -> AuthenticationServices)

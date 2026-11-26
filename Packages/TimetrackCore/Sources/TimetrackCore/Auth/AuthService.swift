@@ -184,7 +184,12 @@ public actor AuthService {
     /// continue with another identity.
     public func reauthenticate(server: URL, accountId: UUID) async throws -> AuthContext {
         let previous = secrets.read(SecretKey.sessionCookie) ?? handedOverCookie ?? cookieJar.sessionCookieValue(for: server)
-        let context = try await signInWithPasskey(server: server)
+        let context: AuthContext
+        do {
+            context = try await signInWithPasskey(server: server)
+        } catch TimetrackError.passkey(TimetrackError.cancelledPrompt) {
+            throw TimetrackError.cancelled // closing the prompt is no failure: nothing is shown
+        }
         guard context.session.account.id != accountId else { return context }
         try? await context.client.logout()
         if let previous {

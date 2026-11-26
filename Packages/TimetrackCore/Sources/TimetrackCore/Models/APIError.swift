@@ -87,6 +87,8 @@ public enum TimetrackError: Error, Sendable, Equatable {
     case cancelled
     /// Passkey flow cancelled or unavailable.
     case passkey(String)
+    /// `passkey` reason: the system prompt was closed.
+    public static let cancelledPrompt = "cancelled"
 
     public var status: Int? {
         if case .api(let status, _, _) = self { return status }

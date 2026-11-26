@@ -23,6 +23,9 @@ struct TimetrackIOSApp: App {
         let model = AppModel(auth: auth)
         model.actionQueue = TimerControlRunner.queue
         FocusNotifications.install() // F2: action buttons of the Focus filter's questions
+        #if DEBUG
+        BackgroundLaunchSimulation.captureHandlersIfRequested() // before the first registration
+        #endif
         FocusEnvironment.registerBackgroundRetry() // F3: retries of Focus actions that could not reach the server (must be registered before launch ends)
         Task { await FocusEnvironment.retryPending() } // F3: also runs on background launches caused by a Focus callback
         #if DEBUG
@@ -33,6 +36,9 @@ struct TimetrackIOSApp: App {
         _model = State(initialValue: model)
         _signOutCleanup = State(initialValue: SignOutCleanup { await AutomationRuntime.shared.signedOut(); await FocusEnvironment.signedOut() })
         AutomationRuntime.shared.start() // L2: restores region monitoring; also runs on background launches caused by region events
+        #if DEBUG
+        BackgroundLaunchSimulation.runIfRequested() // TT_DEV_BG_LAUNCH for BackgroundLaunchTests
+        #endif
     }
 
     var body: some Scene {

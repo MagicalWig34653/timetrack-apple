@@ -184,6 +184,7 @@
 		75B74662F7960CDB59209068 /* ReportEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEE67EC792EECBD77399DD70 /* ReportEntrySheet.swift */; };
 		76351C4C6BE02CB1DE42B4B9 /* OverworkSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85E2DDFC96FA94D6830FA88 /* OverworkSettingsView.swift */; };
 		7683A523BE6234E723B8E3D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 57A2F77CF1674E4E12728A62 /* Assets.xcassets */; };
+		76D61779BDD3A2DAD4EFCE3A /* BackgroundLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E8C755AA73ABBF6E4DB8F8 /* BackgroundLaunchTests.swift */; };
 		775FE7068622D9AD3ECA120E /* WidgetSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340F4AF58707F25617DBB5DD /* WidgetSupport.swift */; };
 		778921A83EA6DBD691502635 /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */; };
 		7840AAB7105F1D144F6CDFB4 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 17381ACB307D0628A0B2706B /* Localizable.xcstrings */; };
@@ -221,6 +222,7 @@
 		8656DBB1DB476691EBE8FD5F /* TimetrackProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA43B48ADCC8D04C080669D /* TimetrackProvider.swift */; };
 		87448175BE4156B41F44A9D5 /* WeekSwipeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF04B7C34525D7FE5BD508C6 /* WeekSwipeTests.swift */; };
 		88AA4A388F027B2AFDC18830 /* PushSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B154C3255C3D1530359998F8 /* PushSupport.swift */; };
+		8D9FAD8E57556CF76C3E6608 /* BackgroundLaunchSimulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB642D5AD3C27FA580D0F67 /* BackgroundLaunchSimulation.swift */; };
 		8E79B55E54A49104CB2ADC34 /* DayDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = E52D0F9CF21A4E4FE73E0851 /* DayDetail.swift */; };
 		8F1B9DDA1BFD7984C10FCD9B /* CalendarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C994C099357497A50E66E11 /* CalendarSettingsView.swift */; };
 		8F41B5D0FCCF4300D9183896 /* TimetrackDesign in Frameworks */ = {isa = PBXBuildFile; productRef = 475340F7A75B311BA614F62B /* TimetrackDesign */; };
@@ -513,6 +515,7 @@
 		305A1EBE5E79DF7C03FD3F13 /* MacSettingsPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSettingsPages.swift; sourceTree = "<group>"; };
 		3061E0EA891E5B9750570E1D /* CalendarFeedsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarFeedsPage.swift; sourceTree = "<group>"; };
 		30AB7E40E2AEBE9935D3CE9C /* TimetrackWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimetrackWatch.entitlements; sourceTree = "<group>"; };
+		31E8C755AA73ABBF6E4DB8F8 /* BackgroundLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundLaunchTests.swift; sourceTree = "<group>"; };
 		339A59817C8526A4C2981217 /* TimetrackPrimary.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = TimetrackPrimary.icon; sourceTree = "<group>"; };
 		340F4AF58707F25617DBB5DD /* WidgetSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSupport.swift; sourceTree = "<group>"; };
 		3533EAD910EFF1072B02CBE1 /* WidgetIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntents.swift; sourceTree = "<group>"; };
@@ -634,6 +637,7 @@
 		BD67BBAE32A0A28F5605E935 /* AD1.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AD1.xcstrings; sourceTree = "<group>"; };
 		BD733A09D977D0687741719F /* TimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeView.swift; sourceTree = "<group>"; };
 		BD7B29F2240005F50DA9A037 /* PlanningAreaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningAreaTests.swift; sourceTree = "<group>"; };
+		BDB642D5AD3C27FA580D0F67 /* BackgroundLaunchSimulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundLaunchSimulation.swift; sourceTree = "<group>"; };
 		BEE67EC792EECBD77399DD70 /* ReportEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportEntrySheet.swift; sourceTree = "<group>"; };
 		BFB0E10859093EE68A4DCF49 /* TimetrackWidgetMac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetrackWidgetMac.swift; sourceTree = "<group>"; };
 		C01AD40B2A16174484DC8424 /* LoginItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItem.swift; sourceTree = "<group>"; };
@@ -875,6 +879,7 @@
 				81BD0D73D00301B634764623 /* AppIconSwitchTests.swift */,
 				DAD2B597F21E123DD98932FF /* AttachmentsRequestTests.swift */,
 				CC8D1598050EC1962CA2E4A2 /* AutomationFlowTests.swift */,
+				31E8C755AA73ABBF6E4DB8F8 /* BackgroundLaunchTests.swift */,
 				21C41102BACA1C267DEC0C65 /* CalendarIntegrationTests.swift */,
 				1C8372C0F72283F849779DC1 /* ContinueLastTests.swift */,
 				521490FB9F422FD8FCBF66B0 /* FocusFilterTests.swift */,
@@ -1234,6 +1239,7 @@
 				7A6E8EEB9A124779C6977A95 /* AppearanceView.swift */,
 				6DC7CF52E0F14BA34747F0A4 /* AppIconSettingsSection.swift */,
 				57A2F77CF1674E4E12728A62 /* Assets.xcassets */,
+				BDB642D5AD3C27FA580D0F67 /* BackgroundLaunchSimulation.swift */,
 				35F6FBAEB436FC29D5E36E45 /* Formatters.swift */,
 				DB635DB727B1C03ADC6258AB /* FrameMeter.swift */,
 				00034D02ECB5AFAE00E8D16D /* IconCatalog.generated.swift */,
@@ -1753,6 +1759,7 @@
 				C2724CD4E883D38438A32A78 /* AppearanceView.swift in Sources */,
 				F11D5311CB8F6DC19256E1A5 /* AutomationRuntime.swift in Sources */,
 				3EBCDEC78EAB39A445EB94F3 /* AutomationSettingsView.swift in Sources */,
+				8D9FAD8E57556CF76C3E6608 /* BackgroundLaunchSimulation.swift in Sources */,
 				97587076D3F7E3EE883FC328 /* BackgroundTaskCompletion+BGTask.swift in Sources */,
 				318EB7FA664F47C8284A3DBA /* CalendarAutoSync.swift in Sources */,
 				D12060BA13B92DB3338CF5E4 /* CalendarDayDemo.swift in Sources */,
@@ -1867,6 +1874,7 @@
 				32E5D9A4FB08865626415A86 /* AppearanceShotTests.swift in Sources */,
 				C142D845EE146069359D3474 /* AttachmentsRequestTests.swift in Sources */,
 				0AE2AEEA419B9C0C2CBCEF95 /* AutomationFlowTests.swift in Sources */,
+				76D61779BDD3A2DAD4EFCE3A /* BackgroundLaunchTests.swift in Sources */,
 				540F7CEDD1A0819445FA6740 /* CalendarIntegrationTests.swift in Sources */,
 				59EAFBE4C2F2122E57147C64 /* ContinueLastTests.swift in Sources */,
 				1C4934055C4B44BAA50B5C46 /* FocusFilterTests.swift in Sources */,
